@@ -1,0 +1,32 @@
+<main class="login-page">
+  <section class="identity" aria-labelledby="system-name">
+    <div>
+      <p class="eyebrow">Tecnológico Universitario Playacar</p>
+      <h1 id="system-name">Sistema de Inventario TUP</h1>
+      <p>Administración institucional de activos, responsables y documentación.</p>
+    </div>
+  </section>
+
+  <section class="access" aria-labelledby="access-title">
+    <div class="access__card card">
+      <p class="eyebrow">Acceso seguro</p>
+      <h2 id="access-title">Iniciar sesión</h2>
+      <p>Utilice una cuenta institucional previamente autorizada.</p>
+
+      @if (auth.error(); as error) {
+        <div class="alert alert--error" role="alert">{{ error }}</div>
+      }
+
+      <button
+        class="button button--primary access__button"
+        type="button"
+        [disabled]="auth.loading()"
+        [attr.aria-busy]="auth.loading()"
+        (click)="login()"
+      >
+        {{ auth.loading() ? 'Validando acceso…' : 'Iniciar sesión con Google' }}
+      </button>
+      <p class="restriction">Acceso exclusivo para usuarios autorizados.</p>
+    </div>
+  </section>
+</main>

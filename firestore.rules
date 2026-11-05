@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function authorized() {
+      return signedIn() && request.auth.token.authorized == true;
+    }
+
+    function admin() {
+      return authorized() && request.auth.token.role == 'admin';
+    }
+
+    match /usuarios/{userId} {
+      allow read: if admin();
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

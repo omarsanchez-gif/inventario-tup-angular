@@ -1,0 +1,78 @@
+.login-page {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+}
+
+.identity,
+.access {
+  display: grid;
+  place-items: center;
+  padding: clamp(2rem, 6vw, 6rem);
+}
+
+.identity {
+  color: #fff;
+  background: linear-gradient(145deg, var(--color-brand-strong), var(--color-brand));
+}
+
+.identity > div {
+  max-width: 38rem;
+}
+
+h1 {
+  margin: 0.35rem 0 1rem;
+  font-size: clamp(2.2rem, 6vw, 4.8rem);
+  line-height: 1.02;
+}
+
+.identity p:last-child {
+  max-width: 32rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.7;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.access__card {
+  width: min(100%, 30rem);
+  padding: clamp(1.5rem, 5vw, 3rem);
+}
+
+.access__card h2 {
+  margin: 0.45rem 0;
+  font-size: 2rem;
+}
+
+.access__card > p:not(.eyebrow, .restriction) {
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.access__button {
+  width: 100%;
+  margin-top: 1.2rem;
+}
+
+.restriction {
+  margin: 1rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .identity {
+    min-height: 38vh;
+  }
+}

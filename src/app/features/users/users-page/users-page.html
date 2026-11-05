@@ -1,0 +1,138 @@
+<section aria-labelledby="users-title">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Administración</p>
+      <h1 id="users-title">Usuarios</h1>
+      <p>Autorice las cuentas institucionales que pueden ingresar al sistema.</p>
+    </div>
+    <button class="button button--primary" type="button" (click)="openNew()">Nuevo usuario</button>
+  </header>
+
+  @if (users.error(); as error) {
+    <div class="alert alert--error" role="alert">{{ error }}</div>
+  }
+  @if (users.success(); as success) {
+    <div class="alert alert--success" role="status">{{ success }}</div>
+  }
+
+  @if (formVisible()) {
+    <form class="card user-form" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-heading">
+        <h2>{{ editingId() ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
+        <button class="button button--secondary" type="button" (click)="closeForm()">
+          Cancelar
+        </button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="user-name">Nombre</label>
+          <input id="user-name" formControlName="nombre" autocomplete="name" />
+          @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+            <small role="alert">Capture el nombre.</small>
+          }
+        </div>
+        <div class="field">
+          <label for="user-email">Correo institucional</label>
+          <input id="user-email" type="email" formControlName="correo" autocomplete="email" />
+          @if (form.controls.correo.touched && form.controls.correo.invalid) {
+            <small role="alert">Capture un correo válido.</small>
+          }
+        </div>
+        <div class="field">
+          <label for="user-role">Rol</label>
+          <select id="user-role" formControlName="rol">
+            <option value="usuario">Usuario</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        @if (!editingId()) {
+          <label class="checkbox-field">
+            <input type="checkbox" formControlName="activo" />
+            Autorizar como usuario activo
+          </label>
+        }
+      </div>
+      <button class="button button--primary" type="submit" [disabled]="users.saving()">
+        {{ users.saving() ? 'Guardando…' : 'Guardar usuario' }}
+      </button>
+    </form>
+  }
+
+  <div class="toolbar">
+    <div class="field search-field">
+      <label for="user-search">Buscar por nombre o correo</label>
+      <input id="user-search" type="search" [value]="users.query()" (input)="setQuery($event)" />
+    </div>
+    <span aria-live="polite">{{ users.filteredUsers().length }} resultado(s)</span>
+  </div>
+
+  @if (users.loading()) {
+    <p role="status">Cargando usuarios…</p>
+  } @else if (users.filteredUsers().length === 0) {
+    <div class="card empty-state">
+      <h2>{{ users.query() ? 'No se encontraron usuarios' : 'No hay usuarios autorizados' }}</h2>
+    </div>
+  } @else {
+    <div class="card table-region">
+      <table>
+        <caption class="sr-only">
+          Usuarios autorizados del Sistema de Inventario TUP
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Correo</th>
+            <th scope="col">Rol</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Último acceso</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users.filteredUsers(); track user.documentId) {
+            <tr>
+              <td>{{ user.nombre }}</td>
+              <td>{{ user.correo }}</td>
+              <td>{{ user.rol === 'admin' ? 'Administrador' : 'Usuario' }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.badge--active]="user.activo"
+                  [class.badge--inactive]="!user.activo"
+                >
+                  {{ user.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>{{ formatAccess(user.ultimoAcceso) }}</td>
+              <td>
+                <div class="actions">
+                  <button class="button button--secondary" type="button" (click)="edit(user)">
+                    Editar
+                  </button>
+                  <button
+                    class="button button--secondary"
+                    type="button"
+                    [disabled]="isSelf(user) || users.saving()"
+                    [attr.title]="isSelf(user) ? 'No puede cambiar su propio estado' : null"
+                    (click)="toggleStatus(user)"
+                  >
+                    {{ user.activo ? 'Desactivar' : 'Activar' }}
+                  </button>
+                  <button
+                    class="button button--danger"
+                    type="button"
+                    [disabled]="isSelf(user) || users.saving()"
+                    [attr.title]="isSelf(user) ? 'No puede eliminar su propio registro' : null"
+                    (click)="remove(user)"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

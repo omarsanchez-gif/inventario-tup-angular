@@ -1,0 +1,35 @@
+<div class="shell">
+  <aside class="sidebar" aria-label="Navegación principal">
+    <a class="brand" routerLink="/dashboard">
+      <span class="brand__mark" aria-hidden="true">TUP</span>
+      <span>Sistema de Inventario</span>
+    </a>
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page">
+        Dashboard
+      </a>
+      @if (auth.role() === 'admin') {
+        <a routerLink="/usuarios" routerLinkActive="active" ariaCurrentWhenActive="page">
+          Usuarios
+        </a>
+      }
+    </nav>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      @if (auth.user(); as user) {
+        <div class="profile">
+          <strong>{{ user.nombre }}</strong>
+          <span>{{ user.correo }} · {{ user.rol === 'admin' ? 'Administrador' : 'Usuario' }}</span>
+        </div>
+      }
+      <button class="button button--secondary" type="button" (click)="logout()">
+        Cerrar sesión
+      </button>
+    </header>
+    <main class="content" id="contenido-principal">
+      <router-outlet />
+    </main>
+  </div>
+</div>

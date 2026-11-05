@@ -1,0 +1,37 @@
+<section aria-labelledby="dashboard-title">
+  @if (auth.user(); as user) {
+    <p class="eyebrow">Inicio</p>
+    <h1 id="dashboard-title">Bienvenido, {{ user.nombre }}</h1>
+    <p class="lead">
+      La base segura del Sistema de Inventario TUP está lista para crecer por módulos.
+    </p>
+
+    <div class="dashboard-grid">
+      <article class="card session-card">
+        <h2>Sesión autorizada</h2>
+        <dl>
+          <div>
+            <dt>Correo</dt>
+            <dd>{{ user.correo }}</dd>
+          </div>
+          <div>
+            <dt>Rol</dt>
+            <dd>{{ user.rol === 'admin' ? 'Administrador' : 'Usuario' }}</dd>
+          </div>
+          <div>
+            <dt>Estado</dt>
+            <dd><span class="badge badge--active">Activo</span></dd>
+          </div>
+        </dl>
+      </article>
+
+      <article class="card roadmap-card">
+        <h2>Indicadores de inventario</h2>
+        <p>
+          Los KPI se incorporarán cuando queden definidos los módulos, sus fuentes canónicas y sus
+          reglas de cálculo. Esta pantalla no muestra datos simulados.
+        </p>
+      </article>
+    </div>
+  }
+</section>
