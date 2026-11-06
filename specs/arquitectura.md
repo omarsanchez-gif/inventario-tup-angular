@@ -21,7 +21,7 @@ Callable → caso de uso → repositorio → Admin SDK
 ## Ambientes
 
 - Local: Emulator Suite y proyecto demo.
-- Staging: pendiente de identificador y autorización.
+- Staging: `inventario-stg`, autorizado únicamente para el alcance documentado.
 - Producción: pendiente y separada de staging.
 
 ## Módulos iniciales
@@ -29,5 +29,6 @@ Callable → caso de uso → repositorio → Admin SDK
 - `core/auth`: sesión y autorización.
 - `features/authentication`: Login.
 - `layout`: shell privado.
+- `shared/ui/icon`: registro SVG institucional compartido.
 - `features/dashboard`: bienvenida autenticada.
 - `features/users`: administración de autorizaciones.

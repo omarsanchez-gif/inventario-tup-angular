@@ -31,3 +31,11 @@
 - RN-DASH-001: Todo usuario autorizado accede a `/dashboard`.
 - RN-DASH-002: El incremento inicial muestra identidad y estado de la plataforma, sin KPI simulados.
 - RN-DASH-003: Las métricas de inventario se implementarán únicamente después de definir fuentes y cálculos.
+
+## Layout y sistema de diseño
+
+- RN-LAY-001: Cada módulo visible en la navegación utiliza un icono único del registro visual compartido.
+- RN-LAY-002: En escritorio el menú lateral se muestra inicialmente y el botón de menú lo oculta o muestra por completo, sin conservar una barra residual.
+- RN-LAY-003: En móvil el menú inicia cerrado, se presenta como drawer superpuesto y puede cerrarse con el botón, el fondo, Escape o la selección de una ruta.
+- RN-LAY-004: Tipografía, tamaños, colores, espaciado, radios, sombras, iconografía y estados interactivos proceden de tokens o primitivas globales.
+- RN-LAY-005: La navegación conserva las restricciones por rol; estandarizar su presentación no amplía autorizaciones.

@@ -12,7 +12,7 @@
 }
 
 .identity {
-  color: #fff;
+  color: var(--color-on-brand);
   background: linear-gradient(145deg, var(--color-brand-strong), var(--color-brand));
 }
 
@@ -30,14 +30,6 @@ h1 {
   max-width: 32rem;
   font-size: clamp(1rem, 2vw, 1.25rem);
   line-height: 1.7;
-}
-
-.eyebrow {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .access__card {

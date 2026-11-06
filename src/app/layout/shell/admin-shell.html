@@ -1,35 +1,89 @@
-<div class="shell">
-  <aside class="sidebar" aria-label="Navegación principal">
+<div class="shell" [class.shell--navigation-open]="navigationOpen()">
+  @if (!desktop() && navigationOpen()) {
+    <button
+      class="navigation-backdrop"
+      type="button"
+      aria-label="Cerrar menú principal"
+      (click)="closeNavigationOnMobile()"
+    ></button>
+  }
+
+  <aside
+    class="sidebar"
+    id="navigation-sidebar"
+    aria-label="Navegación principal"
+    [attr.aria-hidden]="!navigationOpen()"
+    [attr.inert]="navigationOpen() ? null : ''"
+  >
     <a class="brand" routerLink="/dashboard">
       <span class="brand__mark" aria-hidden="true">TUP</span>
-      <span>Sistema de Inventario</span>
+      <span class="brand__name">Sistema de<br />Inventario TUP</span>
     </a>
-    <nav>
-      <a routerLink="/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page">
-        Dashboard
+    <nav class="navigation">
+      <a
+        class="navigation__link"
+        routerLink="/dashboard"
+        routerLinkActive="navigation__link--active"
+        ariaCurrentWhenActive="page"
+        (click)="closeNavigationOnMobile()"
+      >
+        <app-icon name="dashboard" />
+        <span>Dashboard</span>
       </a>
       @if (auth.role() === 'admin') {
-        <a routerLink="/usuarios" routerLinkActive="active" ariaCurrentWhenActive="page">
-          Usuarios
+        <a
+          class="navigation__link"
+          routerLink="/usuarios"
+          routerLinkActive="navigation__link--active"
+          ariaCurrentWhenActive="page"
+          (click)="closeNavigationOnMobile()"
+        >
+          <app-icon name="users" />
+          <span>Usuarios</span>
         </a>
       }
     </nav>
+
+    <div class="sidebar__footer">
+      <button class="sidebar__logout" type="button" (click)="logout()">
+        <app-icon name="logout" />
+        <span>Cerrar sesión</span>
+      </button>
+
+      @if (auth.user(); as user) {
+        <div class="sidebar-profile">
+          <span class="avatar avatar--light" aria-hidden="true">{{ initials() }}</span>
+          <span class="sidebar-profile__identity">
+            <strong>{{ user.nombre }}</strong>
+            <small>{{ user.rol === 'admin' ? 'Administrador' : 'Usuario' }}</small>
+          </span>
+          <span class="sidebar-profile__status"><i aria-hidden="true"></i> Sesión activa</span>
+        </div>
+      }
+    </div>
   </aside>
 
   <div class="workspace">
     <header class="topbar">
-      @if (auth.user(); as user) {
-        <div class="profile">
-          <strong>{{ user.nombre }}</strong>
-          <span>{{ user.correo }} · {{ user.rol === 'admin' ? 'Administrador' : 'Usuario' }}</span>
-        </div>
-      }
-      <button class="button button--secondary" type="button" (click)="logout()">
-        Cerrar sesión
+      <button
+        class="icon-button topbar__menu"
+        type="button"
+        aria-controls="navigation-sidebar"
+        [attr.aria-expanded]="navigationOpen()"
+        [attr.aria-label]="menuActionLabel()"
+        [attr.title]="menuActionLabel()"
+        (click)="toggleNavigation()"
+      >
+        <app-icon [name]="navigationOpen() && !desktop() ? 'close' : 'menu'" />
       </button>
+      <span class="topbar__title">Sistema de Inventario TUP</span>
+      <span class="topbar__spacer"></span>
+      <span class="avatar avatar--brand" aria-label="Usuario actual: {{ auth.user()?.nombre }}">
+        {{ initials() }}
+      </span>
     </header>
     <main class="content" id="contenido-principal">
-      <router-outlet />
+      <div class="content__inner"><router-outlet /></div>
     </main>
   </div>
 </div>

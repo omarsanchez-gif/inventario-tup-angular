@@ -1,0 +1,35 @@
+<svg
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+  [attr.data-icon]="name()"
+>
+  @switch (name()) {
+    @case ('dashboard') {
+      <rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1" />
+      <rect x="14" y="3.5" width="6.5" height="6.5" rx="1" />
+      <rect x="3.5" y="14" width="6.5" height="6.5" rx="1" />
+      <rect x="14" y="14" width="6.5" height="6.5" rx="1" />
+    }
+    @case ('users') {
+      <circle cx="9" cy="7.5" r="3" />
+      <path d="M3.5 20v-1.4A5.6 5.6 0 0 1 9 13a5.6 5.6 0 0 1 5.5 5.6V20" />
+      <path d="M16.5 4.8a3 3 0 0 1 0 5.4" />
+      <path d="M18 13.5a5.4 5.4 0 0 1 2.5 4.5" />
+    }
+    @case ('menu') {
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    }
+    @case ('close') {
+      <path d="m6 6 12 12M18 6 6 18" />
+    }
+    @case ('logout') {
+      <path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10" />
+      <path d="M14 8l4 4-4 4M18 12H9" />
+    }
+  }
+</svg>
