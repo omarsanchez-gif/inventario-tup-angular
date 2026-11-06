@@ -3,6 +3,7 @@
 - [x] Definir modelo y seguridad.
 - [x] Crear casos de uso y repositorio backend.
 - [x] Exponer cinco callables administrativas.
+- [x] Desplegar y verificar las cinco callables únicamente en `inventario-stg`.
 - [x] Crear gateway, facade y pantalla Angular inicial.
 - [x] Migrar alta y edición al formulario modal compartido.
 - [x] Sustituir la confirmación nativa de eliminación por diálogo institucional.

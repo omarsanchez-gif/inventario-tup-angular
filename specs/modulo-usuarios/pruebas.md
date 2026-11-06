@@ -12,3 +12,11 @@
 - USR-010: interfaz soporta carga, vacío, error, búsqueda y operación por teclado.
 - USR-011: alta y edición abren el formulario modal compartido y Cancelar no persiste cambios.
 - USR-012: eliminar requiere confirmación modal; cancelar no ejecuta la callable y confirmar la ejecuta una sola vez.
+
+## Evidencia de staging — 6 de noviembre de 2026
+
+- `npm run functions:build`, `npm run lint:functions` y `npm run format:check` aprobaron.
+- `npm run test:functions` aprobó 4 pruebas en 2 archivos.
+- Las cinco callables administrativas están `ACTIVE` en `inventario-stg`, región `us-central1`, con Node.js 22.
+- Las cinco callables rechazaron solicitudes anónimas con HTTP 401.
+- Queda pendiente validar USR-001 y el listado desde `/usuarios` con la sesión administrativa real; no se ejecutaron altas, ediciones, cambios de estado ni eliminaciones durante la verificación técnica.

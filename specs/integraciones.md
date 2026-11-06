@@ -16,6 +16,8 @@
 - Ese mismo día se actualizó únicamente Hosting con `AppDialog`, formularios modales de alta/edición y confirmación modal de eliminación; sirve `main-PASDWI4I.js` y `styles-BHMDTSOU.css`.
 - El plan Blaze está habilitado únicamente en `inventario-stg` mediante la cuenta de facturación autorizada.
 - `bootstrapAuthorization` está `ACTIVE` en `us-central1`, usa Node.js 22, carga `INSTITUTIONAL_DOMAIN=tecplayacar.edu.mx` y rechaza solicitudes anónimas con HTTP 401.
+- El despliegue de las cinco callables administrativas de Usuarios en staging fue autorizado expresamente y completado el 6 de noviembre de 2026. `listAuthorizedUsers`, `createAuthorizedUser`, `updateAuthorizedUser`, `setAuthorizedUserStatus` y `deleteAuthorizedUser` están `ACTIVE` en `us-central1`, usan Node.js 22 y rechazaron solicitudes anónimas con HTTP 401.
+- Este despliegue se limitó a esas cinco Functions de `inventario-stg`; no modificó Hosting, Rules, datos ni producción.
 - Artifact Registry elimina automáticamente las imágenes de Functions con más de un día para limitar costos de almacenamiento.
 - El perfil canónico activo de `omar.sanchez@tecplayacar.edu.mx` existe como `admin`; su `uid` se asociará en el primer acceso válido.
 - La autorización actual cubre la infraestructura mínima y el despliegue del módulo de autenticación en staging.
