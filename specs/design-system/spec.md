@@ -67,8 +67,19 @@
 - El perfil y cierre de sesión permanecen dentro del sidebar para evitar duplicar acciones.
 - Transiciones respetan `prefers-reduced-motion`.
 
+## Diálogos y formularios administrativos
+
+- Altas y ediciones se muestran mediante `AppDialog`; el formulario no desplaza ni se inserta dentro del contenido del módulo.
+- Las eliminaciones requieren un diálogo de confirmación explícito con acción secundaria `Cancelar` y acción destructiva `Eliminar`.
+- No se utiliza `window.alert`, `window.confirm` ni `window.prompt` para flujos administrativos.
+- La primitiva usa el elemento nativo `dialog`, título asociado, `aria-modal`, cierre visible, Escape y cierre por backdrop.
+- El foco inicial entra al diálogo y el navegador lo mantiene dentro mientras permanece abierto.
+- Cerrar conserva el contenido subyacente y devuelve el control al elemento que abrió el diálogo.
+- La superficie mide `min(42rem, calc(100vw - 2rem))`, limita su altura al viewport y permite scroll interno.
+- En móvil los campos se presentan en una columna y las acciones ocupan el ancho disponible.
+
 ## Estado de implementación
 
-El layout, los tokens ampliados, `AppIcon` y la guardia visual están implementados y publicados únicamente en Hosting de `inventario-stg`. La verificación automática aprobó lint, guardia visual, formato, 7 pruebas Angular, 4 pruebas de Functions y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
+El layout, los tokens ampliados, `AppIcon`, `AppDialog` y la guardia visual están implementados y publicados únicamente en Hosting de `inventario-stg`. La verificación automática aprobó lint, guardia visual, formato, 10 pruebas Angular, 4 pruebas de Functions y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

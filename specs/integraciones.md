@@ -12,7 +12,8 @@
 - Firestore y Functions se ubican en `us-central1`.
 - Google Sign-In, Firestore estándar con protección contra eliminación, las reglas de seguridad y Hosting quedaron configurados el 6 de noviembre de 2026.
 - Hosting publica el build de staging validado en `https://inventario-stg.web.app` y responde HTTP 200.
-- El 6 de noviembre de 2026 se publicó únicamente Hosting con el layout estandarizado, iconos compartidos y navegación responsive; sirve `main-BOD2WQRR.js` y `styles-LVFZXHYI.css`.
+- El 6 de noviembre de 2026 se publicó únicamente Hosting con el layout estandarizado, iconos compartidos y navegación responsive.
+- Ese mismo día se actualizó únicamente Hosting con `AppDialog`, formularios modales de alta/edición y confirmación modal de eliminación; sirve `main-PASDWI4I.js` y `styles-BHMDTSOU.css`.
 - El plan Blaze está habilitado únicamente en `inventario-stg` mediante la cuenta de facturación autorizada.
 - `bootstrapAuthorization` está `ACTIVE` en `us-central1`, usa Node.js 22, carga `INSTITUTIONAL_DOMAIN=tecplayacar.edu.mx` y rechaza solicitudes anónimas con HTTP 401.
 - Artifact Registry elimina automáticamente las imágenes de Functions con más de un día para limitar costos de almacenamiento.

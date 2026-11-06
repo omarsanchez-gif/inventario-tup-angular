@@ -10,3 +10,5 @@
 - USR-008: siempre permanece un administrador activo.
 - USR-009: 501 registros producen error y nunca lista parcial.
 - USR-010: interfaz soporta carga, vacío, error, búsqueda y operación por teclado.
+- USR-011: alta y edición abren el formulario modal compartido y Cancelar no persiste cambios.
+- USR-012: eliminar requiere confirmación modal; cancelar no ejecuta la callable y confirmar la ejecuta una sola vez.

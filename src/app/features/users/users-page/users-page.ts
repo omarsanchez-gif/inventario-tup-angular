@@ -4,11 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { UserRole } from '../../../shared/models/authorized-user';
 import type { SystemUser } from '../../../shared/models/system-user';
+import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { UsersFacade } from '../state/users.facade';
 
 @Component({
   selector: 'app-users-page',
-  imports: [ReactiveFormsModule],
+  imports: [AppDialog, ReactiveFormsModule],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,6 +20,7 @@ export class UsersPage {
   protected readonly users = inject(UsersFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
+  protected readonly pendingDeletion = signal<SystemUser | null>(null);
   protected readonly form = this.formBuilder.nonNullable.group({
     nombre: ['', [Validators.required, Validators.maxLength(120)]],
     correo: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
@@ -93,12 +95,20 @@ export class UsersPage {
     await this.users.setStatus(user);
   }
 
-  protected async remove(user: SystemUser): Promise<void> {
+  protected requestDeletion(user: SystemUser): void {
     if (this.isSelf(user)) return;
-    const confirmed = window.confirm(
-      `¿Eliminar la autorización de ${user.nombre}? Esta acción no elimina su cuenta Google.`,
-    );
-    if (confirmed) await this.users.delete(user);
+    this.users.clearMessages();
+    this.pendingDeletion.set(user);
+  }
+
+  protected cancelDeletion(): void {
+    if (!this.users.saving()) this.pendingDeletion.set(null);
+  }
+
+  protected async confirmDeletion(): Promise<void> {
+    const user = this.pendingDeletion();
+    if (!user || this.users.saving()) return;
+    if (await this.users.delete(user)) this.pendingDeletion.set(null);
   }
 
   protected formatAccess(value: string | null): string {

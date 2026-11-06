@@ -22,6 +22,14 @@ Permitir que `admin` gestione las autorizaciones institucionales del sistema.
 - Debe permanecer al menos otro administrador activo antes de reducir o eliminar uno.
 - Toda mutación usa callable; las escrituras directas están prohibidas.
 
+## Presentación
+
+- `Nuevo usuario` abre el formulario de alta dentro de `AppDialog`.
+- `Editar` abre el mismo formulario modal con los datos permitidos.
+- `Eliminar` abre una confirmación modal institucional; no usa `window.confirm`.
+- Cancelar, Escape, backdrop o cierre visible descartan el diálogo sin mutar datos.
+- Durante el guardado las acciones aplicables permanecen deshabilitadas.
+
 ## Fuera de alcance
 
 Importación masiva, invitaciones, auditoría, permisos granulares y roles adicionales.

@@ -10,4 +10,8 @@
 - [x] Integrar y aprobar la guardia `npm run lint:visual`.
 - [x] Validar lint, formato, pruebas y build de staging.
 - [x] Publicar únicamente Hosting en staging.
+- [x] Crear la primitiva compartida `AppDialog` y sus estilos globales.
+- [x] Migrar formularios y confirmaciones de Usuarios al diálogo compartido.
+- [x] Agregar pruebas unitarias de apertura, cierre y confirmación modal.
+- [x] Validar y publicar el incremento modal únicamente en Hosting de staging.
 - [ ] Completar aceptación visual autenticada en escritorio y móvil desde 320 px.

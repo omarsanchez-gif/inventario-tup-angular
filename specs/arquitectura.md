@@ -30,5 +30,6 @@ Callable → caso de uso → repositorio → Admin SDK
 - `features/authentication`: Login.
 - `layout`: shell privado.
 - `shared/ui/icon`: registro SVG institucional compartido.
+- `shared/ui/dialog`: contenedor modal accesible para formularios y confirmaciones.
 - `features/dashboard`: bienvenida autenticada.
 - `features/users`: administración de autorizaciones.

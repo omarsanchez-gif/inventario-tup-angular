@@ -39,3 +39,4 @@
 - RN-LAY-003: En móvil el menú inicia cerrado, se presenta como drawer superpuesto y puede cerrarse con el botón, el fondo, Escape o la selección de una ruta.
 - RN-LAY-004: Tipografía, tamaños, colores, espaciado, radios, sombras, iconografía y estados interactivos proceden de tokens o primitivas globales.
 - RN-LAY-005: La navegación conserva las restricciones por rol; estandarizar su presentación no amplía autorizaciones.
+- RN-LAY-006: Altas, ediciones y confirmaciones de eliminación se presentan mediante el diálogo compartido; no se usan formularios administrativos inline ni confirmaciones nativas del navegador.

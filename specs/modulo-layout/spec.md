@@ -11,6 +11,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 - Icono compartido y distintivo para cada módulo visible.
 - Estado activo comprensible por forma, contraste y texto, no solo por color.
 - Contenedor de contenido con ancho y espaciado estandarizados.
+- Diálogo compartido para formularios de alta, edición y confirmaciones destructivas.
 
 ## Comportamiento de escritorio
 
@@ -35,6 +36,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 - Todos los objetivos interactivos miden al menos `44 × 44 px`.
 - Los iconos decorativos quedan fuera del árbol accesible; el texto del enlace conserva el nombre del módulo.
 - El foco visible y movimiento reducido provienen del sistema de diseño.
+- Los diálogos exponen título, modalidad, cierre por Escape y retorno de foco mediante el comportamiento nativo.
 
 ## Autorización
 

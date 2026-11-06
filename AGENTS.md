@@ -27,6 +27,7 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - La documentación nunca debe anticipar como completado un cambio que todavía no haya sido implementado y verificado.
 - Toda interfaz nueva o modificada debe superar `npm run lint:visual`; no se desactiva la guardia para aceptar estilos duplicados.
 - Los SCSS encapsulados no redefinen primitivas globales ni introducen colores hexadecimales locales.
+- Altas, ediciones y confirmaciones de eliminación de cualquier módulo usan `AppDialog`; no se permiten formularios administrativos inline ni `window.alert`, `window.confirm` o `window.prompt`.
 - No crear colecciones, campos, roles, rutas o Functions no documentados.
 - No modificar el modelo de datos o reglas de seguridad sin actualizar primero sus specs y pruebas.
 - Angular nunca accede directamente a datos administrativos ni contiene secretos.

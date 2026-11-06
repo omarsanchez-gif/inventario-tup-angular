@@ -16,46 +16,87 @@
   }
 
   @if (formVisible()) {
-    <form class="card user-form" [formGroup]="form" (ngSubmit)="submit()">
-      <div class="form-heading">
-        <h2>{{ editingId() ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
-        <button class="button button--secondary" type="button" (click)="closeForm()">
+    <app-dialog
+      [title]="editingId() ? 'Editar usuario' : 'Nuevo usuario'"
+      [dismissible]="!users.saving()"
+      (dismissed)="closeForm()"
+    >
+      <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-grid">
+          <div class="field">
+            <label for="user-name">Nombre</label>
+            <input id="user-name" formControlName="nombre" autocomplete="name" />
+            @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+              <small role="alert">Capture el nombre.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="user-email">Correo institucional</label>
+            <input id="user-email" type="email" formControlName="correo" autocomplete="email" />
+            @if (form.controls.correo.touched && form.controls.correo.invalid) {
+              <small role="alert">Capture un correo válido.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="user-role">Rol</label>
+            <select id="user-role" formControlName="rol">
+              <option value="usuario">Usuario</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+          @if (!editingId()) {
+            <label class="checkbox-field">
+              <input type="checkbox" formControlName="activo" />
+              Autorizar como usuario activo
+            </label>
+          }
+        </div>
+        <div class="dialog__actions">
+          <button
+            class="button button--secondary"
+            type="button"
+            [disabled]="users.saving()"
+            (click)="closeForm()"
+          >
+            Cancelar
+          </button>
+          <button class="button button--primary" type="submit" [disabled]="users.saving()">
+            {{ users.saving() ? 'Guardando…' : 'Guardar usuario' }}
+          </button>
+        </div>
+      </form>
+    </app-dialog>
+  }
+
+  @if (pendingDeletion(); as user) {
+    <app-dialog
+      title="Eliminar usuario"
+      [dismissible]="!users.saving()"
+      (dismissed)="cancelDeletion()"
+    >
+      <p class="dialog__message">¿Eliminar la autorización de {{ user.nombre }}?</p>
+      <p class="dialog__help">
+        Esta acción revoca su acceso al sistema, pero no elimina su cuenta institucional de Google.
+      </p>
+      <div class="dialog__actions">
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="users.saving()"
+          (click)="cancelDeletion()"
+        >
           Cancelar
         </button>
+        <button
+          class="button button--danger"
+          type="button"
+          [disabled]="users.saving()"
+          (click)="confirmDeletion()"
+        >
+          {{ users.saving() ? 'Eliminando…' : 'Eliminar usuario' }}
+        </button>
       </div>
-      <div class="form-grid">
-        <div class="field">
-          <label for="user-name">Nombre</label>
-          <input id="user-name" formControlName="nombre" autocomplete="name" />
-          @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
-            <small role="alert">Capture el nombre.</small>
-          }
-        </div>
-        <div class="field">
-          <label for="user-email">Correo institucional</label>
-          <input id="user-email" type="email" formControlName="correo" autocomplete="email" />
-          @if (form.controls.correo.touched && form.controls.correo.invalid) {
-            <small role="alert">Capture un correo válido.</small>
-          }
-        </div>
-        <div class="field">
-          <label for="user-role">Rol</label>
-          <select id="user-role" formControlName="rol">
-            <option value="usuario">Usuario</option>
-            <option value="admin">Administrador</option>
-          </select>
-        </div>
-        @if (!editingId()) {
-          <label class="checkbox-field">
-            <input type="checkbox" formControlName="activo" />
-            Autorizar como usuario activo
-          </label>
-        }
-      </div>
-      <button class="button button--primary" type="submit" [disabled]="users.saving()">
-        {{ users.saving() ? 'Guardando…' : 'Guardar usuario' }}
-      </button>
-    </form>
+    </app-dialog>
   }
 
   <div class="toolbar">
@@ -123,7 +164,7 @@
                     type="button"
                     [disabled]="isSelf(user) || users.saving()"
                     [attr.title]="isSelf(user) ? 'No puede eliminar su propio registro' : null"
-                    (click)="remove(user)"
+                    (click)="requestDeletion(user)"
                   >
                     Eliminar
                   </button>
