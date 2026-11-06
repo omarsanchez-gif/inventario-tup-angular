@@ -99,12 +99,18 @@
     </app-dialog>
   }
 
-  <div class="toolbar">
-    <div class="field search-field">
+  <div class="table-toolbar">
+    <div class="field table-search">
       <label for="user-search">Buscar por nombre o correo</label>
-      <input id="user-search" type="search" [value]="users.query()" (input)="setQuery($event)" />
+      <input
+        id="user-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Escriba para filtrar automáticamente"
+        [value]="users.query()"
+        (input)="setQuery($event)"
+      />
     </div>
-    <span aria-live="polite">{{ users.filteredUsers().length }} resultado(s)</span>
   </div>
 
   @if (users.loading()) {
@@ -130,7 +136,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (user of users.filteredUsers(); track user.documentId) {
+          @for (user of paginatedUsers(); track user.documentId) {
             <tr>
               <td>{{ user.nombre }}</td>
               <td>{{ user.correo }}</td>
@@ -195,5 +201,11 @@
         </tbody>
       </table>
     </div>
+    <app-pagination
+      [totalItems]="users.filteredUsers().length"
+      [page]="activePage()"
+      [pageSize]="pageSize"
+      (pageChange)="setPage($event)"
+    />
   }
 </section>

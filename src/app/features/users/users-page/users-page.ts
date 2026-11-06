@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
@@ -6,11 +6,12 @@ import type { UserRole } from '../../../shared/models/authorized-user';
 import type { SystemUser } from '../../../shared/models/system-user';
 import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { AppIcon } from '../../../shared/ui/icon/app-icon';
+import { AppPagination } from '../../../shared/ui/pagination/app-pagination';
 import { UsersFacade } from '../state/users.facade';
 
 @Component({
   selector: 'app-users-page',
-  imports: [AppDialog, AppIcon, ReactiveFormsModule],
+  imports: [AppDialog, AppIcon, AppPagination, ReactiveFormsModule],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +23,16 @@ export class UsersPage {
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly pendingDeletion = signal<SystemUser | null>(null);
+  protected readonly pageSize = 10;
+  protected readonly currentPage = signal(1);
+  protected readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.users.filteredUsers().length / this.pageSize)),
+  );
+  protected readonly activePage = computed(() => Math.min(this.currentPage(), this.totalPages()));
+  protected readonly paginatedUsers = computed(() => {
+    const start = (this.activePage() - 1) * this.pageSize;
+    return this.users.filteredUsers().slice(start, start + this.pageSize);
+  });
   protected readonly form = this.formBuilder.nonNullable.group({
     nombre: ['', [Validators.required, Validators.maxLength(120)]],
     correo: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
@@ -85,6 +96,11 @@ export class UsersPage {
 
   protected setQuery(event: Event): void {
     this.users.setQuery((event.target as HTMLInputElement).value);
+    this.currentPage.set(1);
+  }
+
+  protected setPage(page: number): void {
+    this.currentPage.set(Math.min(Math.max(1, page), this.totalPages()));
   }
 
   protected isSelf(user: SystemUser): boolean {

@@ -265,6 +265,40 @@ a {
   text-align: center;
 }
 
+.table-toolbar {
+  width: 100%;
+  margin: var(--space-5) 0;
+}
+
+.table-search {
+  width: 100%;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.pagination__summary,
+.pagination__status {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.pagination__status {
+  min-width: 7rem;
+  text-align: center;
+}
+
 .eyebrow--inverse {
   color: var(--color-on-brand);
 }
@@ -370,6 +404,15 @@ a {
 
   .dialog__actions .button {
     width: 100%;
+  }
+
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pagination__controls {
+    justify-content: space-between;
   }
 }
 

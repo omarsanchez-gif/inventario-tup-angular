@@ -43,7 +43,7 @@
 ### Iconografía
 
 - Los iconos se consumen mediante el componente compartido `AppIcon`; no se insertan SVG arbitrarios en cada módulo.
-- Registro inicial: `dashboard`, `users`, `menu`, `close`, `logout`, `edit`, `activate`, `deactivate` y `delete`.
+- Registro inicial: `dashboard`, `users`, `menu`, `close`, `logout`, `edit`, `activate`, `deactivate`, `delete`, `previous` y `next`.
 - Trazo estándar: `1.75`, extremos y uniones redondeados, `currentColor` y caja `24 × 24`.
 - Navegación: icono de `1.25rem`; botones de icono: `1.375rem` dentro de un objetivo mínimo de `44 × 44 px`.
 - Cada módulo nuevo documentará y agregará su icono al registro compartido antes de incorporarse al menú.
@@ -80,8 +80,17 @@
 - La superficie mide `min(42rem, calc(100vw - 2rem))`, limita su altura al viewport y permite scroll interno.
 - En móvil los campos se presentan en una columna y las acciones ocupan el ancho disponible.
 
+## Búsqueda y paginación de tablas
+
+- Toda tabla o listado administrativo con búsqueda filtra automáticamente en cada cambio del campo; no requiere botón de búsqueda.
+- El campo de búsqueda ocupa el ancho completo disponible y conserva etiqueta visible asociada.
+- Los resultados se paginan mediante el componente compartido `AppPagination`, con 10 registros por página.
+- Una búsqueda nueva reinicia el listado en la primera página.
+- El paginador informa el intervalo visible, el total de resultados y la página actual; sus controles anterior y siguiente usan iconos compartidos, nombre accesible, tooltip y estado deshabilitado.
+- En móvil la búsqueda, la tabla con desplazamiento horizontal y el paginador conservan objetivos táctiles mínimos de 44 × 44 px.
+
 ## Estado de implementación
 
-El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual y el estándar de acciones contextuales con iconos están implementados y publicados únicamente en Hosting de `inventario-stg`. La verificación automática de este incremento aprobó lint, guardia visual, formato, 11 pruebas Angular y build de staging; la comprobación remota confirmó HTTP 200 y los bundles generados. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
+El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual y el estándar de acciones contextuales con iconos están implementados y publicados únicamente en Hosting de `inventario-stg`. La búsqueda a todo el ancho y `AppPagination` están implementados y validados localmente, todavía sin despliegue. La verificación automática de este incremento aprobó lint, guardia visual, formato, 7 suites con 13 pruebas Angular y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

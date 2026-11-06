@@ -147,4 +147,38 @@ describe('UsersPage dialogs', () => {
       ['edit', 'deactivate', 'delete'],
     );
   });
+
+  it('filters automatically and resets the paginated table to the first page', () => {
+    const manyUsers = Array.from({ length: 12 }, (_, index): SystemUser => ({
+      ...managedUser,
+      documentId: `user-${index + 1}`,
+      uid: `user-${index + 1}-uid`,
+      nombre: `Usuario ${index + 1}`,
+      correo: `usuario${index + 1}@tecplayacar.edu.mx`,
+    }));
+    users.filteredUsers.set(manyUsers);
+    fixture.detectChanges();
+
+    expect(element.querySelectorAll('tbody tr')).toHaveLength(10);
+    expect(element.querySelector('.pagination__summary')?.textContent).toContain(
+      'Mostrando 1–10 de 12 resultado(s)',
+    );
+
+    element.querySelector<HTMLButtonElement>('[aria-label="Página siguiente"]')!.click();
+    fixture.detectChanges();
+    expect(element.querySelectorAll('tbody tr')).toHaveLength(2);
+    expect(element.querySelector('.pagination__status')?.textContent).toContain('Página 2 de 2');
+
+    const search = element.querySelector<HTMLInputElement>('#user-search')!;
+    search.value = 'usuario 1';
+    search.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(users.setQuery).toHaveBeenCalledWith('usuario 1');
+    expect(
+      element.querySelector<HTMLButtonElement>('[aria-label="Página anterior"]')!.disabled,
+    ).toBe(true);
+    expect(element.querySelector('.table-search')).toBeTruthy();
+    expect(element.querySelector('button[type="search"]')).toBeFalsy();
+  });
 });

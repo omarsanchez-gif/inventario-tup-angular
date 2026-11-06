@@ -13,6 +13,8 @@
 - USR-011: alta y edición abren el formulario modal compartido y Cancelar no persiste cambios.
 - USR-012: eliminar requiere confirmación modal; cancelar no ejecuta la callable y confirmar la ejecuta una sola vez.
 - USR-013: las acciones de cada usuario muestran únicamente iconos compartidos y conservan nombre accesible, tooltip, estado deshabilitado y operación por teclado.
+- USR-014: la búsqueda ocupa el ancho disponible, filtra con cada entrada y reinicia el listado en la primera página.
+- USR-015: el listado presenta 10 registros por página y el paginador informa intervalo, total y página actual con controles accesibles.
 
 ## Evidencia de staging — 6 de noviembre de 2026
 
@@ -28,3 +30,10 @@
 - Las 6 suites y 11 pruebas Angular aprobaron, junto con lint, guardia visual, formato y build de staging.
 - El incremento fue desplegado únicamente en Hosting de `inventario-stg`; la comprobación remota confirmó HTTP 200 y los bundles esperados.
 - Queda pendiente su aceptación visual autenticada en escritorio y móvil.
+
+## Evidencia local — búsqueda y paginación
+
+- USR-014 aprobó la búsqueda automática, el campo compartido a todo el ancho y el reinicio a página 1.
+- USR-015 aprobó el límite de 10 filas, el intervalo visible, el total, la página actual y la navegación accesible.
+- Las 7 suites y 13 pruebas Angular aprobaron, junto con lint, guardia visual, formato y build de staging.
+- Este incremento no se ha desplegado; queda pendiente su aceptación visual autenticada en escritorio y móvil.

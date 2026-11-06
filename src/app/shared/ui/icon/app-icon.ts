@@ -9,6 +9,8 @@ export type AppIconName =
   | 'edit'
   | 'logout'
   | 'menu'
+  | 'next'
+  | 'previous'
   | 'users';
 
 @Component({

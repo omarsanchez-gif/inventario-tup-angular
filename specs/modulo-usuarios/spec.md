@@ -28,6 +28,8 @@ Permitir que `admin` gestione las autorizaciones institucionales del sistema.
 - `Editar` abre el mismo formulario modal con los datos permitidos.
 - `Eliminar` abre una confirmación modal institucional; no usa `window.confirm`.
 - Editar, activar, desactivar y eliminar se muestran como botones de icono en la columna de acciones, con nombre accesible y tooltip; no muestran texto visible.
+- La búsqueda filtra automáticamente por nombre o correo, ocupa todo el ancho y reinicia la paginación al cambiar.
+- El listado muestra 10 usuarios por página mediante el paginador compartido e informa intervalo, total y página actual.
 - Cancelar, Escape, backdrop o cierre visible descartan el diálogo sin mutar datos.
 - Durante el guardado las acciones aplicables permanecen deshabilitadas.
 
