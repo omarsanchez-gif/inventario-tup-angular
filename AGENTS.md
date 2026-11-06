@@ -22,6 +22,9 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 ## Reglas obligatorias
 
 - No implementar funcionalidades fuera de especificación.
+- Todo cambio de código, configuración, dependencias, infraestructura, datos controlados o despliegue debe actualizar primero o conjuntamente las specs afectadas.
+- Ningún cambio se considera terminado hasta reflejar su alcance y estado real en `spec.md`, `tareas.md`, `pruebas.md`, la matriz de trazabilidad y las specs transversales que correspondan.
+- La documentación nunca debe anticipar como completado un cambio que todavía no haya sido implementado y verificado.
 - No crear colecciones, campos, roles, rutas o Functions no documentados.
 - No modificar el modelo de datos o reglas de seguridad sin actualizar primero sus specs y pruebas.
 - Angular nunca accede directamente a datos administrativos ni contiene secretos.
