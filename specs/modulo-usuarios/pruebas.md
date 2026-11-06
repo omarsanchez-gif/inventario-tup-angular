@@ -36,4 +36,5 @@
 - USR-014 aprobó la búsqueda automática, el campo compartido a todo el ancho y el reinicio a página 1.
 - USR-015 aprobó el límite de 10 filas, el intervalo visible, el total, la página actual y la navegación accesible.
 - Las 7 suites y 13 pruebas Angular aprobaron, junto con lint, guardia visual, formato y build de staging.
-- Este incremento no se ha desplegado; queda pendiente su aceptación visual autenticada en escritorio y móvil.
+- El incremento fue desplegado únicamente en Hosting de `inventario-stg`; la verificación remota confirmó HTTP 200 y los bundles esperados.
+- Queda pendiente su aceptación visual autenticada en escritorio y móvil.

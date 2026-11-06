@@ -36,6 +36,8 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - No utilizar datos reales ni producción para desarrollo o pruebas manuales.
 - `demo-inventario-tup` es exclusivamente el proyecto local de Emulator Suite.
 - `staging` se usa únicamente como alias explícito de `inventario-stg`.
+- Todo cambio implementado y validado debe desplegarse también en `inventario-stg`, limitando `firebase deploy` mediante `--only` al servicio afectado y usando siempre `--project staging`.
+- La autorización continua de staging no amplía el alcance funcional ni autoriza producción, datos reales o servicios no afectados por el cambio.
 - El proyecto `inventario-stg` está autorizado exclusivamente para el módulo de autenticación y su infraestructura mínima.
 - El plan Blaze está habilitado únicamente en `inventario-stg`; toda creación de recursos con costo debe limitarse al alcance solicitado y documentarse.
 - El alias y proyecto de producción permanecen pendientes; ningún despliegue productivo está autorizado.

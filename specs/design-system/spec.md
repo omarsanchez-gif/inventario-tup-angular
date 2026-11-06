@@ -91,6 +91,6 @@
 
 ## Estado de implementación
 
-El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual y el estándar de acciones contextuales con iconos están implementados y publicados únicamente en Hosting de `inventario-stg`. La búsqueda a todo el ancho y `AppPagination` están implementados y validados localmente, todavía sin despliegue. La verificación automática de este incremento aprobó lint, guardia visual, formato, 7 suites con 13 pruebas Angular y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
+El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el estándar de acciones contextuales con iconos, la búsqueda a todo el ancho y `AppPagination` están implementados y publicados únicamente en Hosting de `inventario-stg`. La verificación automática de este incremento aprobó lint, guardia visual, formato, 7 suites con 13 pruebas Angular y build de staging; la verificación remota confirmó HTTP 200 y los bundles esperados. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

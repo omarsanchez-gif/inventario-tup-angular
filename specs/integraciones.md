@@ -6,6 +6,7 @@
 - Firestore conserva el perfil canónico.
 - Emulator Suite usa `demo-inventario-tup`.
 - El proyecto Firebase de staging autorizado es `inventario-stg`, asociado exclusivamente al alias `staging`.
+- Desde el 6 de noviembre de 2026, todo cambio implementado y validado cuenta con autorización continua para desplegarse en `inventario-stg`, exclusivamente mediante `--only` sobre el servicio afectado y `--project staging`; esta autorización no incluye producción ni amplía el alcance funcional.
 - `inventario-stg` fue creado el 6 de noviembre de 2026.
 - La app web de staging es `Inventario TUP - Staging` (`1:719448906735:web:5c52a80957b8e1ea28341a`).
 - Google Sign-In usa la marca `Inventario TUP - Staging` y el correo de soporte institucional autorizado.
@@ -14,6 +15,7 @@
 - Hosting publica el build de staging validado en `https://inventario-stg.web.app` y responde HTTP 200.
 - El 6 de noviembre de 2026 se publicó únicamente Hosting con el layout estandarizado, iconos compartidos y navegación responsive.
 - Ese mismo día se actualizó únicamente Hosting con `AppDialog`, formularios modales de alta/edición y confirmación modal de eliminación; sirve `main-PASDWI4I.js` y `styles-BHMDTSOU.css`.
+- El 6 de noviembre de 2026 se desplegó únicamente Hosting de `inventario-stg` con búsqueda automática y paginación compartida. La verificación remota confirmó HTTP 200 y los bundles `main-EJ7XPHJ4.js`, `styles-BYOAK37E.css` y `chunk-wVPnxYqq.js`; Functions, Rules, datos y producción no fueron modificados.
 - El 6 de noviembre de 2026 se desplegó con autorización expresa únicamente Hosting de `inventario-stg` con las acciones contextuales iconográficas estandarizadas. El sitio responde HTTP 200 y sirve `main-L7C4WPFM.js`, `styles-MJOK67HH.css` y el módulo de Usuarios `chunk-j_aye9gZ.js`; Functions, Rules, datos y producción no fueron modificados.
 - El plan Blaze está habilitado únicamente en `inventario-stg` mediante la cuenta de facturación autorizada.
 - `bootstrapAuthorization` está `ACTIVE` en `us-central1`, usa Node.js 22, carga `INSTITUTIONAL_DOMAIN=tecplayacar.edu.mx` y rechaza solicitudes anónimas con HTTP 401.
