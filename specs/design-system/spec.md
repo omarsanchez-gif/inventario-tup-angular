@@ -82,6 +82,6 @@
 
 ## Estado de implementación
 
-El layout, los tokens ampliados, `AppIcon`, `AppDialog` y la guardia visual están implementados y publicados únicamente en Hosting de `inventario-stg`. El estándar de acciones contextuales con iconos está implementado y validado localmente, pero todavía no se ha desplegado. La verificación automática de este incremento aprobó lint, guardia visual, formato, 11 pruebas Angular y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
+El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual y el estándar de acciones contextuales con iconos están implementados y publicados únicamente en Hosting de `inventario-stg`. La verificación automática de este incremento aprobó lint, guardia visual, formato, 11 pruebas Angular y build de staging; la comprobación remota confirmó HTTP 200 y los bundles generados. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

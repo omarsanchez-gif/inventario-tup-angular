@@ -26,4 +26,5 @@
 
 - USR-013 aprobó mediante prueba de componente: tres acciones sin texto visible, icono compartido, `aria-label` y tooltip dinámicos.
 - Las 6 suites y 11 pruebas Angular aprobaron, junto con lint, guardia visual, formato y build de staging.
-- Este incremento no se ha desplegado; queda pendiente su aceptación visual autenticada en escritorio y móvil.
+- El incremento fue desplegado únicamente en Hosting de `inventario-stg`; la comprobación remota confirmó HTTP 200 y los bundles esperados.
+- Queda pendiente su aceptación visual autenticada en escritorio y móvil.
