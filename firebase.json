@@ -19,6 +19,14 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [{ "source": "**", "destination": "/index.html" }]
   },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Inventario TUP - Staging",
+        "supportEmail": "omar.sanchez@tecplayacar.edu.mx"
+      }
+    }
+  },
   "emulators": {
     "auth": { "port": 9099 },
     "functions": { "port": 5001 },

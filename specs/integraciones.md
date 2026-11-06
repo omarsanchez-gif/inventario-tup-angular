@@ -5,8 +5,20 @@
 - Angular usa Firebase Authentication y Cloud Functions callable.
 - Firestore conserva el perfil canónico.
 - Emulator Suite usa `demo-inventario-tup`.
-- Los proyectos reales de staging y producción están pendientes de creación y aprobación.
-- La auditoría de ejecución está en cero; el estado del tooling se documenta en ADR-002.
+- El proyecto Firebase de staging autorizado es `inventario-stg`, asociado exclusivamente al alias `staging`.
+- `inventario-stg` fue creado el 6 de noviembre de 2026.
+- La app web de staging es `Inventario TUP - Staging` (`1:719448906735:web:5c52a80957b8e1ea28341a`).
+- Google Sign-In usa la marca `Inventario TUP - Staging` y el correo de soporte institucional autorizado.
+- Firestore y Functions se ubican en `us-central1`.
+- Google Sign-In, Firestore estándar con protección contra eliminación, las reglas de seguridad y Hosting quedaron configurados el 6 de noviembre de 2026.
+- Hosting publica el build de staging validado en `https://inventario-stg.web.app` y responde HTTP 200 con `main-XUIVMUR2.js`.
+- El plan Blaze está habilitado únicamente en `inventario-stg` mediante la cuenta de facturación autorizada.
+- `bootstrapAuthorization` está `ACTIVE` en `us-central1`, usa Node.js 22, carga `INSTITUTIONAL_DOMAIN=tecplayacar.edu.mx` y rechaza solicitudes anónimas con HTTP 401.
+- Artifact Registry elimina automáticamente las imágenes de Functions con más de un día para limitar costos de almacenamiento.
+- El perfil canónico activo de `omar.sanchez@tecplayacar.edu.mx` existe como `admin`; su `uid` se asociará en el primer acceso válido.
+- La autorización actual cubre la infraestructura mínima y el despliegue del módulo de autenticación en staging.
+- El proyecto y alias de producción permanecen pendientes y no están autorizados.
+- La auditoría conserva cuatro alertas moderadas transitivas en utilidades de archivos de `google-gax`, sin altas ni críticas; el detalle y la decisión están en ADR-002.
 
 ## Snipe-IT
 

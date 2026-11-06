@@ -29,8 +29,10 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Toda mutación administrativa se ejecuta mediante Cloud Functions callable y valida el perfil canónico.
 - No utilizar datos reales ni producción para desarrollo o pruebas manuales.
 - `demo-inventario-tup` es exclusivamente el proyecto local de Emulator Suite.
-- Los alias `staging` y `production` no se crearán hasta conocer y aprobar los proyectos Firebase correspondientes.
-- Ningún despliegue está autorizado por la creación de esta base.
+- `staging` se usa únicamente como alias explícito de `inventario-stg`.
+- El proyecto `inventario-stg` está autorizado exclusivamente para el módulo de autenticación y su infraestructura mínima.
+- El plan Blaze está habilitado únicamente en `inventario-stg`; toda creación de recursos con costo debe limitarse al alcance solicitado y documentarse.
+- El alias y proyecto de producción permanecen pendientes; ningún despliegue productivo está autorizado.
 - Las credenciales de Snipe-IT son secretos de backend y nunca se guardan en Angular o Git.
 - La migración desde Snipe-IT se especificará e implementará como herramienta separada.
 - Interfaz WCAG 2.2 AA y responsive desde 320 px.
@@ -51,7 +53,7 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Activos, modelos, fabricantes, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.
-- Creación o despliegue de proyectos Firebase de staging o producción.
+- Creación o despliegue de proyectos Firebase de producción.
 - Datos reales.
 
 ## Definición de terminado

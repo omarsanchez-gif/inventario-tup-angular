@@ -27,9 +27,9 @@
     "@firebase/firestore": {
       "@grpc/grpc-js": "1.14.5"
     },
-    "glob": "14.0.3",
-    "minimatch": "11.0.4",
-    "rimraf": "6.1.4"
+    "google-gax@5.0.8": {
+      "google-auth-library": "10.9.1"
+    }
   },
   "packageManager": "npm@11.13.0",
   "dependencies": {
