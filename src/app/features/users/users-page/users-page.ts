@@ -5,11 +5,12 @@ import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { UserRole } from '../../../shared/models/authorized-user';
 import type { SystemUser } from '../../../shared/models/system-user';
 import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
+import { AppIcon } from '../../../shared/ui/icon/app-icon';
 import { UsersFacade } from '../state/users.facade';
 
 @Component({
   selector: 'app-users-page',
-  imports: [AppDialog, ReactiveFormsModule],
+  imports: [AppDialog, AppIcon, ReactiveFormsModule],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

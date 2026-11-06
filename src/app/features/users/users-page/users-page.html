@@ -147,26 +147,46 @@
               <td>{{ formatAccess(user.ultimoAcceso) }}</td>
               <td>
                 <div class="actions">
-                  <button class="button button--secondary" type="button" (click)="edit(user)">
-                    Editar
+                  <button
+                    class="icon-button icon-button--secondary"
+                    type="button"
+                    [attr.aria-label]="'Editar a ' + user.nombre"
+                    [attr.title]="'Editar a ' + user.nombre"
+                    (click)="edit(user)"
+                  >
+                    <app-icon name="edit" />
                   </button>
                   <button
-                    class="button button--secondary"
+                    class="icon-button icon-button--secondary"
                     type="button"
                     [disabled]="isSelf(user) || users.saving()"
-                    [attr.title]="isSelf(user) ? 'No puede cambiar su propio estado' : null"
+                    [attr.aria-label]="
+                      user.activo ? 'Desactivar a ' + user.nombre : 'Activar a ' + user.nombre
+                    "
+                    [attr.title]="
+                      isSelf(user)
+                        ? 'No puede cambiar su propio estado'
+                        : user.activo
+                          ? 'Desactivar a ' + user.nombre
+                          : 'Activar a ' + user.nombre
+                    "
                     (click)="toggleStatus(user)"
                   >
-                    {{ user.activo ? 'Desactivar' : 'Activar' }}
+                    <app-icon [name]="user.activo ? 'deactivate' : 'activate'" />
                   </button>
                   <button
-                    class="button button--danger"
+                    class="icon-button icon-button--danger"
                     type="button"
                     [disabled]="isSelf(user) || users.saving()"
-                    [attr.title]="isSelf(user) ? 'No puede eliminar su propio registro' : null"
+                    [attr.aria-label]="'Eliminar a ' + user.nombre"
+                    [attr.title]="
+                      isSelf(user)
+                        ? 'No puede eliminar su propio registro'
+                        : 'Eliminar a ' + user.nombre
+                    "
                     (click)="requestDeletion(user)"
                   >
-                    Eliminar
+                    <app-icon name="delete" />
                   </button>
                 </div>
               </td>

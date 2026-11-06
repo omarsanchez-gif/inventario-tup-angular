@@ -88,6 +88,12 @@ describe('UsersPage dialogs', () => {
     return match;
   }
 
+  function actionButton(label: string): HTMLButtonElement {
+    const match = element.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`);
+    if (!match) throw new Error(`No se encontró la acción ${label}.`);
+    return match;
+  }
+
   it('opens new and edit forms in the shared dialog', () => {
     button('Nuevo usuario').click();
     fixture.detectChanges();
@@ -98,13 +104,13 @@ describe('UsersPage dialogs', () => {
     expect(element.querySelector('dialog')).toBeFalsy();
     expect(users.create).not.toHaveBeenCalled();
 
-    button('Editar').click();
+    actionButton('Editar a Usuario Prueba').click();
     fixture.detectChanges();
     expect(element.querySelector('.dialog__title')?.textContent).toContain('Editar usuario');
   });
 
   it('requires the institutional dialog before deleting', async () => {
-    button('Eliminar').click();
+    actionButton('Eliminar a Usuario Prueba').click();
     fixture.detectChanges();
     expect(element.querySelector('.dialog__title')?.textContent).toContain('Eliminar usuario');
 
@@ -112,7 +118,7 @@ describe('UsersPage dialogs', () => {
     fixture.detectChanges();
     expect(users.delete).not.toHaveBeenCalled();
 
-    button('Eliminar').click();
+    actionButton('Eliminar a Usuario Prueba').click();
     fixture.detectChanges();
     button('Eliminar usuario').click();
     await fixture.whenStable();
@@ -120,5 +126,25 @@ describe('UsersPage dialogs', () => {
     expect(users.delete).toHaveBeenCalledOnce();
     expect(users.delete).toHaveBeenCalledWith(managedUser);
     expect(element.querySelector('dialog')).toBeFalsy();
+  });
+
+  it('renders record actions as accessible icon-only buttons', () => {
+    const actions = [...element.querySelectorAll<HTMLButtonElement>('.actions button')];
+
+    expect(actions).toHaveLength(3);
+    expect(actions.map((action) => action.textContent?.trim())).toEqual(['', '', '']);
+    expect(actions.map((action) => action.getAttribute('aria-label'))).toEqual([
+      'Editar a Usuario Prueba',
+      'Desactivar a Usuario Prueba',
+      'Eliminar a Usuario Prueba',
+    ]);
+    expect(actions.map((action) => action.getAttribute('title'))).toEqual([
+      'Editar a Usuario Prueba',
+      'Desactivar a Usuario Prueba',
+      'Eliminar a Usuario Prueba',
+    ]);
+    expect(actions.map((action) => action.querySelector('svg')?.getAttribute('data-icon'))).toEqual(
+      ['edit', 'deactivate', 'delete'],
+    );
   });
 });

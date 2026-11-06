@@ -1,6 +1,15 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-export type AppIconName = 'close' | 'dashboard' | 'logout' | 'menu' | 'users';
+export type AppIconName =
+  | 'activate'
+  | 'close'
+  | 'dashboard'
+  | 'deactivate'
+  | 'delete'
+  | 'edit'
+  | 'logout'
+  | 'menu'
+  | 'users';
 
 @Component({
   selector: 'app-icon',

@@ -43,7 +43,7 @@
 ### Iconografía
 
 - Los iconos se consumen mediante el componente compartido `AppIcon`; no se insertan SVG arbitrarios en cada módulo.
-- Registro inicial: `dashboard`, `users`, `menu`, `close` y `logout`.
+- Registro inicial: `dashboard`, `users`, `menu`, `close`, `logout`, `edit`, `activate`, `deactivate` y `delete`.
 - Trazo estándar: `1.75`, extremos y uniones redondeados, `currentColor` y caja `24 × 24`.
 - Navegación: icono de `1.25rem`; botones de icono: `1.375rem` dentro de un objetivo mínimo de `44 × 44 px`.
 - Cada módulo nuevo documentará y agregará su icono al registro compartido antes de incorporarse al menú.
@@ -52,6 +52,8 @@
 
 - `page-header`, `page-title`, `eyebrow` y `lead` normalizan encabezados.
 - `button` e `icon-button` normalizan acciones textuales y de icono.
+- Las acciones contextuales de registros en tablas y listados se presentan únicamente como `icon-button`; cada control incluye icono compartido, `aria-label` y tooltip descriptivo. Esta regla aplica a todos los módulos.
+- Las acciones principales de página y los botones de confirmación o cancelación dentro de diálogos conservan texto visible.
 - `card`, `field`, `alert` y `badge` conservan una sola definición global.
 - Los estilos encapsulados de páginas controlan únicamente distribución o necesidades particulares del módulo.
 - `npm run lint:visual` rechaza redefiniciones locales de primitivas y colores hexadecimales fuera de `src/styles.scss`.
@@ -80,6 +82,6 @@
 
 ## Estado de implementación
 
-El layout, los tokens ampliados, `AppIcon`, `AppDialog` y la guardia visual están implementados y publicados únicamente en Hosting de `inventario-stg`. La verificación automática aprobó lint, guardia visual, formato, 10 pruebas Angular, 4 pruebas de Functions y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
+El layout, los tokens ampliados, `AppIcon`, `AppDialog` y la guardia visual están implementados y publicados únicamente en Hosting de `inventario-stg`. El estándar de acciones contextuales con iconos está implementado y validado localmente, pero todavía no se ha desplegado. La verificación automática de este incremento aprobó lint, guardia visual, formato, 11 pruebas Angular y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.
