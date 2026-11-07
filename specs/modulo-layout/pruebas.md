@@ -12,6 +12,11 @@
 - LAY-010: `AppDialog` abre como modal con título asociado y cierre visible, por Escape y por backdrop.
 - LAY-011: formularios y confirmaciones usan acciones estandarizadas y una sola columna en móvil.
 - LAY-012: el cierre del diálogo devuelve el foco al control que lo abrió.
+- LAY-013: `Configuraciones` aparece solo para `admin`, utiliza el icono `settings` y no navega por sí mismo.
+- LAY-014: el botón alterna el grupo por ratón y teclado e informa `aria-expanded` y `aria-controls` correctamente.
+- LAY-015: una ruta secundaria activa abre el grupo y marca como activos el enlace y su padre.
+- LAY-016: el grupo solo presenta módulos implementados; inicialmente no muestra Fabricantes ni Modelos de activos.
+- LAY-017: en móvil, expandir el grupo conserva el drawer y seleccionar `Categorías` navega y lo cierra.
 
 ## Evidencia del incremento
 

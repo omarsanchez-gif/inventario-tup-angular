@@ -32,3 +32,9 @@
 - Acceso API de solo lectura confirmado manualmente con respuesta HTTP 200.
 - La migración se diseñará como proceso independiente y trazable.
 - No hay extracción, sincronización ni credenciales almacenadas en este incremento.
+
+## Categorías planificadas
+
+- `listCategories`, `createCategory`, `updateCategory`, `setCategoryStatus` y `deleteCategory` están especificadas, pero no implementadas ni desplegadas.
+- Este incremento es exclusivamente documental: no crea colecciones, Functions, Rules, índices, datos ni recursos con costo en `inventario-stg`.
+- La futura migración de categorías desde Snipe-IT utilizará una herramienta backend separada y no formará parte de las pantallas administrativas.

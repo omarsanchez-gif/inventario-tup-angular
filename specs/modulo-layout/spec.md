@@ -12,6 +12,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 - Estado activo comprensible por forma, contraste y texto, no solo por color.
 - Contenedor de contenido con ancho y espaciado estandarizados.
 - Diálogo compartido para formularios de alta, edición y confirmaciones destructivas.
+- Grupo desplegable `Configuraciones` exclusivo de `admin`, con opciones secundarias de texto para catálogos implementados.
 
 ## Comportamiento de escritorio
 
@@ -27,6 +28,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 - El sidebar inicia cerrado y no desplaza el contenido.
 - El botón de menú abre un drawer fijo con backdrop.
 - El drawer se cierra al activar nuevamente el botón, seleccionar una ruta, pulsar el backdrop o presionar Escape.
+- Expandir o contraer `Configuraciones` no cierra el drawer; seleccionar una de sus rutas sí lo cierra.
 - El cambio de breakpoint restablece el estado apropiado: abierto en escritorio y cerrado en móvil.
 
 ## Accesibilidad
@@ -37,10 +39,11 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 - Los iconos decorativos quedan fuera del árbol accesible; el texto del enlace conserva el nombre del módulo.
 - El foco visible y movimiento reducido provienen del sistema de diseño.
 - Los diálogos exponen título, modalidad, cierre por Escape y retorno de foco mediante el comportamiento nativo.
+- `Configuraciones` usa un botón con `aria-expanded`, `aria-controls` y nombre accesible; sus enlaces secundarios conservan foco visible y jerarquía comprensible.
 
 ## Autorización
 
-El layout solo presenta rutas ya autorizadas. `Usuarios` se muestra exclusivamente a `admin`; guards, Functions y Rules conservan la autorización efectiva.
+El layout solo presenta rutas ya autorizadas. `Usuarios` y `Configuraciones` se muestran exclusivamente a `admin`; guards, Functions y Rules conservan la autorización efectiva. El grupo no muestra enlaces de módulos todavía no implementados.
 
 ## Fuera de alcance
 

@@ -43,7 +43,8 @@
 ### Iconografía
 
 - Los iconos se consumen mediante el componente compartido `AppIcon`; no se insertan SVG arbitrarios en cada módulo.
-- Registro inicial: `dashboard`, `users`, `menu`, `close`, `logout`, `edit`, `activate`, `deactivate`, `delete`, `previous` y `next`.
+- Registro implementado: `dashboard`, `users`, `menu`, `close`, `logout`, `edit`, `activate`, `deactivate`, `delete`, `previous` y `next`.
+- Registro planificado: `settings`, reservado para el grupo administrativo `Configuraciones` antes de implementar Categorías.
 - Trazo estándar: `1.75`, extremos y uniones redondeados, `currentColor` y caja `24 × 24`.
 - Navegación: icono de `1.25rem`; botones de icono: `1.375rem` dentro de un objetivo mínimo de `44 × 44 px`.
 - Cada módulo nuevo documentará y agregará su icono al registro compartido antes de incorporarse al menú.
@@ -69,6 +70,16 @@
 - El perfil y cierre de sesión permanecen dentro del sidebar para evitar duplicar acciones.
 - Transiciones respetan `prefers-reduced-motion`.
 
+### Grupo Configuraciones
+
+- `Configuraciones` es un botón desplegable de primer nivel con icono `settings`, visible exclusivamente a `admin`; no navega a una pantalla propia.
+- El botón declara `aria-expanded` y `aria-controls`, admite teclado y conserva un objetivo mínimo de `44 × 44 px`.
+- Las opciones secundarias se presentan con texto, sangría y estado activo, sin exigir un icono individual.
+- Solo se muestran opciones con módulo implementado y autorizado; al implementar Categorías, la primera opción será `Categorías`.
+- La ruta secundaria activa abre automáticamente el grupo y mantiene un indicador activo tanto en la opción como en el padre.
+- En móvil, activar una opción secundaria cierra el drawer; expandir o contraer el grupo no cierra el drawer.
+- `Usuarios` permanece como opción principal independiente.
+
 ## Diálogos y formularios administrativos
 
 - Altas y ediciones se muestran mediante `AppDialog`; el formulario no desplaza ni se inserta dentro del contenido del módulo.
@@ -91,6 +102,6 @@
 
 ## Estado de implementación
 
-El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el estándar de acciones contextuales con iconos, la búsqueda a todo el ancho y `AppPagination` están implementados y publicados únicamente en Hosting de `inventario-stg`. La verificación automática de este incremento aprobó lint, guardia visual, formato, 7 suites con 13 pruebas Angular y build de staging; la verificación remota confirmó HTTP 200 y los bundles esperados. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
+El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el estándar de acciones contextuales con iconos, la búsqueda a todo el ancho y `AppPagination` están implementados y publicados únicamente en Hosting de `inventario-stg`. El grupo `Configuraciones`, el icono `settings` y su primera opción `Categorías` están especificados, pero no implementados ni desplegados. La verificación automática del último incremento ejecutable aprobó lint, guardia visual, formato, 7 suites con 13 pruebas Angular y build de staging; la verificación remota confirmó HTTP 200 y los bundles esperados. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

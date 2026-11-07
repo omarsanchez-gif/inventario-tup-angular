@@ -40,3 +40,22 @@
 - RN-LAY-004: Tipografía, tamaños, colores, espaciado, radios, sombras, iconografía y estados interactivos proceden de tokens o primitivas globales.
 - RN-LAY-005: La navegación conserva las restricciones por rol; estandarizar su presentación no amplía autorizaciones.
 - RN-LAY-006: Altas, ediciones y confirmaciones de eliminación se presentan mediante el diálogo compartido; no se usan formularios administrativos inline ni confirmaciones nativas del navegador.
+- RN-LAY-007: `Configuraciones` es un grupo desplegable exclusivo de `admin`, no una ruta ni una pantalla independiente.
+- RN-LAY-008: Solo los módulos administrativos implementados y autorizados aparecen como opciones secundarias de `Configuraciones`.
+- RN-LAY-009: Las opciones secundarias usan texto y estado activo; el icono distintivo se reserva para el grupo principal.
+- RN-LAY-010: Si una ruta secundaria está activa, `Configuraciones` permanece desplegado y expresa también su estado activo.
+- RN-LAY-011: En móvil, seleccionar una opción secundaria navega y cierra completamente el drawer.
+
+## Categorías
+
+- RN-CAT-001: Solo un `admin` autorizado puede listar y administrar categorías.
+- RN-CAT-002: Los únicos campos capturados son `nombre` y `notas`; no existen tipo, acuerdo de uso, imagen ni opciones de notificación en este módulo.
+- RN-CAT-003: El nombre es obligatorio, tiene máximo 120 caracteres y es único después de normalizar mayúsculas, diacríticos y espacios.
+- RN-CAT-004: Las notas son opcionales, se recortan y admiten máximo 1,000 caracteres.
+- RN-CAT-005: Toda categoría se crea activa; el estado se administra mediante una acción separada y no forma parte del formulario de alta o edición.
+- RN-CAT-006: Una categoría inactiva permanece visible en la administración y en referencias históricas, pero no podrá seleccionarse en nuevos modelos de activos.
+- RN-CAT-007: Una categoría solo puede eliminarse cuando ningún consumidor aprobado la referencia; si está en uso, debe desactivarse.
+- RN-CAT-008: Toda mutación usa una callable y las lecturas o escrituras directas desde clientes están prohibidas.
+- RN-CAT-009: El listado administrativo admite un máximo inicial de 500 categorías, se ordena por nombre normalizado y nunca devuelve resultados parciales.
+- RN-CAT-010: Identificadores, normalización, índice de unicidad y fechas son administrados por backend.
+- RN-CAT-011: La correspondencia con identificadores de Snipe-IT pertenece a la futura herramienta de migración y no se captura ni expone en el módulo.

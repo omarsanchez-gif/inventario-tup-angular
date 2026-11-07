@@ -55,10 +55,11 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Dashboard inicial de bienvenida, sin KPI simulados.
 - Usuarios administrativos con los roles iniciales `admin` y `usuario`.
 - Firestore Rules de denegación por defecto.
+- Especificación de `modulo-categorias` y del grupo administrativo `Configuraciones`, autorizada el 7 de noviembre de 2026, sin autorización de implementación, datos o despliegue funcional en este incremento.
 
 ## Fuera de alcance actual
 
-- Activos, modelos, fabricantes, personas, ubicaciones y responsivas.
+- Implementación de categorías; activos, modelos, fabricantes, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.
 - Creación o despliegue de proyectos Firebase de producción.
