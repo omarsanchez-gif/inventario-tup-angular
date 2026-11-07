@@ -25,6 +25,8 @@
 - RN-USR-006: Cambiar rol o estado sincroniza claims; reducir acceso revoca refresh tokens.
 - RN-USR-007: UID, fechas y último acceso son administrados por backend.
 - RN-USR-008: El módulo admite un máximo inicial de 500 usuarios y no devuelve resultados parciales.
+- RN-USR-009: Ningún cliente lee `usuarios` directamente; incluso el listado administrativo se obtiene mediante una callable con revalidación canónica.
+- RN-USR-010: Al reducir acceso, actualizar claims y revocar refresh tokens son intentos independientes; el fallo de uno no omite el otro y la operación informa reconciliación requerida.
 
 ## Dashboard inicial
 
@@ -43,7 +45,7 @@
 - RN-LAY-007: `Configuraciones` es un grupo desplegable exclusivo de `admin`, no una ruta ni una pantalla independiente.
 - RN-LAY-008: Solo los módulos administrativos implementados y autorizados aparecen como opciones secundarias de `Configuraciones`.
 - RN-LAY-009: Las opciones secundarias usan texto y estado activo; el icono distintivo se reserva para el grupo principal.
-- RN-LAY-010: Si una ruta secundaria está activa, `Configuraciones` permanece desplegado y expresa también su estado activo.
+- RN-LAY-010: Si una ruta secundaria está activa, `Configuraciones` expresa su estado activo y se abre al navegar a ella; el usuario puede contraerlo manualmente sin perder el indicador del padre.
 - RN-LAY-011: En móvil, seleccionar una opción secundaria navega y cierra completamente el drawer.
 
 ## Categorías

@@ -56,6 +56,7 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Usuarios administrativos con los roles iniciales `admin` y `usuario`.
 - Firestore Rules de denegación por defecto.
 - `modulo-categorias` y el grupo administrativo `Configuraciones`, autorizados para implementación, pruebas y despliegue exclusivo a staging el 7 de noviembre de 2026, limitados a sus specs vigentes.
+- Endurecimiento transversal previo a Fabricantes, autorizado el 7 de noviembre de 2026: cierre de lectura directa de Usuarios, revocación defensiva, encabezados y caché de Hosting, CI y reconciliación documental conforme a ADR-004.
 
 ## Fuera de alcance actual
 

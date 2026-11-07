@@ -42,12 +42,20 @@ Callable → caso de uso → repositorio → Admin SDK
 - Fabricantes, Modelos de activos y otros catálogos no aparecen hasta contar con especificación e implementación propias.
 - La activación visual del grupo no sustituye guards, callables ni reglas de seguridad.
 
-## Backend planificado de Categorías
+## Backend de Categorías
 
 ```text
 Callable → caso de uso de Categorías → repositorio → Admin SDK
 ```
 
-Las callables planificadas son `listCategories`, `createCategory`, `updateCategory`, `setCategoryStatus` y `deleteCategory`, todas en `us-central1`. La unicidad se reserva transaccionalmente en `categorias_nombres`; la verificación de referencias se abstrae para incorporar Modelos de activos sin cambiar el contrato público.
+Las callables desplegadas son `listCategories`, `createCategory`, `updateCategory`, `setCategoryStatus` y `deleteCategory`, todas en `us-central1`. La unicidad se reserva transaccionalmente en `categorias_nombres`; la verificación de referencias deberá ampliarse al incorporar Modelos de activos sin cambiar el contrato público.
 
 `cantidadActivos` es un read model desnormalizado para evitar una consulta de agregación por cada categoría del listado. Inicia en cero y su mantenimiento no se habilitará hasta que las specs de Modelos, Activos y Migración definan todas las transiciones que incrementan, decrementan, transfieren o reconcilian el contador. La fuente canónica siempre será Activos.
+
+## Endurecimiento transversal
+
+- Angular consume Usuarios y catálogos administrativos exclusivamente mediante callables.
+- Claims acelera la autorización, pero cada callable revalida `usuarios`; las Rules no exponen el directorio administrativo.
+- Hosting define encabezados defensivos y caché explícita desde `firebase.json`.
+- CI reproduce formato, lint, pruebas Angular/Functions, emuladores, compilación y auditoría sin desplegar.
+- App Check, PITR, bitácora administrativa y producción requieren decisiones y aceptación separadas antes de habilitarse.

@@ -1,16 +1,17 @@
 # Sistema de Inventario TUP
 
-Base local del nuevo sistema institucional de inventario, construido con Angular 22, Firebase y desarrollo por especificaciones.
+Sistema institucional de inventario en construcción, desarrollado con Angular 22, Firebase y desarrollo por especificaciones.
 
 ## Estado
 
-Primer incremento local:
+Estado actual en staging:
 
 - Login institucional con Google y autorización canónica.
 - Shell privado y Dashboard inicial sin KPI simulados.
 - Administración inicial de usuarios autorizados.
+- Administración de Categorías dentro del grupo Configuraciones.
 - Cloud Functions, Firestore Rules y Emulator Suite.
-- Sin proyectos reales de staging o producción configurados.
+- Proyecto `inventario-stg` configurado y publicado; producción no está configurada ni autorizada.
 - Sin conexión ni extracción desde Snipe-IT.
 
 ## Requisitos
@@ -31,6 +32,7 @@ La aplicación local usa `demo-inventario-tup`. El inicio con Google dentro del 
 
     npm test
     npm run test:functions
+    npm run test:emulators
     npm run lint
     npm run format:check
     npm run functions:build
@@ -39,16 +41,9 @@ La aplicación local usa `demo-inventario-tup`. El inicio con Google dentro del 
 
 ## Firebase real
 
-`environment.staging.ts` conserva valores `PENDIENTE_CONFIGURAR` y `.firebaserc` no contiene alias reales. Antes de conectar staging se deben:
+`staging` apunta exclusivamente a `inventario-stg`; el proyecto predeterminado continúa siendo `demo-inventario-tup`. Todo despliegue usa `--only` y `--project staging`, se limita al servicio afectado y actualiza evidencia en specs. Producción permanece fuera de alcance.
 
-1. Crear o identificar un proyecto Firebase exclusivo de staging.
-2. Aprobar nombre, región, bucket, OAuth y responsables.
-3. Agregar el alias `staging` sin cambiar el proyecto demo predeterminado.
-4. Configurar Google Sign-In y el dominio autorizado.
-5. Crear el primer administrador mediante un procedimiento backend controlado.
-6. Validar Auth, Functions y Rules con Emulator Suite.
-
-La creación de esta base no autoriza despliegues.
+La configuración web de Firebase es pública y no funciona como secreto. Las restricciones de sitio/API, Rules, callables y autorización canónica constituyen la protección efectiva. Credenciales privadas, tokens de Snipe-IT y cuentas de servicio nunca se guardan en el frontend o repositorio.
 
 ## Especificaciones
 

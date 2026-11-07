@@ -23,9 +23,15 @@
 - Este despliegue se limitó a esas cinco Functions de `inventario-stg`; no modificó Hosting, Rules, datos ni producción.
 - Artifact Registry elimina automáticamente las imágenes de Functions con más de un día para limitar costos de almacenamiento.
 - El perfil canónico activo de `omar.sanchez@tecplayacar.edu.mx` existe como `admin`; su `uid` se asociará en el primer acceso válido.
-- La autorización actual cubre la infraestructura mínima y el despliegue del módulo de autenticación en staging.
+- La autorización vigente cubre Autenticación, Usuarios, Categorías y el endurecimiento transversal documentado en ADR-004, siempre limitado a staging y a los servicios afectados.
 - El proyecto y alias de producción permanecen pendientes y no están autorizados.
 - La auditoría conserva cuatro alertas moderadas transitivas en utilidades de archivos de `google-gax`, sin altas ni críticas; el detalle y la decisión están en ADR-002.
+- El 7 de noviembre de 2026 se desplegó el endurecimiento previo a Fabricantes por servicios separados: Firestore Rules, las 11 callables existentes y Hosting. No se modificaron datos, índices, secretos ni producción.
+- Las 11 callables están `ACTIVE` en Node.js 22, `us-central1`, con `maxInstances: 20`; todas rechazaron solicitudes anónimas con HTTP 401.
+- Firestore remoto rechazó con HTTP 403 el acceso anónimo directo a `usuarios` y `categorias`; Auth/Functions/Firestore Emulator también confirmó que un token `admin` válido no puede leer `usuarios` directamente y debe usar la callable.
+- Hosting responde HTTP 200 en raíz y rutas SPA, envía CSP, COOP, `X-Frame-Options`, `nosniff`, Referrer-Policy y Permissions-Policy. Las rutas usan `no-store` y los bundles con hash `max-age=31536000, immutable`.
+- Firestore conserva protección contra eliminación; PITR está deshabilitado y será una decisión con costo previa a producción.
+- App Check no se activó parcialmente: requiere proveedor web, prueba autenticada y procedimiento de recuperación antes de exigir tokens.
 
 ## Snipe-IT
 

@@ -21,6 +21,8 @@ Permitir que `admin` gestione las autorizaciones institucionales del sistema.
 - Un administrador no puede reducir su propio acceso.
 - Debe permanecer al menos otro administrador activo antes de reducir o eliminar uno.
 - Toda mutación usa callable; las escrituras directas están prohibidas.
+- El listado también usa callable; ninguna lectura directa de `usuarios` está permitida, aun con claim administrativo.
+- Al reducir acceso, claims y revocación se intentan de forma independiente y cualquier fallo exige reconciliación.
 
 ## Presentación
 

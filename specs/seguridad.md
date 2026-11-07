@@ -3,7 +3,7 @@
 - SEC-001: Firestore aplica denegación por defecto.
 - SEC-002: `usuarios` es la fuente canónica de autorización; los claims son una proyección.
 - SEC-003: Solo Admin SDK escribe `usuarios` y custom claims.
-- SEC-004: Un `admin` autorizado puede leer `usuarios`; `usuario` y anónimo no pueden.
+- SEC-004: Ningún cliente puede leer directamente `usuarios`; el listado administrativo se entrega únicamente mediante callable.
 - SEC-005: Ningún cliente puede escribir directamente en `usuarios`.
 - SEC-006: Cada callable valida Authentication, claims y el documento canónico activo.
 - SEC-007: Los errores expuestos se sanitizan y nunca incluyen tokens, secretos o stack traces.
@@ -16,3 +16,7 @@
 - SEC-014: La eliminación verifica referencias mediante backend y falla de forma segura cuando no puede demostrar que la categoría está libre.
 - SEC-015: La futura consulta de categorías activas para Modelos de activos requerirá un contrato sanitizado propio; no queda autorizada por esta especificación.
 - SEC-016: `cantidadActivos` solo puede escribirse o reconciliarse mediante backend autorizado; ningún payload administrativo acepta ese campo.
+- SEC-017: La reducción de acceso intenta actualizar claims y revocar refresh tokens de forma independiente; cualquier fallo produce `reconciliation-required` y nunca habilita una mutación posterior sin perfil canónico activo.
+- SEC-018: Hosting envía protección contra framing, MIME sniffing y fuga de referer, restringe capacidades no utilizadas y separa la caché del documento de entrada respecto de assets con hash.
+- SEC-019: Las callables conservan revalidación canónica y un máximo explícito de instancias. App Check requiere proveedor web y aceptación autenticada antes de activarse; no se habilita parcialmente.
+- SEC-020: La configuración web de Firebase es pública por diseño y debe conservar restricciones de sitio y API en Google Cloud; ningún secreto privado se guarda en Angular o Git.

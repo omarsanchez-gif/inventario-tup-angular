@@ -1,0 +1,58 @@
+name: Validación continua
+
+on:
+  pull_request:
+    branches: [main, desarrollo]
+  push:
+    branches: [main, desarrollo]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Instalar dependencias reproducibles
+        run: npm ci
+
+      - name: Validar formato
+        run: npm run format:check
+
+      - name: Validar lint y primitivas visuales
+        run: npm run lint
+
+      - name: Ejecutar pruebas Angular
+        run: npm test
+
+      - name: Ejecutar pruebas unitarias de Functions
+        run: npm run test:functions
+
+      - name: Ejecutar pruebas integrales con emuladores
+        run: npm run test:emulators
+
+      - name: Compilar staging
+        run: npm run build:staging
+
+      - name: Bloquear vulnerabilidades altas o críticas de runtime
+        run: npm audit --omit=dev --audit-level=high

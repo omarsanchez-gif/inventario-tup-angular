@@ -54,11 +54,32 @@ describe('bootstrapAuthorization', () => {
   });
 
   it('rejects an external domain', async () => {
+    const deps = dependencies();
     await expect(
       bootstrapAuthorization(
         { uid: 'external', email: 'user@example.com', emailVerified: true },
-        dependencies(),
+        deps,
       ),
     ).rejects.toMatchObject<AuthorizationError>({ functionalCode: 'domain-not-allowed' });
+
+    expect(deps.claims.setClaims).toHaveBeenCalledWith('external', {
+      authorized: false,
+      role: null,
+    });
+    expect(deps.claims.revokeRefreshTokens).toHaveBeenCalledWith('external');
+  });
+
+  it('attempts token revocation even when removing claims fails', async () => {
+    const deps = dependencies();
+    vi.mocked(deps.claims.setClaims).mockRejectedValueOnce(new Error('claims unavailable'));
+
+    await expect(
+      bootstrapAuthorization(
+        { uid: 'external', email: 'user@example.com', emailVerified: true },
+        deps,
+      ),
+    ).rejects.toMatchObject<AuthorizationError>({ functionalCode: 'domain-not-allowed' });
+
+    expect(deps.claims.revokeRefreshTokens).toHaveBeenCalledWith('external');
   });
 });

@@ -1,7 +1,7 @@
 # Pruebas: Usuarios
 
 - USR-001: `admin` accede; `usuario` y anónimo son rechazados.
-- USR-002: las escrituras directas a Firestore se rechazan.
+- USR-002: toda lectura y escritura directa a Firestore se rechaza, incluso con token de `admin`.
 - USR-003: alta válida crea autorización sin cuenta Authentication.
 - USR-004: correo externo, inválido o duplicado se rechaza.
 - USR-005: edición conserva campos administrados y bloquea correo con UID.
@@ -15,6 +15,22 @@
 - USR-013: las acciones de cada usuario muestran únicamente iconos compartidos y conservan nombre accesible, tooltip, estado deshabilitado y operación por teclado.
 - USR-014: la búsqueda ocupa el ancho disponible, filtra con cada entrada y reinicia el listado en la primera página.
 - USR-015: el listado presenta 10 registros por página y el paginador informa intervalo, total y página actual con controles accesibles.
+- USR-016: si falla `setClaims` durante una reducción de acceso, aun se intenta revocar refresh tokens y se responde `reconciliation-required`.
+- USR-017: Auth, Functions y Firestore Emulator validan admin canónico, rechazo de `usuario` y anónimo, Rules cerradas, desactivación, claims, autoprotección y unicidad concurrente.
+
+## Evidencia de endurecimiento local — 7 de noviembre de 2026
+
+- `npm run test:emulators` aprobó 5 pruebas integrales en dos suites con Auth, Functions y Firestore Emulator.
+- El flujo sintético aprobó `bootstrapAuthorization`, `listAuthorizedUsers`, desactivación mediante callable y sincronización de claims.
+- Un token administrativo válido recibió HTTP 403 al intentar leer `usuarios` directamente; `usuario` y anónimo fueron rechazados por la callable.
+- Las transacciones protegieron al solicitante y permitieron solo una de dos altas concurrentes con el mismo correo.
+- Las pruebas unitarias verificaron que la revocación se intenta aunque falle `setClaims`.
+
+## Evidencia de endurecimiento en staging — 7 de noviembre de 2026
+
+- Firestore Rules se desplegaron sin advertencias y el acceso anónimo directo a `usuarios` respondió HTTP 403.
+- Las cinco callables de Usuarios y `bootstrapAuthorization` quedaron `ACTIVE`, Node.js 22, `us-central1`, `maxInstances: 20`, y respondieron HTTP 401 sin sesión.
+- La aceptación autenticada real del listado y de las mutaciones administrativas permanece pendiente para no alterar datos durante la verificación técnica.
 
 ## Evidencia de staging — 6 de noviembre de 2026
 

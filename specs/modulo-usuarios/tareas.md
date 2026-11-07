@@ -10,5 +10,7 @@
 - [x] Agregar pruebas de presentación y confirmación modal.
 - [x] Sustituir las acciones textuales del listado por botones de icono compartidos y accesibles.
 - [x] Incorporar búsqueda automática a todo el ancho y paginación compartida de 10 registros.
-- [ ] Completar pruebas integrales Auth/Firestore Emulator.
+- [x] Completar pruebas integrales Auth/Firestore/Functions Emulator para acceso, Rules, desactivación, claims, concurrencia y autoprotección.
+- [x] Cerrar toda lectura directa de `usuarios` y consumir exclusivamente las callables administrativas.
+- [x] Hacer independiente el intento de revocación ante fallos de sincronización de claims.
 - [ ] Validación visual y funcional con cuentas sintéticas.

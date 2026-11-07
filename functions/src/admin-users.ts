@@ -145,17 +145,33 @@ async function synchronize(
   revoke: boolean,
 ): Promise<void> {
   if (!user.uid) return;
+  let reconciliationRequired = false;
   try {
     await dependencies.claims.setClaims(user.uid, {
       authorized: user.activo,
       role: user.activo ? user.rol : null,
     });
-    if (revoke) await dependencies.claims.revokeRefreshTokens(user.uid);
   } catch (error) {
+    reconciliationRequired = true;
     dependencies.logger.error('La autorización requiere reconciliación.', {
       documentId: user.documentId,
+      operation: 'set-claims',
       cause: error instanceof Error ? error.name : 'unknown',
     });
+  }
+  if (revoke) {
+    try {
+      await dependencies.claims.revokeRefreshTokens(user.uid);
+    } catch (error) {
+      reconciliationRequired = true;
+      dependencies.logger.error('La autorización requiere reconciliación.', {
+        documentId: user.documentId,
+        operation: 'revoke-refresh-tokens',
+        cause: error instanceof Error ? error.name : 'unknown',
+      });
+    }
+  }
+  if (reconciliationRequired) {
     throw new AdminUsersError(
       'reconciliation-required',
       'failed-precondition',

@@ -45,7 +45,11 @@ const auth = getAuth();
 const authorizationRepository = createAuthorizationRepository(firestore);
 const adminUsersRepository = createAdminUsersRepository(firestore);
 const adminCategoriesRepository = createAdminCategoriesRepository(firestore);
-const options = { invoker: 'public' as const, region: 'us-central1' as const };
+const options = {
+  invoker: 'public' as const,
+  maxInstances: 20,
+  region: 'us-central1' as const,
+};
 
 const claims = {
   async getClaims(uid: string) {

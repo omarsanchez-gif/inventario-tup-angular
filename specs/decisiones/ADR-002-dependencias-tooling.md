@@ -17,3 +17,10 @@ npm no ofrece una corrección compatible dentro de los rangos de `@google-cloud/
 - Mantener en cero altas y críticas.
 - Revisar versiones corregidas de `@google-cloud/firestore-api`/`google-gax` antes de ampliar Functions.
 - No usar `npm audit fix --force`.
+
+## Revisión previa a Fabricantes — 7 de noviembre de 2026
+
+- `npm audit --omit=dev` continúa en cero altas/críticas y cuatro moderadas transitivas de `google-gax 5.0.8`.
+- La auditoría completa reporta 29 moderadas concentradas en Firebase CLI, ESLint y utilidades transitivas; no reporta altas ni críticas.
+- `firebase-admin 14.5.0` y `@google-cloud/firestore 9.4.0` son las versiones publicadas vigentes. Firestore todavía declara `@google-cloud/firestore-api ^0.2.0`, que conserva `google-gax 5.0.8`; forzar `firestore-api 0.7.1` cruza una versión mayor `0.x` sin garantía de compatibilidad.
+- Se mantiene la decisión de no forzar overrides. CI fallará ante vulnerabilidades altas o críticas y esta ADR se revisará antes de producción o cuando Firebase publique una cadena compatible.

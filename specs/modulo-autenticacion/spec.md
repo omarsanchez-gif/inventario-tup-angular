@@ -12,6 +12,7 @@ Permitir acceso únicamente a cuentas institucionales previamente autorizadas y 
 - Asociación inicial de UID, actualización de último acceso y claims.
 - Recuperación y cierre de sesión.
 - Guards para rutas invitadas, autorizadas y administrativas.
+- Al negar acceso se intenta retirar claims y revocar refresh tokens; una falla de limpieza no sustituye el error funcional original.
 
 ## Contrato
 
