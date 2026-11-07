@@ -40,3 +40,4 @@
 - SEC-032: Backend validará tamaño decodificado, firma real del archivo, dimensiones y formato; no confiará únicamente en extensión, nombre o MIME declarado por el cliente.
 - SEC-033: El procesamiento rechazará imágenes malformadas, bombas de descompresión y dimensiones fuera del límite técnico; eliminará metadatos antes de guardar WebP normalizado.
 - SEC-034: Sustitución, eliminación y borrado de Modelo aplicarán compensación entre Firestore y Storage y reportarán reconciliación cuando no pueda completarse la limpieza.
+- SEC-035: La cuenta runtime `719448906735-compute@developer.gserviceaccount.com` recibe `roles/iam.serviceAccountTokenCreator` únicamente sobre sí misma para ejecutar `iam.serviceAccounts.signBlob`; no se concede ese rol a usuarios ni a nivel de proyecto y Storage continúa cerrado.

@@ -60,6 +60,7 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Fabricantes fue desplegado únicamente a `inventario-stg` el 7 de noviembre de 2026: Firestore Rules, cinco Functions y Hosting. Las Functions están activas y rechazan solicitudes anónimas; producción, datos y migración permanecieron intactos.
 - `modulo-modelos-activos`, autorizado expresamente el 7 de noviembre de 2026 para implementación, pruebas y despliegue exclusivo a staging, limitado a Nombre, Categoría, Fabricante, Modelo No., Notas e Imagen conforme a sus specs vigentes y ADR-005.
 - Modelos de activos fue desplegado únicamente a `inventario-stg` el 7 de noviembre de 2026: Firestore Rules, Storage Rules, nueve Functions nuevas, dos Functions de eliminación reforzadas y Hosting. El bucket regional `inventario-stg.firebasestorage.app` quedó en `US-CENTRAL1`, vacío y cerrado a clientes. Producción, datos reales y migración permanecieron intactos.
+- La primera lectura autenticada de una miniatura reveló falta de permiso de firma. Con autorización expresa se concedió `roles/iam.serviceAccountTokenCreator` únicamente a la cuenta runtime de staging sobre sí misma y se actualizó solo `getAssetModelImageAccess`; la miniatura cargó en sesión administrativa, Storage siguió cerrado y producción no fue modificada.
 - Endurecimiento transversal previo a Fabricantes, autorizado el 7 de noviembre de 2026: cierre de lectura directa de Usuarios, revocación defensiva, encabezados y caché de Hosting, CI y reconciliación documental conforme a ADR-004.
 
 ## Fuera de alcance actual

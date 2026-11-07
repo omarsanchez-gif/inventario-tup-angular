@@ -253,21 +253,29 @@ export function createAssetModelImagesService(
       });
       const expires = new Date(Date.now() + SIGNED_URL_DURATION_MS);
       const modelPaths = paths(documentId);
-      const [thumbnailUrl, originalUrl] = await Promise.all([
-        variant === 'thumbnail' || variant === 'both'
-          ? bucket
-              .file(modelPaths.thumbnail)
-              .getSignedUrl({ action: 'read', expires, version: 'v4' })
-              .then(([url]) => url)
-          : Promise.resolve(null),
-        variant === 'original' || variant === 'both'
-          ? bucket
-              .file(modelPaths.original)
-              .getSignedUrl({ action: 'read', expires, version: 'v4' })
-              .then(([url]) => url)
-          : Promise.resolve(null),
-      ]);
-      return { thumbnailUrl, originalUrl, expiresAt: expires.toISOString(), version };
+      try {
+        const [thumbnailUrl, originalUrl] = await Promise.all([
+          variant === 'thumbnail' || variant === 'both'
+            ? bucket
+                .file(modelPaths.thumbnail)
+                .getSignedUrl({ action: 'read', expires, version: 'v4' })
+                .then(([url]) => url)
+            : Promise.resolve(null),
+          variant === 'original' || variant === 'both'
+            ? bucket
+                .file(modelPaths.original)
+                .getSignedUrl({ action: 'read', expires, version: 'v4' })
+                .then(([url]) => url)
+            : Promise.resolve(null),
+        ]);
+        return { thumbnailUrl, originalUrl, expiresAt: expires.toISOString(), version };
+      } catch {
+        throw new AdminAssetModelsError(
+          'asset-model-image-reconciliation-required',
+          'failed-precondition',
+          'La imagen requiere reconciliación.',
+        );
+      }
     },
     async cleanupDeleted(documentId) {
       try {

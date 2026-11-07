@@ -33,4 +33,5 @@
 - [x] Inicializar `inventario-stg.firebasestorage.app` en `US-CENTRAL1` con reglas cerradas y sin datos.
 - [x] Desplegar por separado Rules, Functions, Storage Rules y Hosting a `inventario-stg`.
 - [x] Verificar evidencia remota sin crear datos reales ni tocar producción.
+- [x] Corregir el `SigningError` de la primera prueba autenticada con un vínculo IAM propio y verificar la miniatura del Modelo de prueba existente.
 - [ ] Completar aceptación funcional y visual autenticada en escritorio y móvil.

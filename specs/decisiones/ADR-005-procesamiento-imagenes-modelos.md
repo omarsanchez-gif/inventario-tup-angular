@@ -2,7 +2,7 @@
 
 ## Estado
 
-Aceptada el 7 de noviembre de 2026 con la autorización expresa del módulo Modelos de activos. `sharp` 0.35.5 quedó fijado en Functions; la validación local comprobó transformación real a WebP, límites de salida, firma incongruente, reglas cerradas de Storage y ausencia de vulnerabilidades altas o críticas de runtime. La prueba autenticada de URLs firmadas y del ciclo completo de imagen en staging queda como aceptación operativa pendiente posterior al despliegue.
+Aceptada el 7 de noviembre de 2026 con la autorización expresa del módulo Modelos de activos. `sharp` 0.35.5 quedó fijado en Functions; la validación local comprobó transformación real a WebP, límites de salida, firma incongruente, reglas cerradas de Storage y ausencia de vulnerabilidades altas o críticas de runtime. La lectura autenticada de una miniatura mediante URL firmada quedó aceptada en staging; sustitución, eliminación, expiración y revisión móvil permanecen como aceptación operativa pendiente.
 
 ## Contexto
 
@@ -49,7 +49,7 @@ SVG amplía la superficie de contenido activo y GIF puede introducir animación 
 
 - Se agrega una dependencia nativa a Functions y aumenta el tamaño del paquete desplegado.
 - El emulador y CI deben ejecutar procesamiento real de fixtures pequeños.
-- Las URLs firmadas dependen de permisos de firma del runtime de staging, que deberán verificarse antes del despliegue.
+- Las URLs firmadas requieren `iam.serviceAccounts.signBlob`. En staging se concede `roles/iam.serviceAccountTokenCreator` únicamente a la cuenta runtime sobre sí misma; no se usa un rol de proyecto ni se abre Storage.
 - Sustitución, eliminación y borrado necesitan pruebas de compensación por no existir una transacción distribuida.
 - Activos reutilizará la imagen del Modelo mediante un contrato sanitizado futuro; no copiará archivos.
 

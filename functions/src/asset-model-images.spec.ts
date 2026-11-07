@@ -1,8 +1,12 @@
 import sharp from 'sharp';
+import { Timestamp, type Firestore } from 'firebase-admin/firestore';
 import { describe, expect, it, vi } from 'vitest';
 
 import { setAssetModelImage, type AssetModelImageDependencies } from './asset-model-images.js';
-import { processAssetModelImage } from './firebase-asset-model-images.service.js';
+import {
+  createAssetModelImagesService,
+  processAssetModelImage,
+} from './firebase-asset-model-images.service.js';
 
 const admin = { uid: 'uid-admin', authorized: true, role: 'admin' } as const;
 
@@ -76,5 +80,40 @@ describe('asset model images', () => {
     await expect(
       processAssetModelImage({ fileName: 'fake.jpg', contentType: 'image/jpeg', bytes: source }),
     ).rejects.toMatchObject({ functionalCode: 'asset-model-image-invalid' });
+  });
+
+  it('maps signing failures to a controlled reconciliation error', async () => {
+    const modelReference = { id: 'model-1' };
+    const usersQuery = { limit: vi.fn().mockReturnThis() };
+    const firestore = {
+      collection: vi.fn((name: string) =>
+        name === 'usuarios'
+          ? { where: vi.fn().mockReturnValue(usersQuery) }
+          : { doc: vi.fn().mockReturnValue(modelReference) },
+      ),
+      runTransaction: vi.fn(async (operation: (transaction: unknown) => Promise<unknown>) => {
+        const get = vi
+          .fn()
+          .mockResolvedValueOnce({
+            size: 1,
+            docs: [{ data: () => ({ activo: true, rol: 'admin' }) }],
+          })
+          .mockResolvedValueOnce({
+            exists: true,
+            data: () => ({
+              imagen: { version: 'version-1', fechaActualizacion: Timestamp.now() },
+            }),
+          });
+        return operation({ get });
+      }),
+    } as unknown as Firestore;
+    const bucket = {
+      file: vi.fn(() => ({ getSignedUrl: vi.fn().mockRejectedValue(new Error('signing failed')) })),
+    };
+    const service = createAssetModelImagesService(firestore, bucket as never);
+
+    await expect(service.access('uid-admin', 'model-1', 'thumbnail')).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
   });
 });

@@ -2,9 +2,11 @@
 
 El 7 de noviembre de 2026 aprobaron 27 pruebas Angular, 28 pruebas unitarias de Functions y 9 pruebas integrales con Auth, Firestore, Functions y Storage Emulator. También aprobaron lint, guardia visual, formato, compilación de Functions y build de staging; `npm audit --omit=dev --audit-level=high` no reportó vulnerabilidades altas o críticas y conservó cuatro moderadas transitivas ya documentadas en ADR-002.
 
-La automatización cubre autorización, sanitización, límites de payload, transformación real a WebP, unicidad transaccional, conservación de catálogos inactivos vigentes, bloqueo de Categoría/Fabricante en uso, reglas cerradas, modales, columnas, acciones, búsqueda, paginación, descarte de miniaturas fuera de página y renovación de URLs vencidas. La prueba remota autenticada de carga, sustitución, eliminación y expiración de imagen, así como la aceptación visual en escritorio y móvil, permanecen pendientes.
+La automatización cubre autorización, sanitización, límites de payload, transformación real a WebP, unicidad transaccional, conservación de catálogos inactivos vigentes, bloqueo de Categoría/Fabricante en uso, reglas cerradas, modales, columnas, acciones, búsqueda, paginación, descarte de miniaturas fuera de página y renovación de URLs vencidas. La prueba remota autenticada de sustitución, eliminación y expiración de imagen, así como la aceptación visual móvil, permanecen pendientes.
 
 La verificación remota posterior al despliegue confirmó las nueve callables `ACTIVE` en Node.js 22, `us-central1`, con `maxInstances: 20`; las nueve rechazaron solicitudes anónimas con HTTP 401. Firestore rechazó lectura anónima de `modelos_activos` y Storage rechazó lectura anónima de `modelos-activos/**`, ambas con HTTP 403. `/configuraciones/modelos-activos` y sus bundles `main-ALBLFGKY.js`, `styles-CISTRGAV.css` y `chunk-CA-BBvnz.js` respondieron HTTP 200. No se crearon documentos ni objetos de negocio.
+
+La primera comprobación autenticada de un Modelo con imagen expuso `SigningError` en `getAssetModelImageAccess` y la interfaz mostró el placeholder seguro. Tras conceder a la cuenta runtime el vínculo propio mínimo para `iam.serviceAccounts.signBlob` y actualizar únicamente esa callable, una recarga autenticada confirmó que la alerta desapareció y la miniatura del Modelo `MSI` cargó. MOD-029 queda aceptada para emisión y consumo real de la variante `thumbnail`; las variantes restantes y su expiración conservan cobertura automatizada y aceptación manual pendiente.
 
 ## Backend, referencias y seguridad
 
