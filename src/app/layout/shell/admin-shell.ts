@@ -7,7 +7,9 @@ import {
   OnDestroy,
   signal,
 } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 
 import { AuthFacade } from '../../core/auth/auth.facade';
 import { AppIcon } from '../../shared/ui/icon/app-icon';
@@ -21,10 +23,19 @@ import { AppIcon } from '../../shared/ui/icon/app-icon';
 })
 export class AdminShell implements OnDestroy {
   protected readonly auth = inject(AuthFacade);
+  private readonly router = inject(Router);
+  private readonly currentUrl = signal(this.router.url);
   private readonly desktopMedia =
     typeof window === 'undefined' ? null : window.matchMedia('(min-width: 64rem)');
   protected readonly desktop = signal(this.desktopMedia?.matches ?? true);
   protected readonly navigationOpen = signal(this.desktopMedia?.matches ?? true);
+  protected readonly settingsOpen = signal(this.router.url.startsWith('/configuraciones/'));
+  protected readonly settingsRouteActive = computed(() =>
+    this.currentUrl().startsWith('/configuraciones/'),
+  );
+  protected readonly settingsExpanded = computed(
+    () => this.settingsOpen() || this.settingsRouteActive(),
+  );
   protected readonly menuActionLabel = computed(() =>
     this.navigationOpen() ? 'Ocultar menú principal' : 'Mostrar menú principal',
   );
@@ -48,6 +59,15 @@ export class AdminShell implements OnDestroy {
 
   constructor() {
     this.desktopMedia?.addEventListener('change', this.handleViewportChange);
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe((event) => {
+        this.currentUrl.set(event.urlAfterRedirects);
+        if (event.urlAfterRedirects.startsWith('/configuraciones/')) this.settingsOpen.set(true);
+      });
   }
 
   ngOnDestroy(): void {
@@ -65,6 +85,10 @@ export class AdminShell implements OnDestroy {
 
   protected closeNavigationOnMobile(): void {
     if (!this.desktop()) this.navigationOpen.set(false);
+  }
+
+  protected toggleSettings(): void {
+    this.settingsOpen.update((open) => !open);
   }
 
   protected logout(): void {

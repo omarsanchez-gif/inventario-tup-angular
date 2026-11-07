@@ -33,6 +33,15 @@ export const routes: Routes = [
           import('./features/users/users-page/users-page').then((component) => component.UsersPage),
         title: 'Usuarios | Sistema de Inventario TUP',
       },
+      {
+        path: 'configuraciones/categorias',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/categories/categories-page/categories-page').then(
+            (component) => component.CategoriesPage,
+          ),
+        title: 'Categorías | Sistema de Inventario TUP',
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

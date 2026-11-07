@@ -41,6 +41,37 @@
           <app-icon name="users" />
           <span>Usuarios</span>
         </a>
+        <div class="navigation-group">
+          <button
+            class="navigation__link navigation__group-toggle"
+            type="button"
+            [class.navigation__link--parent-active]="settingsRouteActive()"
+            aria-controls="settings-navigation"
+            [attr.aria-expanded]="settingsExpanded()"
+            (click)="toggleSettings()"
+          >
+            <app-icon name="settings" />
+            <span>Configuraciones</span>
+            <app-icon
+              class="navigation__chevron"
+              name="next"
+              [class.navigation__chevron--expanded]="settingsExpanded()"
+            />
+          </button>
+          @if (settingsExpanded()) {
+            <div class="navigation__subnav" id="settings-navigation">
+              <a
+                class="navigation__sublink"
+                routerLink="/configuraciones/categorias"
+                routerLinkActive="navigation__sublink--active"
+                ariaCurrentWhenActive="page"
+                (click)="closeNavigationOnMobile()"
+              >
+                Categorías
+              </a>
+            </div>
+          }
+        </div>
       }
     </nav>
 

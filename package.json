@@ -13,6 +13,7 @@
     "test:watch": "ng test",
     "functions:build": "npm --workspace functions run build",
     "test:functions": "vitest run functions/src",
+    "test:categories:emulator": "firebase emulators:exec --only firestore --project demo-inventario-tup \"vitest run functions/src/categories-firestore.spec.ts\"",
     "lint": "ng lint && npm run lint:functions && npm run lint:visual",
     "lint:functions": "eslint functions/src --max-warnings=0",
     "lint:visual": "node scripts/check-visual-primitives.mjs",

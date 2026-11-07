@@ -2,7 +2,7 @@
 
 ## Estado
 
-Especificación aprobada el 7 de noviembre de 2026. La implementación, creación de datos y despliegue funcional todavía no están autorizados por este incremento.
+Especificación aprobada y autorizada para implementación, pruebas y despliegue exclusivo a `inventario-stg` el 7 de noviembre de 2026. Producción, migración y los módulos dependientes permanecen fuera de alcance.
 
 ## Objetivo
 
@@ -170,7 +170,6 @@ La pantalla no importa ni sincroniza Snipe-IT. Una herramienta backend futura mi
 
 ## Fuera de alcance
 
-- Implementación de Categorías en este incremento documental.
 - Fabricantes y Modelos de activos.
 - Consulta sanitizada para consumidores no administrativos.
 - Importación, sincronización o almacenamiento de identificadores de Snipe-IT.

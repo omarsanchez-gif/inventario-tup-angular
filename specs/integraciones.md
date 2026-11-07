@@ -33,8 +33,10 @@
 - La migración se diseñará como proceso independiente y trazable.
 - No hay extracción, sincronización ni credenciales almacenadas en este incremento.
 
-## Categorías planificadas
+## Categorías
 
-- `listCategories`, `createCategory`, `updateCategory`, `setCategoryStatus` y `deleteCategory` están especificadas, pero no implementadas ni desplegadas.
-- Este incremento es exclusivamente documental: no crea colecciones, Functions, Rules, índices, datos ni recursos con costo en `inventario-stg`.
+- El 7 de noviembre de 2026 se desplegaron por separado y únicamente a `inventario-stg` Firestore Rules, `listCategories`, `createCategory`, `updateCategory`, `setCategoryStatus`, `deleteCategory` y Hosting.
+- Las cinco callables están `ACTIVE` en `us-central1`, usan Node.js 22 y rechazaron solicitudes anónimas con HTTP 401; Firestore rechazó con HTTP 403 la lectura anónima directa de `categorias`.
+- Hosting responde HTTP 200 y sirve `main-XXPSXP7R.js` y `styles-CISTRGAV.css`.
+- El despliegue no incluyó índices, datos, secretos, migración ni producción.
 - La futura migración de categorías desde Snipe-IT utilizará una herramienta backend separada y no formará parte de las pantallas administrativas.

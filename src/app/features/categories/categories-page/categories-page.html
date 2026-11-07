@@ -1,0 +1,198 @@
+<section aria-labelledby="categories-title">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Configuraciones</p>
+      <h1 class="page-title" id="categories-title">Categorías</h1>
+      <p>Administre las categorías que clasificarán los modelos de activos.</p>
+    </div>
+    <button class="button button--primary" type="button" (click)="openNew()">
+      Nueva categoría
+    </button>
+  </header>
+
+  @if (categories.error(); as error) {
+    <div class="alert alert--error" role="alert">{{ error }}</div>
+  }
+  @if (categories.success(); as success) {
+    <div class="alert alert--success" role="status">{{ success }}</div>
+  }
+
+  @if (formVisible()) {
+    <app-dialog
+      [title]="editingId() ? 'Editar categoría' : 'Nueva categoría'"
+      [dismissible]="!categories.saving()"
+      (dismissed)="closeForm()"
+    >
+      <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-grid form-grid--single">
+          <div class="field">
+            <label for="category-name">Nombre de la categoría</label>
+            <input id="category-name" formControlName="nombre" maxlength="120" />
+            @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+              <small role="alert">Capture un nombre de máximo 120 caracteres.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="category-notes">Notas</label>
+            <textarea id="category-notes" formControlName="notas" maxlength="1000"></textarea>
+            @if (form.controls.notas.touched && form.controls.notas.invalid) {
+              <small role="alert">Las notas admiten máximo 1,000 caracteres.</small>
+            }
+          </div>
+        </div>
+        <div class="dialog__actions">
+          <button
+            class="button button--secondary"
+            type="button"
+            [disabled]="categories.saving()"
+            (click)="closeForm()"
+          >
+            Cancelar
+          </button>
+          <button class="button button--primary" type="submit" [disabled]="categories.saving()">
+            {{ categories.saving() ? 'Guardando…' : 'Guardar categoría' }}
+          </button>
+        </div>
+      </form>
+    </app-dialog>
+  }
+
+  @if (pendingDeletion(); as category) {
+    <app-dialog
+      title="Eliminar categoría"
+      [dismissible]="!categories.saving()"
+      (dismissed)="cancelDeletion()"
+    >
+      <p class="dialog__message">¿Eliminar la categoría {{ category.nombre }}?</p>
+      <p class="dialog__help">
+        Solo se eliminará si no está vinculada con activos o modelos. Si está en uso deberá
+        desactivarla.
+      </p>
+      <div class="dialog__actions">
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="categories.saving()"
+          (click)="cancelDeletion()"
+        >
+          Cancelar
+        </button>
+        <button
+          class="button button--danger"
+          type="button"
+          [disabled]="categories.saving()"
+          (click)="confirmDeletion()"
+        >
+          {{ categories.saving() ? 'Eliminando…' : 'Eliminar categoría' }}
+        </button>
+      </div>
+    </app-dialog>
+  }
+
+  <div class="table-toolbar">
+    <div class="field table-search">
+      <label for="category-search">Buscar por nombre o notas</label>
+      <input
+        id="category-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Escriba para filtrar automáticamente"
+        [value]="categories.query()"
+        (input)="setQuery($event)"
+      />
+    </div>
+  </div>
+
+  @if (categories.loading()) {
+    <p role="status">Cargando categorías…</p>
+  } @else if (categories.filteredCategories().length === 0) {
+    <div class="card empty-state">
+      <h2>
+        {{ categories.query() ? 'No se encontraron categorías' : 'No hay categorías registradas' }}
+      </h2>
+    </div>
+  } @else {
+    <div class="card data-table-region">
+      <table class="data-table">
+        <caption class="sr-only">
+          Categorías del Sistema de Inventario TUP
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Notas</th>
+            <th scope="col">Cantidad de activos</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (category of paginatedCategories(); track category.documentId) {
+            <tr>
+              <td>{{ category.nombre }}</td>
+              <td>{{ category.notas || '—' }}</td>
+              <td>{{ category.cantidadActivos }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.badge--active]="category.activo"
+                  [class.badge--inactive]="!category.activo"
+                >
+                  {{ category.activo ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td>
+                <div class="record-actions">
+                  <button
+                    class="icon-button icon-button--secondary"
+                    type="button"
+                    [disabled]="categories.saving()"
+                    [attr.aria-label]="'Editar ' + category.nombre"
+                    [attr.title]="'Editar ' + category.nombre"
+                    (click)="edit(category)"
+                  >
+                    <app-icon name="edit" />
+                  </button>
+                  <button
+                    class="icon-button icon-button--secondary"
+                    type="button"
+                    [disabled]="categories.saving()"
+                    [attr.aria-label]="
+                      category.activo
+                        ? 'Desactivar ' + category.nombre
+                        : 'Activar ' + category.nombre
+                    "
+                    [attr.title]="
+                      category.activo
+                        ? 'Desactivar ' + category.nombre
+                        : 'Activar ' + category.nombre
+                    "
+                    (click)="toggleStatus(category)"
+                  >
+                    <app-icon [name]="category.activo ? 'deactivate' : 'activate'" />
+                  </button>
+                  <button
+                    class="icon-button icon-button--danger"
+                    type="button"
+                    [disabled]="categories.saving()"
+                    [attr.aria-label]="'Eliminar ' + category.nombre"
+                    [attr.title]="'Eliminar ' + category.nombre"
+                    (click)="requestDeletion(category)"
+                  >
+                    <app-icon name="delete" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination
+      [totalItems]="categories.filteredCategories().length"
+      [page]="activePage()"
+      [pageSize]="pageSize"
+      (pageChange)="setPage($event)"
+    />
+  }
+</section>

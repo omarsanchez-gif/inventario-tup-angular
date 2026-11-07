@@ -2,7 +2,7 @@
 
 ## Estado
 
-Aceptada para la especificación de Categorías el 7 de noviembre de 2026. Su implementación permanece pendiente de autorización.
+Aceptada para la implementación de Categorías el 7 de noviembre de 2026.
 
 ## Contexto
 

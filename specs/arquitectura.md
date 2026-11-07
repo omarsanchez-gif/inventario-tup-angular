@@ -33,9 +33,9 @@ Callable → caso de uso → repositorio → Admin SDK
 - `shared/ui/dialog`: contenedor modal accesible para formularios y confirmaciones.
 - `features/dashboard`: bienvenida autenticada.
 - `features/users`: administración de autorizaciones.
-- `features/categories`: módulo administrativo planificado para Categorías; no implementado en este incremento.
+- `features/categories`: módulo administrativo de Categorías implementado, validado y desplegado únicamente en staging.
 
-## Navegación administrativa planificada
+## Navegación administrativa
 
 - `Configuraciones` será un grupo desplegable del sidebar, visible solo para `admin` y sin ruta propia.
 - La primera ruta secundaria aprobada es `/configuraciones/categorias`, protegida por guard administrativo.

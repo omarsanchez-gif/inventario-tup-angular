@@ -6,6 +6,15 @@ import { defineString } from 'firebase-functions/params';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
 import {
+  AdminCategoriesError,
+  createCategory as createCategoryRecord,
+  deleteCategory as deleteCategoryRecord,
+  listCategories as listCategoryRecords,
+  setCategoryStatus as setCategoryRecordStatus,
+  updateCategory as updateCategoryRecord,
+  type AdminCategoriesDependencies,
+} from './admin-categories.js';
+import {
   AdminUsersError,
   createAuthorizedUser as createUser,
   deleteAuthorizedUser as deleteUser,
@@ -19,6 +28,7 @@ import {
   AuthorizationError,
   bootstrapAuthorization as authorize,
 } from './bootstrap-authorization.js';
+import { createAdminCategoriesRepository } from './firestore-categories.repository.js';
 import {
   createAdminUsersRepository,
   createAuthorizationRepository,
@@ -34,6 +44,7 @@ const firestore = getFirestore();
 const auth = getAuth();
 const authorizationRepository = createAuthorizationRepository(firestore);
 const adminUsersRepository = createAdminUsersRepository(firestore);
+const adminCategoriesRepository = createAdminCategoriesRepository(firestore);
 const options = { invoker: 'public' as const, region: 'us-central1' as const };
 
 const claims = {
@@ -69,6 +80,10 @@ function adminDependencies(): AdminUsersDependencies {
   };
 }
 
+function categoryDependencies(): AdminCategoriesDependencies {
+  return { repository: adminCategoriesRepository };
+}
+
 async function executeAdmin<T>(operation: () => Promise<T>): Promise<T> {
   try {
     return await operation();
@@ -79,6 +94,24 @@ async function executeAdmin<T>(operation: () => Promise<T>): Promise<T> {
       });
     }
     logger.error('Error no controlado en Usuarios.', {
+      cause: error instanceof Error ? error.name : 'unknown',
+    });
+    throw new HttpsError('unavailable', 'El servicio no está disponible.', {
+      functionalCode: 'service-unavailable',
+    });
+  }
+}
+
+async function executeCategories<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (error instanceof AdminCategoriesError) {
+      throw new HttpsError(error.functionsCode, error.message, {
+        functionalCode: error.functionalCode,
+      });
+    }
+    logger.error('Error no controlado en Categorías.', {
       cause: error instanceof Error ? error.name : 'unknown',
     });
     throw new HttpsError('unavailable', 'El servicio no está disponible.', {
@@ -144,4 +177,32 @@ export const setAuthorizedUserStatus = onCall(options, async (request) =>
 
 export const deleteAuthorizedUser = onCall(options, async (request) =>
   executeAdmin(() => deleteUser(adminIdentity(request.auth), request.data, adminDependencies())),
+);
+
+export const listCategories = onCall(options, async (request) =>
+  executeCategories(() => listCategoryRecords(adminIdentity(request.auth), categoryDependencies())),
+);
+
+export const createCategory = onCall(options, async (request) =>
+  executeCategories(() =>
+    createCategoryRecord(adminIdentity(request.auth), request.data, categoryDependencies()),
+  ),
+);
+
+export const updateCategory = onCall(options, async (request) =>
+  executeCategories(() =>
+    updateCategoryRecord(adminIdentity(request.auth), request.data, categoryDependencies()),
+  ),
+);
+
+export const setCategoryStatus = onCall(options, async (request) =>
+  executeCategories(() =>
+    setCategoryRecordStatus(adminIdentity(request.auth), request.data, categoryDependencies()),
+  ),
+);
+
+export const deleteCategory = onCall(options, async (request) =>
+  executeCategories(() =>
+    deleteCategoryRecord(adminIdentity(request.auth), request.data, categoryDependencies()),
+  ),
 );

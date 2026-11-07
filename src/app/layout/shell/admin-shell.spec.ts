@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 import { AuthFacade } from '../../core/auth/auth.facade';
 import type { AuthorizedUser } from '../../shared/models/authorized-user';
@@ -21,6 +21,7 @@ describe('AdminShell', () => {
   let fixture: ComponentFixture<AdminShell>;
   let logout: ReturnType<typeof vi.fn>;
   let viewportListener: ((event: MediaQueryListEvent) => void) | undefined;
+  let roleState: WritableSignal<'admin' | 'usuario' | null>;
 
   beforeEach(async () => {
     Object.defineProperty(window, 'matchMedia', {
@@ -45,12 +46,16 @@ describe('AdminShell', () => {
     });
     logout = vi.fn();
     const userState = signal<AuthorizedUser | null>(user);
-    const roleState = signal<'admin' | 'usuario' | null>('admin');
+    roleState = signal<'admin' | 'usuario' | null>('admin');
 
     await TestBed.configureTestingModule({
       imports: [AdminShell],
       providers: [
-        provideRouter([{ path: 'dashboard', component: RouteStub }]),
+        provideRouter([
+          { path: 'dashboard', component: RouteStub },
+          { path: 'usuarios', component: RouteStub },
+          { path: 'configuraciones/categorias', component: RouteStub },
+        ]),
         {
           provide: AuthFacade,
           useValue: {
@@ -137,5 +142,36 @@ describe('AdminShell', () => {
     viewportListener?.({ matches: true } as MediaQueryListEvent);
     fixture.detectChanges();
     expect(button.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('shows an accessible admin settings group with only the implemented child', async () => {
+    createShell();
+    const element = fixture.nativeElement as HTMLElement;
+    const settings = element.querySelector<HTMLButtonElement>('.navigation__group-toggle')!;
+
+    expect(settings).toBeTruthy();
+    expect(settings.getAttribute('aria-expanded')).toBe('false');
+    expect(element.querySelector('[data-icon="settings"]')).toBeTruthy();
+    expect(element.textContent).not.toContain('Fabricantes');
+    expect(element.textContent).not.toContain('Modelos de activos');
+
+    settings.click();
+    fixture.detectChanges();
+    expect(settings.getAttribute('aria-expanded')).toBe('true');
+    expect(element.querySelector('.navigation__sublink')?.textContent).toContain('Categorías');
+
+    await TestBed.inject(Router).navigateByUrl('/configuraciones/categorias');
+    fixture.detectChanges();
+    expect(settings.classList).toContain('navigation__link--parent-active');
+    expect(element.querySelector('.navigation__sublink--active')).toBeTruthy();
+  });
+
+  it('hides settings from the usuario role', () => {
+    roleState.set('usuario');
+    createShell();
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('.navigation__group-toggle')).toBeFalsy();
+    expect(element.textContent).not.toContain('Categorías');
   });
 });

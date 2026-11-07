@@ -19,6 +19,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /categorias/{categoryId} {
+      allow read, write: if false;
+    }
+
+    match /categorias_nombres/{nameKey} {
+      allow read, write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

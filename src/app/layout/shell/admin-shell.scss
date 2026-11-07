@@ -84,6 +84,58 @@
   color: var(--color-on-brand);
 }
 
+.navigation-group {
+  display: grid;
+}
+
+.navigation__group-toggle {
+  width: 100%;
+  border: 0;
+  text-align: left;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.navigation__group-toggle > span {
+  flex: 1;
+}
+
+.navigation__chevron {
+  font-size: 1rem;
+  transition: transform 160ms ease;
+}
+
+.navigation__chevron--expanded {
+  transform: rotate(90deg);
+}
+
+.navigation__link--parent-active {
+  color: var(--color-on-brand);
+  background: rgb(255 255 255 / 14%);
+}
+
+.navigation__subnav {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-1) 0 var(--space-1) calc(1.25rem + var(--space-6));
+}
+
+.navigation__sublink {
+  min-height: var(--control-size);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  color: rgb(255 255 255 / 76%);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+}
+
+.navigation__sublink:hover,
+.navigation__sublink--active {
+  color: var(--color-on-brand);
+  background: rgb(255 255 255 / 12%);
+}
+
 .navigation__link--active {
   color: var(--color-brand-strong);
   background: var(--color-surface);
@@ -275,7 +327,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sidebar,
-  .workspace {
+  .workspace,
+  .navigation__chevron {
     transition: none;
   }
 }

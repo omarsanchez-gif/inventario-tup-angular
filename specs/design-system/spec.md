@@ -43,8 +43,7 @@
 ### Iconografía
 
 - Los iconos se consumen mediante el componente compartido `AppIcon`; no se insertan SVG arbitrarios en cada módulo.
-- Registro implementado: `dashboard`, `users`, `menu`, `close`, `logout`, `edit`, `activate`, `deactivate`, `delete`, `previous` y `next`.
-- Registro planificado: `settings`, reservado para el grupo administrativo `Configuraciones` antes de implementar Categorías.
+- Registro implementado: `dashboard`, `users`, `menu`, `close`, `logout`, `edit`, `activate`, `deactivate`, `delete`, `previous`, `next` y `settings`.
 - Trazo estándar: `1.75`, extremos y uniones redondeados, `currentColor` y caja `24 × 24`.
 - Navegación: icono de `1.25rem`; botones de icono: `1.375rem` dentro de un objetivo mínimo de `44 × 44 px`.
 - Cada módulo nuevo documentará y agregará su icono al registro compartido antes de incorporarse al menú.
@@ -102,6 +101,6 @@
 
 ## Estado de implementación
 
-El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el estándar de acciones contextuales con iconos, la búsqueda a todo el ancho y `AppPagination` están implementados y publicados únicamente en Hosting de `inventario-stg`. El grupo `Configuraciones`, el icono `settings` y su primera opción `Categorías` están especificados, pero no implementados ni desplegados. La verificación automática del último incremento ejecutable aprobó lint, guardia visual, formato, 7 suites con 13 pruebas Angular y build de staging; la verificación remota confirmó HTTP 200 y los bundles esperados. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
+El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el estándar de acciones contextuales con iconos, la búsqueda a todo el ancho y `AppPagination` están implementados y publicados únicamente en Hosting de `inventario-stg`. El grupo `Configuraciones`, el icono `settings` y su primera opción `Categorías` también están publicados; Hosting responde HTTP 200 y sirve `main-XXPSXP7R.js` y `styles-CISTRGAV.css`. La regresión aprobó 8 suites con 18 pruebas Angular, lint, guardia visual, formato y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

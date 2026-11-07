@@ -129,7 +129,7 @@ describe('UsersPage dialogs', () => {
   });
 
   it('renders record actions as accessible icon-only buttons', () => {
-    const actions = [...element.querySelectorAll<HTMLButtonElement>('.actions button')];
+    const actions = [...element.querySelectorAll<HTMLButtonElement>('.record-actions button')];
 
     expect(actions).toHaveLength(3);
     expect(actions.map((action) => action.textContent?.trim())).toEqual(['', '', '']);

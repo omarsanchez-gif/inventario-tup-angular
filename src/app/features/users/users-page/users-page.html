@@ -120,8 +120,8 @@
       <h2>{{ users.query() ? 'No se encontraron usuarios' : 'No hay usuarios autorizados' }}</h2>
     </div>
   } @else {
-    <div class="card table-region">
-      <table>
+    <div class="card data-table-region">
+      <table class="data-table">
         <caption class="sr-only">
           Usuarios autorizados del Sistema de Inventario TUP
         </caption>
@@ -152,7 +152,7 @@
               </td>
               <td>{{ formatAccess(user.ultimoAcceso) }}</td>
               <td>
-                <div class="actions">
+                <div class="record-actions">
                   <button
                     class="icon-button icon-button--secondary"
                     type="button"

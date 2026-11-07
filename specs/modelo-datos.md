@@ -2,7 +2,7 @@
 
 ## Estado
 
-El modelo implementado permanece limitado a autorización. La entidad Categoría y su índice técnico están aprobados únicamente a nivel de especificación; todavía no existen en Firestore. Las demás entidades de inventario y migración continúan pendientes.
+El modelo desplegado comprende autorización y los contratos de Categorías. Firestore Rules protege `categorias` y `categorias_nombres`, y las cinco callables administrativas están publicadas en staging; las colecciones se materializarán con la primera alta autorizada, ya que este incremento no creó datos. Las demás entidades de inventario y migración continúan pendientes.
 
 ## Colección `usuarios`
 
@@ -24,7 +24,7 @@ Restricciones:
 - `fechaCreacion` y `ultimoAcceso` usan tiempo de servidor.
 - No se agregan entidades de Snipe-IT hasta aprobar su mapeo.
 
-## Colección planificada `categorias`
+## Colección `categorias`
 
 ```text
 categorias/{categoriaId}
@@ -51,7 +51,7 @@ Restricciones:
 - `fechaCreacion` y `fechaActualizacion` usan tiempo del servidor; la fecha de creación es inmutable.
 - Una futura entidad Modelo de activo referenciará `categoriaId`; no se duplica el nombre de la categoría como fuente canónica.
 
-## Índice técnico planificado `categorias_nombres`
+## Índice técnico `categorias_nombres`
 
 ```text
 categorias_nombres/{nombreKey}

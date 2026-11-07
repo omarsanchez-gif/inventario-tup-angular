@@ -38,7 +38,7 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - `staging` se usa únicamente como alias explícito de `inventario-stg`.
 - Todo cambio implementado y validado debe desplegarse también en `inventario-stg`, limitando `firebase deploy` mediante `--only` al servicio afectado y usando siempre `--project staging`.
 - La autorización continua de staging no amplía el alcance funcional ni autoriza producción, datos reales o servicios no afectados por el cambio.
-- El proyecto `inventario-stg` está autorizado exclusivamente para el módulo de autenticación y su infraestructura mínima.
+- El proyecto `inventario-stg` está autorizado exclusivamente para los módulos incluidos en el alcance vigente y su infraestructura documentada.
 - El plan Blaze está habilitado únicamente en `inventario-stg`; toda creación de recursos con costo debe limitarse al alcance solicitado y documentarse.
 - El alias y proyecto de producción permanecen pendientes; ningún despliegue productivo está autorizado.
 - Las credenciales de Snipe-IT son secretos de backend y nunca se guardan en Angular o Git.
@@ -55,11 +55,11 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Dashboard inicial de bienvenida, sin KPI simulados.
 - Usuarios administrativos con los roles iniciales `admin` y `usuario`.
 - Firestore Rules de denegación por defecto.
-- Especificación de `modulo-categorias` y del grupo administrativo `Configuraciones`, autorizada el 7 de noviembre de 2026, sin autorización de implementación, datos o despliegue funcional en este incremento.
+- `modulo-categorias` y el grupo administrativo `Configuraciones`, autorizados para implementación, pruebas y despliegue exclusivo a staging el 7 de noviembre de 2026, limitados a sus specs vigentes.
 
 ## Fuera de alcance actual
 
-- Implementación de categorías; activos, modelos, fabricantes, personas, ubicaciones y responsivas.
+- Activos, modelos, fabricantes, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.
 - Creación o despliegue de proyectos Firebase de producción.

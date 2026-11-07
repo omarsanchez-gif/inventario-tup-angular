@@ -25,3 +25,10 @@
 - Lint Angular/Functions, `lint:visual`, formato y build de staging aprobados.
 - Hosting remoto responde HTTP 200 y sirve `main-PASDWI4I.js` y `styles-BHMDTSOU.css`.
 - Aceptación visual autenticada pendiente; la revisión pública alcanzó correctamente el Login sin automatizar el diálogo de Google.
+
+## Evidencia de Configuraciones
+
+- LAY-013–017 aprobaron mediante pruebas de componente para visibilidad administrativa, expansión accesible, ruta activa y ausencia de módulos no implementados.
+- La regresión completa aprobó 8 suites y 18 pruebas Angular, lint, guardia visual, formato y build de staging.
+- Hosting de `inventario-stg` responde HTTP 200 y sirve `main-XXPSXP7R.js` y `styles-CISTRGAV.css` con el grupo `Configuraciones` y la ruta secundaria de Categorías.
+- La aceptación visual autenticada permanece pendiente.

@@ -11,6 +11,7 @@ export type AppIconName =
   | 'menu'
   | 'next'
   | 'previous'
+  | 'settings'
   | 'users';
 
 @Component({

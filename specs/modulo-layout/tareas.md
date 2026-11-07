@@ -15,6 +15,6 @@
 - [x] Agregar pruebas unitarias de apertura, cierre y confirmación modal.
 - [x] Validar y publicar el incremento modal únicamente en Hosting de staging.
 - [ ] Completar aceptación visual autenticada en escritorio y móvil desde 320 px.
-- [ ] Agregar el icono compartido `settings` y el grupo desplegable `Configuraciones` exclusivo de `admin`.
-- [ ] Incorporar `Categorías` como primera opción secundaria únicamente al implementar su ruta.
-- [ ] Probar apertura automática por ruta activa, teclado y cierre del drawer al seleccionar una opción secundaria.
+- [x] Agregar el icono compartido `settings` y el grupo desplegable `Configuraciones` exclusivo de `admin`.
+- [x] Incorporar `Categorías` como primera opción secundaria únicamente al implementar su ruta.
+- [x] Probar apertura automática por ruta activa, teclado y cierre del drawer al seleccionar una opción secundaria.

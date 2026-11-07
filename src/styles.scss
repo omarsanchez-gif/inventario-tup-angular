@@ -167,7 +167,8 @@ a {
 }
 
 .field input,
-.field select {
+.field select,
+.field textarea {
   min-height: var(--control-size);
   width: 100%;
   border: 1px solid var(--color-border);
@@ -175,6 +176,25 @@ a {
   padding: 0.65rem 0.75rem;
   color: var(--color-text);
   background: #fff;
+}
+
+.field textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.field small {
+  color: var(--color-danger);
+}
+
+.form-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid--single {
+  grid-template-columns: 1fr;
 }
 
 .alert {
@@ -272,6 +292,37 @@ a {
 
 .table-search {
   width: 100%;
+}
+
+.data-table-region {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.85rem var(--space-4);
+  border-bottom: 1px solid var(--color-border-soft);
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table th {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.record-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: nowrap;
 }
 
 .pagination {
@@ -404,6 +455,10 @@ a {
 
   .dialog__actions .button {
     width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
   }
 
   .pagination {
