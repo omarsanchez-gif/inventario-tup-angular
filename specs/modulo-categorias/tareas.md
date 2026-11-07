@@ -8,6 +8,7 @@
 - [x] Definir autorización, callables, errores funcionales y límites.
 - [x] Definir la ruta y el reajuste visual de `Configuraciones`.
 - [x] Documentar pruebas y trazabilidad.
+- [x] Especificar `cantidadActivos`, su semántica y su dependencia de Modelos, Activos y Migración.
 
 ## Implementación pendiente de autorización
 
@@ -18,6 +19,8 @@
 - [ ] Crear gateway, facade, ruta y pantalla Angular de Categorías.
 - [ ] Implementar formularios y confirmación mediante `AppDialog`.
 - [ ] Reutilizar búsqueda automática, paginación e icon-buttons compartidos.
+- [ ] Mostrar `cantidadActivos` como columna de solo lectura, con valor inicial cero.
+- [ ] Antes de implementar Activos, definir mantenimiento atómico, transferencia y reconciliación del contador.
 - [ ] Agregar pruebas unitarias y de integración con Auth/Firestore Emulator.
 - [ ] Validar lint, guardia visual, formato, pruebas y build de staging.
 - [ ] Desplegar solo los servicios afectados a `inventario-stg` y verificar evidencia remota.

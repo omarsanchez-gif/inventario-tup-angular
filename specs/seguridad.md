@@ -15,3 +15,4 @@
 - SEC-013: El rol `usuario` y las solicitudes anónimas no pueden listar ni mutar el catálogo administrativo de Categorías.
 - SEC-014: La eliminación verifica referencias mediante backend y falla de forma segura cuando no puede demostrar que la categoría está libre.
 - SEC-015: La futura consulta de categorías activas para Modelos de activos requerirá un contrato sanitizado propio; no queda autorizada por esta especificación.
+- SEC-016: `cantidadActivos` solo puede escribirse o reconciliarse mediante backend autorizado; ningún payload administrativo acepta ese campo.

@@ -25,6 +25,9 @@
 - CAT-018: alta y edición usan `AppDialog`, validan Nombre y Notas y no muestran Tipo ni campos descartados de Snipe-IT.
 - CAT-019: búsqueda automática por nombre o notas ocupa todo el ancho, reinicia página y el paginador limita a 10 registros.
 - CAT-020: tabla, badges, acciones iconográficas, estados de carga/error/vacío y diálogos funcionan por teclado y desde 320 px.
+- CAT-021: una categoría nueva expone `cantidadActivos: 0` y ninguna callable administrativa acepta modificarlo.
+- CAT-022: la tabla muestra `Cantidad de activos` como entero no editable y conserva el valor al buscar, paginar, editar o cambiar estado.
+- CAT-023: las futuras operaciones de crear, eliminar, restaurar o transferir Activos ajustan los contadores afectados sin producir negativos; la prueba integral queda bloqueada hasta especificar e implementar Activos.
 
 ## Evidencia
 

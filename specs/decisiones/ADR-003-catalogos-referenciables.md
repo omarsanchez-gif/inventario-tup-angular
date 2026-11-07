@@ -17,6 +17,9 @@ Categorías será referenciada por futuros Modelos de activos. Usar el nombre co
 - Los catálogos referenciables incluyen estado activo administrado fuera del formulario principal.
 - Una entidad referenciada no se elimina: se desactiva y conserva para historia.
 - El vínculo con Snipe-IT se administra en la futura herramienta de migración, no como campo editable del catálogo.
+- Categorías conserva `cantidadActivos` como read model derivado para evitar una agregación por cada fila; Activos permanece como fuente canónica.
+- El contador incluye todos los activos existentes de la categoría, sin distinguir asignación o estado operativo, y excluye los eliminados.
+- Las specs de Modelos, Activos y Migración deberán definir mantenimiento atómico y reconciliación antes de habilitar valores distintos de cero.
 
 ## Consecuencias
 
@@ -25,4 +28,5 @@ Categorías será referenciada por futuros Modelos de activos. Usar el nombre co
 - La unicidad se mantiene aun con solicitudes concurrentes.
 - El backend debe comprobar referencias antes de eliminar y fallar de forma segura si no puede hacerlo.
 - El índice técnico queda completamente inaccesible para clientes.
+- El contador derivado puede reconstruirse y no se usa como única evidencia para permitir una eliminación.
 - Fabricantes y otros catálogos podrán reutilizar el patrón únicamente después de especificarlo para cada módulo.

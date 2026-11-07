@@ -16,6 +16,7 @@ Permitir que un `admin` gestione el catálogo de categorías que posteriormente 
 - Alta, edición, activación, desactivación y eliminación condicionada.
 - Reserva transaccional del nombre normalizado.
 - Estados de carga, vacío, error y éxito.
+- Cantidad derivada de activos pertenecientes a cada categoría.
 
 ## Campos capturados
 
@@ -49,6 +50,19 @@ No se implementan `tipo`, acuerdo de uso, confirmaciones de aceptación, notific
 - Si una categoría está en uso, la operación responde `category-in-use` y la interfaz indica que debe desactivarse.
 - Renombrar conserva `categoriaId` y cambia en una transacción la reserva del nombre anterior por la nueva.
 
+## Cantidad de activos
+
+- `cantidadActivos` es informativo y no se captura en alta o edición.
+- Una categoría nueva inicia con `0`.
+- Cuenta todos los Activos existentes que pertenecen a la categoría mediante su Modelo de activo.
+- La asignación a una persona, ubicación o responsable y el estado operativo del activo no alteran su inclusión.
+- Los activos eliminados no se cuentan; restaurarlos vuelve a incluirlos.
+- Crear, eliminar, restaurar o transferir un activo entre categorías ajustará los contadores afectados desde backend.
+- Una importación desde Snipe-IT calculará el valor a partir de los activos migrados y ejecutará una reconciliación antes de cerrar el proceso.
+- El contador es un read model: Activos es la fuente canónica y una tarea autorizada de reconciliación podrá reconstruirlo.
+- El valor no determina por sí solo si puede eliminarse la categoría, porque un Modelo sin activos también constituye una referencia.
+- Hasta implementar Modelos y Activos, todas las categorías conservarán el valor inicial `0`.
+
 ## Autorización
 
 - Solo `admin` autenticado, autorizado y activo puede acceder a la ruta o invocar sus callables.
@@ -71,6 +85,7 @@ items[]
   nombre: string
   notas: string | null
   activo: boolean
+  cantidadActivos: number
   fechaCreacion: string ISO-8601
   fechaActualizacion: string ISO-8601
 ```
@@ -78,6 +93,7 @@ items[]
 - Devuelve la colección completa ordenada por `nombreNormalizado` ascendente.
 - Si existen más de 500 documentos, responde `category-capacity-exceeded` y no devuelve una lista parcial.
 - No expone `nombreNormalizado`, `nombreKey` ni documentos del índice técnico.
+- Expone `cantidadActivos` como entero no negativo y no acepta modificarlo desde ninguna callable administrativa de Categorías.
 
 ### `createCategory`
 
@@ -140,7 +156,8 @@ La interfaz traduce estos códigos a mensajes institucionales y no expone stack 
 - Encabezado institucional: etiqueta `Configuraciones`, título `Categorías`, descripción y botón textual `Nueva categoría`.
 - Búsqueda automática a todo el ancho por nombre y notas.
 - Paginación compartida de 10 registros por página.
-- Tabla con columnas `Nombre`, `Notas`, `Estado` y `Acciones`.
+- Tabla con columnas `Nombre`, `Notas`, `Cantidad de activos`, `Estado` y `Acciones`.
+- `Cantidad de activos` muestra el número derivado como texto; no es editable ni funciona como enlace hasta que exista una ruta de Activos con filtro canónico.
 - Las acciones Editar, Activar/Desactivar y Eliminar utilizan iconos compartidos, tooltip y nombre accesible.
 - Alta y edición usan `AppDialog` con los campos Nombre de la categoría y Notas.
 - Eliminar usa un diálogo de confirmación que identifica la categoría y explica que la acción no procede si está en uso.

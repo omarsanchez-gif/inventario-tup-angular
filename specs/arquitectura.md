@@ -49,3 +49,5 @@ Callable → caso de uso de Categorías → repositorio → Admin SDK
 ```
 
 Las callables planificadas son `listCategories`, `createCategory`, `updateCategory`, `setCategoryStatus` y `deleteCategory`, todas en `us-central1`. La unicidad se reserva transaccionalmente en `categorias_nombres`; la verificación de referencias se abstrae para incorporar Modelos de activos sin cambiar el contrato público.
+
+`cantidadActivos` es un read model desnormalizado para evitar una consulta de agregación por cada categoría del listado. Inicia en cero y su mantenimiento no se habilitará hasta que las specs de Modelos, Activos y Migración definan todas las transiciones que incrementan, decrementan, transfieren o reconcilian el contador. La fuente canónica siempre será Activos.

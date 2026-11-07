@@ -59,3 +59,4 @@
 - RN-CAT-009: El listado administrativo admite un máximo inicial de 500 categorías, se ordena por nombre normalizado y nunca devuelve resultados parciales.
 - RN-CAT-010: Identificadores, normalización, índice de unicidad y fechas son administrados por backend.
 - RN-CAT-011: La correspondencia con identificadores de Snipe-IT pertenece a la futura herramienta de migración y no se captura ni expone en el módulo.
+- RN-CAT-012: Cada categoría muestra la cantidad derivada de activos existentes que pertenecen a ella mediante su Modelo de activo; incluye cualquier asignación o estado operativo, excluye activos eliminados y nunca es editable por clientes.
