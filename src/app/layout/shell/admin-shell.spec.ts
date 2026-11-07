@@ -179,6 +179,21 @@ describe('AdminShell', () => {
     expect(element.querySelector('.navigation__sublink--active')).toBeTruthy();
   });
 
+  it('uses the same typography for every primary navigation option', () => {
+    createShell();
+    const element = fixture.nativeElement as HTMLElement;
+    const links = element.querySelectorAll<HTMLElement>('.navigation > .navigation__link');
+    const settings = element.querySelector<HTMLElement>('.navigation__group-toggle')!;
+    const dashboardStyle = getComputedStyle(links[0]);
+    const usersStyle = getComputedStyle(links[1]);
+    const settingsStyle = getComputedStyle(settings);
+
+    expect(settingsStyle.fontSize).toBe(dashboardStyle.fontSize);
+    expect(settingsStyle.fontSize).toBe(usersStyle.fontSize);
+    expect(settingsStyle.fontWeight).toBe(dashboardStyle.fontWeight);
+    expect(settingsStyle.fontWeight).toBe(usersStyle.fontWeight);
+  });
+
   it('hides settings from the usuario role', () => {
     roleState.set('usuario');
     createShell();

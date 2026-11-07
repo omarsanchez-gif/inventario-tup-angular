@@ -20,3 +20,4 @@
 - [x] Probar apertura automática por ruta activa, teclado y cierre del drawer al seleccionar una opción secundaria.
 - [x] Permitir contraer `Configuraciones` con una ruta secundaria activa.
 - [x] Extender los enlaces secundarios a todo el ancho disponible conservando su sangría interna.
+- [x] Igualar la tipografía del botón `Configuraciones` con los enlaces principales del sidebar.

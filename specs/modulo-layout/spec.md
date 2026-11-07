@@ -10,6 +10,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 - Sidebar institucional con identidad, navegación autorizada, perfil y cierre de sesión.
 - Icono compartido y distintivo para cada módulo visible.
 - Estado activo comprensible por forma, contraste y texto, no solo por color.
+- Dashboard, Usuarios y los grupos principales como `Configuraciones` comparten familia, tamaño y peso tipográfico.
 - Contenedor de contenido con ancho y espaciado estandarizados.
 - Diálogo compartido para formularios de alta, edición y confirmaciones destructivas.
 - Grupo desplegable `Configuraciones` exclusivo de `admin`, con opciones secundarias de texto para catálogos implementados.

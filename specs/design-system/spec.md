@@ -72,6 +72,7 @@
 ### Grupo Configuraciones
 
 - `Configuraciones` es un botón desplegable de primer nivel con icono `settings`, visible exclusivamente a `admin`; no navega a una pantalla propia.
+- Como elemento de primer nivel, usa exactamente la misma familia, tamaño y peso tipográfico que Dashboard y Usuarios.
 - El botón declara `aria-expanded` y `aria-controls`, admite teclado y conserva un objetivo mínimo de `44 × 44 px`.
 - Las opciones secundarias se presentan con texto, sangría y estado activo, sin exigir un icono individual.
 - Solo se muestran opciones con módulo implementado y autorizado; al implementar Categorías, la primera opción será `Categorías`.
@@ -103,6 +104,6 @@
 
 ## Estado de implementación
 
-El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el estándar de acciones contextuales con iconos, la búsqueda a todo el ancho y `AppPagination` están implementados y publicados únicamente en Hosting de `inventario-stg`. El grupo `Configuraciones`, el icono `settings` y su primera opción `Categorías` también están publicados; la corrección para contraer sobre una ruta activa y ocupar todo el ancho con los submenús sirve `main-3IK73UUE.js` y `styles-CISTRGAV.css` con HTTP 200. La regresión aprobó 8 suites con 18 pruebas Angular, lint, guardia visual, formato y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
+El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el estándar de acciones contextuales con iconos, la búsqueda a todo el ancho y `AppPagination` están implementados y publicados únicamente en Hosting de `inventario-stg`. El grupo `Configuraciones`, el icono `settings` y su primera opción `Categorías` también están publicados; permite contraerse sobre una ruta activa, sus submenús ocupan todo el ancho y su tipografía coincide con Dashboard y Usuarios. Hosting sirve `main-IQTLWJGB.js` y `styles-CISTRGAV.css` con HTTP 200. La regresión aprobó 8 suites con 19 pruebas Angular, lint, guardia visual, formato y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

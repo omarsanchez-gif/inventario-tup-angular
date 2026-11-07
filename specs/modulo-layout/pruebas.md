@@ -18,6 +18,7 @@
 - LAY-016: el grupo solo presenta módulos implementados; inicialmente no muestra Fabricantes ni Modelos de activos.
 - LAY-017: en móvil, expandir el grupo conserva el drawer y seleccionar `Categorías` navega y lo cierra.
 - LAY-018: con Categorías activa, el usuario puede contraer y volver a expandir `Configuraciones`; el padre conserva su estado activo y el submenú usa todo el ancho disponible.
+- LAY-019: Dashboard, Usuarios y Configuraciones exponen el mismo tamaño y peso tipográfico como opciones principales.
 
 ## Evidencia del incremento
 
@@ -33,4 +34,5 @@
 - La regresión completa aprobó 8 suites y 18 pruebas Angular, lint, guardia visual, formato y build de staging.
 - Hosting de `inventario-stg` responde HTTP 200 y sirve `main-XXPSXP7R.js` y `styles-CISTRGAV.css` con el grupo `Configuraciones` y la ruta secundaria de Categorías.
 - LAY-018 aprobó en la regresión de 8 suites y 18 pruebas Angular; Hosting se actualizó de forma aislada y sirve `main-3IK73UUE.js` y `styles-CISTRGAV.css` con HTTP 200.
+- LAY-019 aprobó en la regresión de 8 suites y 19 pruebas Angular; Hosting sirve `main-IQTLWJGB.js` y `styles-CISTRGAV.css` con HTTP 200.
 - La aceptación visual autenticada permanece pendiente.
