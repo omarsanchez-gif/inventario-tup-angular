@@ -25,6 +25,7 @@
 - El perfil canónico activo de `omar.sanchez@tecplayacar.edu.mx` existe como `admin`; su `uid` se asociará en el primer acceso válido.
 - La autorización vigente cubre Autenticación, Usuarios, Categorías y el endurecimiento transversal documentado en ADR-004, siempre limitado a staging y a los servicios afectados.
 - La autorización vigente también cubre Fabricantes conforme a su spec aprobada, siempre limitado a staging y a los servicios afectados.
+- La autorización vigente cubre Modelos de activos y ADR-005 conforme a sus specs aprobadas, limitada a las reglas, Functions y Hosting afectados de staging; no incluye datos reales, migración ni producción.
 - El proyecto y alias de producción permanecen pendientes y no están autorizados.
 - La auditoría conserva cuatro alertas moderadas transitivas en utilidades de archivos de `google-gax`, sin altas ni críticas; el detalle y la decisión están en ADR-002.
 - El 7 de noviembre de 2026 se desplegó el endurecimiento previo a Fabricantes por servicios separados: Firestore Rules, las 11 callables existentes y Hosting. No se modificaron datos, índices, secretos ni producción.
@@ -58,3 +59,17 @@
 - Hosting responde HTTP 200 en `/` y `/configuraciones/fabricantes`, referencia `main-TOQX2LZJ.js` y publica el lazy chunk `chunk-D2Sg13iw.js`; conserva CSP y la política diferenciada de caché.
 - El despliegue no incluyó índices, datos, secretos, migración ni producción.
 - La futura migración de Fabricantes desde Snipe-IT utilizará una herramienta backend separada y se ejecutará antes de Modelos de activos.
+
+## Modelos de activos
+
+- El bucket predeterminado `inventario-stg.firebasestorage.app` se inicializó el 7 de noviembre de 2026 como bucket regional en `US-CENTRAL1`, clase Standard y reglas de producción cerradas; no se cargaron objetos.
+- La implementación usa exclusivamente ese bucket de staging y las rutas `modelos-activos/{modeloId}/original.webp` y `thumbnail.webp`.
+- Storage Rules permanecerá en denegación total; el binario viajará por callable y Admin SDK realizará las operaciones.
+- El acceso de lectura será temporal mediante URLs firmadas de máximo cinco minutos, emitidas solo después de revalidar al administrador canónico.
+- El despliegue debe verificar en staging que las nueve callables queden activas, que las solicitudes anónimas sean rechazadas, que Rules permanezca cerrada y que Hosting sirva la ruta. La firma y el ciclo completo de imagen requieren una aceptación autenticada posterior.
+- No se almacenarán URLs permanentes, credenciales o contenido base64 en Firestore, logs o repositorio.
+- La API de Snipe-IT seguirá siendo solo una fuente futura de migración backend; la pantalla no extraerá imágenes ni datos externos.
+- El 7 de noviembre de 2026 se desplegaron por separado y únicamente a `inventario-stg` Firestore Rules, Storage Rules, las nueve callables de Modelos, `deleteCategory`, `deleteManufacturer` y Hosting. No se desplegaron índices, secretos, datos, migración ni producción.
+- Las nueve callables de Modelos están `ACTIVE` en Node.js 22, `us-central1`, con `maxInstances: 20`, usan `inventario-stg.firebasestorage.app` y rechazaron solicitudes anónimas con HTTP 401.
+- Firestore y Storage rechazaron acceso anónimo directo con HTTP 403. Hosting sirve la ruta de Modelos y los bundles `main-ALBLFGKY.js`, `styles-CISTRGAV.css` y `chunk-CA-BBvnz.js` con HTTP 200; la versión final descarta miniaturas fuera de página y renueva accesos próximos a vencer.
+- Los permisos efectivos de firma y el ciclo de alta, miniatura, sustitución, eliminación y expiración requieren la aceptación autenticada pendiente; esta comprobación no debe crear datos sin una prueba manual acordada.

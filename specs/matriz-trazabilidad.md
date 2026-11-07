@@ -1,14 +1,17 @@
 # Matriz de trazabilidad
 
-| Alcance           | Reglas          | Implementación                                            | Pruebas      |
-| ----------------- | --------------- | --------------------------------------------------------- | ------------ |
-| Autenticación     | RN-AUT-001–006  | `core/auth`, `bootstrapAuthorization`                     | AUT-001–008  |
-| Dashboard inicial | RN-DASH-001–003 | `features/dashboard`                                      | DASH-001–004 |
-| Usuarios          | RN-USR-001–008  | `features/users`, callables administrativas               | USR-001–015  |
-| Layout privado    | RN-LAY-001–011  | `layout/shell`, `shared/ui/icon`, `shared/ui/dialog`      | LAY-001–017  |
-| Categorías        | RN-CAT-001–012  | `features/categories`, cinco callables administrativas    | CAT-001–023  |
-| Fabricantes       | RN-FAB-001–012  | `features/manufacturers`, cinco callables administrativas | FAB-001–020  |
+| Alcance            | Reglas          | Implementación                                            | Pruebas      |
+| ------------------ | --------------- | --------------------------------------------------------- | ------------ |
+| Autenticación      | RN-AUT-001–006  | `core/auth`, `bootstrapAuthorization`                     | AUT-001–008  |
+| Dashboard inicial  | RN-DASH-001–003 | `features/dashboard`                                      | DASH-001–004 |
+| Usuarios           | RN-USR-001–008  | `features/users`, callables administrativas               | USR-001–015  |
+| Layout privado     | RN-LAY-001–011  | `layout/shell`, `shared/ui/icon`, `shared/ui/dialog`      | LAY-001–017  |
+| Categorías         | RN-CAT-001–012  | `features/categories`, cinco callables administrativas    | CAT-001–024  |
+| Fabricantes        | RN-FAB-001–012  | `features/manufacturers`, cinco callables administrativas | FAB-001–020  |
+| Modelos de activos | RN-MOD-001–020  | `features/asset-models`, nueve callables, Storage privado | MOD-001–035  |
 
-Estado: Login, layout estandarizado, Usuarios, Categorías, Fabricantes y `Configuraciones` están publicados en `inventario-stg`. Las 16 callables usan Node.js 22, `us-central1`, máximo 20 instancias y rechazo anónimo; Firestore niega todo acceso directo a Usuarios, Categorías y Fabricantes. Hosting publica encabezados defensivos y caché diferenciada. Las pruebas integrales con Auth, Functions y Firestore Emulator están aprobadas y CI reproduce la validación sin desplegar. Faltan las aceptaciones funcionales autenticadas reales y la aceptación visual autenticada del layout/modal. App Check, PITR, bitácora y producción permanecen como decisiones separadas.
+Estado: Login, layout estandarizado, Usuarios, Categorías, Fabricantes, Modelos de activos y `Configuraciones` están publicados en `inventario-stg`. Las 25 callables usan Node.js 22, `us-central1`, máximo 20 instancias y rechazo anónimo; Firestore niega acceso directo a Usuarios y catálogos y Storage permanece cerrado. Hosting publica encabezados defensivos y caché diferenciada. Las pruebas integrales con Auth, Functions, Firestore y Storage Emulator están aprobadas y CI reproduce la validación sin desplegar. Faltan las aceptaciones funcionales autenticadas reales, incluida la del ciclo de imagen, y la aceptación visual autenticada. App Check, PITR, bitácora y producción permanecen como decisiones separadas.
 
-Fabricantes fue aprobado, implementado, validado y publicado únicamente en staging el 7 de noviembre de 2026. FAB-011 y FAB-012 permanecen bloqueadas hasta que Modelos de activos defina el consumidor canónico; incorporar esa verificación es requisito previo al primer despliegue de Modelos.
+Fabricantes fue aprobado, implementado, validado y publicado únicamente en staging el 7 de noviembre de 2026. La protección de eliminación frente a `modelos_activos` quedó implementada y validada localmente antes del despliegue de Modelos.
+
+Modelos de activos fue aprobado, implementado, validado y publicado únicamente en staging el 7 de noviembre de 2026. Existen ruta, menú, contratos cerrados, nueve Functions `ACTIVE`, repositorio transaccional, bucket regional privado y procesamiento WebP; no se crearon datos. La aceptación autenticada del ciclo de imagen permanece pendiente.

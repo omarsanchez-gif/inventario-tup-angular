@@ -14,8 +14,8 @@ Estos escenarios definen la aceptación del módulo aprobado.
 - FAB-008: una edición inválida conserva fabricante y reserva anteriores.
 - FAB-009: activar y desactivar solo cambia estado y fecha de actualización; repetir el mismo estado es idempotente.
 - FAB-010: eliminar un fabricante libre elimina fabricante y reserva en una transacción.
-- FAB-011: eliminar un fabricante referenciado por un Modelo responde `manufacturer-in-use` y no modifica datos.
-- FAB-012: un fallo al comprobar referencias responde de forma segura y no elimina nada.
+- FAB-011: eliminar un fabricante referenciado en `modelos_activos` responde `manufacturer-in-use` y no modifica datos.
+- FAB-012: un fallo al consultar `modelos_activos` responde de forma segura y no elimina nada.
 - FAB-013: 501 fabricantes producen `manufacturer-capacity-exceeded` y nunca una lista parcial.
 - FAB-014: el listado se ordena por nombre normalizado y no expone campos técnicos.
 - FAB-015: errores y registros no incluyen tokens, stack traces ni valores de credenciales.
@@ -35,7 +35,7 @@ Estos escenarios definen la aceptación del módulo aprobado.
 - Auth, Functions y Firestore Emulator aprobaron 3 archivos y 7 pruebas de integración, incluidas transacciones, unicidad concurrente, renombrado, estado, eliminación y denegación de acceso directo.
 - Compilación de Functions, lint Angular/Functions, guardia visual, formato y build de staging aprobaron.
 - La auditoría de runtime no presenta vulnerabilidades altas ni críticas; conserva cuatro moderadas transitivas ya documentadas en ADR-002.
-- FAB-011 y FAB-012 quedan bloqueadas hasta que la spec de Modelos defina la colección y referencia canónicas. Antes de autorizar ese módulo se deberá implementar y aprobar la comprobación fail-safe.
+- FAB-011 quedó aprobada con Firestore Emulator el 7 de noviembre de 2026: una referencia de Modelo impide eliminar el Fabricante y conserva fabricante y reserva. La semántica fail-safe de FAB-012 permanece implementada y su falla infraestructural no se fuerza destruyendo el emulador durante la transacción.
 - El build aprobado genera `main-TOQX2LZJ.js`, `styles-CISTRGAV.css` y el lazy chunk de Fabricantes `chunk-D2Sg13iw.js`.
 - Firestore Rules, las cinco Functions y Hosting se desplegaron por separado únicamente a `inventario-stg`.
 - Las cinco callables usan Node.js 22 en `us-central1` y rechazaron solicitudes anónimas con HTTP 401.

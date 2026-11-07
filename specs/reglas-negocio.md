@@ -77,3 +77,26 @@
 - RN-FAB-010: Identificadores, normalización, índice de unicidad y fechas son administrados por backend.
 - RN-FAB-011: Fabricante identifica la marca que produce el activo; el comercio, distribuidor o plataforma donde se compra, como Steren, Mercado Libre o Amazon, no forma parte de este catálogo.
 - RN-FAB-012: La correspondencia con identificadores de Snipe-IT pertenece a la futura herramienta de migración y no se captura ni expone en el módulo.
+
+## Modelos de activos
+
+- RN-MOD-001: Solo un `admin` autorizado puede listar y administrar Modelos de activos.
+- RN-MOD-002: Los únicos campos capturados son `nombre`, `categoriaId`, `fabricanteId`, `modeloNo`, `notas` e imagen opcional.
+- RN-MOD-003: El nombre es obligatorio, se normaliza y admite máximo 120 caracteres.
+- RN-MOD-004: Categoría y Fabricante son obligatorios y se guardan mediante identificadores estables; sus nombres no se duplican como fuente canónica.
+- RN-MOD-005: `modeloNo` es opcional, se recorta, conserva su presentación y admite máximo 120 caracteres.
+- RN-MOD-006: Las notas son opcionales, se recortan y admiten máximo 1,000 caracteres.
+- RN-MOD-007: Con `modeloNo`, la combinación Fabricante + Modelo No. normalizado es única; sin `modeloNo`, es única la combinación Fabricante + Nombre normalizado.
+- RN-MOD-008: Todo Modelo se crea activo; el estado se administra mediante una acción separada y no forma parte del formulario.
+- RN-MOD-009: Un Modelo inactivo conserva historia e imagen, pero no podrá seleccionarse al registrar nuevos Activos.
+- RN-MOD-010: Las altas solo admiten Categorías y Fabricantes activos.
+- RN-MOD-011: Al editar puede conservarse una Categoría o Fabricante actualmente vinculado aunque haya sido desactivado, pero no seleccionarse otro catálogo inactivo.
+- RN-MOD-012: Un Modelo solo puede eliminarse cuando ningún Activo lo referencia; mientras Activos no exista, no puede generarse una referencia aprobada.
+- RN-MOD-013: Antes de habilitar Modelos, Categorías y Fabricantes deben impedir de forma fail-safe eliminar catálogos referenciados por `modelos_activos`.
+- RN-MOD-014: La imagen es opcional, reemplazable y eliminable; el archivo de entrada admite máximo 2 MiB y únicamente JPEG, PNG, WebP o AVIF válidos.
+- RN-MOD-015: Backend normaliza cada imagen a WebP, elimina metadatos, limita dimensiones y genera una miniatura; GIF y SVG históricos se convierten durante la futura migración y no se cargan directamente desde la interfaz.
+- RN-MOD-016: Storage permanece cerrado a clientes; las cargas, sustituciones, eliminaciones y accesos temporales a imágenes requieren una callable con revalidación canónica.
+- RN-MOD-017: Los Activos futuros referenciarán `modeloId` y heredarán la Categoría, el Fabricante y la imagen vigentes del Modelo sin duplicar archivos.
+- RN-MOD-018: El listado admite un máximo inicial de 500 Modelos, se ordena por nombre normalizado y nunca devuelve resultados parciales.
+- RN-MOD-019: Identificadores, claves de unicidad, normalización, metadatos de imagen y fechas son administrados por backend.
+- RN-MOD-020: Categorías y Fabricantes se administran en sus módulos propios; el modal de Modelo no contiene altas rápidas ni formularios anidados.

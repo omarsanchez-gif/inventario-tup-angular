@@ -85,6 +85,7 @@ export function createAdminManufacturersRepository(
   const manufacturers = firestore.collection('fabricantes');
   const names = firestore.collection('fabricantes_nombres');
   const users = firestore.collection('usuarios');
+  const assetModels = firestore.collection('modelos_activos');
 
   async function requireCanonicalAdmin(transaction: Transaction, uid: string): Promise<void> {
     const snapshot = await transaction.get(users.where('uid', '==', uid).limit(2));
@@ -233,6 +234,16 @@ export function createAdminManufacturersRepository(
         const indexReference = names.doc(nameKey(manufacturer.nombreNormalizado));
         const indexSnapshot = await transaction.get(indexReference);
         verifyIndex(indexSnapshot.data(), manufacturer);
+        const modelReferences = await transaction.get(
+          assetModels.where('fabricanteId', '==', documentId).limit(1),
+        );
+        if (!modelReferences.empty) {
+          throw new AdminManufacturersError(
+            'manufacturer-in-use',
+            'failed-precondition',
+            'El fabricante está en uso.',
+          );
+        }
         transaction.delete(reference);
         transaction.delete(indexReference);
       });

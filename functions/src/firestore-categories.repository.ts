@@ -87,6 +87,7 @@ export function createAdminCategoriesRepository(firestore: Firestore): AdminCate
   const categories = firestore.collection('categorias');
   const names = firestore.collection('categorias_nombres');
   const users = firestore.collection('usuarios');
+  const assetModels = firestore.collection('modelos_activos');
 
   async function requireCanonicalAdmin(transaction: Transaction, uid: string): Promise<void> {
     const snapshot = await transaction.get(users.where('uid', '==', uid).limit(2));
@@ -229,7 +230,17 @@ export function createAdminCategoriesRepository(firestore: Firestore): AdminCate
         const indexReference = names.doc(nameKey(category.nombreNormalizado));
         const indexSnapshot = await transaction.get(indexReference);
         verifyIndex(indexSnapshot.data(), category);
+        const modelReferences = await transaction.get(
+          assetModels.where('categoriaId', '==', documentId).limit(1),
+        );
         if (category.cantidadActivos > 0) {
+          throw new AdminCategoriesError(
+            'category-in-use',
+            'failed-precondition',
+            'La categoría está en uso.',
+          );
+        }
+        if (!modelReferences.empty) {
           throw new AdminCategoriesError(
             'category-in-use',
             'failed-precondition',

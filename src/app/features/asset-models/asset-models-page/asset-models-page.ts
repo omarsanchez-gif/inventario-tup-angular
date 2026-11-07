@@ -1,0 +1,340 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  signal,
+} from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+
+import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
+import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
+import { AppIcon } from '../../../shared/ui/icon/app-icon';
+import { AppPagination } from '../../../shared/ui/pagination/app-pagination';
+import { AssetModelsFacade } from '../state/asset-models.facade';
+
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
+function fileBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error ?? new Error('No se pudo leer el archivo.'));
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== 'string' || !result.includes(',')) {
+        reject(new Error('No se pudo leer el archivo.'));
+        return;
+      }
+      resolve(result.slice(result.indexOf(',') + 1));
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+@Component({
+  selector: 'app-asset-models-page',
+  imports: [AppDialog, AppIcon, AppPagination, ReactiveFormsModule],
+  templateUrl: './asset-models-page.html',
+  styleUrl: './asset-models-page.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AssetModelsPage implements OnDestroy {
+  private readonly formBuilder = inject(FormBuilder);
+  protected readonly assetModels = inject(AssetModelsFacade);
+  protected readonly formVisible = signal(false);
+  protected readonly editingId = signal<string | null>(null);
+  protected readonly pendingDeletion = signal<InventoryAssetModel | null>(null);
+  protected readonly selectedImage = signal<File | null>(null);
+  protected readonly imagePreview = signal<string | null>(null);
+  protected readonly currentImageUrl = signal<string | null>(null);
+  protected readonly removeCurrentImage = signal(false);
+  protected readonly fileError = signal<string | null>(null);
+  protected readonly thumbnailUrls = signal<Record<string, string>>({});
+  private readonly thumbnailVersions = new Map<string, string>();
+  private readonly thumbnailExpirations = new Map<string, number>();
+  private thumbnailRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+  private thumbnailRefreshGeneration = 0;
+  protected readonly pageSize = 10;
+  protected readonly currentPage = signal(1);
+  protected readonly currentModel = computed(
+    () => this.assetModels.models().find((item) => item.documentId === this.editingId()) ?? null,
+  );
+  protected readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.assetModels.filteredModels().length / this.pageSize)),
+  );
+  protected readonly activePage = computed(() => Math.min(this.currentPage(), this.totalPages()));
+  protected readonly paginatedModels = computed(() => {
+    const start = (this.activePage() - 1) * this.pageSize;
+    return this.assetModels.filteredModels().slice(start, start + this.pageSize);
+  });
+  protected readonly categoryOptions = computed(() => {
+    const options = [...this.assetModels.catalogs().categorias];
+    const current = this.currentModel()?.categoria;
+    if (current && !options.some((item) => item.documentId === current.documentId)) {
+      options.push({ documentId: current.documentId, nombre: `${current.nombre} (inactiva)` });
+    }
+    return options;
+  });
+  protected readonly manufacturerOptions = computed(() => {
+    const options = [...this.assetModels.catalogs().fabricantes];
+    const current = this.currentModel()?.fabricante;
+    if (current && !options.some((item) => item.documentId === current.documentId)) {
+      options.push({ documentId: current.documentId, nombre: `${current.nombre} (inactivo)` });
+    }
+    return options;
+  });
+  protected readonly form = this.formBuilder.nonNullable.group({
+    nombre: ['', [Validators.required, Validators.maxLength(120)]],
+    categoriaId: ['', Validators.required],
+    fabricanteId: ['', Validators.required],
+    modeloNo: ['', Validators.maxLength(120)],
+    notas: ['', Validators.maxLength(1_000)],
+  });
+
+  constructor() {
+    void this.initialize();
+  }
+
+  ngOnDestroy(): void {
+    this.thumbnailRefreshGeneration += 1;
+    this.clearThumbnailRefreshTimer();
+    this.revokePreview();
+  }
+
+  private async initialize(): Promise<void> {
+    await this.assetModels.load();
+    await this.refreshVisibleThumbnails();
+  }
+
+  protected openNew(): void {
+    this.resetImageState();
+    this.assetModels.clearMessages();
+    this.editingId.set(null);
+    this.form.reset({ nombre: '', categoriaId: '', fabricanteId: '', modeloNo: '', notas: '' });
+    this.formVisible.set(true);
+  }
+
+  protected edit(model: InventoryAssetModel): void {
+    this.resetImageState();
+    this.assetModels.clearMessages();
+    this.editingId.set(model.documentId);
+    this.form.reset({
+      nombre: model.nombre,
+      categoriaId: model.categoria.documentId,
+      fabricanteId: model.fabricante.documentId,
+      modeloNo: model.modeloNo ?? '',
+      notas: model.notas ?? '',
+    });
+    this.formVisible.set(true);
+    if (model.tieneImagen) void this.loadCurrentImage(model.documentId);
+  }
+
+  protected closeForm(): void {
+    if (this.assetModels.saving()) return;
+    this.formVisible.set(false);
+    this.editingId.set(null);
+    this.resetImageState();
+  }
+
+  protected selectImage(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.fileError.set(null);
+    this.revokePreview();
+    this.selectedImage.set(null);
+    if (!file) return;
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      this.fileError.set('Use una imagen JPEG, PNG, WebP o AVIF.');
+      input.value = '';
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      this.fileError.set('La imagen supera el límite de 2 MiB.');
+      input.value = '';
+      return;
+    }
+    this.selectedImage.set(file);
+    this.imagePreview.set(URL.createObjectURL(file));
+    this.removeCurrentImage.set(false);
+  }
+
+  protected clearSelectedImage(): void {
+    this.revokePreview();
+    this.selectedImage.set(null);
+    this.fileError.set(null);
+  }
+
+  protected requestImageRemoval(): void {
+    this.clearSelectedImage();
+    this.removeCurrentImage.set(true);
+  }
+
+  protected async submit(): Promise<void> {
+    if (this.form.invalid || this.fileError()) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const raw = this.form.getRawValue();
+    const input = {
+      nombre: raw.nombre,
+      categoriaId: raw.categoriaId,
+      fabricanteId: raw.fabricanteId,
+      modeloNo: raw.modeloNo.trim() || null,
+      notas: raw.notas.trim() || null,
+    };
+    const editingId = this.editingId();
+    const documentId = await this.assetModels.save(
+      editingId ? { documentId: editingId, ...input } : input,
+    );
+    if (!documentId) return;
+
+    let imageCompleted = true;
+    const selected = this.selectedImage();
+    if (selected) {
+      try {
+        imageCompleted = await this.assetModels.setImage(
+          documentId,
+          selected,
+          await fileBase64(selected),
+        );
+      } catch {
+        this.fileError.set('El Modelo quedó guardado, pero no fue posible leer la imagen.');
+        imageCompleted = false;
+      }
+    } else if (this.removeCurrentImage()) {
+      imageCompleted = await this.assetModels.removeImage(documentId);
+    }
+
+    if (imageCompleted) {
+      this.closeForm();
+      this.thumbnailUrls.set({});
+      this.thumbnailVersions.clear();
+      this.thumbnailExpirations.clear();
+      await this.refreshVisibleThumbnails();
+    } else {
+      this.editingId.set(documentId);
+    }
+  }
+
+  protected setQuery(event: Event): void {
+    this.assetModels.setQuery((event.target as HTMLInputElement).value);
+    this.currentPage.set(1);
+    void this.refreshVisibleThumbnails();
+  }
+
+  protected setPage(page: number): void {
+    this.currentPage.set(Math.min(Math.max(1, page), this.totalPages()));
+    void this.refreshVisibleThumbnails();
+  }
+
+  protected async toggleStatus(model: InventoryAssetModel): Promise<void> {
+    if (this.assetModels.saving()) return;
+    await this.assetModels.setStatus(model);
+  }
+
+  protected requestDeletion(model: InventoryAssetModel): void {
+    if (this.assetModels.saving()) return;
+    this.assetModels.clearMessages();
+    this.pendingDeletion.set(model);
+  }
+
+  protected cancelDeletion(): void {
+    if (!this.assetModels.saving()) this.pendingDeletion.set(null);
+  }
+
+  protected async confirmDeletion(): Promise<void> {
+    const model = this.pendingDeletion();
+    if (!model || this.assetModels.saving()) return;
+    if (await this.assetModels.delete(model)) {
+      this.pendingDeletion.set(null);
+      this.thumbnailUrls.update((urls) => {
+        const next = { ...urls };
+        delete next[model.documentId];
+        return next;
+      });
+    }
+  }
+
+  private async loadCurrentImage(documentId: string): Promise<void> {
+    try {
+      const access = await this.assetModels.imageAccess(documentId, 'original');
+      this.currentImageUrl.set(access.originalUrl);
+    } catch {
+      this.assetModels.reportImageReadError();
+    }
+  }
+
+  private async refreshVisibleThumbnails(): Promise<void> {
+    const generation = ++this.thumbnailRefreshGeneration;
+    const visibleIds = new Set(this.paginatedModels().map((model) => model.documentId));
+    this.thumbnailUrls.update((urls) =>
+      Object.fromEntries(Object.entries(urls).filter(([documentId]) => visibleIds.has(documentId))),
+    );
+    for (const documentId of this.thumbnailVersions.keys()) {
+      if (visibleIds.has(documentId)) continue;
+      this.thumbnailVersions.delete(documentId);
+      this.thumbnailExpirations.delete(documentId);
+    }
+    this.clearThumbnailRefreshTimer();
+    const renewalThreshold = Date.now() + 5_000;
+    await Promise.all(
+      this.paginatedModels().map(async (model) => {
+        if (!model.tieneImagen || !model.imagenVersion) return;
+        if (
+          this.thumbnailVersions.get(model.documentId) === model.imagenVersion &&
+          (this.thumbnailExpirations.get(model.documentId) ?? 0) > renewalThreshold
+        ) {
+          return;
+        }
+        try {
+          const access = await this.assetModels.imageAccess(model.documentId, 'thumbnail');
+          if (generation === this.thumbnailRefreshGeneration && access.thumbnailUrl) {
+            this.thumbnailUrls.update((urls) => ({
+              ...urls,
+              [model.documentId]: access.thumbnailUrl!,
+            }));
+            this.thumbnailVersions.set(model.documentId, model.imagenVersion!);
+            this.thumbnailExpirations.set(model.documentId, Date.parse(access.expiresAt));
+          }
+        } catch {
+          if (generation === this.thumbnailRefreshGeneration) {
+            this.assetModels.reportImageReadError();
+          }
+        }
+      }),
+    );
+    if (generation === this.thumbnailRefreshGeneration) this.scheduleThumbnailRefresh();
+  }
+
+  private scheduleThumbnailRefresh(): void {
+    const expirations = [...this.thumbnailExpirations.values()].filter(Number.isFinite);
+    if (expirations.length === 0) return;
+    const nextRenewal = Math.max(1_000, Math.min(...expirations) - Date.now() - 5_000);
+    this.thumbnailRefreshTimer = setTimeout(() => {
+      this.thumbnailRefreshTimer = null;
+      void this.refreshVisibleThumbnails();
+    }, nextRenewal);
+  }
+
+  private clearThumbnailRefreshTimer(): void {
+    if (this.thumbnailRefreshTimer === null) return;
+    clearTimeout(this.thumbnailRefreshTimer);
+    this.thumbnailRefreshTimer = null;
+  }
+
+  private resetImageState(): void {
+    this.revokePreview();
+    this.selectedImage.set(null);
+    this.currentImageUrl.set(null);
+    this.removeCurrentImage.set(false);
+    this.fileError.set(null);
+  }
+
+  private revokePreview(): void {
+    const preview = this.imagePreview();
+    if (preview) URL.revokeObjectURL(preview);
+    this.imagePreview.set(null);
+  }
+}

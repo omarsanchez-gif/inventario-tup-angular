@@ -51,6 +51,15 @@ export const routes: Routes = [
           ),
         title: 'Fabricantes | Sistema de Inventario TUP',
       },
+      {
+        path: 'configuraciones/modelos-activos',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/asset-models/asset-models-page/asset-models-page').then(
+            (component) => component.AssetModelsPage,
+          ),
+        title: 'Modelos de activos | Sistema de Inventario TUP',
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

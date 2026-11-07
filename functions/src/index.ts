@@ -1,10 +1,27 @@
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 import { logger } from 'firebase-functions';
 import { defineString } from 'firebase-functions/params';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
+import {
+  AdminAssetModelsError,
+  createAssetModel as createAssetModelRecord,
+  deleteAssetModel as deleteAssetModelRecord,
+  getAssetModelCatalogs as getAssetModelCatalogRecords,
+  listAssetModels as listAssetModelRecords,
+  setAssetModelStatus as setAssetModelRecordStatus,
+  updateAssetModel as updateAssetModelRecord,
+  type AdminAssetModelsDependencies,
+} from './admin-asset-models.js';
+import {
+  getAssetModelImageAccess as getAssetModelImageAccessRecord,
+  removeAssetModelImage as removeAssetModelImageRecord,
+  setAssetModelImage as setAssetModelImageRecord,
+  type AssetModelImageDependencies,
+} from './asset-model-images.js';
 import {
   AdminCategoriesError,
   createCategory as createCategoryRecord,
@@ -38,6 +55,8 @@ import {
   bootstrapAuthorization as authorize,
 } from './bootstrap-authorization.js';
 import { createAdminCategoriesRepository } from './firestore-categories.repository.js';
+import { createAdminAssetModelsRepository } from './firestore-asset-models.repository.js';
+import { createAssetModelImagesService } from './firebase-asset-model-images.service.js';
 import { createAdminManufacturersRepository } from './firestore-manufacturers.repository.js';
 import {
   createAdminUsersRepository,
@@ -56,6 +75,8 @@ const authorizationRepository = createAuthorizationRepository(firestore);
 const adminUsersRepository = createAdminUsersRepository(firestore);
 const adminCategoriesRepository = createAdminCategoriesRepository(firestore);
 const adminManufacturersRepository = createAdminManufacturersRepository(firestore);
+const adminAssetModelsRepository = createAdminAssetModelsRepository(firestore);
+const assetModelImagesService = createAssetModelImagesService(firestore, getStorage().bucket());
 const options = {
   invoker: 'public' as const,
   maxInstances: 20,
@@ -101,6 +122,14 @@ function categoryDependencies(): AdminCategoriesDependencies {
 
 function manufacturerDependencies(): AdminManufacturersDependencies {
   return { repository: adminManufacturersRepository };
+}
+
+function assetModelDependencies(): AdminAssetModelsDependencies {
+  return { repository: adminAssetModelsRepository };
+}
+
+function assetModelImageDependencies(): AssetModelImageDependencies {
+  return { repository: adminAssetModelsRepository, images: assetModelImagesService };
 }
 
 async function executeAdmin<T>(operation: () => Promise<T>): Promise<T> {
@@ -149,6 +178,24 @@ async function executeManufacturers<T>(operation: () => Promise<T>): Promise<T> 
       });
     }
     logger.error('Error no controlado en Fabricantes.', {
+      cause: error instanceof Error ? error.name : 'unknown',
+    });
+    throw new HttpsError('unavailable', 'El servicio no está disponible.', {
+      functionalCode: 'service-unavailable',
+    });
+  }
+}
+
+async function executeAssetModels<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (error instanceof AdminAssetModelsError) {
+      throw new HttpsError(error.functionsCode, error.message, {
+        functionalCode: error.functionalCode,
+      });
+    }
+    logger.error('Error no controlado en Modelos de activos.', {
       cause: error instanceof Error ? error.name : 'unknown',
     });
     throw new HttpsError('unavailable', 'El servicio no está disponible.', {
@@ -275,5 +322,77 @@ export const setManufacturerStatus = onCall(options, async (request) =>
 export const deleteManufacturer = onCall(options, async (request) =>
   executeManufacturers(() =>
     deleteManufacturerRecord(adminIdentity(request.auth), request.data, manufacturerDependencies()),
+  ),
+);
+
+export const listAssetModels = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    listAssetModelRecords(adminIdentity(request.auth), assetModelDependencies()),
+  ),
+);
+
+export const getAssetModelCatalogs = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    getAssetModelCatalogRecords(adminIdentity(request.auth), assetModelDependencies()),
+  ),
+);
+
+export const createAssetModel = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    createAssetModelRecord(adminIdentity(request.auth), request.data, assetModelDependencies()),
+  ),
+);
+
+export const updateAssetModel = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    updateAssetModelRecord(adminIdentity(request.auth), request.data, assetModelDependencies()),
+  ),
+);
+
+export const setAssetModelStatus = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    setAssetModelRecordStatus(adminIdentity(request.auth), request.data, assetModelDependencies()),
+  ),
+);
+
+export const deleteAssetModel = onCall(options, async (request) =>
+  executeAssetModels(async () => {
+    const result = await deleteAssetModelRecord(
+      adminIdentity(request.auth),
+      request.data,
+      assetModelDependencies(),
+    );
+    if (result.hadImage) await assetModelImagesService.cleanupDeleted(result.documentId);
+    return result;
+  }),
+);
+
+export const setAssetModelImage = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    setAssetModelImageRecord(
+      adminIdentity(request.auth),
+      request.data,
+      assetModelImageDependencies(),
+    ),
+  ),
+);
+
+export const removeAssetModelImage = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    removeAssetModelImageRecord(
+      adminIdentity(request.auth),
+      request.data,
+      assetModelImageDependencies(),
+    ),
+  ),
+);
+
+export const getAssetModelImageAccess = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    getAssetModelImageAccessRecord(
+      adminIdentity(request.auth),
+      request.data,
+      assetModelImageDependencies(),
+    ),
   ),
 );

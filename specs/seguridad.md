@@ -14,7 +14,7 @@
 - SEC-012: Las cinco callables de Categorías validan Authentication, claim administrativo y el documento canónico activo antes de acceder a datos.
 - SEC-013: El rol `usuario` y las solicitudes anónimas no pueden listar ni mutar el catálogo administrativo de Categorías.
 - SEC-014: La eliminación verifica referencias mediante backend y falla de forma segura cuando no puede demostrar que la categoría está libre.
-- SEC-015: La futura consulta de categorías activas para Modelos de activos requerirá un contrato sanitizado propio; no queda autorizada por esta especificación.
+- SEC-015: Modelos consume Categorías activas mediante `getAssetModelCatalogs`, que expone únicamente identificador y nombre.
 - SEC-016: `cantidadActivos` solo puede escribirse o reconciliarse mediante backend autorizado; ningún payload administrativo acepta ese campo.
 - SEC-017: La reducción de acceso intenta actualizar claims y revocar refresh tokens de forma independiente; cualquier fallo produce `reconciliation-required` y nunca habilita una mutación posterior sin perfil canónico activo.
 - SEC-018: Hosting envía protección contra framing, MIME sniffing y fuga de referer, restringe capacidades no utilizadas y separa la caché del documento de entrada respecto de assets con hash.
@@ -26,5 +26,17 @@
 - SEC-021: `fabricantes` y `fabricantes_nombres` permanecen cerradas a toda lectura y escritura directa desde clientes; el módulo consume exclusivamente callables.
 - SEC-022: Las cinco callables de Fabricantes validan Authentication, claim administrativo y el documento canónico activo antes de acceder a datos.
 - SEC-023: El rol `usuario` y las solicitudes anónimas no pueden listar ni mutar el catálogo administrativo de Fabricantes.
-- SEC-024: Antes de autorizar el primer Modelo de activo, `deleteManufacturer` debe incorporar la verificación fail-safe del contrato canónico de Modelos; mientras ese consumidor no existe, no es posible crear una referencia aprobada a `fabricanteId`.
-- SEC-025: La futura consulta de fabricantes activos para Modelos de activos requerirá un contrato sanitizado propio; no queda autorizada por este borrador.
+- SEC-024: `deleteManufacturer` verifica de forma fail-safe referencias canónicas en `modelos_activos` antes de eliminar.
+- SEC-025: Modelos consume Fabricantes activos mediante `getAssetModelCatalogs`, que expone únicamente identificador y nombre.
+
+## Modelos de activos
+
+- SEC-026: `modelos_activos` y `modelos_activos_claves` permanecerán cerradas a toda lectura y escritura directa desde clientes; el módulo consumirá exclusivamente callables.
+- SEC-027: Toda callable de Modelos validará Authentication, claim administrativo y el documento canónico activo antes de acceder a Firestore o Storage.
+- SEC-028: El rol `usuario`, perfiles inactivos y solicitudes anónimas no podrán listar, mutar ni obtener acceso temporal a imágenes de Modelos.
+- SEC-029: `getAssetModelCatalogs` expondrá únicamente identificador y nombre de Categorías y Fabricantes aplicables; no filtrará en Angular documentos administrativos completos.
+- SEC-030: `deleteCategory` y `deleteManufacturer` consultarán `modelos_activos` y fallarán de forma segura ante referencia, error o resultado no determinable antes de desplegar Modelos.
+- SEC-031: Storage Rules conservará denegación total; Admin SDK será el único escritor y las imágenes se leerán mediante URLs firmadas de máximo cinco minutos emitidas por callable.
+- SEC-032: Backend validará tamaño decodificado, firma real del archivo, dimensiones y formato; no confiará únicamente en extensión, nombre o MIME declarado por el cliente.
+- SEC-033: El procesamiento rechazará imágenes malformadas, bombas de descompresión y dimensiones fuera del límite técnico; eliminará metadatos antes de guardar WebP normalizado.
+- SEC-034: Sustitución, eliminación y borrado de Modelo aplicarán compensación entre Firestore y Storage y reportarán reconciliación cuando no pueda completarse la limpieza.

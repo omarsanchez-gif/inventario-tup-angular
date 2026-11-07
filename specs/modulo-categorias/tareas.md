@@ -21,6 +21,7 @@
 - [x] Reutilizar búsqueda automática, paginación e icon-buttons compartidos.
 - [x] Mostrar `cantidadActivos` como columna de solo lectura, con valor inicial cero.
 - [ ] Antes de implementar Activos, definir mantenimiento atómico, transferencia y reconciliación del contador.
+- [x] Antes de desplegar Modelos de activos, ampliar `deleteCategory` con la comprobación fail-safe de referencias en `modelos_activos`.
 - [x] Agregar pruebas unitarias y de integración con Auth/Firestore Emulator.
 - [x] Validar lint, guardia visual, formato, pruebas y build de staging.
 - [x] Desplegar solo los servicios afectados a `inventario-stg` y verificar evidencia remota.

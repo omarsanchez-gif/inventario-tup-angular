@@ -11,6 +11,8 @@ import { AuthFacade } from './core/auth/auth.facade';
 import { provideFirebase } from './core/firebase/firebase.providers';
 import { CATEGORIES_GATEWAY } from './features/categories/data/categories.gateway';
 import { FirebaseCategoriesGateway } from './features/categories/data/firebase-categories.gateway';
+import { ASSET_MODELS_GATEWAY } from './features/asset-models/data/asset-models.gateway';
+import { FirebaseAssetModelsGateway } from './features/asset-models/data/firebase-asset-models.gateway';
 import { FirebaseManufacturersGateway } from './features/manufacturers/data/firebase-manufacturers.gateway';
 import { MANUFACTURERS_GATEWAY } from './features/manufacturers/data/manufacturers.gateway';
 import { FirebaseUsersGateway } from './features/users/data/firebase-users.gateway';
@@ -21,6 +23,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideFirebase(),
+    FirebaseAssetModelsGateway,
+    { provide: ASSET_MODELS_GATEWAY, useExisting: FirebaseAssetModelsGateway },
     FirebaseCategoriesGateway,
     { provide: CATEGORIES_GATEWAY, useExisting: FirebaseCategoriesGateway },
     FirebaseManufacturersGateway,

@@ -58,11 +58,13 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - `modulo-categorias` y el grupo administrativo `Configuraciones`, autorizados para implementación, pruebas y despliegue exclusivo a staging el 7 de noviembre de 2026, limitados a sus specs vigentes.
 - `modulo-fabricantes`, autorizado expresamente el 7 de noviembre de 2026 para implementación, pruebas y despliegue exclusivo a staging, limitado a Nombre, Notas y su administración conforme a sus specs vigentes.
 - Fabricantes fue desplegado únicamente a `inventario-stg` el 7 de noviembre de 2026: Firestore Rules, cinco Functions y Hosting. Las Functions están activas y rechazan solicitudes anónimas; producción, datos y migración permanecieron intactos.
+- `modulo-modelos-activos`, autorizado expresamente el 7 de noviembre de 2026 para implementación, pruebas y despliegue exclusivo a staging, limitado a Nombre, Categoría, Fabricante, Modelo No., Notas e Imagen conforme a sus specs vigentes y ADR-005.
+- Modelos de activos fue desplegado únicamente a `inventario-stg` el 7 de noviembre de 2026: Firestore Rules, Storage Rules, nueve Functions nuevas, dos Functions de eliminación reforzadas y Hosting. El bucket regional `inventario-stg.firebasestorage.app` quedó en `US-CENTRAL1`, vacío y cerrado a clientes. Producción, datos reales y migración permanecieron intactos.
 - Endurecimiento transversal previo a Fabricantes, autorizado el 7 de noviembre de 2026: cierre de lectura directa de Usuarios, revocación defensiva, encabezados y caché de Hosting, CI y reconciliación documental conforme a ADR-004.
 
 ## Fuera de alcance actual
 
-- Activos, modelos, personas, ubicaciones y responsivas.
+- Activos, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.
 - Creación o despliegue de proyectos Firebase de producción.

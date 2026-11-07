@@ -28,6 +28,7 @@
 - CAT-021: una categoría nueva expone `cantidadActivos: 0` y ninguna callable administrativa acepta modificarlo.
 - CAT-022: la tabla muestra `Cantidad de activos` como entero no editable y conserva el valor al buscar, paginar, editar o cambiar estado.
 - CAT-023: las futuras operaciones de crear, eliminar, restaurar o transferir Activos ajustan los contadores afectados sin producir negativos; la prueba integral queda bloqueada hasta especificar e implementar Activos.
+- CAT-024: antes de desplegar Modelos, una referencia en `modelos_activos` produce `category-in-use`; un error de consulta falla de forma segura sin eliminar categoría ni reserva.
 
 ## Evidencia local — 7 de noviembre de 2026
 
@@ -36,6 +37,7 @@
 - Firestore Emulator aprobó 2 pruebas de integración: transacciones, unicidad concurrente, renombrado, estado, eliminación condicionada y denegación de acceso directo.
 - Compilación de Functions, lint Angular/Functions, guardia visual, formato y build de staging aprobaron.
 - CAT-023 permanece parcialmente diferida: el valor inicial y la protección están cubiertos, pero el ajuste por operaciones reales requiere los futuros módulos de Modelos y Activos.
+- CAT-024 quedó aprobada con Firestore Emulator el 7 de noviembre de 2026: una referencia de Modelo impide eliminar la Categoría y la transacción conserva categoría y reserva.
 - Firestore Rules, las cinco callables y Hosting se desplegaron por separado únicamente a `inventario-stg`.
 - Las cinco callables están `ACTIVE` en `us-central1`, usan Node.js 22 y rechazaron solicitudes anónimas con HTTP 401.
 - Firestore remoto rechazó con HTTP 403 la lectura anónima directa de `categorias` y Hosting respondió HTTP 200 con `main-XXPSXP7R.js` y `styles-CISTRGAV.css`.

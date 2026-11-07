@@ -56,6 +56,7 @@ describe('AdminShell', () => {
           { path: 'usuarios', component: RouteStub },
           { path: 'configuraciones/categorias', component: RouteStub },
           { path: 'configuraciones/fabricantes', component: RouteStub },
+          { path: 'configuraciones/modelos-activos', component: RouteStub },
         ]),
         {
           provide: AuthFacade,
@@ -153,14 +154,13 @@ describe('AdminShell', () => {
     expect(settings).toBeTruthy();
     expect(settings.getAttribute('aria-expanded')).toBe('false');
     expect(element.querySelector('[data-icon="settings"]')).toBeTruthy();
-    expect(element.textContent).not.toContain('Modelos de activos');
 
     settings.click();
     fixture.detectChanges();
     expect(settings.getAttribute('aria-expanded')).toBe('true');
     expect(
       [...element.querySelectorAll('.navigation__sublink')].map((link) => link.textContent?.trim()),
-    ).toEqual(['Categorías', 'Fabricantes']);
+    ).toEqual(['Categorías', 'Fabricantes', 'Modelos de activos']);
 
     await TestBed.inject(Router).navigateByUrl('/configuraciones/categorias');
     fixture.detectChanges();

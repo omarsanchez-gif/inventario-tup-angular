@@ -2,7 +2,7 @@
 
 ## Estado
 
-El modelo implementado comprende autorización, Categorías y Fabricantes. Firestore Rules protege sus colecciones e índices técnicos; las colecciones de Fabricantes se materializarán con la primera alta autorizada, ya que la implementación y el despliegue no crean datos. Las demás entidades de inventario y migración continúan pendientes.
+El modelo implementado comprende autorización, Categorías, Fabricantes y Modelos de activos. Firestore Rules protege sus colecciones e índices técnicos; la implementación y el despliegue no crean documentos de negocio. Activos y migración continúan pendientes.
 
 ## Colección `usuarios`
 
@@ -95,3 +95,76 @@ fabricantes_nombres/{nombreKey}
 ```
 
 `nombreKey` es el SHA-256 hexadecimal de `nombreNormalizado`. El fabricante y su reserva de nombre se crean, renombran o eliminan en una transacción. Ningún cliente puede leer o escribir este índice.
+
+## Colección `modelos_activos`
+
+Este contrato fue aprobado para Modelos de activos el 7 de noviembre de 2026. La colección se materializa únicamente mediante una alta administrativa autorizada; el despliegue no crea datos.
+
+```text
+modelos_activos/{modeloId}
+  nombre: string
+  nombreNormalizado: string
+  categoriaId: string
+  fabricanteId: string
+  modeloNo: string | null
+  modeloNoNormalizado: string | null
+  notas: string | null
+  activo: boolean
+  imagen: {
+    contentType: "image/webp"
+    originalSize: number
+    thumbnailSize: number
+    sha256: string
+    version: string
+    fechaActualizacion: Timestamp
+  } | null
+  fechaCreacion: Timestamp
+  fechaActualizacion: Timestamp
+```
+
+Restricciones:
+
+- `modeloId` es estable, generado por backend e independiente del nombre y del identificador de Snipe-IT.
+- `nombre` se recorta, colapsa espacios internos y conserva su presentación; máximo 120 caracteres.
+- `nombreNormalizado` usa Unicode NFKD, elimina diacríticos, convierte a minúsculas, colapsa espacios y recorta.
+- `categoriaId` y `fabricanteId` referencian documentos canónicos; no se persisten sus nombres dentro del Modelo.
+- `modeloNo` conserva presentación, se recorta y colapsa espacios; una cadena vacía se guarda como `null`.
+- `modeloNoNormalizado` aplica la misma normalización de texto y queda `null` cuando `modeloNo` no existe.
+- `notas` se recorta; una cadena vacía se guarda como `null` y admite máximo 1,000 caracteres.
+- `activo` inicia en `true` y solo cambia mediante el caso de uso de estado.
+- `imagen` es metadata administrada por backend; no contiene URLs ni contenido binario.
+- `version` cambia después de cada sustitución válida y permite invalidar presentaciones anteriores.
+- `fechaCreacion`, `fechaActualizacion` e `imagen.fechaActualizacion` usan tiempo del servidor.
+
+## Índice técnico `modelos_activos_claves`
+
+```text
+modelos_activos_claves/{claveKey}
+  modeloId: string
+  fabricanteId: string
+  tipo: "modeloNo" | "nombre"
+  valorNormalizado: string
+```
+
+- Con `modeloNo`, la clave lógica es `fabricanteId + modeloNoNormalizado`.
+- Sin `modeloNo`, la clave lógica es `fabricanteId + nombreNormalizado`.
+- `claveKey` es el SHA-256 hexadecimal de la clave lógica con separadores no ambiguos.
+- Modelo y reserva se crean, renombran o eliminan en una transacción.
+- Cambiar Fabricante, Nombre o Modelo No. sustituye la reserva cuando cambia la clave lógica.
+- Ningún cliente puede leer o escribir el índice.
+
+## Objetos de Storage
+
+Bucket de staging: `inventario-stg.firebasestorage.app`, ubicación regional `US-CENTRAL1`, clase Standard. Producción no tiene bucket autorizado.
+
+```text
+modelos-activos/{modeloId}/original.webp
+modelos-activos/{modeloId}/thumbnail.webp
+```
+
+- Las rutas son deterministas y no se guardan como URLs públicas.
+- `original.webp` se orienta según EXIF, elimina metadatos y limita sus dimensiones máximas a 1,600 × 1,600 píxeles sin ampliar imágenes pequeñas.
+- `thumbnail.webp` limita sus dimensiones a 256 × 256 píxeles sin deformar.
+- Los objetos solo se escriben o eliminan con Admin SDK; Storage Rules mantiene denegación total para clientes.
+- La callable de acceso entrega URLs firmadas de corta duración únicamente después de revalidar al administrador canónico.
+- Un fallo entre Storage y Firestore se resuelve mediante compensación y un estado funcional de reconciliación; ninguna URL se persiste en Firestore.

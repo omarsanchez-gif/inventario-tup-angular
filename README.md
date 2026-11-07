@@ -11,6 +11,7 @@ Estado actual en staging:
 - Administración inicial de usuarios autorizados.
 - Administración de Categorías dentro del grupo Configuraciones.
 - Administración de Fabricantes con Nombre y Notas dentro del grupo Configuraciones.
+- Administración de Modelos de activos con Categoría, Fabricante e imagen normalizada dentro del grupo Configuraciones.
 - Cloud Functions, Firestore Rules y Emulator Suite.
 - Proyecto `inventario-stg` configurado y publicado; producción no está configurada ni autorizada.
 - Sin conexión ni extracción desde Snipe-IT.
@@ -48,4 +49,4 @@ La configuración web de Firebase es pública y no funciona como secreto. Las re
 
 ## Especificaciones
 
-La fuente de verdad está en [specs](specs/). Las entidades de inventario y la migración desde Snipe-IT se definirán antes de implementarse.
+La fuente de verdad está en [specs](specs/). Activos y la migración desde Snipe-IT se definirán antes de implementarse.

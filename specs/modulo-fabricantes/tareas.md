@@ -23,7 +23,7 @@
 - [x] Reutilizar búsqueda automática, paginación e icon-buttons compartidos.
 - [x] Agregar pruebas unitarias y de integración con Auth/Firestore Emulator.
 - [x] Validar lint, guardia visual, formato, pruebas y build de staging.
-- [ ] Antes de implementar Modelos de activos, ampliar `deleteManufacturer` con la comprobación fail-safe de sus referencias.
+- [x] Antes de desplegar Modelos de activos, ampliar `deleteManufacturer` con la comprobación fail-safe de referencias en `modelos_activos`.
 - [x] Desplegar por separado solo los servicios afectados a `inventario-stg`.
 - [x] Verificar Rules, Functions, rechazo anónimo, Hosting, bundle y encabezados remotos.
 - [ ] Completar aceptación funcional y visual autenticada en escritorio y móvil.

@@ -102,8 +102,21 @@
 - El paginador informa el intervalo visible, el total de resultados y la página actual; sus controles anterior y siguiente usan iconos compartidos, nombre accesible, tooltip y estado deshabilitado.
 - En móvil la búsqueda, la tabla con desplazamiento horizontal y el paginador conservan objetivos táctiles mínimos de 44 × 44 px.
 
+## Campo de imagen para Modelos de activos
+
+- La selección usa un `input type="file"` nativo con etiqueta visible; no depende de arrastrar y soltar.
+- Expone formatos permitidos y límite de 2 MiB antes de seleccionar.
+- Muestra previsualización local, nombre y tamaño del archivo sin subirlo automáticamente.
+- Permite retirar la selección antes de guardar y revoca el object URL local al reemplazar, cerrar o destruir el componente.
+- Una imagen vigente muestra miniatura, estado y acciones textuales `Reemplazar imagen` y `Eliminar imagen` dentro del diálogo.
+- Carga, procesamiento, error parcial y reintento se anuncian con regiones de estado accesibles; no se simula un porcentaje que la callable no pueda medir.
+- La tabla usa una miniatura con dimensiones reservadas y texto alternativo contextual; ante ausencia o error muestra un placeholder que no depende solo del color.
+- El campo se implementa por composición de primitivas globales; su SCSS encapsulado controla únicamente previsualización y distribución responsive.
+
 ## Estado de implementación
 
 El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el estándar de acciones contextuales con iconos, la búsqueda a todo el ancho y `AppPagination` están implementados y publicados únicamente en Hosting de `inventario-stg`. El grupo `Configuraciones`, el icono `settings` y las opciones `Categorías` y `Fabricantes` también están publicados; permite contraerse sobre una ruta activa, sus submenús ocupan todo el ancho y su tipografía coincide con Dashboard y Usuarios. Hosting sirve `main-TOQX2LZJ.js` y `styles-CISTRGAV.css` con HTTP 200. La regresión aprobó 9 suites con 22 pruebas Angular, lint, guardia visual, formato y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
+
+Modelos de activos reutiliza las mismas primitivas y fue publicado en Hosting de staging el 7 de noviembre de 2026. La regresión actual aprobó 10 suites con 27 pruebas Angular y la guardia visual; Hosting sirve `main-ALBLFGKY.js`, `styles-CISTRGAV.css` y el módulo diferido `chunk-CA-BBvnz.js`. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.
