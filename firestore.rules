@@ -14,6 +14,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    match /fabricantes/{manufacturerId} {
+      allow read, write: if false;
+    }
+
+    match /fabricantes_nombres/{nameKey} {
+      allow read, write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

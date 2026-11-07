@@ -25,10 +25,20 @@ import {
   type AdminUsersDependencies,
 } from './admin-users.js';
 import {
+  AdminManufacturersError,
+  createManufacturer as createManufacturerRecord,
+  deleteManufacturer as deleteManufacturerRecord,
+  listManufacturers as listManufacturerRecords,
+  setManufacturerStatus as setManufacturerRecordStatus,
+  updateManufacturer as updateManufacturerRecord,
+  type AdminManufacturersDependencies,
+} from './admin-manufacturers.js';
+import {
   AuthorizationError,
   bootstrapAuthorization as authorize,
 } from './bootstrap-authorization.js';
 import { createAdminCategoriesRepository } from './firestore-categories.repository.js';
+import { createAdminManufacturersRepository } from './firestore-manufacturers.repository.js';
 import {
   createAdminUsersRepository,
   createAuthorizationRepository,
@@ -45,6 +55,7 @@ const auth = getAuth();
 const authorizationRepository = createAuthorizationRepository(firestore);
 const adminUsersRepository = createAdminUsersRepository(firestore);
 const adminCategoriesRepository = createAdminCategoriesRepository(firestore);
+const adminManufacturersRepository = createAdminManufacturersRepository(firestore);
 const options = {
   invoker: 'public' as const,
   maxInstances: 20,
@@ -88,6 +99,10 @@ function categoryDependencies(): AdminCategoriesDependencies {
   return { repository: adminCategoriesRepository };
 }
 
+function manufacturerDependencies(): AdminManufacturersDependencies {
+  return { repository: adminManufacturersRepository };
+}
+
 async function executeAdmin<T>(operation: () => Promise<T>): Promise<T> {
   try {
     return await operation();
@@ -116,6 +131,24 @@ async function executeCategories<T>(operation: () => Promise<T>): Promise<T> {
       });
     }
     logger.error('Error no controlado en Categorías.', {
+      cause: error instanceof Error ? error.name : 'unknown',
+    });
+    throw new HttpsError('unavailable', 'El servicio no está disponible.', {
+      functionalCode: 'service-unavailable',
+    });
+  }
+}
+
+async function executeManufacturers<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (error instanceof AdminManufacturersError) {
+      throw new HttpsError(error.functionsCode, error.message, {
+        functionalCode: error.functionalCode,
+      });
+    }
+    logger.error('Error no controlado en Fabricantes.', {
       cause: error instanceof Error ? error.name : 'unknown',
     });
     throw new HttpsError('unavailable', 'El servicio no está disponible.', {
@@ -208,5 +241,39 @@ export const setCategoryStatus = onCall(options, async (request) =>
 export const deleteCategory = onCall(options, async (request) =>
   executeCategories(() =>
     deleteCategoryRecord(adminIdentity(request.auth), request.data, categoryDependencies()),
+  ),
+);
+
+export const listManufacturers = onCall(options, async (request) =>
+  executeManufacturers(() =>
+    listManufacturerRecords(adminIdentity(request.auth), manufacturerDependencies()),
+  ),
+);
+
+export const createManufacturer = onCall(options, async (request) =>
+  executeManufacturers(() =>
+    createManufacturerRecord(adminIdentity(request.auth), request.data, manufacturerDependencies()),
+  ),
+);
+
+export const updateManufacturer = onCall(options, async (request) =>
+  executeManufacturers(() =>
+    updateManufacturerRecord(adminIdentity(request.auth), request.data, manufacturerDependencies()),
+  ),
+);
+
+export const setManufacturerStatus = onCall(options, async (request) =>
+  executeManufacturers(() =>
+    setManufacturerRecordStatus(
+      adminIdentity(request.auth),
+      request.data,
+      manufacturerDependencies(),
+    ),
+  ),
+);
+
+export const deleteManufacturer = onCall(options, async (request) =>
+  executeManufacturers(() =>
+    deleteManufacturerRecord(adminIdentity(request.auth), request.data, manufacturerDependencies()),
   ),
 );

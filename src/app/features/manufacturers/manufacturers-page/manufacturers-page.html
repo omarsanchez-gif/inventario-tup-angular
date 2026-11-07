@@ -1,0 +1,198 @@
+<section aria-labelledby="manufacturers-title">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Configuraciones</p>
+      <h1 class="page-title" id="manufacturers-title">Fabricantes</h1>
+      <p>Administre las marcas que producen los modelos de activos.</p>
+    </div>
+    <button class="button button--primary" type="button" (click)="openNew()">
+      Nuevo fabricante
+    </button>
+  </header>
+
+  @if (manufacturers.error(); as error) {
+    <div class="alert alert--error" role="alert">{{ error }}</div>
+  }
+  @if (manufacturers.success(); as success) {
+    <div class="alert alert--success" role="status">{{ success }}</div>
+  }
+
+  @if (formVisible()) {
+    <app-dialog
+      [title]="editingId() ? 'Editar fabricante' : 'Nuevo fabricante'"
+      [dismissible]="!manufacturers.saving()"
+      (dismissed)="closeForm()"
+    >
+      <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-grid form-grid--single">
+          <div class="field">
+            <label for="manufacturer-name">Nombre</label>
+            <input id="manufacturer-name" formControlName="nombre" maxlength="120" />
+            @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+              <small role="alert">Capture un nombre de máximo 120 caracteres.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="manufacturer-notes">Notas</label>
+            <textarea id="manufacturer-notes" formControlName="notas" maxlength="1000"></textarea>
+            @if (form.controls.notas.touched && form.controls.notas.invalid) {
+              <small role="alert">Las notas admiten máximo 1,000 caracteres.</small>
+            }
+          </div>
+        </div>
+        <div class="dialog__actions">
+          <button
+            class="button button--secondary"
+            type="button"
+            [disabled]="manufacturers.saving()"
+            (click)="closeForm()"
+          >
+            Cancelar
+          </button>
+          <button class="button button--primary" type="submit" [disabled]="manufacturers.saving()">
+            {{ manufacturers.saving() ? 'Guardando…' : 'Guardar fabricante' }}
+          </button>
+        </div>
+      </form>
+    </app-dialog>
+  }
+
+  @if (pendingDeletion(); as manufacturer) {
+    <app-dialog
+      title="Eliminar fabricante"
+      [dismissible]="!manufacturers.saving()"
+      (dismissed)="cancelDeletion()"
+    >
+      <p class="dialog__message">¿Eliminar el fabricante {{ manufacturer.nombre }}?</p>
+      <p class="dialog__help">
+        Solo se eliminará si no está vinculado con modelos de activos. Si está en uso deberá
+        desactivarlo.
+      </p>
+      <div class="dialog__actions">
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="manufacturers.saving()"
+          (click)="cancelDeletion()"
+        >
+          Cancelar
+        </button>
+        <button
+          class="button button--danger"
+          type="button"
+          [disabled]="manufacturers.saving()"
+          (click)="confirmDeletion()"
+        >
+          {{ manufacturers.saving() ? 'Eliminando…' : 'Eliminar fabricante' }}
+        </button>
+      </div>
+    </app-dialog>
+  }
+
+  <div class="table-toolbar">
+    <div class="field table-search">
+      <label for="manufacturer-search">Buscar por nombre o notas</label>
+      <input
+        id="manufacturer-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Escriba para filtrar automáticamente"
+        [value]="manufacturers.query()"
+        (input)="setQuery($event)"
+      />
+    </div>
+  </div>
+
+  @if (manufacturers.loading()) {
+    <p role="status">Cargando fabricantes…</p>
+  } @else if (manufacturers.filteredManufacturers().length === 0) {
+    <div class="card empty-state">
+      <h2>
+        {{
+          manufacturers.query() ? 'No se encontraron fabricantes' : 'No hay fabricantes registrados'
+        }}
+      </h2>
+    </div>
+  } @else {
+    <div class="card data-table-region">
+      <table class="data-table">
+        <caption class="sr-only">
+          Fabricantes del Sistema de Inventario TUP
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Notas</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (manufacturer of paginatedManufacturers(); track manufacturer.documentId) {
+            <tr>
+              <td>{{ manufacturer.nombre }}</td>
+              <td>{{ manufacturer.notas || '—' }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.badge--active]="manufacturer.activo"
+                  [class.badge--inactive]="!manufacturer.activo"
+                >
+                  {{ manufacturer.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <div class="record-actions">
+                  <button
+                    class="icon-button icon-button--secondary"
+                    type="button"
+                    [disabled]="manufacturers.saving()"
+                    [attr.aria-label]="'Editar ' + manufacturer.nombre"
+                    [attr.title]="'Editar ' + manufacturer.nombre"
+                    (click)="edit(manufacturer)"
+                  >
+                    <app-icon name="edit" />
+                  </button>
+                  <button
+                    class="icon-button icon-button--secondary"
+                    type="button"
+                    [disabled]="manufacturers.saving()"
+                    [attr.aria-label]="
+                      manufacturer.activo
+                        ? 'Desactivar ' + manufacturer.nombre
+                        : 'Activar ' + manufacturer.nombre
+                    "
+                    [attr.title]="
+                      manufacturer.activo
+                        ? 'Desactivar ' + manufacturer.nombre
+                        : 'Activar ' + manufacturer.nombre
+                    "
+                    (click)="toggleStatus(manufacturer)"
+                  >
+                    <app-icon [name]="manufacturer.activo ? 'deactivate' : 'activate'" />
+                  </button>
+                  <button
+                    class="icon-button icon-button--danger"
+                    type="button"
+                    [disabled]="manufacturers.saving()"
+                    [attr.aria-label]="'Eliminar ' + manufacturer.nombre"
+                    [attr.title]="'Eliminar ' + manufacturer.nombre"
+                    (click)="requestDeletion(manufacturer)"
+                  >
+                    <app-icon name="delete" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination
+      [totalItems]="manufacturers.filteredManufacturers().length"
+      [page]="activePage()"
+      [pageSize]="pageSize"
+      (pageChange)="setPage($event)"
+    />
+  }
+</section>

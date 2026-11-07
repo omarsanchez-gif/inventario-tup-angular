@@ -20,3 +20,11 @@
 - SEC-018: Hosting envía protección contra framing, MIME sniffing y fuga de referer, restringe capacidades no utilizadas y separa la caché del documento de entrada respecto de assets con hash.
 - SEC-019: Las callables conservan revalidación canónica y un máximo explícito de instancias. App Check requiere proveedor web y aceptación autenticada antes de activarse; no se habilita parcialmente.
 - SEC-020: La configuración web de Firebase es pública por diseño y debe conservar restricciones de sitio y API en Google Cloud; ningún secreto privado se guarda en Angular o Git.
+
+## Fabricantes
+
+- SEC-021: `fabricantes` y `fabricantes_nombres` permanecen cerradas a toda lectura y escritura directa desde clientes; el módulo consume exclusivamente callables.
+- SEC-022: Las cinco callables de Fabricantes validan Authentication, claim administrativo y el documento canónico activo antes de acceder a datos.
+- SEC-023: El rol `usuario` y las solicitudes anónimas no pueden listar ni mutar el catálogo administrativo de Fabricantes.
+- SEC-024: Antes de autorizar el primer Modelo de activo, `deleteManufacturer` debe incorporar la verificación fail-safe del contrato canónico de Modelos; mientras ese consumidor no existe, no es posible crear una referencia aprobada a `fabricanteId`.
+- SEC-025: La futura consulta de fabricantes activos para Modelos de activos requerirá un contrato sanitizado propio; no queda autorizada por este borrador.

@@ -62,3 +62,18 @@
 - RN-CAT-010: Identificadores, normalización, índice de unicidad y fechas son administrados por backend.
 - RN-CAT-011: La correspondencia con identificadores de Snipe-IT pertenece a la futura herramienta de migración y no se captura ni expone en el módulo.
 - RN-CAT-012: Cada categoría muestra la cantidad derivada de activos existentes que pertenecen a ella mediante su Modelo de activo; incluye cualquier asignación o estado operativo, excluye activos eliminados y nunca es editable por clientes.
+
+## Fabricantes
+
+- RN-FAB-001: Solo un `admin` autorizado puede listar y administrar fabricantes.
+- RN-FAB-002: Los únicos campos capturados son `nombre` y `notas`; no se almacenan URL, URL de soporte, búsqueda de garantía, teléfono, correo de soporte ni imagen.
+- RN-FAB-003: El nombre es obligatorio, tiene máximo 120 caracteres y es único después de normalizar mayúsculas, diacríticos y espacios.
+- RN-FAB-004: Las notas son opcionales, se recortan y admiten máximo 1,000 caracteres.
+- RN-FAB-005: Todo fabricante se crea activo; el estado se administra mediante una acción separada y no forma parte del formulario de alta o edición.
+- RN-FAB-006: Un fabricante inactivo permanece visible en la administración y en referencias históricas, pero no podrá seleccionarse en nuevos Modelos de activos.
+- RN-FAB-007: Un fabricante solo puede eliminarse cuando ningún Modelo de activo lo referencia; si está en uso, debe desactivarse.
+- RN-FAB-008: Toda mutación usa una callable y las lecturas o escrituras directas desde clientes están prohibidas.
+- RN-FAB-009: El listado administrativo admite un máximo inicial de 500 fabricantes, se ordena por nombre normalizado y nunca devuelve resultados parciales.
+- RN-FAB-010: Identificadores, normalización, índice de unicidad y fechas son administrados por backend.
+- RN-FAB-011: Fabricante identifica la marca que produce el activo; el comercio, distribuidor o plataforma donde se compra, como Steren, Mercado Libre o Amazon, no forma parte de este catálogo.
+- RN-FAB-012: La correspondencia con identificadores de Snipe-IT pertenece a la futura herramienta de migración y no se captura ni expone en el módulo.

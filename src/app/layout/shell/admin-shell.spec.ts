@@ -55,6 +55,7 @@ describe('AdminShell', () => {
           { path: 'dashboard', component: RouteStub },
           { path: 'usuarios', component: RouteStub },
           { path: 'configuraciones/categorias', component: RouteStub },
+          { path: 'configuraciones/fabricantes', component: RouteStub },
         ]),
         {
           provide: AuthFacade,
@@ -144,7 +145,7 @@ describe('AdminShell', () => {
     expect(button.getAttribute('aria-expanded')).toBe('true');
   });
 
-  it('shows an accessible admin settings group with only the implemented child', async () => {
+  it('shows an accessible admin settings group with the implemented children', async () => {
     createShell();
     const element = fixture.nativeElement as HTMLElement;
     const settings = element.querySelector<HTMLButtonElement>('.navigation__group-toggle')!;
@@ -152,18 +153,25 @@ describe('AdminShell', () => {
     expect(settings).toBeTruthy();
     expect(settings.getAttribute('aria-expanded')).toBe('false');
     expect(element.querySelector('[data-icon="settings"]')).toBeTruthy();
-    expect(element.textContent).not.toContain('Fabricantes');
     expect(element.textContent).not.toContain('Modelos de activos');
 
     settings.click();
     fixture.detectChanges();
     expect(settings.getAttribute('aria-expanded')).toBe('true');
-    expect(element.querySelector('.navigation__sublink')?.textContent).toContain('Categorías');
+    expect(
+      [...element.querySelectorAll('.navigation__sublink')].map((link) => link.textContent?.trim()),
+    ).toEqual(['Categorías', 'Fabricantes']);
 
     await TestBed.inject(Router).navigateByUrl('/configuraciones/categorias');
     fixture.detectChanges();
     expect(settings.classList).toContain('navigation__link--parent-active');
     expect(element.querySelector('.navigation__sublink--active')).toBeTruthy();
+
+    await TestBed.inject(Router).navigateByUrl('/configuraciones/fabricantes');
+    fixture.detectChanges();
+    expect(element.querySelector('.navigation__sublink--active')?.textContent).toContain(
+      'Fabricantes',
+    );
 
     settings.click();
     fixture.detectChanges();

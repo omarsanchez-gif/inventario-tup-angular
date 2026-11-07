@@ -24,6 +24,7 @@
 - Artifact Registry elimina automáticamente las imágenes de Functions con más de un día para limitar costos de almacenamiento.
 - El perfil canónico activo de `omar.sanchez@tecplayacar.edu.mx` existe como `admin`; su `uid` se asociará en el primer acceso válido.
 - La autorización vigente cubre Autenticación, Usuarios, Categorías y el endurecimiento transversal documentado en ADR-004, siempre limitado a staging y a los servicios afectados.
+- La autorización vigente también cubre Fabricantes conforme a su spec aprobada, siempre limitado a staging y a los servicios afectados.
 - El proyecto y alias de producción permanecen pendientes y no están autorizados.
 - La auditoría conserva cuatro alertas moderadas transitivas en utilidades de archivos de `google-gax`, sin altas ni críticas; el detalle y la decisión están en ADR-002.
 - El 7 de noviembre de 2026 se desplegó el endurecimiento previo a Fabricantes por servicios separados: Firestore Rules, las 11 callables existentes y Hosting. No se modificaron datos, índices, secretos ni producción.
@@ -48,3 +49,12 @@
 - Hosting responde HTTP 200 y sirve `main-XXPSXP7R.js` y `styles-CISTRGAV.css`.
 - El despliegue no incluyó índices, datos, secretos, migración ni producción.
 - La futura migración de categorías desde Snipe-IT utilizará una herramienta backend separada y no formará parte de las pantallas administrativas.
+
+## Fabricantes
+
+- El 7 de noviembre de 2026 se desplegaron por separado y únicamente a `inventario-stg` Firestore Rules, `listManufacturers`, `createManufacturer`, `updateManufacturer`, `setManufacturerStatus`, `deleteManufacturer` y Hosting.
+- Las cinco callables están `ACTIVE` como Functions v2 en `us-central1`, usan Node.js 22 y rechazaron solicitudes anónimas con HTTP 401.
+- Firestore remoto rechazó con HTTP 403 la lectura anónima directa de `fabricantes`.
+- Hosting responde HTTP 200 en `/` y `/configuraciones/fabricantes`, referencia `main-TOQX2LZJ.js` y publica el lazy chunk `chunk-D2Sg13iw.js`; conserva CSP y la política diferenciada de caché.
+- El despliegue no incluyó índices, datos, secretos, migración ni producción.
+- La futura migración de Fabricantes desde Snipe-IT utilizará una herramienta backend separada y se ejecutará antes de Modelos de activos.

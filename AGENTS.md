@@ -56,11 +56,13 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Usuarios administrativos con los roles iniciales `admin` y `usuario`.
 - Firestore Rules de denegación por defecto.
 - `modulo-categorias` y el grupo administrativo `Configuraciones`, autorizados para implementación, pruebas y despliegue exclusivo a staging el 7 de noviembre de 2026, limitados a sus specs vigentes.
+- `modulo-fabricantes`, autorizado expresamente el 7 de noviembre de 2026 para implementación, pruebas y despliegue exclusivo a staging, limitado a Nombre, Notas y su administración conforme a sus specs vigentes.
+- Fabricantes fue desplegado únicamente a `inventario-stg` el 7 de noviembre de 2026: Firestore Rules, cinco Functions y Hosting. Las Functions están activas y rechazan solicitudes anónimas; producción, datos y migración permanecieron intactos.
 - Endurecimiento transversal previo a Fabricantes, autorizado el 7 de noviembre de 2026: cierre de lectura directa de Usuarios, revocación defensiva, encabezados y caché de Hosting, CI y reconciliación documental conforme a ADR-004.
 
 ## Fuera de alcance actual
 
-- Activos, modelos, fabricantes, personas, ubicaciones y responsivas.
+- Activos, modelos, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.
 - Creación o despliegue de proyectos Firebase de producción.

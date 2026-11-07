@@ -2,7 +2,7 @@
 
 ## Estado
 
-El modelo desplegado comprende autorización y los contratos de Categorías. Firestore Rules protege `categorias` y `categorias_nombres`, y las cinco callables administrativas están publicadas en staging; las colecciones se materializarán con la primera alta autorizada, ya que este incremento no creó datos. Las demás entidades de inventario y migración continúan pendientes.
+El modelo implementado comprende autorización, Categorías y Fabricantes. Firestore Rules protege sus colecciones e índices técnicos; las colecciones de Fabricantes se materializarán con la primera alta autorizada, ya que la implementación y el despliegue no crean datos. Las demás entidades de inventario y migración continúan pendientes.
 
 ## Colección `usuarios`
 
@@ -60,3 +60,38 @@ categorias_nombres/{nombreKey}
 ```
 
 `nombreKey` es el SHA-256 hexadecimal de `nombreNormalizado`. La categoría y su reserva de nombre se crean, renombran o eliminan en una transacción. Ningún cliente puede leer o escribir este índice. Esta decisión se desarrolla en ADR-003.
+
+## Colección `fabricantes`
+
+Este contrato fue aprobado para el módulo Fabricantes el 7 de noviembre de 2026.
+
+```text
+fabricantes/{fabricanteId}
+  nombre: string
+  nombreNormalizado: string
+  notas: string | null
+  activo: boolean
+  fechaCreacion: Timestamp
+  fechaActualizacion: Timestamp
+```
+
+Restricciones:
+
+- `fabricanteId` es estable, generado por backend y no depende del nombre ni del identificador de Snipe-IT.
+- `nombre` se recorta, colapsa espacios internos y conserva su presentación legible; máximo 120 caracteres.
+- `nombreNormalizado` se deriva en backend mediante Unicode NFKD, eliminación de diacríticos, conversión a minúsculas, colapso de espacios y recorte.
+- `notas` se recorta; una cadena vacía se guarda como `null` y su longitud máxima es 1,000 caracteres.
+- `activo` inicia en `true` y solo cambia mediante el caso de uso de estado.
+- `fechaCreacion` y `fechaActualizacion` usan tiempo del servidor; la fecha de creación es inmutable.
+- Una futura entidad Modelo de activo referenciará `fabricanteId`; no duplicará el nombre como fuente canónica.
+- No se almacenan datos de compra o soporte del fabricante ni datos del comercio, distribuidor o plataforma de adquisición.
+
+## Índice técnico `fabricantes_nombres`
+
+```text
+fabricantes_nombres/{nombreKey}
+  fabricanteId: string
+  nombreNormalizado: string
+```
+
+`nombreKey` es el SHA-256 hexadecimal de `nombreNormalizado`. El fabricante y su reserva de nombre se crean, renombran o eliminan en una transacción. Ningún cliente puede leer o escribir este índice.

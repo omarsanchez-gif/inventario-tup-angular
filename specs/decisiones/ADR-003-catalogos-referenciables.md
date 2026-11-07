@@ -2,7 +2,7 @@
 
 ## Estado
 
-Aceptada para la implementación de Categorías el 7 de noviembre de 2026.
+Aceptada para la implementación de Categorías y Fabricantes el 7 de noviembre de 2026.
 
 ## Contexto
 
@@ -10,9 +10,10 @@ Categorías será referenciada por futuros Modelos de activos. Usar el nombre co
 
 ## Decisión
 
-- Cada categoría usa un `categoriaId` estable, generado por backend e independiente del nombre y de Snipe-IT.
+- Cada categoría usa un `categoriaId` estable y cada fabricante un `fabricanteId` estable, generados por backend e independientes del nombre y de Snipe-IT.
 - El nombre se normaliza para unicidad, pero se conserva por separado su presentación legible.
 - `categorias_nombres/{nombreKey}` reserva transaccionalmente el nombre; `nombreKey` es SHA-256 de `nombreNormalizado`.
+- `fabricantes_nombres/{nombreKey}` aplica la misma reserva transaccional al catálogo de Fabricantes.
 - Alta, cambio de nombre y eliminación modifican entidad e índice en una sola transacción.
 - Los catálogos referenciables incluyen estado activo administrado fuera del formulario principal.
 - Una entidad referenciada no se elimina: se desactiva y conserva para historia.
@@ -29,4 +30,4 @@ Categorías será referenciada por futuros Modelos de activos. Usar el nombre co
 - El backend debe comprobar referencias antes de eliminar y fallar de forma segura si no puede hacerlo.
 - El índice técnico queda completamente inaccesible para clientes.
 - El contador derivado puede reconstruirse y no se usa como única evidencia para permitir una eliminación.
-- Fabricantes y otros catálogos podrán reutilizar el patrón únicamente después de especificarlo para cada módulo.
+- Fabricantes reutiliza el patrón con su spec aprobada; otros catálogos solo podrán hacerlo después de especificarlo para cada módulo.

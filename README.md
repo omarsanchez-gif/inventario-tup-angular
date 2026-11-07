@@ -10,6 +10,7 @@ Estado actual en staging:
 - Shell privado y Dashboard inicial sin KPI simulados.
 - Administración inicial de usuarios autorizados.
 - Administración de Categorías dentro del grupo Configuraciones.
+- Administración de Fabricantes con Nombre y Notas dentro del grupo Configuraciones.
 - Cloud Functions, Firestore Rules y Emulator Suite.
 - Proyecto `inventario-stg` configurado y publicado; producción no está configurada ni autorizada.
 - Sin conexión ni extracción desde Snipe-IT.

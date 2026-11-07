@@ -42,6 +42,15 @@ export const routes: Routes = [
           ),
         title: 'Categorías | Sistema de Inventario TUP',
       },
+      {
+        path: 'configuraciones/fabricantes',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/manufacturers/manufacturers-page/manufacturers-page').then(
+            (component) => component.ManufacturersPage,
+          ),
+        title: 'Fabricantes | Sistema de Inventario TUP',
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },
