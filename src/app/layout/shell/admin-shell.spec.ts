@@ -164,6 +164,19 @@ describe('AdminShell', () => {
     fixture.detectChanges();
     expect(settings.classList).toContain('navigation__link--parent-active');
     expect(element.querySelector('.navigation__sublink--active')).toBeTruthy();
+
+    settings.click();
+    fixture.detectChanges();
+    expect(settings.getAttribute('aria-expanded')).toBe('false');
+    expect(settings.classList).toContain('navigation__link--parent-active');
+    expect(element.querySelector('.navigation__subnav')).toBeFalsy();
+
+    settings.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(settings.getAttribute('aria-expanded')).toBe('true');
+    expect(element.querySelector('.navigation__sublink--active')).toBeTruthy();
   });
 
   it('hides settings from the usuario role', () => {

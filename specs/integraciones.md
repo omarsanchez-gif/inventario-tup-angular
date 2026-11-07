@@ -36,6 +36,7 @@
 ## Categorías
 
 - El 7 de noviembre de 2026 se desplegaron por separado y únicamente a `inventario-stg` Firestore Rules, `listCategories`, `createCategory`, `updateCategory`, `setCategoryStatus`, `deleteCategory` y Hosting.
+- Ese mismo día se publicó únicamente Hosting con la corrección del grupo `Configuraciones`: permite contraerlo sobre una ruta activa y extiende los submenús a todo el ancho disponible. La verificación remota confirmó HTTP 200 y los bundles `main-3IK73UUE.js` y `styles-CISTRGAV.css`; Functions, Rules, datos y producción no fueron modificados.
 - Las cinco callables están `ACTIVE` en `us-central1`, usan Node.js 22 y rechazaron solicitudes anónimas con HTTP 401; Firestore rechazó con HTTP 403 la lectura anónima directa de `categorias`.
 - Hosting responde HTTP 200 y sirve `main-XXPSXP7R.js` y `styles-CISTRGAV.css`.
 - El despliegue no incluyó índices, datos, secretos, migración ni producción.

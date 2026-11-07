@@ -118,13 +118,19 @@
 .navigation__subnav {
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-1) 0 var(--space-1) calc(1.25rem + var(--space-6));
+  width: 100%;
+  padding-block: var(--space-1);
 }
 
 .navigation__sublink {
+  display: flex;
+  width: 100%;
   min-height: var(--control-size);
+  align-items: center;
+  box-sizing: border-box;
   border-radius: var(--radius-sm);
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3)
+    calc(1.25rem + var(--space-6) + var(--space-3));
   color: rgb(255 255 255 / 76%);
   font-size: var(--font-size-sm);
   text-decoration: none;

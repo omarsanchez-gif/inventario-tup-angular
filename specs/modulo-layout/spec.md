@@ -29,6 +29,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 - El botón de menú abre un drawer fijo con backdrop.
 - El drawer se cierra al activar nuevamente el botón, seleccionar una ruta, pulsar el backdrop o presionar Escape.
 - Expandir o contraer `Configuraciones` no cierra el drawer; seleccionar una de sus rutas sí lo cierra.
+- `Configuraciones` puede contraerse manualmente aunque una de sus rutas esté activa; la ruta conserva el estado activo del botón padre y el grupo vuelve a abrirse al navegar nuevamente a una ruta secundaria.
 - El cambio de breakpoint restablece el estado apropiado: abierto en escritorio y cerrado en móvil.
 
 ## Accesibilidad
@@ -40,6 +41,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 - El foco visible y movimiento reducido provienen del sistema de diseño.
 - Los diálogos exponen título, modalidad, cierre por Escape y retorno de foco mediante el comportamiento nativo.
 - `Configuraciones` usa un botón con `aria-expanded`, `aria-controls` y nombre accesible; sus enlaces secundarios conservan foco visible y jerarquía comprensible.
+- Cada enlace secundario ocupa todo el ancho disponible del grupo; la sangría se aplica al contenido y no reduce su superficie interactiva ni su fondo activo.
 
 ## Autorización
 

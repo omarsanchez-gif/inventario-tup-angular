@@ -33,9 +33,7 @@ export class AdminShell implements OnDestroy {
   protected readonly settingsRouteActive = computed(() =>
     this.currentUrl().startsWith('/configuraciones/'),
   );
-  protected readonly settingsExpanded = computed(
-    () => this.settingsOpen() || this.settingsRouteActive(),
-  );
+  protected readonly settingsExpanded = this.settingsOpen.asReadonly();
   protected readonly menuActionLabel = computed(() =>
     this.navigationOpen() ? 'Ocultar menú principal' : 'Mostrar menú principal',
   );

@@ -76,6 +76,8 @@
 - Las opciones secundarias se presentan con texto, sangría y estado activo, sin exigir un icono individual.
 - Solo se muestran opciones con módulo implementado y autorizado; al implementar Categorías, la primera opción será `Categorías`.
 - La ruta secundaria activa abre automáticamente el grupo y mantiene un indicador activo tanto en la opción como en el padre.
+- El usuario puede contraer el grupo aun cuando una ruta secundaria está activa; el padre conserva su indicador y una navegación posterior a una ruta secundaria vuelve a expandirlo.
+- Los enlaces secundarios ocupan todo el ancho disponible; la jerarquía visual se expresa mediante sangría interna sin reducir el fondo, foco ni área interactiva.
 - En móvil, activar una opción secundaria cierra el drawer; expandir o contraer el grupo no cierra el drawer.
 - `Usuarios` permanece como opción principal independiente.
 
@@ -101,6 +103,6 @@
 
 ## Estado de implementación
 
-El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el estándar de acciones contextuales con iconos, la búsqueda a todo el ancho y `AppPagination` están implementados y publicados únicamente en Hosting de `inventario-stg`. El grupo `Configuraciones`, el icono `settings` y su primera opción `Categorías` también están publicados; Hosting responde HTTP 200 y sirve `main-XXPSXP7R.js` y `styles-CISTRGAV.css`. La regresión aprobó 8 suites con 18 pruebas Angular, lint, guardia visual, formato y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
+El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el estándar de acciones contextuales con iconos, la búsqueda a todo el ancho y `AppPagination` están implementados y publicados únicamente en Hosting de `inventario-stg`. El grupo `Configuraciones`, el icono `settings` y su primera opción `Categorías` también están publicados; la corrección para contraer sobre una ruta activa y ocupar todo el ancho con los submenús sirve `main-3IK73UUE.js` y `styles-CISTRGAV.css` con HTTP 200. La regresión aprobó 8 suites con 18 pruebas Angular, lint, guardia visual, formato y build de staging. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

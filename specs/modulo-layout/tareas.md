@@ -18,3 +18,5 @@
 - [x] Agregar el icono compartido `settings` y el grupo desplegable `Configuraciones` exclusivo de `admin`.
 - [x] Incorporar `Categorías` como primera opción secundaria únicamente al implementar su ruta.
 - [x] Probar apertura automática por ruta activa, teclado y cierre del drawer al seleccionar una opción secundaria.
+- [x] Permitir contraer `Configuraciones` con una ruta secundaria activa.
+- [x] Extender los enlaces secundarios a todo el ancho disponible conservando su sangría interna.
