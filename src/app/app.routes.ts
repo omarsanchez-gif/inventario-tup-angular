@@ -60,6 +60,15 @@ export const routes: Routes = [
           ),
         title: 'Modelos de activos | Sistema de Inventario TUP',
       },
+      {
+        path: 'configuraciones/campus',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/campuses/campuses-page/campuses-page').then(
+            (component) => component.CampusesPage,
+          ),
+        title: 'Campus | Sistema de Inventario TUP',
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

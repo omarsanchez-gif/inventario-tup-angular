@@ -32,6 +32,15 @@ import {
   type AdminCategoriesDependencies,
 } from './admin-categories.js';
 import {
+  AdminCampusesError,
+  createCampus as createCampusRecord,
+  deleteCampus as deleteCampusRecord,
+  listCampuses as listCampusRecords,
+  setCampusStatus as setCampusRecordStatus,
+  updateCampus as updateCampusRecord,
+  type AdminCampusesDependencies,
+} from './admin-campuses.js';
+import {
   AdminUsersError,
   createAuthorizedUser as createUser,
   deleteAuthorizedUser as deleteUser,
@@ -55,6 +64,7 @@ import {
   bootstrapAuthorization as authorize,
 } from './bootstrap-authorization.js';
 import { createAdminCategoriesRepository } from './firestore-categories.repository.js';
+import { createAdminCampusesRepository } from './firestore-campuses.repository.js';
 import { createAdminAssetModelsRepository } from './firestore-asset-models.repository.js';
 import { createAssetModelImagesService } from './firebase-asset-model-images.service.js';
 import { createAdminManufacturersRepository } from './firestore-manufacturers.repository.js';
@@ -74,6 +84,7 @@ const auth = getAuth();
 const authorizationRepository = createAuthorizationRepository(firestore);
 const adminUsersRepository = createAdminUsersRepository(firestore);
 const adminCategoriesRepository = createAdminCategoriesRepository(firestore);
+const adminCampusesRepository = createAdminCampusesRepository(firestore);
 const adminManufacturersRepository = createAdminManufacturersRepository(firestore);
 const adminAssetModelsRepository = createAdminAssetModelsRepository(firestore);
 const assetModelImagesService = createAssetModelImagesService(firestore, getStorage().bucket());
@@ -120,6 +131,10 @@ function categoryDependencies(): AdminCategoriesDependencies {
   return { repository: adminCategoriesRepository };
 }
 
+function campusDependencies(): AdminCampusesDependencies {
+  return { repository: adminCampusesRepository };
+}
+
 function manufacturerDependencies(): AdminManufacturersDependencies {
   return { repository: adminManufacturersRepository };
 }
@@ -160,6 +175,24 @@ async function executeCategories<T>(operation: () => Promise<T>): Promise<T> {
       });
     }
     logger.error('Error no controlado en Categorías.', {
+      cause: error instanceof Error ? error.name : 'unknown',
+    });
+    throw new HttpsError('unavailable', 'El servicio no está disponible.', {
+      functionalCode: 'service-unavailable',
+    });
+  }
+}
+
+async function executeCampuses<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (error instanceof AdminCampusesError) {
+      throw new HttpsError(error.functionsCode, error.message, {
+        functionalCode: error.functionalCode,
+      });
+    }
+    logger.error('Error no controlado en Campus.', {
       cause: error instanceof Error ? error.name : 'unknown',
     });
     throw new HttpsError('unavailable', 'El servicio no está disponible.', {
@@ -288,6 +321,34 @@ export const setCategoryStatus = onCall(options, async (request) =>
 export const deleteCategory = onCall(options, async (request) =>
   executeCategories(() =>
     deleteCategoryRecord(adminIdentity(request.auth), request.data, categoryDependencies()),
+  ),
+);
+
+export const listCampuses = onCall(options, async (request) =>
+  executeCampuses(() => listCampusRecords(adminIdentity(request.auth), campusDependencies())),
+);
+
+export const createCampus = onCall(options, async (request) =>
+  executeCampuses(() =>
+    createCampusRecord(adminIdentity(request.auth), request.data, campusDependencies()),
+  ),
+);
+
+export const updateCampus = onCall(options, async (request) =>
+  executeCampuses(() =>
+    updateCampusRecord(adminIdentity(request.auth), request.data, campusDependencies()),
+  ),
+);
+
+export const setCampusStatus = onCall(options, async (request) =>
+  executeCampuses(() =>
+    setCampusRecordStatus(adminIdentity(request.auth), request.data, campusDependencies()),
+  ),
+);
+
+export const deleteCampus = onCall(options, async (request) =>
+  executeCampuses(() =>
+    deleteCampusRecord(adminIdentity(request.auth), request.data, campusDependencies()),
   ),
 );
 

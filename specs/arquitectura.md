@@ -36,7 +36,7 @@ Callable → caso de uso → repositorio → Admin SDK
 - `features/categories`: módulo administrativo de Categorías implementado, validado y desplegado únicamente en staging.
 - `features/manufacturers`: módulo administrativo de Fabricantes implementado y validado para staging.
 - `features/asset-models`: módulo administrativo de Modelos de activos implementado, validado y desplegado únicamente en staging.
-- `features/campuses`: módulo administrativo de Campus propuesto; no implementado ni autorizado para despliegue.
+- `features/campuses`: módulo administrativo de Campus implementado, validado y desplegado únicamente en staging.
 
 ## Navegación administrativa
 
@@ -45,7 +45,7 @@ Callable → caso de uso → repositorio → Admin SDK
 - Fabricantes usa `/configuraciones/fabricantes`, protegida por guard administrativo y visible como segunda opción secundaria.
 - Modelos de activos usa `/configuraciones/modelos-activos`, protegida por guard administrativo y visible como tercera opción secundaria.
 - Otros catálogos no aparecen hasta contar con especificación e implementación propias.
-- Campus usará `/configuraciones/campus` y solo aparecerá después de validar, implementar y autorizar su módulo.
+- Campus usa `/configuraciones/campus`, protegida por guard administrativo y visible como cuarta opción secundaria.
 - La activación visual del grupo no sustituye guards, callables ni reglas de seguridad.
 
 ## Backend de Categorías
@@ -93,10 +93,10 @@ Se implementaron nueve callables en `us-central1`: `listAssetModels`, `getAssetM
 - CI reproduce formato, lint, pruebas Angular/Functions, emuladores, compilación y auditoría sin desplegar.
 - App Check, PITR, bitácora administrativa y producción requieren decisiones y aceptación separadas antes de habilitarse.
 
-## Backend propuesto de Campus
+## Backend de Campus
 
 ```text
 Callable → caso de uso de Campus → repositorio → Admin SDK
 ```
 
-Se planifican `listCampuses`, `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus` en `us-central1`. Código y nombre usarán reservas transaccionales en `campus_claves`; los consumidores futuros mantendrán contadores y ampliarán la eliminación fail-safe antes de activarse. Esta sección no representa implementación existente.
+`listCampuses`, `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus` usan `us-central1`. Código y nombre usan reservas transaccionales en `campus_claves`; los consumidores futuros mantendrán contadores y ampliarán la eliminación fail-safe antes de activarse.

@@ -1,6 +1,6 @@
 # Pruebas: Campus
 
-Estos escenarios definen la aceptación propuesta. No existe evidencia de implementación o despliegue mientras la spec permanezca en borrador.
+Estos escenarios definen la aceptación del módulo aprobado.
 
 ## Backend y seguridad
 
@@ -43,3 +43,22 @@ Estos escenarios definen la aceptación propuesta. No existe evidencia de implem
 - CAM-031: el despliegue no crea automáticamente documentos FCS, TUP ni otros datos de negocio.
 
 Los escenarios CAM-026 a CAM-030 se implementarán en los módulos consumidores correspondientes; se conservan aquí para definir el contrato que Campus deberá soportar.
+
+## Evidencia local — 9 de noviembre de 2026
+
+- 11 suites y 30 pruebas Angular aprobaron, incluidas navegación, columnas, contadores, formulario limitado a Código, Nombre y Notas, diálogos, búsqueda y paginación.
+- 7 archivos y 36 pruebas unitarias de Functions aprobaron; 7 corresponden a validación, sanitización y contratos administrativos de Campus.
+- Auth, Functions, Firestore y Storage Emulator aprobaron 5 archivos y 12 pruebas de integración, incluidas las 3 de Campus para doble reserva, mutaciones atómicas, concurrencia y denegación directa.
+- Firestore Emulator se ejecutó en un puerto temporal alterno porque el puerto local 8080 pertenece a `iVMS-4200`; no se cerró ni modificó ese proceso y la configuración temporal no se conservó.
+- Compilación de Functions, lint Angular/Functions, guardia visual, formato y build de staging aprobaron.
+- El build aprobado genera `main-HWJHCEZJ.js`, `styles-CISTRGAV.css` y el módulo diferido de Campus `chunk-DMN2xbo-.js`.
+- No se crearon documentos FCS, TUP ni otros datos de negocio durante las pruebas.
+
+## Evidencia remota — 9 de noviembre de 2026
+
+- Firestore Rules, las cinco Functions y Hosting se desplegaron por separado y únicamente a `inventario-stg`.
+- `listCampuses`, `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus` están `ACTIVE` en Node.js 22, `us-central1`, con máximo 20 instancias.
+- `listCampuses` rechazó una solicitud anónima con HTTP 401 y Firestore rechazó la lectura anónima directa de `campus` con HTTP 403.
+- `/configuraciones/campus` respondió HTTP 200 y sirve `main-HWJHCEZJ.js`, `styles-CISTRGAV.css` y el módulo diferido `chunk-DMN2xbo-.js`.
+- Una sesión administrativa confirmó Campus como cuarta opción de `Configuraciones`, encabezado, búsqueda, estado vacío y modal con únicamente Código, Nombre y Notas; el diálogo se canceló sin crear datos.
+- No se desplegaron índices, Storage, secretos, migración ni producción. La aceptación visual móvil y el ciclo real de alta, edición, estado y eliminación permanecen pendientes.

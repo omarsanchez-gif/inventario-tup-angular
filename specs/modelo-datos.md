@@ -2,7 +2,7 @@
 
 ## Estado
 
-El modelo implementado comprende autorización, Categorías, Fabricantes y Modelos de activos. Firestore Rules protege sus colecciones e índices técnicos; la implementación y el despliegue no crean documentos de negocio. Campus se documenta como contrato propuesto todavía no materializado. Áreas, Coordinaciones, Activos y migración continúan pendientes.
+El modelo implementado comprende autorización, Categorías, Fabricantes, Modelos de activos y el contrato de Campus. Firestore Rules protege sus colecciones e índices técnicos; implementación y despliegue no crean documentos de negocio. Áreas, Coordinaciones, Activos y migración continúan pendientes.
 
 ## Colección `usuarios`
 
@@ -169,9 +169,9 @@ modelos-activos/{modeloId}/thumbnail.webp
 - La callable de acceso entrega URLs firmadas de corta duración únicamente después de revalidar al administrador canónico.
 - Un fallo entre Storage y Firestore se resuelve mediante compensación y un estado funcional de reconciliación; ninguna URL se persiste en Firestore.
 
-## Colección propuesta `campus`
+## Colección `campus`
 
-Este contrato permanece en borrador y no autoriza crear la colección ni datos.
+Este contrato fue aprobado el 9 de noviembre de 2026. La colección solo se materializa mediante un alta administrativa autorizada; el despliegue no crea datos.
 
 ```text
 campus/{campusId}
@@ -201,7 +201,7 @@ Restricciones:
 - Las relaciones futuras referenciarán `campusId`; no usarán código ni nombre como clave foránea.
 - `fechaCreacion` y `fechaActualizacion` usan tiempo del servidor; la fecha de creación es inmutable.
 
-## Índice técnico propuesto `campus_claves`
+## Índice técnico `campus_claves`
 
 ```text
 campus_claves/{claveKey}

@@ -2,7 +2,7 @@
 
 ## Estado
 
-Borrador preparado el 9 de noviembre de 2026 para validación funcional. El responsable autorizó únicamente la elaboración de specs; esta versión no autoriza implementación, creación de datos, cambios de Firebase ni despliegue a staging o producción.
+Especificación aprobada y autorizada por el responsable el 9 de noviembre de 2026 para implementación, pruebas y despliegue exclusivo a `inventario-stg`. No autoriza crear datos de negocio, migrar Snipe-IT ni modificar producción.
 
 ## Objetivo
 
@@ -100,7 +100,7 @@ Ambos valores son read models. Las entidades futuras serán la fuente canónica 
 - El guard y la visibilidad del menú serán defensas de presentación, no autorización efectiva.
 - Esta spec no modifica los permisos de inventario de `usuario`; la reestructuración de accesos se realizará después de definir Áreas y coberturas de Coordinaciones.
 
-## Contratos callable planificados
+## Contratos callable
 
 ### `listCampuses`
 
@@ -214,7 +214,7 @@ La interfaz traducirá estos códigos a mensajes institucionales y no expondrá 
 - Eliminación masiva, ordenamiento manual, fusión de duplicados o alta rápida de entidades relacionadas.
 - Creación automática de FCS o TUP durante build o despliegue.
 
-## Decisiones propuestas para validación
+## Decisiones aprobadas
 
 1. Campus es la raíz y se crea antes de Áreas y coberturas de Coordinaciones.
 2. Código, Nombre y Notas son los únicos campos capturados.
@@ -222,3 +222,7 @@ La interfaz traducirá estos códigos a mensajes institucionales y no expondrá 
 4. El formulario no asigna Áreas ni Coordinaciones.
 5. Las cantidades de Áreas y Activos son read models no editables que permanecen en cero hasta contar con fuentes aprobadas.
 6. FCS y TUP son registros administrativos, no constantes ni datos creados por el despliegue.
+
+## Estado de publicación
+
+Firestore Rules, las cinco callables y Hosting fueron desplegados por separado únicamente a `inventario-stg` el 9 de noviembre de 2026. Las Functions usan Node.js 22 en `us-central1`, máximo 20 instancias y están `ACTIVE`; la ruta publicada respondió HTTP 200 y la sesión administrativa confirmó el estado vacío y el modal aprobado. No se crearon Campus, índices compuestos, secretos ni datos de negocio y producción permaneció intacta.

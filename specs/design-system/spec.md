@@ -119,4 +119,6 @@ El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el e
 
 Modelos de activos reutiliza las mismas primitivas y fue publicado en Hosting de staging el 7 de noviembre de 2026. La regresión actual aprobó 10 suites con 27 pruebas Angular y la guardia visual; Hosting sirve `main-ALBLFGKY.js`, `styles-CISTRGAV.css` y el módulo diferido `chunk-CA-BBvnz.js`. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
+Campus reutiliza encabezado, tabla, búsqueda, `AppPagination`, `AppDialog`, badges e icon-buttons sin introducir variantes visuales. Fue publicado únicamente en Hosting de staging el 9 de noviembre de 2026; la regresión aprobó 11 suites con 30 pruebas Angular y la guardia visual. La sesión administrativa confirmó navegación, estado vacío y formulario modal en escritorio; la revisión visual móvil permanece pendiente.
+
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

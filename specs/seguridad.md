@@ -42,7 +42,7 @@
 - SEC-034: Sustitución, eliminación y borrado de Modelo aplicarán compensación entre Firestore y Storage y reportarán reconciliación cuando no pueda completarse la limpieza.
 - SEC-035: La cuenta runtime `719448906735-compute@developer.gserviceaccount.com` recibe `roles/iam.serviceAccountTokenCreator` únicamente sobre sí misma para ejecutar `iam.serviceAccounts.signBlob`; no se concede ese rol a usuarios ni a nivel de proyecto y Storage continúa cerrado.
 
-## Campus propuesto
+## Campus
 
 - SEC-036: `campus` y `campus_claves` permanecerán cerradas a toda lectura y escritura directa desde clientes; el módulo consumirá exclusivamente callables.
 - SEC-037: Las cinco callables de Campus validarán Authentication, claim administrativo y el documento canónico activo antes de acceder a Firestore.

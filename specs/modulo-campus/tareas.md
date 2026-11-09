@@ -11,22 +11,22 @@
 - [x] Proponer ruta, navegación, tabla, búsqueda, paginación y diálogos estandarizados.
 - [x] Documentar que FCS y TUP no se crearán automáticamente durante el despliegue.
 - [x] Documentar escenarios de prueba y trazabilidad.
-- [ ] Obtener validación funcional del responsable sobre las decisiones propuestas.
-- [ ] Autorizar expresamente implementación, pruebas y despliegue exclusivo a staging.
+- [x] Obtener validación funcional del responsable sobre las decisiones propuestas.
+- [x] Autorizar expresamente implementación, pruebas y despliegue exclusivo a staging.
 
 ## Implementación
 
-- [ ] Crear casos de uso y repositorio backend con reservas transaccionales.
-- [ ] Exponer las cinco callables administrativas.
-- [ ] Incorporar reglas de denegación para `campus` y `campus_claves`.
-- [ ] Incorporar `Campus` al grupo `Configuraciones` y proteger la ruta.
-- [ ] Crear gateway, facade, ruta y pantalla Angular.
-- [ ] Implementar formularios y confirmación mediante `AppDialog`.
-- [ ] Reutilizar búsqueda automática, paginación e icon-buttons compartidos.
-- [ ] Agregar pruebas unitarias y de integración con Auth/Firestore Emulator.
-- [ ] Validar formato, lint, guardia visual, pruebas y build de staging.
-- [ ] Desplegar por separado únicamente los servicios afectados a `inventario-stg` cuando sea autorizado.
-- [ ] Verificar Rules, Functions, rechazo anónimo, Hosting, bundle y encabezados remotos.
+- [x] Crear casos de uso y repositorio backend con reservas transaccionales.
+- [x] Exponer las cinco callables administrativas.
+- [x] Incorporar reglas de denegación para `campus` y `campus_claves`.
+- [x] Incorporar `Campus` al grupo `Configuraciones` y proteger la ruta.
+- [x] Crear gateway, facade, ruta y pantalla Angular.
+- [x] Implementar formularios y confirmación mediante `AppDialog`.
+- [x] Reutilizar búsqueda automática, paginación e icon-buttons compartidos.
+- [x] Agregar pruebas unitarias y de integración con Auth/Firestore Emulator.
+- [x] Validar formato, lint, guardia visual, pruebas y build de staging.
+- [x] Desplegar por separado únicamente los servicios afectados a `inventario-stg` cuando sea autorizado.
+- [x] Verificar Rules, Functions, rechazo anónimo, Hosting, bundle y encabezados remotos.
 - [ ] Completar aceptación funcional y visual autenticada en escritorio y móvil.
 
 ## Dependencias futuras
