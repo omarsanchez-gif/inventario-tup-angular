@@ -2,7 +2,7 @@
 
 ## Estado
 
-El modelo implementado comprende autorización, Categorías, Fabricantes y Modelos de activos. Firestore Rules protege sus colecciones e índices técnicos; la implementación y el despliegue no crean documentos de negocio. Activos y migración continúan pendientes.
+El modelo implementado comprende autorización, Categorías, Fabricantes y Modelos de activos. Firestore Rules protege sus colecciones e índices técnicos; la implementación y el despliegue no crean documentos de negocio. Campus se documenta como contrato propuesto todavía no materializado. Áreas, Coordinaciones, Activos y migración continúan pendientes.
 
 ## Colección `usuarios`
 
@@ -168,3 +168,48 @@ modelos-activos/{modeloId}/thumbnail.webp
 - Los objetos solo se escriben o eliminan con Admin SDK; Storage Rules mantiene denegación total para clientes.
 - La callable de acceso entrega URLs firmadas de corta duración únicamente después de revalidar al administrador canónico.
 - Un fallo entre Storage y Firestore se resuelve mediante compensación y un estado funcional de reconciliación; ninguna URL se persiste en Firestore.
+
+## Colección propuesta `campus`
+
+Este contrato permanece en borrador y no autoriza crear la colección ni datos.
+
+```text
+campus/{campusId}
+  codigo: string
+  codigoNormalizado: string
+  nombre: string
+  nombreNormalizado: string
+  notas: string | null
+  activo: boolean
+  cantidadAreas: number
+  cantidadActivos: number
+  fechaCreacion: Timestamp
+  fechaActualizacion: Timestamp
+```
+
+Restricciones:
+
+- `campusId` es estable, generado por backend e independiente del código, nombre e identificadores externos.
+- `codigo` se recorta, convierte a mayúsculas y admite letras sin diacríticos, números y guion medio; máximo 20 caracteres.
+- `codigoNormalizado` es la representación canónica en mayúsculas y sin diacríticos usada para unicidad.
+- `nombre` se recorta, colapsa espacios y conserva su presentación; máximo 120 caracteres.
+- `nombreNormalizado` usa Unicode NFKD, elimina diacríticos, convierte a minúsculas, colapsa espacios y recorta.
+- `notas` se recorta; una cadena vacía se guarda como `null` y admite máximo 1,000 caracteres.
+- `activo` inicia en `true` y solo cambia mediante el caso de uso de estado.
+- `cantidadAreas` y `cantidadActivos` inician en `0`, son enteros no negativos y solo backend podrá mantenerlos o reconciliarlos.
+- No se embeben arreglos de Áreas, Coordinaciones, Usuarios o Activos.
+- Las relaciones futuras referenciarán `campusId`; no usarán código ni nombre como clave foránea.
+- `fechaCreacion` y `fechaActualizacion` usan tiempo del servidor; la fecha de creación es inmutable.
+
+## Índice técnico propuesto `campus_claves`
+
+```text
+campus_claves/{claveKey}
+  campusId: string
+  tipo: "codigo" | "nombre"
+  valorNormalizado: string
+```
+
+- `claveKey` es el SHA-256 hexadecimal de `tipo + valorNormalizado` con separadores no ambiguos.
+- Código, nombre y sus dos reservas se crean, modifican o eliminan en una transacción.
+- Ningún cliente podrá leer o escribir este índice.

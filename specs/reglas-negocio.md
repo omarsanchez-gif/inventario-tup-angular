@@ -100,3 +100,21 @@
 - RN-MOD-018: El listado admite un máximo inicial de 500 Modelos, se ordena por nombre normalizado y nunca devuelve resultados parciales.
 - RN-MOD-019: Identificadores, claves de unicidad, normalización, metadatos de imagen y fechas son administrados por backend.
 - RN-MOD-020: Categorías y Fabricantes se administran en sus módulos propios; el modal de Modelo no contiene altas rápidas ni formularios anidados.
+
+## Campus
+
+- RN-CAM-001: Campus es la raíz física para futuras Áreas, coberturas de Coordinaciones, asignaciones de Usuarios y Activos.
+- RN-CAM-002: Solo un `admin` autorizado puede listar y administrar Campus.
+- RN-CAM-003: Los únicos campos capturados son `codigo`, `nombre` y `notas`; no se asignan Áreas ni Coordinaciones desde este formulario.
+- RN-CAM-004: El código es obligatorio, admite máximo 20 caracteres, se normaliza a mayúsculas sin diacríticos y es único.
+- RN-CAM-005: El nombre es obligatorio, admite máximo 120 caracteres y es único después de normalizar mayúsculas, diacríticos y espacios.
+- RN-CAM-006: Las notas son opcionales, se recortan y admiten máximo 1,000 caracteres.
+- RN-CAM-007: Todo Campus se crea activo; el estado se administra mediante una acción separada.
+- RN-CAM-008: Un Campus inactivo conserva historia, pero no podrá seleccionarse en nuevas entidades consumidoras.
+- RN-CAM-009: Un Campus solo puede eliminarse cuando ningún consumidor aprobado referencia `campusId`; cualquier error de comprobación impide borrar.
+- RN-CAM-010: Toda mutación usa una callable y las lecturas o escrituras directas desde clientes están prohibidas.
+- RN-CAM-011: El listado admite un máximo inicial de 100 Campus, se ordena por nombre normalizado y nunca devuelve resultados parciales.
+- RN-CAM-012: Identificadores, normalización, reservas, cantidades y fechas son administrados por backend.
+- RN-CAM-013: `cantidadAreas` y `cantidadActivos` son contadores derivados, no editables, que permanecen en cero hasta implementar sus fuentes canónicas.
+- RN-CAM-014: FCS y TUP son datos administrativos esperados y no constantes codificadas ni documentos creados automáticamente durante despliegue.
+- RN-CAM-015: Una Coordinación futura podrá cubrir varios Campus sin duplicarse; la relación se definirá fuera del documento de Campus.

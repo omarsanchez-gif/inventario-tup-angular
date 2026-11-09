@@ -74,3 +74,11 @@
 - Firestore y Storage rechazaron acceso anónimo directo con HTTP 403. Hosting sirve la ruta de Modelos y los bundles `main-ALBLFGKY.js`, `styles-CISTRGAV.css` y `chunk-CA-BBvnz.js` con HTTP 200; la versión final descarta miniaturas fuera de página y renueva accesos próximos a vencer.
 - La primera prueba autenticada de miniatura del 7 de noviembre de 2026 detectó `SigningError`: la cuenta runtime podía validar Firestore y Storage, pero no firmar URLs. La política IAM confirmó que faltaba el vínculo propio `roles/iam.serviceAccountTokenCreator`.
 - Con autorización expresa se agregó ese rol únicamente a `719448906735-compute@developer.gserviceaccount.com` sobre sí misma y se actualizó solo `getAssetModelImageAccess`. Tras recargar la sesión administrativa, desapareció la alerta y se mostró la imagen del Modelo `MSI`; el bucket continuó cerrado a acceso directo. Sustitución, eliminación, expiración y revisión móvil permanecen pendientes de aceptación autenticada.
+
+## Campus propuesto
+
+- El 9 de noviembre de 2026 se autorizó únicamente elaborar los specs de Campus; implementación, Rules, Functions, Hosting, datos y despliegue permanecen sin autorización.
+- La implementación futura usará cinco callables administrativas en `us-central1` y conservará Firestore cerrado a clientes.
+- FCS y TUP no se crearán durante build o despliegue. Cualquier carga inicial será una operación de datos separada, explícitamente autorizada y evidenciada.
+- La pantalla no consultará Snipe-IT. La futura migración resolverá correspondencias externas desde backend y referenciará `campusId`.
+- No se modifica staging ni producción como resultado de esta especificación.

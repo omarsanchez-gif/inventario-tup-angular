@@ -41,3 +41,12 @@
 - SEC-033: El procesamiento rechazará imágenes malformadas, bombas de descompresión y dimensiones fuera del límite técnico; eliminará metadatos antes de guardar WebP normalizado.
 - SEC-034: Sustitución, eliminación y borrado de Modelo aplicarán compensación entre Firestore y Storage y reportarán reconciliación cuando no pueda completarse la limpieza.
 - SEC-035: La cuenta runtime `719448906735-compute@developer.gserviceaccount.com` recibe `roles/iam.serviceAccountTokenCreator` únicamente sobre sí misma para ejecutar `iam.serviceAccounts.signBlob`; no se concede ese rol a usuarios ni a nivel de proyecto y Storage continúa cerrado.
+
+## Campus propuesto
+
+- SEC-036: `campus` y `campus_claves` permanecerán cerradas a toda lectura y escritura directa desde clientes; el módulo consumirá exclusivamente callables.
+- SEC-037: Las cinco callables de Campus validarán Authentication, claim administrativo y el documento canónico activo antes de acceder a Firestore.
+- SEC-038: `usuario`, perfiles inactivos y solicitudes anónimas no podrán listar ni mutar Campus.
+- SEC-039: Ningún payload administrativo podrá escribir campos normalizados, reservas, cantidades, estado inicial, identificadores o fechas.
+- SEC-040: `deleteCampus` fallará de forma segura ante una referencia, error o resultado no determinable y se ampliará antes de habilitar cada consumidor.
+- SEC-041: Los futuros catálogos para consumidores expondrán únicamente identificador, código y nombre de Campus aplicables; no entregarán documentos administrativos completos.

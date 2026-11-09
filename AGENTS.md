@@ -61,10 +61,12 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - `modulo-modelos-activos`, autorizado expresamente el 7 de noviembre de 2026 para implementación, pruebas y despliegue exclusivo a staging, limitado a Nombre, Categoría, Fabricante, Modelo No., Notas e Imagen conforme a sus specs vigentes y ADR-005.
 - Modelos de activos fue desplegado únicamente a `inventario-stg` el 7 de noviembre de 2026: Firestore Rules, Storage Rules, nueve Functions nuevas, dos Functions de eliminación reforzadas y Hosting. El bucket regional `inventario-stg.firebasestorage.app` quedó en `US-CENTRAL1`, vacío y cerrado a clientes. Producción, datos reales y migración permanecieron intactos.
 - La primera lectura autenticada de una miniatura reveló falta de permiso de firma. Con autorización expresa se concedió `roles/iam.serviceAccountTokenCreator` únicamente a la cuenta runtime de staging sobre sí misma y se actualizó solo `getAssetModelImageAccess`; la miniatura cargó en sesión administrativa, Storage siguió cerrado y producción no fue modificada.
+- `modulo-campus`: el 9 de noviembre de 2026 se autorizó únicamente elaborar sus specs como raíz física para Áreas, coberturas de Coordinaciones, asignaciones y Activos. Implementación, datos y despliegue permanecen pendientes de validación y autorización expresa.
 - Endurecimiento transversal previo a Fabricantes, autorizado el 7 de noviembre de 2026: cierre de lectura directa de Usuarios, revocación defensiva, encabezados y caché de Hosting, CI y reconciliación documental conforme a ADR-004.
 
 ## Fuera de alcance actual
 
+- Implementación de Campus; Áreas, Coordinaciones y reestructuración de accesos de Usuarios.
 - Activos, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.
