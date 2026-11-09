@@ -1,0 +1,27 @@
+<dialog
+  #dialog
+  class="dialog"
+  aria-modal="true"
+  tabindex="-1"
+  [attr.aria-labelledby]="titleId"
+  (cancel)="requestDismissal($event)"
+  (click)="dismissFromBackdrop($event)"
+  (keydown.escape)="requestDismissal($event)"
+>
+  <section class="dialog__surface">
+    <header class="dialog__header">
+      <h2 class="dialog__title" [id]="titleId">{{ title() }}</h2>
+      <button
+        class="icon-button"
+        type="button"
+        aria-label="Cerrar diálogo"
+        title="Cerrar diálogo"
+        [disabled]="!dismissible()"
+        (click)="requestDismissal()"
+      >
+        <app-icon name="close" />
+      </button>
+    </header>
+    <div class="dialog__body"><ng-content /></div>
+  </section>
+</dialog>

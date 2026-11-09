@@ -1,0 +1,39 @@
+.page-header p:last-child {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.model-image,
+.model-image-placeholder {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius);
+  object-fit: contain;
+  background: var(--color-surface-subtle);
+}
+
+.model-image-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.image-field {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.image-preview {
+  width: min(12rem, 100%);
+  max-height: 12rem;
+  object-fit: contain;
+  border-radius: var(--radius);
+  background: var(--color-surface-subtle);
+}
+
+.image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

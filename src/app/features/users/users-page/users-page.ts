@@ -1,14 +1,17 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { UserRole } from '../../../shared/models/authorized-user';
 import type { SystemUser } from '../../../shared/models/system-user';
+import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
+import { AppIcon } from '../../../shared/ui/icon/app-icon';
+import { AppPagination } from '../../../shared/ui/pagination/app-pagination';
 import { UsersFacade } from '../state/users.facade';
 
 @Component({
   selector: 'app-users-page',
-  imports: [ReactiveFormsModule],
+  imports: [AppDialog, AppIcon, AppPagination, ReactiveFormsModule],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,6 +22,17 @@ export class UsersPage {
   protected readonly users = inject(UsersFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
+  protected readonly pendingDeletion = signal<SystemUser | null>(null);
+  protected readonly pageSize = 10;
+  protected readonly currentPage = signal(1);
+  protected readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.users.filteredUsers().length / this.pageSize)),
+  );
+  protected readonly activePage = computed(() => Math.min(this.currentPage(), this.totalPages()));
+  protected readonly paginatedUsers = computed(() => {
+    const start = (this.activePage() - 1) * this.pageSize;
+    return this.users.filteredUsers().slice(start, start + this.pageSize);
+  });
   protected readonly form = this.formBuilder.nonNullable.group({
     nombre: ['', [Validators.required, Validators.maxLength(120)]],
     correo: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
@@ -82,6 +96,11 @@ export class UsersPage {
 
   protected setQuery(event: Event): void {
     this.users.setQuery((event.target as HTMLInputElement).value);
+    this.currentPage.set(1);
+  }
+
+  protected setPage(page: number): void {
+    this.currentPage.set(Math.min(Math.max(1, page), this.totalPages()));
   }
 
   protected isSelf(user: SystemUser): boolean {
@@ -93,12 +112,20 @@ export class UsersPage {
     await this.users.setStatus(user);
   }
 
-  protected async remove(user: SystemUser): Promise<void> {
+  protected requestDeletion(user: SystemUser): void {
     if (this.isSelf(user)) return;
-    const confirmed = window.confirm(
-      `¿Eliminar la autorización de ${user.nombre}? Esta acción no elimina su cuenta Google.`,
-    );
-    if (confirmed) await this.users.delete(user);
+    this.users.clearMessages();
+    this.pendingDeletion.set(user);
+  }
+
+  protected cancelDeletion(): void {
+    if (!this.users.saving()) this.pendingDeletion.set(null);
+  }
+
+  protected async confirmDeletion(): Promise<void> {
+    const user = this.pendingDeletion();
+    if (!user || this.users.saving()) return;
+    if (await this.users.delete(user)) this.pendingDeletion.set(null);
   }
 
   protected formatAccess(value: string | null): string {

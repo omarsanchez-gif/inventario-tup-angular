@@ -3,9 +3,12 @@
 # Compiled output
 /dist
 /functions/lib
+/.firebase
 /tmp
 /out-tsc
 /bazel-out
+firebase-debug*.log
+firestore-debug.log
 
 # Node
 /node_modules

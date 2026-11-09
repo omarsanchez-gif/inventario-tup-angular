@@ -22,6 +22,12 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 ## Reglas obligatorias
 
 - No implementar funcionalidades fuera de especificación.
+- Todo cambio de código, configuración, dependencias, infraestructura, datos controlados o despliegue debe actualizar primero o conjuntamente las specs afectadas.
+- Ningún cambio se considera terminado hasta reflejar su alcance y estado real en `spec.md`, `tareas.md`, `pruebas.md`, la matriz de trazabilidad y las specs transversales que correspondan.
+- La documentación nunca debe anticipar como completado un cambio que todavía no haya sido implementado y verificado.
+- Toda interfaz nueva o modificada debe superar `npm run lint:visual`; no se desactiva la guardia para aceptar estilos duplicados.
+- Los SCSS encapsulados no redefinen primitivas globales ni introducen colores hexadecimales locales.
+- Altas, ediciones y confirmaciones de eliminación de cualquier módulo usan `AppDialog`; no se permiten formularios administrativos inline ni `window.alert`, `window.confirm` o `window.prompt`.
 - No crear colecciones, campos, roles, rutas o Functions no documentados.
 - No modificar el modelo de datos o reglas de seguridad sin actualizar primero sus specs y pruebas.
 - Angular nunca accede directamente a datos administrativos ni contiene secretos.
@@ -29,8 +35,12 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Toda mutación administrativa se ejecuta mediante Cloud Functions callable y valida el perfil canónico.
 - No utilizar datos reales ni producción para desarrollo o pruebas manuales.
 - `demo-inventario-tup` es exclusivamente el proyecto local de Emulator Suite.
-- Los alias `staging` y `production` no se crearán hasta conocer y aprobar los proyectos Firebase correspondientes.
-- Ningún despliegue está autorizado por la creación de esta base.
+- `staging` se usa únicamente como alias explícito de `inventario-stg`.
+- Todo cambio implementado y validado debe desplegarse también en `inventario-stg`, limitando `firebase deploy` mediante `--only` al servicio afectado y usando siempre `--project staging`.
+- La autorización continua de staging no amplía el alcance funcional ni autoriza producción, datos reales o servicios no afectados por el cambio.
+- El proyecto `inventario-stg` está autorizado exclusivamente para los módulos incluidos en el alcance vigente y su infraestructura documentada.
+- El plan Blaze está habilitado únicamente en `inventario-stg`; toda creación de recursos con costo debe limitarse al alcance solicitado y documentarse.
+- El alias y proyecto de producción permanecen pendientes; ningún despliegue productivo está autorizado.
 - Las credenciales de Snipe-IT son secretos de backend y nunca se guardan en Angular o Git.
 - La migración desde Snipe-IT se especificará e implementará como herramienta separada.
 - Interfaz WCAG 2.2 AA y responsive desde 320 px.
@@ -45,13 +55,22 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Dashboard inicial de bienvenida, sin KPI simulados.
 - Usuarios administrativos con los roles iniciales `admin` y `usuario`.
 - Firestore Rules de denegación por defecto.
+- `modulo-categorias` y el grupo administrativo `Configuraciones`, autorizados para implementación, pruebas y despliegue exclusivo a staging el 7 de noviembre de 2026, limitados a sus specs vigentes.
+- `modulo-fabricantes`, autorizado expresamente el 7 de noviembre de 2026 para implementación, pruebas y despliegue exclusivo a staging, limitado a Nombre, Notas y su administración conforme a sus specs vigentes.
+- Fabricantes fue desplegado únicamente a `inventario-stg` el 7 de noviembre de 2026: Firestore Rules, cinco Functions y Hosting. Las Functions están activas y rechazan solicitudes anónimas; producción, datos y migración permanecieron intactos.
+- `modulo-modelos-activos`, autorizado expresamente el 7 de noviembre de 2026 para implementación, pruebas y despliegue exclusivo a staging, limitado a Nombre, Categoría, Fabricante, Modelo No., Notas e Imagen conforme a sus specs vigentes y ADR-005.
+- Modelos de activos fue desplegado únicamente a `inventario-stg` el 7 de noviembre de 2026: Firestore Rules, Storage Rules, nueve Functions nuevas, dos Functions de eliminación reforzadas y Hosting. El bucket regional `inventario-stg.firebasestorage.app` quedó en `US-CENTRAL1`, vacío y cerrado a clientes. Producción, datos reales y migración permanecieron intactos.
+- La primera lectura autenticada de una miniatura reveló falta de permiso de firma. Con autorización expresa se concedió `roles/iam.serviceAccountTokenCreator` únicamente a la cuenta runtime de staging sobre sí misma y se actualizó solo `getAssetModelImageAccess`; la miniatura cargó en sesión administrativa, Storage siguió cerrado y producción no fue modificada.
+- `modulo-campus`: el 9 de noviembre de 2026 se autorizó únicamente elaborar sus specs como raíz física para Áreas, coberturas de Coordinaciones, asignaciones y Activos. Implementación, datos y despliegue permanecen pendientes de validación y autorización expresa.
+- Endurecimiento transversal previo a Fabricantes, autorizado el 7 de noviembre de 2026: cierre de lectura directa de Usuarios, revocación defensiva, encabezados y caché de Hosting, CI y reconciliación documental conforme a ADR-004.
 
 ## Fuera de alcance actual
 
-- Activos, modelos, fabricantes, personas, ubicaciones y responsivas.
+- Implementación de Campus; Áreas, Coordinaciones y reestructuración de accesos de Usuarios.
+- Activos, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.
-- Creación o despliegue de proyectos Firebase de staging o producción.
+- Creación o despliegue de proyectos Firebase de producción.
 - Datos reales.
 
 ## Definición de terminado

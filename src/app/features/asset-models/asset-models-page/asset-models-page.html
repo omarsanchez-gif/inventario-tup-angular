@@ -1,0 +1,282 @@
+<section aria-labelledby="asset-models-title">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Configuraciones</p>
+      <h1 class="page-title" id="asset-models-title">Modelos de activos</h1>
+      <p>Administre los modelos que clasificarán los activos institucionales.</p>
+    </div>
+    <button class="button button--primary" type="button" (click)="openNew()">Nuevo modelo</button>
+  </header>
+
+  @if (assetModels.error(); as error) {
+    <div class="alert alert--error" role="alert">{{ error }}</div>
+  }
+  @if (assetModels.success(); as success) {
+    <div class="alert alert--success" role="status">{{ success }}</div>
+  }
+
+  @if (formVisible()) {
+    <app-dialog
+      [title]="editingId() ? 'Editar modelo' : 'Nuevo modelo'"
+      [dismissible]="!assetModels.saving()"
+      (dismissed)="closeForm()"
+    >
+      <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-grid form-grid--single">
+          <div class="field">
+            <label for="asset-model-name">Nombre del modelo de activo</label>
+            <input id="asset-model-name" formControlName="nombre" maxlength="120" />
+            @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+              <small role="alert">Capture un nombre de máximo 120 caracteres.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="asset-model-category">Nombre de la categoría</label>
+            <select id="asset-model-category" formControlName="categoriaId">
+              <option value="">Seleccione una categoría</option>
+              @for (category of categoryOptions(); track category.documentId) {
+                <option [value]="category.documentId">{{ category.nombre }}</option>
+              }
+            </select>
+            @if (form.controls.categoriaId.touched && form.controls.categoriaId.invalid) {
+              <small role="alert">Seleccione una categoría.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="asset-model-manufacturer">Fabricante</label>
+            <select id="asset-model-manufacturer" formControlName="fabricanteId">
+              <option value="">Seleccione un fabricante</option>
+              @for (manufacturer of manufacturerOptions(); track manufacturer.documentId) {
+                <option [value]="manufacturer.documentId">{{ manufacturer.nombre }}</option>
+              }
+            </select>
+            @if (form.controls.fabricanteId.touched && form.controls.fabricanteId.invalid) {
+              <small role="alert">Seleccione un fabricante.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="asset-model-number">Modelo No.</label>
+            <input id="asset-model-number" formControlName="modeloNo" maxlength="120" />
+            @if (form.controls.modeloNo.touched && form.controls.modeloNo.invalid) {
+              <small role="alert">El Modelo No. admite máximo 120 caracteres.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="asset-model-notes">Notas</label>
+            <textarea id="asset-model-notes" formControlName="notas" maxlength="1000"></textarea>
+            @if (form.controls.notas.touched && form.controls.notas.invalid) {
+              <small role="alert">Las notas admiten máximo 1,000 caracteres.</small>
+            }
+          </div>
+          <div class="field image-field">
+            <label for="asset-model-image">Imagen</label>
+            <input
+              id="asset-model-image"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              [disabled]="assetModels.saving()"
+              (change)="selectImage($event)"
+            />
+            <small>JPEG, PNG, WebP o AVIF. Máximo 2 MiB.</small>
+            @if (fileError(); as error) {
+              <small role="alert">{{ error }}</small>
+            }
+            @if (imagePreview(); as preview) {
+              <img
+                class="image-preview"
+                [src]="preview"
+                alt="Vista previa de la imagen seleccionada"
+              />
+              <p>{{ selectedImage()?.name }} · {{ selectedImage()?.size }} bytes</p>
+              <div class="image-actions">
+                <button
+                  class="button button--secondary"
+                  type="button"
+                  (click)="clearSelectedImage()"
+                >
+                  Retirar selección
+                </button>
+              </div>
+            } @else if (currentImageUrl() && !removeCurrentImage()) {
+              <img
+                class="image-preview"
+                [src]="currentImageUrl()"
+                alt="Imagen vigente del modelo"
+              />
+              <div class="image-actions">
+                <button class="button button--danger" type="button" (click)="requestImageRemoval()">
+                  Eliminar imagen
+                </button>
+              </div>
+            } @else if (removeCurrentImage()) {
+              <p role="status">La imagen vigente se eliminará al guardar.</p>
+            }
+          </div>
+        </div>
+        <div class="dialog__actions">
+          <button
+            class="button button--secondary"
+            type="button"
+            [disabled]="assetModels.saving()"
+            (click)="closeForm()"
+          >
+            Cancelar
+          </button>
+          <button class="button button--primary" type="submit" [disabled]="assetModels.saving()">
+            {{ assetModels.saving() ? 'Guardando…' : 'Guardar modelo' }}
+          </button>
+        </div>
+      </form>
+    </app-dialog>
+  }
+
+  @if (pendingDeletion(); as model) {
+    <app-dialog
+      title="Eliminar modelo"
+      [dismissible]="!assetModels.saving()"
+      (dismissed)="cancelDeletion()"
+    >
+      <p class="dialog__message">¿Eliminar el modelo {{ model.nombre }}?</p>
+      <p class="dialog__help">
+        Solo se eliminará si no está vinculado con Activos. Si está en uso deberá desactivarlo.
+      </p>
+      <div class="dialog__actions">
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="assetModels.saving()"
+          (click)="cancelDeletion()"
+        >
+          Cancelar
+        </button>
+        <button
+          class="button button--danger"
+          type="button"
+          [disabled]="assetModels.saving()"
+          (click)="confirmDeletion()"
+        >
+          {{ assetModels.saving() ? 'Eliminando…' : 'Eliminar modelo' }}
+        </button>
+      </div>
+    </app-dialog>
+  }
+
+  <div class="table-toolbar">
+    <div class="field table-search">
+      <label for="asset-model-search"
+        >Buscar por nombre, categoría, fabricante, Modelo No. o notas</label
+      >
+      <input
+        id="asset-model-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Escriba para filtrar automáticamente"
+        [value]="assetModels.query()"
+        (input)="setQuery($event)"
+      />
+    </div>
+  </div>
+
+  @if (assetModels.loading()) {
+    <p role="status">Cargando modelos de activos…</p>
+  } @else if (assetModels.filteredModels().length === 0) {
+    <div class="card empty-state">
+      <h2>
+        {{ assetModels.query() ? 'No se encontraron modelos' : 'No hay modelos registrados' }}
+      </h2>
+    </div>
+  } @else {
+    <div class="card data-table-region">
+      <table class="data-table">
+        <caption class="sr-only">
+          Modelos de activos del Sistema de Inventario TUP
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Imagen</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Categoría</th>
+            <th scope="col">Fabricante</th>
+            <th scope="col">Modelo No.</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (model of paginatedModels(); track model.documentId) {
+            <tr>
+              <td>
+                @if (thumbnailUrls()[model.documentId]; as thumbnail) {
+                  <img
+                    class="model-image"
+                    [src]="thumbnail"
+                    [alt]="'Imagen del modelo ' + model.nombre"
+                  />
+                } @else {
+                  <span class="model-image-placeholder" aria-label="Sin imagen">Sin imagen</span>
+                }
+              </td>
+              <td>{{ model.nombre }}</td>
+              <td>{{ model.categoria.nombre }}</td>
+              <td>{{ model.fabricante.nombre }}</td>
+              <td>{{ model.modeloNo || '—' }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.badge--active]="model.activo"
+                  [class.badge--inactive]="!model.activo"
+                >
+                  {{ model.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <div class="record-actions">
+                  <button
+                    class="icon-button icon-button--secondary"
+                    type="button"
+                    [disabled]="assetModels.saving()"
+                    [attr.aria-label]="'Editar ' + model.nombre"
+                    [attr.title]="'Editar ' + model.nombre"
+                    (click)="edit(model)"
+                  >
+                    <app-icon name="edit" />
+                  </button>
+                  <button
+                    class="icon-button icon-button--secondary"
+                    type="button"
+                    [disabled]="assetModels.saving()"
+                    [attr.aria-label]="
+                      model.activo ? 'Desactivar ' + model.nombre : 'Activar ' + model.nombre
+                    "
+                    [attr.title]="
+                      model.activo ? 'Desactivar ' + model.nombre : 'Activar ' + model.nombre
+                    "
+                    (click)="toggleStatus(model)"
+                  >
+                    <app-icon [name]="model.activo ? 'deactivate' : 'activate'" />
+                  </button>
+                  <button
+                    class="icon-button icon-button--danger"
+                    type="button"
+                    [disabled]="assetModels.saving()"
+                    [attr.aria-label]="'Eliminar ' + model.nombre"
+                    [attr.title]="'Eliminar ' + model.nombre"
+                    (click)="requestDeletion(model)"
+                  >
+                    <app-icon name="delete" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination
+      [totalItems]="assetModels.filteredModels().length"
+      [page]="activePage()"
+      [pageSize]="pageSize"
+      (pageChange)="setPage($event)"
+    />
+  }
+</section>

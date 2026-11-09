@@ -77,6 +77,14 @@ async function deny(uid: string, dependencies: AuthorizationDependencies): Promi
       cause: error instanceof Error ? error.name : 'unknown',
     });
   }
+  try {
+    await dependencies.claims.revokeRefreshTokens(uid);
+  } catch (error) {
+    dependencies.logger.error('No fue posible revocar refresh tokens.', {
+      uid,
+      cause: error instanceof Error ? error.name : 'unknown',
+    });
+  }
 }
 
 export async function bootstrapAuthorization(

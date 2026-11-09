@@ -1,10 +1,36 @@
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 import { logger } from 'firebase-functions';
 import { defineString } from 'firebase-functions/params';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
+import {
+  AdminAssetModelsError,
+  createAssetModel as createAssetModelRecord,
+  deleteAssetModel as deleteAssetModelRecord,
+  getAssetModelCatalogs as getAssetModelCatalogRecords,
+  listAssetModels as listAssetModelRecords,
+  setAssetModelStatus as setAssetModelRecordStatus,
+  updateAssetModel as updateAssetModelRecord,
+  type AdminAssetModelsDependencies,
+} from './admin-asset-models.js';
+import {
+  getAssetModelImageAccess as getAssetModelImageAccessRecord,
+  removeAssetModelImage as removeAssetModelImageRecord,
+  setAssetModelImage as setAssetModelImageRecord,
+  type AssetModelImageDependencies,
+} from './asset-model-images.js';
+import {
+  AdminCategoriesError,
+  createCategory as createCategoryRecord,
+  deleteCategory as deleteCategoryRecord,
+  listCategories as listCategoryRecords,
+  setCategoryStatus as setCategoryRecordStatus,
+  updateCategory as updateCategoryRecord,
+  type AdminCategoriesDependencies,
+} from './admin-categories.js';
 import {
   AdminUsersError,
   createAuthorizedUser as createUser,
@@ -16,9 +42,22 @@ import {
   type AdminUsersDependencies,
 } from './admin-users.js';
 import {
+  AdminManufacturersError,
+  createManufacturer as createManufacturerRecord,
+  deleteManufacturer as deleteManufacturerRecord,
+  listManufacturers as listManufacturerRecords,
+  setManufacturerStatus as setManufacturerRecordStatus,
+  updateManufacturer as updateManufacturerRecord,
+  type AdminManufacturersDependencies,
+} from './admin-manufacturers.js';
+import {
   AuthorizationError,
   bootstrapAuthorization as authorize,
 } from './bootstrap-authorization.js';
+import { createAdminCategoriesRepository } from './firestore-categories.repository.js';
+import { createAdminAssetModelsRepository } from './firestore-asset-models.repository.js';
+import { createAssetModelImagesService } from './firebase-asset-model-images.service.js';
+import { createAdminManufacturersRepository } from './firestore-manufacturers.repository.js';
 import {
   createAdminUsersRepository,
   createAuthorizationRepository,
@@ -34,7 +73,15 @@ const firestore = getFirestore();
 const auth = getAuth();
 const authorizationRepository = createAuthorizationRepository(firestore);
 const adminUsersRepository = createAdminUsersRepository(firestore);
-const options = { invoker: 'public' as const, region: 'us-central1' as const };
+const adminCategoriesRepository = createAdminCategoriesRepository(firestore);
+const adminManufacturersRepository = createAdminManufacturersRepository(firestore);
+const adminAssetModelsRepository = createAdminAssetModelsRepository(firestore);
+const assetModelImagesService = createAssetModelImagesService(firestore, getStorage().bucket());
+const options = {
+  invoker: 'public' as const,
+  maxInstances: 20,
+  region: 'us-central1' as const,
+};
 
 const claims = {
   async getClaims(uid: string) {
@@ -69,6 +116,22 @@ function adminDependencies(): AdminUsersDependencies {
   };
 }
 
+function categoryDependencies(): AdminCategoriesDependencies {
+  return { repository: adminCategoriesRepository };
+}
+
+function manufacturerDependencies(): AdminManufacturersDependencies {
+  return { repository: adminManufacturersRepository };
+}
+
+function assetModelDependencies(): AdminAssetModelsDependencies {
+  return { repository: adminAssetModelsRepository };
+}
+
+function assetModelImageDependencies(): AssetModelImageDependencies {
+  return { repository: adminAssetModelsRepository, images: assetModelImagesService };
+}
+
 async function executeAdmin<T>(operation: () => Promise<T>): Promise<T> {
   try {
     return await operation();
@@ -79,6 +142,60 @@ async function executeAdmin<T>(operation: () => Promise<T>): Promise<T> {
       });
     }
     logger.error('Error no controlado en Usuarios.', {
+      cause: error instanceof Error ? error.name : 'unknown',
+    });
+    throw new HttpsError('unavailable', 'El servicio no está disponible.', {
+      functionalCode: 'service-unavailable',
+    });
+  }
+}
+
+async function executeCategories<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (error instanceof AdminCategoriesError) {
+      throw new HttpsError(error.functionsCode, error.message, {
+        functionalCode: error.functionalCode,
+      });
+    }
+    logger.error('Error no controlado en Categorías.', {
+      cause: error instanceof Error ? error.name : 'unknown',
+    });
+    throw new HttpsError('unavailable', 'El servicio no está disponible.', {
+      functionalCode: 'service-unavailable',
+    });
+  }
+}
+
+async function executeManufacturers<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (error instanceof AdminManufacturersError) {
+      throw new HttpsError(error.functionsCode, error.message, {
+        functionalCode: error.functionalCode,
+      });
+    }
+    logger.error('Error no controlado en Fabricantes.', {
+      cause: error instanceof Error ? error.name : 'unknown',
+    });
+    throw new HttpsError('unavailable', 'El servicio no está disponible.', {
+      functionalCode: 'service-unavailable',
+    });
+  }
+}
+
+async function executeAssetModels<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (error instanceof AdminAssetModelsError) {
+      throw new HttpsError(error.functionsCode, error.message, {
+        functionalCode: error.functionalCode,
+      });
+    }
+    logger.error('Error no controlado en Modelos de activos.', {
       cause: error instanceof Error ? error.name : 'unknown',
     });
     throw new HttpsError('unavailable', 'El servicio no está disponible.', {
@@ -144,4 +261,138 @@ export const setAuthorizedUserStatus = onCall(options, async (request) =>
 
 export const deleteAuthorizedUser = onCall(options, async (request) =>
   executeAdmin(() => deleteUser(adminIdentity(request.auth), request.data, adminDependencies())),
+);
+
+export const listCategories = onCall(options, async (request) =>
+  executeCategories(() => listCategoryRecords(adminIdentity(request.auth), categoryDependencies())),
+);
+
+export const createCategory = onCall(options, async (request) =>
+  executeCategories(() =>
+    createCategoryRecord(adminIdentity(request.auth), request.data, categoryDependencies()),
+  ),
+);
+
+export const updateCategory = onCall(options, async (request) =>
+  executeCategories(() =>
+    updateCategoryRecord(adminIdentity(request.auth), request.data, categoryDependencies()),
+  ),
+);
+
+export const setCategoryStatus = onCall(options, async (request) =>
+  executeCategories(() =>
+    setCategoryRecordStatus(adminIdentity(request.auth), request.data, categoryDependencies()),
+  ),
+);
+
+export const deleteCategory = onCall(options, async (request) =>
+  executeCategories(() =>
+    deleteCategoryRecord(adminIdentity(request.auth), request.data, categoryDependencies()),
+  ),
+);
+
+export const listManufacturers = onCall(options, async (request) =>
+  executeManufacturers(() =>
+    listManufacturerRecords(adminIdentity(request.auth), manufacturerDependencies()),
+  ),
+);
+
+export const createManufacturer = onCall(options, async (request) =>
+  executeManufacturers(() =>
+    createManufacturerRecord(adminIdentity(request.auth), request.data, manufacturerDependencies()),
+  ),
+);
+
+export const updateManufacturer = onCall(options, async (request) =>
+  executeManufacturers(() =>
+    updateManufacturerRecord(adminIdentity(request.auth), request.data, manufacturerDependencies()),
+  ),
+);
+
+export const setManufacturerStatus = onCall(options, async (request) =>
+  executeManufacturers(() =>
+    setManufacturerRecordStatus(
+      adminIdentity(request.auth),
+      request.data,
+      manufacturerDependencies(),
+    ),
+  ),
+);
+
+export const deleteManufacturer = onCall(options, async (request) =>
+  executeManufacturers(() =>
+    deleteManufacturerRecord(adminIdentity(request.auth), request.data, manufacturerDependencies()),
+  ),
+);
+
+export const listAssetModels = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    listAssetModelRecords(adminIdentity(request.auth), assetModelDependencies()),
+  ),
+);
+
+export const getAssetModelCatalogs = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    getAssetModelCatalogRecords(adminIdentity(request.auth), assetModelDependencies()),
+  ),
+);
+
+export const createAssetModel = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    createAssetModelRecord(adminIdentity(request.auth), request.data, assetModelDependencies()),
+  ),
+);
+
+export const updateAssetModel = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    updateAssetModelRecord(adminIdentity(request.auth), request.data, assetModelDependencies()),
+  ),
+);
+
+export const setAssetModelStatus = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    setAssetModelRecordStatus(adminIdentity(request.auth), request.data, assetModelDependencies()),
+  ),
+);
+
+export const deleteAssetModel = onCall(options, async (request) =>
+  executeAssetModels(async () => {
+    const result = await deleteAssetModelRecord(
+      adminIdentity(request.auth),
+      request.data,
+      assetModelDependencies(),
+    );
+    if (result.hadImage) await assetModelImagesService.cleanupDeleted(result.documentId);
+    return result;
+  }),
+);
+
+export const setAssetModelImage = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    setAssetModelImageRecord(
+      adminIdentity(request.auth),
+      request.data,
+      assetModelImageDependencies(),
+    ),
+  ),
+);
+
+export const removeAssetModelImage = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    removeAssetModelImageRecord(
+      adminIdentity(request.auth),
+      request.data,
+      assetModelImageDependencies(),
+    ),
+  ),
+);
+
+export const getAssetModelImageAccess = onCall(options, async (request) =>
+  executeAssetModels(() =>
+    getAssetModelImageAccessRecord(
+      adminIdentity(request.auth),
+      request.data,
+      assetModelImageDependencies(),
+    ),
+  ),
 );

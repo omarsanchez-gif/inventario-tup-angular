@@ -1,0 +1,32 @@
+@if (totalItems() > 0) {
+  <nav class="pagination" aria-label="Paginación de resultados">
+    <p class="pagination__summary" aria-live="polite">
+      Mostrando {{ firstItem() }}–{{ lastItem() }} de {{ totalItems() }} resultado(s)
+    </p>
+    <div class="pagination__controls">
+      <button
+        class="icon-button icon-button--secondary"
+        type="button"
+        aria-label="Página anterior"
+        title="Página anterior"
+        [disabled]="currentPage() === 1"
+        (click)="selectPage(currentPage() - 1)"
+      >
+        <app-icon name="previous" />
+      </button>
+      <span class="pagination__status" aria-current="page">
+        Página {{ currentPage() }} de {{ totalPages() }}
+      </span>
+      <button
+        class="icon-button icon-button--secondary"
+        type="button"
+        aria-label="Página siguiente"
+        title="Página siguiente"
+        [disabled]="currentPage() === totalPages()"
+        (click)="selectPage(currentPage() + 1)"
+      >
+        <app-icon name="next" />
+      </button>
+    </div>
+  </nav>
+}

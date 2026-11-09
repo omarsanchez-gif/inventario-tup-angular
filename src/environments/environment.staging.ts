@@ -2,11 +2,11 @@ export const environment = {
   production: false,
   useEmulators: false,
   firebase: {
-    apiKey: 'PENDIENTE_CONFIGURAR',
-    authDomain: 'PENDIENTE_CONFIGURAR',
-    projectId: 'PENDIENTE_CONFIGURAR',
-    storageBucket: 'PENDIENTE_CONFIGURAR',
-    appId: 'PENDIENTE_CONFIGURAR',
+    apiKey: 'AIzaSyBdavvM-W85SRsrS03ZB8588EfMP6D_5Gk',
+    authDomain: 'inventario-stg.firebaseapp.com',
+    projectId: 'inventario-stg',
+    storageBucket: 'inventario-stg.firebasestorage.app',
+    appId: '1:719448906735:web:5c52a80957b8e1ea28341a',
   },
   emulators: {
     auth: { host: '127.0.0.1', port: 9099 },

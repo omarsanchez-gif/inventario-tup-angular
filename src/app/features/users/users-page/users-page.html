@@ -2,7 +2,7 @@
   <header class="page-header">
     <div>
       <p class="eyebrow">Administración</p>
-      <h1 id="users-title">Usuarios</h1>
+      <h1 class="page-title" id="users-title">Usuarios</h1>
       <p>Autorice las cuentas institucionales que pueden ingresar al sistema.</p>
     </div>
     <button class="button button--primary" type="button" (click)="openNew()">Nuevo usuario</button>
@@ -16,54 +16,101 @@
   }
 
   @if (formVisible()) {
-    <form class="card user-form" [formGroup]="form" (ngSubmit)="submit()">
-      <div class="form-heading">
-        <h2>{{ editingId() ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
-        <button class="button button--secondary" type="button" (click)="closeForm()">
-          Cancelar
-        </button>
-      </div>
-      <div class="form-grid">
-        <div class="field">
-          <label for="user-name">Nombre</label>
-          <input id="user-name" formControlName="nombre" autocomplete="name" />
-          @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
-            <small role="alert">Capture el nombre.</small>
+    <app-dialog
+      [title]="editingId() ? 'Editar usuario' : 'Nuevo usuario'"
+      [dismissible]="!users.saving()"
+      (dismissed)="closeForm()"
+    >
+      <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-grid">
+          <div class="field">
+            <label for="user-name">Nombre</label>
+            <input id="user-name" formControlName="nombre" autocomplete="name" />
+            @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+              <small role="alert">Capture el nombre.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="user-email">Correo institucional</label>
+            <input id="user-email" type="email" formControlName="correo" autocomplete="email" />
+            @if (form.controls.correo.touched && form.controls.correo.invalid) {
+              <small role="alert">Capture un correo válido.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="user-role">Rol</label>
+            <select id="user-role" formControlName="rol">
+              <option value="usuario">Usuario</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+          @if (!editingId()) {
+            <label class="checkbox-field">
+              <input type="checkbox" formControlName="activo" />
+              Autorizar como usuario activo
+            </label>
           }
         </div>
-        <div class="field">
-          <label for="user-email">Correo institucional</label>
-          <input id="user-email" type="email" formControlName="correo" autocomplete="email" />
-          @if (form.controls.correo.touched && form.controls.correo.invalid) {
-            <small role="alert">Capture un correo válido.</small>
-          }
+        <div class="dialog__actions">
+          <button
+            class="button button--secondary"
+            type="button"
+            [disabled]="users.saving()"
+            (click)="closeForm()"
+          >
+            Cancelar
+          </button>
+          <button class="button button--primary" type="submit" [disabled]="users.saving()">
+            {{ users.saving() ? 'Guardando…' : 'Guardar usuario' }}
+          </button>
         </div>
-        <div class="field">
-          <label for="user-role">Rol</label>
-          <select id="user-role" formControlName="rol">
-            <option value="usuario">Usuario</option>
-            <option value="admin">Administrador</option>
-          </select>
-        </div>
-        @if (!editingId()) {
-          <label class="checkbox-field">
-            <input type="checkbox" formControlName="activo" />
-            Autorizar como usuario activo
-          </label>
-        }
-      </div>
-      <button class="button button--primary" type="submit" [disabled]="users.saving()">
-        {{ users.saving() ? 'Guardando…' : 'Guardar usuario' }}
-      </button>
-    </form>
+      </form>
+    </app-dialog>
   }
 
-  <div class="toolbar">
-    <div class="field search-field">
+  @if (pendingDeletion(); as user) {
+    <app-dialog
+      title="Eliminar usuario"
+      [dismissible]="!users.saving()"
+      (dismissed)="cancelDeletion()"
+    >
+      <p class="dialog__message">¿Eliminar la autorización de {{ user.nombre }}?</p>
+      <p class="dialog__help">
+        Esta acción revoca su acceso al sistema, pero no elimina su cuenta institucional de Google.
+      </p>
+      <div class="dialog__actions">
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="users.saving()"
+          (click)="cancelDeletion()"
+        >
+          Cancelar
+        </button>
+        <button
+          class="button button--danger"
+          type="button"
+          [disabled]="users.saving()"
+          (click)="confirmDeletion()"
+        >
+          {{ users.saving() ? 'Eliminando…' : 'Eliminar usuario' }}
+        </button>
+      </div>
+    </app-dialog>
+  }
+
+  <div class="table-toolbar">
+    <div class="field table-search">
       <label for="user-search">Buscar por nombre o correo</label>
-      <input id="user-search" type="search" [value]="users.query()" (input)="setQuery($event)" />
+      <input
+        id="user-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Escriba para filtrar automáticamente"
+        [value]="users.query()"
+        (input)="setQuery($event)"
+      />
     </div>
-    <span aria-live="polite">{{ users.filteredUsers().length }} resultado(s)</span>
   </div>
 
   @if (users.loading()) {
@@ -73,8 +120,8 @@
       <h2>{{ users.query() ? 'No se encontraron usuarios' : 'No hay usuarios autorizados' }}</h2>
     </div>
   } @else {
-    <div class="card table-region">
-      <table>
+    <div class="card data-table-region">
+      <table class="data-table">
         <caption class="sr-only">
           Usuarios autorizados del Sistema de Inventario TUP
         </caption>
@@ -89,7 +136,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (user of users.filteredUsers(); track user.documentId) {
+          @for (user of paginatedUsers(); track user.documentId) {
             <tr>
               <td>{{ user.nombre }}</td>
               <td>{{ user.correo }}</td>
@@ -105,27 +152,47 @@
               </td>
               <td>{{ formatAccess(user.ultimoAcceso) }}</td>
               <td>
-                <div class="actions">
-                  <button class="button button--secondary" type="button" (click)="edit(user)">
-                    Editar
+                <div class="record-actions">
+                  <button
+                    class="icon-button icon-button--secondary"
+                    type="button"
+                    [attr.aria-label]="'Editar a ' + user.nombre"
+                    [attr.title]="'Editar a ' + user.nombre"
+                    (click)="edit(user)"
+                  >
+                    <app-icon name="edit" />
                   </button>
                   <button
-                    class="button button--secondary"
+                    class="icon-button icon-button--secondary"
                     type="button"
                     [disabled]="isSelf(user) || users.saving()"
-                    [attr.title]="isSelf(user) ? 'No puede cambiar su propio estado' : null"
+                    [attr.aria-label]="
+                      user.activo ? 'Desactivar a ' + user.nombre : 'Activar a ' + user.nombre
+                    "
+                    [attr.title]="
+                      isSelf(user)
+                        ? 'No puede cambiar su propio estado'
+                        : user.activo
+                          ? 'Desactivar a ' + user.nombre
+                          : 'Activar a ' + user.nombre
+                    "
                     (click)="toggleStatus(user)"
                   >
-                    {{ user.activo ? 'Desactivar' : 'Activar' }}
+                    <app-icon [name]="user.activo ? 'deactivate' : 'activate'" />
                   </button>
                   <button
-                    class="button button--danger"
+                    class="icon-button icon-button--danger"
                     type="button"
                     [disabled]="isSelf(user) || users.saving()"
-                    [attr.title]="isSelf(user) ? 'No puede eliminar su propio registro' : null"
-                    (click)="remove(user)"
+                    [attr.aria-label]="'Eliminar a ' + user.nombre"
+                    [attr.title]="
+                      isSelf(user)
+                        ? 'No puede eliminar su propio registro'
+                        : 'Eliminar a ' + user.nombre
+                    "
+                    (click)="requestDeletion(user)"
                   >
-                    Eliminar
+                    <app-icon name="delete" />
                   </button>
                 </div>
               </td>
@@ -134,5 +201,11 @@
         </tbody>
       </table>
     </div>
+    <app-pagination
+      [totalItems]="users.filteredUsers().length"
+      [page]="activePage()"
+      [pageSize]="pageSize"
+      (pageChange)="setPage($event)"
+    />
   }
 </section>
