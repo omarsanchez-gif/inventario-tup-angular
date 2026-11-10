@@ -2,15 +2,15 @@
 
 ## Estado
 
-Especificación aprobada, implementada y desplegada únicamente a `inventario-stg` el 7 de noviembre de 2026. El responsable confirmó las decisiones técnicas; producción, migración y datos reales permanecen fuera de alcance. La validación local y la verificación técnica remota están aprobadas; la aceptación funcional autenticada del ciclo completo de imagen continúa pendiente.
+Especificación base aprobada, implementada y desplegada únicamente a `inventario-stg`. Producción, migración y datos reales permanecen fuera de alcance. La validación local y la verificación técnica remota están aprobadas; la aceptación funcional autenticada del ciclo completo de imagen continúa pendiente. La autorización granular de ADR-007 permanece propuesta y no está implementada o desplegada.
 
 ## Objetivo
 
-Permitir que un `admin` gestione el catálogo de Modelos que clasifica a los Activos futuros, relacionando cada Modelo con una Categoría y un Fabricante y centralizando su imagen para que los Activos la hereden sin duplicar archivos.
+Permitir que un `admin` o un `usuario` expresamente autorizado gestione el catálogo de Modelos que clasifica a los Activos futuros, relacionando cada Modelo con una Categoría y un Fabricante y centralizando su imagen para que los Activos la hereden sin duplicar archivos.
 
 ## Alcance
 
-- Ruta privada `/configuraciones/modelos-activos`, visible únicamente a `admin` después de implementar y autorizar el módulo.
+- Ruta privada `/configuraciones/modelos-activos`, visible a `admin` o a `usuario` con `modelosActivos.ver` cuando el incremento granular sea implementado.
 - Listado administrativo completo, ordenado por nombre y limitado inicialmente a 500 registros.
 - Búsqueda automática local por nombre, categoría, fabricante, Modelo No. o notas.
 - Alta, edición, activación, desactivación y eliminación condicionada.
@@ -134,11 +134,14 @@ Estado, identificadores, normalización, claves de unicidad, metadata de imagen 
 
 ## Autorización
 
-- Solo `admin` autenticado, autorizado y activo puede acceder a la ruta o invocar sus callables.
-- `usuario`, perfiles inactivos y anónimos no pueden listar, mutar ni obtener imágenes.
+- `admin` autenticado, autorizado y activo conserva acceso total.
+- `usuario` requiere `modelosActivos.ver` para ruta, listado, catálogos sanitizados y acceso temporal a imagen; `crear` para alta; `editar` para datos, carga, sustitución o retirada de imagen; `cambiarEstado` para activar o desactivar; y `eliminar` para eliminar.
+- Toda acción exige además `modelosActivos.ver`; sin la capacidad requerida, para perfil inactivo y para anónimo, backend rechaza la solicitud.
+- Obtener Categorías y Fabricantes sanitizados como apoyo de Modelos no concede acceso a sus pantallas administrativas.
 - Angular no accede directamente a `modelos_activos`, `modelos_activos_claves` ni Storage.
-- Cada callable verifica Authentication, claims y el documento canónico `usuarios`.
+- Cada callable verifica Authentication, claim base, documento canónico `usuarios` y la capacidad de su acción.
 - El guard y la visibilidad del menú son defensa de presentación, no autorización efectiva.
+- El permiso es global para el catálogo; no contiene Campus, Coordinación o Área.
 
 ## Contratos callable
 
@@ -282,7 +285,7 @@ La interfaz traduce estos códigos a mensajes institucionales y no expone stack 
 
 ### Navegación
 
-- `Configuraciones` permanece como grupo desplegable de primer nivel solo para `admin`.
+- `Configuraciones` permanece como grupo desplegable de primer nivel; `admin` ve todos los enlaces y `usuario` solo Modelos de activos cuando posee `modelosActivos.ver`.
 - `Modelos de activos` es una opción secundaria de texto y navega a `/configuraciones/modelos-activos`.
 - La opción está publicada porque el módulo fue implementado y autorizado.
 - El orden vigente es `Categorías`, `Fabricantes`, `Modelos de activos`, `Campus`.

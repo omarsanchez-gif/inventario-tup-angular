@@ -27,3 +27,10 @@
 - [x] Desplegar por separado solo los servicios afectados a `inventario-stg`.
 - [x] Verificar Rules, Functions, rechazo anónimo, Hosting, bundle y encabezados remotos.
 - [ ] Completar aceptación funcional y visual autenticada en escritorio y móvil.
+
+## Incremento futuro: permisos granulares
+
+- [x] Especificar el mapeo Ver/Crear/Editar/Cambiar estado/Eliminar de las cinco callables.
+- [ ] Sustituir la restricción exclusiva de `admin` por la capacidad canónica, conservando acceso total administrativo.
+- [ ] Adaptar guard, submenú y acciones visibles sin confiar en ellos como autoridad.
+- [ ] Probar cada concesión y denegación con rol `usuario`, además de la regresión de `admin` y anónimo.

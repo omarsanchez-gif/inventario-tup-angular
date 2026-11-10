@@ -88,3 +88,11 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 - MOD-051: retirar antes de vencer una carga recuperable responde reconciliación pendiente, conserva la carga activa y solo confirma limpieza después del reintento que elimina objetos y operación. <!-- trace:required -->
 - MOD-052: si el escritor registra `cargaFinalizada: true` después de los borrados y antes de la transacción final, esa ronda conserva operación y generaciones, responde reconciliación y una ronda posterior elimina ambos objetos antes de cerrar. <!-- trace:required -->
 - MOD-053: si ambos uploads terminan pero Firestore falla antes del acuse y durante la compensación, el reintento vencido descubre ambas generaciones, limpia la versión y deja utilizables una carga y retirada posteriores. <!-- trace:required -->
+
+## Criterios futuros de permisos
+
+- MOD-054: `admin` conserva acceso total; `usuario` con `modelosActivos.ver` lista, navega y obtiene miniaturas, mientras otro `usuario` y anónimo son rechazados.
+- MOD-055: Crear, Editar, Cambiar estado y Eliminar exigen exactamente su acción canónica además de Ver; poseer otra acción no eleva acceso.
+- MOD-056: carga, sustitución y retirada de imagen requieren Editar; acceso temporal a original o miniatura requiere Ver y Storage directo permanece cerrado.
+- MOD-057: `getAssetModelCatalogs` entrega referencias sanitizadas a quien puede Ver Modelos sin conceder rutas o callables administrativas de Categorías o Fabricantes.
+- MOD-058: la interfaz muestra solo acciones permitidas, pero toda invocación directa sin capacidad es rechazada sin alterar metadata, objetos, operaciones o trabajos de limpieza.

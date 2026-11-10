@@ -51,14 +51,29 @@ Callable → caso de uso → repositorio → Admin SDK
 
 ## Navegación administrativa
 
-- `Configuraciones` es un grupo desplegable del sidebar, visible solo para `admin` y sin ruta propia.
-- La primera ruta secundaria aprobada es `/configuraciones/categorias`, protegida por guard administrativo.
-- Fabricantes usa `/configuraciones/fabricantes`, protegida por guard administrativo y visible como segunda opción secundaria.
-- Modelos de activos usa `/configuraciones/modelos-activos`, protegida por guard administrativo y visible como tercera opción secundaria.
+- `Configuraciones` es un grupo desplegable del sidebar y no tiene ruta propia. `admin` lo ve completo; `usuario` lo ve solo si posee `ver` en al menos un submódulo.
+- `/configuraciones/categorias` requiere `admin` o `categorias.ver`.
+- `/configuraciones/fabricantes` requiere `admin` o `fabricantes.ver`.
+- `/configuraciones/modelos-activos` requiere `admin` o `modelosActivos.ver`.
 - Otros catálogos no aparecen hasta contar con especificación e implementación propias.
 - Campus usa `/configuraciones/campus`, protegida por guard administrativo y visible como cuarta opción secundaria.
 - Áreas conserva únicamente un borrador documental; no tiene ruta, opción de menú, código ni backend.
 - La activación visual del grupo no sustituye guards, callables ni reglas de seguridad.
+
+## Autorización granular
+
+```text
+AuthFacade → perfil y permisos de solo lectura → capabilityGuard → Page
+                                                        ↓
+Callable → Authentication + claim base + usuarios canónico + permiso de acción
+```
+
+- `usuarios` contiene el mapa canónico; claims conserva únicamente autorización y rol.
+- `admin` satisface todas las capacidades vigentes. `usuario` requiere una acción explícita y activa.
+- El shell filtra enlaces y las páginas filtran acciones para claridad, pero cada callable vuelve a resolver la capacidad.
+- `bootstrapAuthorization` entrega permisos sanitizados y toda revalidación conserva UID y generación de sesión.
+- Permisos y alcance son capas independientes. Esta arquitectura no contiene todavía Campus, Coordinaciones o Áreas en la autorización granular.
+- La decisión completa está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
 
 ## Backend de Categorías
 

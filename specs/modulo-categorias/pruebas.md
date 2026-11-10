@@ -30,6 +30,12 @@
 - CAT-023: las futuras operaciones de crear, eliminar, restaurar o transferir Activos ajustan los contadores afectados sin producir negativos; la prueba integral queda bloqueada hasta especificar e implementar Activos.
 - CAT-024: antes de desplegar Modelos, una referencia en `modelos_activos` produce `category-in-use`; un error de consulta falla de forma segura sin eliminar categoría ni reserva.
 
+## Criterios futuros de permisos
+
+- CAT-025: `admin` conserva acceso total; `usuario` con `categorias.ver` lista y navega, mientras otro `usuario` y anónimo son rechazados.
+- CAT-026: crear, editar, cambiar estado y eliminar exigen exactamente su acción canónica además de Ver; poseer otra acción no eleva acceso.
+- CAT-027: la interfaz muestra solo acciones permitidas, pero una invocación directa sin capacidad también es rechazada por backend sin modificar categoría o reserva.
+
 ## Evidencia local — 7 de noviembre de 2026
 
 - 8 suites y 18 pruebas Angular aprobaron, incluidas presentación, modales, acciones, cantidad, búsqueda, paginación y navegación de Configuraciones.

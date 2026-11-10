@@ -22,6 +22,13 @@
 - LAY-020: Chromium comprueba Escape, retorno de foco, navegación móvil, formulario a 320 px y ausencia de desbordamiento global que impida acciones. <!-- trace:required -->
 - LAY-021: los rechazos de eliminación de Usuarios, Categorías, Fabricantes, Modelos y Campus permanecen dentro del `dialog[open]` con `role="alert"`, sin duplicado de fondo y con cierre o reintento accesibles. <!-- trace:required -->
 
+## Criterios futuros de permisos
+
+- LAY-022: `admin` ve todos los submenús vigentes; `usuario` ve Configuraciones solo con al menos un permiso Ver y exclusivamente los enlaces concedidos.
+- LAY-023: un `usuario` con uno, dos o tres módulos conserva alternancia, ruta activa, cierre móvil, teclado y ancho completo de submenús; sin módulos no se renderiza el grupo.
+- LAY-024: cada ruta exige el guard de su capacidad y revalida el perfil canónico; una URL directa no confía en visibilidad del sidebar.
+- LAY-025: revocar permisos y revalidar sesión retira enlaces y acciones sin aceptar respuestas de otra generación; backend deniega de inmediato aun si la vista estaba obsoleta.
+
 ## Evidencia del incremento
 
 - 10 pruebas Angular aprobadas, incluidas iconografía, cierres del drawer, cambio de breakpoint, alternancia del menú y diálogos de Usuarios.

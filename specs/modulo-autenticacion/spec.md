@@ -1,5 +1,9 @@
 # Spec: Autenticación
 
+## Estado
+
+El contrato base está implementado. La ampliación de `bootstrapAuthorization` con permisos sanitizados pertenece a ADR-007 y permanece propuesta, sin código o despliegue.
+
 ## Objetivo
 
 Permitir acceso únicamente a cuentas institucionales previamente autorizadas y activas.
@@ -20,7 +24,8 @@ Permitir acceso únicamente a cuentas institucionales previamente autorizadas y 
 
 ```text
 bootstrapAuthorization({}) →
-  uid, nombre, correo, rol, activo: true, claimsUpdated
+  uid, nombre, correo, rol, activo: true, claimsUpdated,
+  permisos: { categorias[], fabricantes[], modelosActivos[] }
 ```
 
 Errores: `unauthenticated`, `domain-not-allowed`, `user-not-authorized`, `user-inactive`, `uid-conflict`, `invalid-role`, `service-unavailable`.
@@ -29,6 +34,8 @@ Errores: `unauthenticated`, `domain-not-allowed`, `user-not-authorized`, `user-i
 
 Angular mantiene una generación por identidad. Bootstrap, renovación de claims y lecturas administrativas solo pueden publicar estado si UID y generación continúan vigentes. `onAuthStateChanged(null)` y el logout invalidan primero la generación y luego retiran el shell privado.
 
+Cuando se implemente ADR-007, `bootstrapAuthorization` devolverá el mapa granular sanitizado desde `usuarios`; no lo copiará a Custom Claims. `admin` recibirá acceso efectivo total y `usuario` solo sus acciones explícitas. La misma operación servirá para revalidar capacidades al entrar a una ruta protegida o recuperar foco, sin aceptar resultados de otra generación de sesión.
+
 ## Fuera de alcance
 
-Registro público, contraseña, MFA, otros proveedores e invitaciones.
+Registro público, contraseña, MFA, otros proveedores, invitaciones y alcance por Campus/Coordinación/Área.

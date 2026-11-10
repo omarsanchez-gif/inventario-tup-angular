@@ -14,7 +14,21 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 ## Secuencia propuesta
 
-### 1. Áreas
+### 1. Permisos granulares de catálogos
+
+**Objetivo:** permitir que un `usuario` seleccionado consulte o mantenga Categorías, Fabricantes y Modelos sin convertirlo en `admin` ni incorporar todavía alcance territorial.
+
+**Dependencias:** Usuarios, Layout y los tres catálogos ya implementados; ADR-007 y validación final de sus criterios.
+
+**Reutilización:** `usuarios` como fuente canónica, callables existentes, generación de sesión, `AppDialog`, icon-buttons y guards funcionales.
+
+**Decisiones principales:** alta sin permisos, asignación posterior, mapa completo por módulo/acción, `admin` con acceso total, `usuario` con denegación por defecto y permisos fuera de claims.
+
+**Límite:** no incluye perfiles reutilizables, puestos Jefe/Auxiliar, Campus, Coordinaciones, Áreas o alcance sobre Activos.
+
+**Estado:** especificación propuesta para validación; implementación no autorizada todavía.
+
+### 2. Áreas
 
 **Objetivo:** crear la unidad física bajo Campus que después puedan referenciar coberturas, Usuarios y Activos.
 
@@ -28,7 +42,7 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 **Estado:** borrador propuesto, pendiente de aprobación.
 
-### 2. Coordinaciones, coberturas y alcance de Usuarios
+### 3. Coordinaciones, coberturas y alcance de Usuarios
 
 **Objetivo:** representar una Coordinación institucional una sola vez y definir qué Campus y Áreas cubre; asignar a cada Usuario una cobertura predeterminada y excepciones opcionales.
 
@@ -42,7 +56,7 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 **Estado:** propuesta de secuencia; sin spec detallada ni autorización.
 
-### 3. Activos individuales
+### 4. Activos individuales
 
 **Objetivo:** registrar cada bien físico, referenciar su Modelo y ubicarlo en Campus/Área con los identificadores operativos que se aprueben.
 
@@ -56,7 +70,7 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 **Estado:** propuesta de secuencia; sin spec detallada ni autorización.
 
-### 4. Asignaciones, responsables y responsivas
+### 5. Asignaciones, responsables y responsivas
 
 **Objetivo:** registrar custodia o entrega de Activos, responsables, vigencia, devolución y evidencia documental.
 
@@ -68,7 +82,7 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 **Estado:** propuesta de secuencia; sin spec detallada ni autorización.
 
-### 5. Indicadores operativos
+### 6. Indicadores operativos
 
 **Objetivo:** sustituir el Dashboard inicial por métricas reales y trazables.
 
@@ -80,7 +94,7 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 **Estado:** propuesta de secuencia; sin spec detallada ni autorización.
 
-### 6. Migración o sincronización
+### 7. Migración o sincronización
 
 **Objetivo:** extraer, transformar, conciliar y cargar datos autorizados desde Snipe-IT con reportes de creados, coincidencias, conflictos y errores.
 
@@ -102,6 +116,9 @@ Campus ──> Áreas ──> Coordinaciones/coberturas/Usuarios ──> Activos
 Categorías + Fabricantes ──> Modelos ──> Activos ──> asignaciones/responsivas
                                           │
 contratos estables de todos los módulos ──┴──> migración separada
+
+Usuarios + Categorías + Fabricantes + Modelos ──> permisos granulares
+Alcance territorial ──> incremento posterior e independiente
 ```
 
 ## Condiciones para iniciar Áreas

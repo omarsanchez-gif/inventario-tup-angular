@@ -75,7 +75,8 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 
 ## Fuera de alcance actual
 
-- Áreas, Coordinaciones y reestructuración de accesos de Usuarios. `specs/modulo-areas/` es un borrador propuesto y no autoriza implementación.
+- La implementación de permisos granulares. Su propuesta está documentada en Usuarios y ADR-007, pero no autoriza código, datos o despliegue hasta validación expresa.
+- Áreas, Coordinaciones y alcance territorial de Usuarios. `specs/modulo-areas/` es un borrador propuesto y no autoriza implementación.
 - Activos, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.

@@ -2,7 +2,7 @@
 
 ## Estado
 
-Especificación aprobada y autorizada para implementación, pruebas y despliegue exclusivo a `inventario-stg` el 7 de noviembre de 2026. Producción y migración permanecen fuera de alcance. Modelos de activos fue autorizado posteriormente y ya consume este catálogo; Activos continúa fuera de alcance.
+Especificación base aprobada, implementada y desplegada exclusivamente a `inventario-stg`. Producción y migración permanecen fuera de alcance. Modelos de activos ya consume este catálogo; Activos continúa fuera de alcance. La autorización granular de ADR-007 permanece propuesta y no está implementada o desplegada.
 
 ## Objetivo
 
@@ -10,7 +10,7 @@ Permitir que un `admin` gestione el catálogo de categorías que clasifica los M
 
 ## Alcance
 
-- Ruta privada `/configuraciones/categorias`, visible únicamente a `admin`.
+- Ruta privada `/configuraciones/categorias`, visible a `admin` o a `usuario` con `categorias.ver` cuando el incremento granular sea implementado.
 - Listado administrativo completo, ordenado por nombre y limitado inicialmente a 500 registros.
 - Búsqueda automática local por nombre o notas.
 - Alta, edición, activación, desactivación y eliminación condicionada.
@@ -65,11 +65,13 @@ No se implementan `tipo`, acuerdo de uso, confirmaciones de aceptación, notific
 
 ## Autorización
 
-- Solo `admin` autenticado, autorizado y activo puede acceder a la ruta o invocar sus callables.
-- `usuario` y anónimo no pueden listar ni mutar Categorías.
+- `admin` autenticado, autorizado y activo conserva acceso total.
+- `usuario` requiere `categorias.ver` para ruta y listado, `categorias.crear` para alta, `categorias.editar` para edición, `categorias.cambiarEstado` para activar o desactivar y `categorias.eliminar` para eliminar.
+- Toda acción exige además `categorias.ver`; sin la capacidad requerida y para anónimo, backend rechaza la solicitud.
 - Angular no accede directamente a `categorias` ni a `categorias_nombres`.
-- Cada callable verifica Authentication, claims y el documento canónico `usuarios`.
+- Cada callable verifica Authentication, claim base, documento canónico `usuarios` y la capacidad de su acción.
 - El guard y la visibilidad del menú son defensa de presentación, no autorización efectiva.
+- El permiso es global para el catálogo; no contiene Campus, Coordinación o Área.
 
 ## Contratos callable planificados
 
@@ -144,7 +146,7 @@ La interfaz traduce estos códigos a mensajes institucionales y no expone stack 
 
 ### Navegación
 
-- `Configuraciones` aparece como grupo desplegable de primer nivel solo para `admin`.
+- `Configuraciones` aparece como grupo desplegable de primer nivel para `admin` o para `usuario` con al menos un permiso Ver; Categorías se muestra únicamente con `categorias.ver`.
 - Usa el icono compartido `settings` y no representa una ruta.
 - `Categorías` es una opción secundaria de texto y navega a `/configuraciones/categorias`.
 - El grupo se abre automáticamente cuando Categorías está activa.

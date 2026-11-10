@@ -97,3 +97,10 @@
 - Las cinco callables están `ACTIVE` como Functions v2 en `us-central1`, usan Node.js 22, máximo 20 instancias y `listCampuses` rechazó una solicitud anónima con HTTP 401.
 - Firestore rechazó con HTTP 403 la lectura anónima directa de `campus`. Hosting respondió HTTP 200 en `/configuraciones/campus` y sirve `main-HWJHCEZJ.js`, `styles-CISTRGAV.css` y `chunk-DMN2xbo-.js`.
 - La verificación administrativa autenticada confirmó el estado vacío y el modal aprobado sin crear documentos. No se desplegaron índices, Storage, secretos, migración ni producción.
+
+## Permisos granulares propuestos
+
+- ADR-007 y las specs asociadas definen un incremento futuro sobre `bootstrapAuthorization`, Usuarios, Layout y las callables existentes de Categorías, Fabricantes y Modelos.
+- No se creará una integración externa ni un proveedor nuevo. `usuarios` seguirá siendo la fuente canónica y Custom Claims conservará solo `authorized` y `role`.
+- La implementación futura agregaría `setAuthorizedUserPermissions` y actualizaría únicamente las Functions existentes que deben resolver una capacidad por acción, además de Hosting y las Rules que resulten afectadas.
+- Esta especificación no ejecutó builds, emuladores o despliegues y no modificó `inventario-stg`, IAM, datos, secretos, Storage ni producción.

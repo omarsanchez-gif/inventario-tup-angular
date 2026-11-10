@@ -67,6 +67,10 @@ Los cambios de esta consolidación son documentales: no vuelven a ejecutar ni re
 
 El 10 de noviembre de 2026 se aplicó la skill oficial `angular-developer` al estado `c9490aec92df418c902054b177d16a5b506908ae`. La arquitectura standalone, `OnPush`, Signals de solo lectura, Reactive Forms, rutas, guards, limpieza de recursos y primitivas compartidas resultó conforme; no se detectó un defecto que ameritara cambiar código o Firebase. Aprobaron 55 pruebas Angular, lint completo con guardia visual y build de staging. La revisión y sus límites se detallan en [Angular Skills para Codex](herramientas/angular-skills.md); al ser un cambio documental, no se desplegó Hosting.
 
+## Propuesta posterior: permisos granulares
+
+El 10 de noviembre de 2026 se especificó para validación un incremento que permite asignar después del alta permisos Ver, Crear, Editar, Cambiar estado y Eliminar sobre Categorías, Fabricantes y Modelos. `admin` conservaría acceso total; `usuario` iniciaría sin permisos y recibiría solo acciones explícitas desde una acción separada de la tabla de Usuarios. La propuesta no incluye Campus, Coordinaciones, Áreas ni alcance sobre Activos y no está implementada o desplegada. Su decisión está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
+
 ## Staging vigente
 
 - Proyecto exclusivo: `inventario-stg`; alias obligatorio `staging`.
@@ -90,7 +94,8 @@ Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación té
 
 ## Exclusiones actuales
 
-- Áreas, Coordinaciones, coberturas y reestructuración de acceso de Usuarios.
+- Implementación de permisos granulares; solo existe su propuesta documental.
+- Áreas, Coordinaciones, coberturas y alcance territorial de Usuarios.
 - Activos individuales, personas, responsables, asignaciones, movimientos y responsivas.
 - Indicadores operativos del Dashboard.
 - Migración o sincronización con Snipe-IT y datos reales.

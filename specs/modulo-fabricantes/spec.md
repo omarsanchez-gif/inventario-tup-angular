@@ -2,7 +2,7 @@
 
 ## Estado
 
-Especificación aprobada y autorizada para implementación, pruebas y despliegue exclusivo a `inventario-stg` el 7 de noviembre de 2026. Producción, migración y Proveedores permanecen fuera de alcance. Modelos de activos fue autorizado posteriormente y ya consume este catálogo.
+Especificación base aprobada, implementada y desplegada exclusivamente a `inventario-stg`. Producción, migración y Proveedores permanecen fuera de alcance. Modelos de activos ya consume este catálogo. La autorización granular de ADR-007 permanece propuesta y no está implementada o desplegada.
 
 ## Objetivo
 
@@ -17,7 +17,7 @@ Permitir que un `admin` gestione las marcas que producen los equipos y que son r
 
 ## Alcance
 
-- Ruta privada `/configuraciones/fabricantes`, visible únicamente a `admin`.
+- Ruta privada `/configuraciones/fabricantes`, visible a `admin` o a `usuario` con `fabricantes.ver` cuando el incremento granular sea implementado.
 - Listado administrativo completo, ordenado por nombre y limitado inicialmente a 500 registros.
 - Búsqueda automática local por nombre o notas.
 - Alta, edición, activación, desactivación y eliminación condicionada.
@@ -61,11 +61,13 @@ El formulario contiene exclusivamente `Nombre` y `Notas`. Estado, identificadore
 
 ## Autorización
 
-- Solo `admin` autenticado, autorizado y activo puede acceder a la ruta o invocar sus callables.
-- `usuario` y anónimo no pueden listar ni mutar Fabricantes.
+- `admin` autenticado, autorizado y activo conserva acceso total.
+- `usuario` requiere `fabricantes.ver` para ruta y listado, `fabricantes.crear` para alta, `fabricantes.editar` para edición, `fabricantes.cambiarEstado` para activar o desactivar y `fabricantes.eliminar` para eliminar.
+- Toda acción exige además `fabricantes.ver`; sin la capacidad requerida y para anónimo, backend rechaza la solicitud.
 - Angular no accede directamente a `fabricantes` ni a `fabricantes_nombres`.
-- Cada callable verifica Authentication, claims y el documento canónico `usuarios`.
+- Cada callable verifica Authentication, claim base, documento canónico `usuarios` y la capacidad de su acción.
 - El guard y la visibilidad del menú son defensa de presentación, no autorización efectiva.
+- El permiso es global para el catálogo; no contiene Campus, Coordinación o Área.
 
 ## Contratos callable
 
@@ -137,7 +139,7 @@ La interfaz traduce estos códigos a mensajes institucionales y no expone stack 
 
 ### Navegación
 
-- `Configuraciones` permanece como grupo desplegable de primer nivel solo para `admin`.
+- `Configuraciones` permanece como grupo desplegable de primer nivel; `admin` ve todos los enlaces y `usuario` solo Fabricantes cuando posee `fabricantes.ver`.
 - `Fabricantes` es una opción secundaria de texto y navega a `/configuraciones/fabricantes`.
 - `Categorías` permanece como opción secundaria independiente dentro del mismo grupo.
 - Modelos de activos no aparece hasta contar con implementación propia.

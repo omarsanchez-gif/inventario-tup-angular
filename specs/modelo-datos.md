@@ -6,6 +6,8 @@ El modelo implementado comprende autorización, Categorías, Fabricantes, Modelo
 
 ## Colección `usuarios`
 
+El bloque `permisos` de este contrato pertenece al incremento propuesto en ADR-007 y todavía no está implementado o desplegado. Los demás campos describen el contrato vigente.
+
 ```text
 usuarios/{documentId}
   uid: string | null
@@ -13,6 +15,10 @@ usuarios/{documentId}
   correo: string
   rol: "admin" | "usuario"
   activo: boolean
+  permisos:
+    categorias: string[]
+    fabricantes: string[]
+    modelosActivos: string[]
   fechaCreacion: Timestamp
   ultimoAcceso: Timestamp | null
 ```
@@ -22,6 +28,12 @@ Restricciones:
 - `correo` se guarda normalizado a minúsculas y debe ser único.
 - `uid` se asocia exclusivamente durante el bootstrap de autorización.
 - `fechaCreacion` y `ultimoAcceso` usan tiempo de servidor.
+- Cada lista de `permisos` usa exclusivamente `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`, sin duplicados y en ese orden canónico.
+- Toda acción distinta de `ver` requiere que la misma lista incluya `ver`.
+- Nuevos documentos con rol `usuario` se crean con las tres listas vacías. `admin` obtiene acceso total por rol y no depende del contenido del mapa.
+- La ausencia del campo en documentos anteriores se interpreta como mapa vacío para `usuario`; la implementación no requiere reescribirlos para denegar acceso.
+- Cambiar el rol reemplaza `permisos` por las tres listas vacías. Desactivar conserva el mapa, pero lo vuelve inefectivo.
+- `permisos` no incluye Campus, Coordinaciones, Áreas, Activos, puestos o perfiles reutilizables.
 - No se agregan entidades de Snipe-IT hasta aprobar su mapeo.
 
 ## Colección `categorias`

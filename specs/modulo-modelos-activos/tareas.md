@@ -53,3 +53,11 @@
 - [x] Cerrar cada recuperación únicamente con evidencia observada antes de sus borrados y conservar generaciones concurrentes.
 - [x] Recuperar un escritor ausente mediante ambas generaciones autoritativas sin fabricar el acuse ni usar TTL.
 - [x] Publicar y verificar este incremento de endurecimiento únicamente en staging.
+
+## Incremento futuro: permisos granulares
+
+- [x] Especificar el mapeo de las nueve callables a Ver/Crear/Editar/Cambiar estado/Eliminar.
+- [x] Definir que Editar gobierna carga, sustitución y retirada de imagen y Ver gobierna acceso temporal.
+- [ ] Sustituir la restricción exclusiva de `admin` por la capacidad canónica, conservando acceso total administrativo.
+- [ ] Adaptar guard, submenú, acciones e imagen visible sin confiar en frontend como autoridad.
+- [ ] Probar cada concesión y denegación con rol `usuario`, Storage privado y regresión completa del protocolo de imagen.

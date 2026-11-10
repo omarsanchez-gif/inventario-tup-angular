@@ -1,5 +1,9 @@
 # Spec: Layout privado
 
+## Estado
+
+El layout base está implementado y desplegado. El filtrado de Configuraciones por capacidades de `usuario` pertenece a ADR-007 y permanece propuesto, sin código o despliegue.
+
 ## Objetivo
 
 Proporcionar un shell administrativo consistente, responsive y accesible para todos los módulos privados.
@@ -13,7 +17,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 - Dashboard, Usuarios y los grupos principales como `Configuraciones` comparten familia, tamaño y peso tipográfico.
 - Contenedor de contenido con ancho y espaciado estandarizados.
 - Diálogo compartido para formularios de alta, edición y confirmaciones destructivas.
-- Grupo desplegable `Configuraciones` exclusivo de `admin`, con opciones secundarias de texto para catálogos implementados.
+- Grupo desplegable `Configuraciones` completo para `admin` y filtrado por permisos `ver` para `usuario`, con opciones secundarias de texto para catálogos implementados.
 
 ## Comportamiento de escritorio
 
@@ -46,7 +50,9 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 
 ## Autorización
 
-El layout solo presenta rutas ya autorizadas. `Usuarios` y `Configuraciones` se muestran exclusivamente a `admin`; guards, Functions y Rules conservan la autorización efectiva. El grupo no muestra enlaces de módulos todavía no implementados.
+El layout solo presenta rutas ya autorizadas. `Usuarios` y Campus se mantienen exclusivos de `admin`. `Configuraciones` aparece completo para `admin`; para `usuario` aparece cuando existe al menos un permiso `ver` y contiene solo Categorías, Fabricantes o Modelos autorizados. Un grupo vacío no se renderiza. Guards y Functions conservan la autorización efectiva y el grupo no muestra enlaces de módulos todavía no implementados.
+
+Una revalidación de permisos actualiza menú y acciones solo si pertenece al UID y generación vigentes. Ocultar un enlace no sustituye la denegación backend.
 
 ## Fuera de alcance
 

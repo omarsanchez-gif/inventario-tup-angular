@@ -1,18 +1,26 @@
 # Seguridad
 
+## Estado
+
+El endurecimiento y las restricciones administrativas desplegadas se describen en `estado-actual.md`. SEC-045–048 y las referencias a acciones granulares en SEC-012/013, SEC-022/023 y SEC-027/028 pertenecen a ADR-007 y todavía no están implementadas o desplegadas; hasta entonces las callables de los tres catálogos continúan exigiendo `admin`.
+
 - SEC-001: Firestore aplica denegación por defecto.
 - SEC-002: `usuarios` es la fuente canónica de autorización; los claims son una proyección.
 - SEC-003: Solo Admin SDK escribe `usuarios` y custom claims.
 - SEC-004: Ningún cliente puede leer directamente `usuarios`; el listado administrativo se entrega únicamente mediante callable.
 - SEC-005: Ningún cliente puede escribir directamente en `usuarios`.
 - SEC-006: Cada callable valida Authentication, claims y el documento canónico activo.
+- SEC-045: Los Custom Claims conservan solo `authorized` y `role`; los permisos granulares se leen de `usuarios` en cada callable afectada.
+- SEC-046: Para `usuario`, todo permiso ausente o desconocido se deniega. `admin` conserva acceso total por rol a los catálogos vigentes.
+- SEC-047: `setAuthorizedUserPermissions` exige `admin` canónico, objetivo distinto con rol `usuario`, vocabulario cerrado y reemplazo completo; ningún cliente escribe el mapa directamente.
+- SEC-048: Cambiar rol limpia permisos, una reducción se aplica inmediatamente en backend y la interfaz descarta cualquier revalidación de sesión obsoleta.
 - SEC-007: Los errores expuestos se sanitizan y nunca incluyen tokens, secretos o stack traces.
 - SEC-008: La configuración pública de Firebase no se considera autorización; Security Rules y Functions son obligatorias.
 - SEC-009: Storage permanece cerrado a clientes; toda ruta y consumidor requiere especificación y acceso backend autorizado.
 - SEC-010: El token de Snipe-IT será un secreto exclusivo de herramientas backend.
 - SEC-011: `categorias` y `categorias_nombres` permanecen cerradas a toda lectura y escritura directa desde clientes; el módulo consume exclusivamente callables.
-- SEC-012: Las cinco callables de Categorías validan Authentication, claim administrativo y el documento canónico activo antes de acceder a datos.
-- SEC-013: El rol `usuario` y las solicitudes anónimas no pueden listar ni mutar el catálogo administrativo de Categorías.
+- SEC-012: Las cinco callables de Categorías validan Authentication, claim de autorización, documento canónico activo y `admin` o la acción granular requerida.
+- SEC-013: Un `usuario` sin la acción de Categorías y toda solicitud anónima no pueden listar ni mutar el catálogo.
 - SEC-014: La eliminación verifica referencias mediante backend y falla de forma segura cuando no puede demostrar que la categoría está libre.
 - SEC-015: Modelos consume Categorías activas mediante `getAssetModelCatalogs`, que expone únicamente identificador y nombre.
 - SEC-016: `cantidadActivos` solo puede escribirse o reconciliarse mediante backend autorizado; ningún payload administrativo acepta ese campo.
@@ -24,16 +32,16 @@
 ## Fabricantes
 
 - SEC-021: `fabricantes` y `fabricantes_nombres` permanecen cerradas a toda lectura y escritura directa desde clientes; el módulo consume exclusivamente callables.
-- SEC-022: Las cinco callables de Fabricantes validan Authentication, claim administrativo y el documento canónico activo antes de acceder a datos.
-- SEC-023: El rol `usuario` y las solicitudes anónimas no pueden listar ni mutar el catálogo administrativo de Fabricantes.
+- SEC-022: Las cinco callables de Fabricantes validan Authentication, claim de autorización, documento canónico activo y `admin` o la acción granular requerida.
+- SEC-023: Un `usuario` sin la acción de Fabricantes y toda solicitud anónima no pueden listar ni mutar el catálogo.
 - SEC-024: `deleteManufacturer` verifica de forma fail-safe referencias canónicas en `modelos_activos` antes de eliminar.
 - SEC-025: Modelos consume Fabricantes activos mediante `getAssetModelCatalogs`, que expone únicamente identificador y nombre.
 
 ## Modelos de activos
 
 - SEC-026: `modelos_activos` y `modelos_activos_claves` permanecen cerradas a toda lectura y escritura directa desde clientes; el módulo consume exclusivamente callables.
-- SEC-027: Toda callable de Modelos valida Authentication, claim administrativo y el documento canónico activo antes de acceder a Firestore o Storage.
-- SEC-028: El rol `usuario`, perfiles inactivos y solicitudes anónimas no pueden listar, mutar ni obtener acceso temporal a imágenes de Modelos.
+- SEC-027: Toda callable de Modelos valida Authentication, claim de autorización, documento canónico activo y `admin` o la acción granular requerida antes de acceder a Firestore o Storage.
+- SEC-028: Un `usuario` sin la acción requerida, todo perfil inactivo y toda solicitud anónima no pueden listar, mutar ni obtener acceso temporal a imágenes de Modelos.
 - SEC-029: `getAssetModelCatalogs` expone únicamente identificador y nombre de Categorías y Fabricantes aplicables; Angular no filtra documentos administrativos completos.
 - SEC-030: `deleteCategory` y `deleteManufacturer` consultan `modelos_activos` y fallan de forma segura ante referencia, error o resultado no determinable.
 - SEC-031: Storage Rules conserva denegación total; Admin SDK es el único escritor y las imágenes se leen mediante URLs firmadas de máximo cinco minutos emitidas por callable.

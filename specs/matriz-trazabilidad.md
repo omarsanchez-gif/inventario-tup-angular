@@ -2,20 +2,21 @@
 
 ## Estado vigente — 10 de noviembre de 2026
 
-| Alcance            | Reglas               | Implementación o propuesta                                | Pruebas                 |
-| ------------------ | -------------------- | --------------------------------------------------------- | ----------------------- |
-| Autenticación      | RN-AUT-001–009       | `core/auth`, `SessionScope`, `bootstrapAuthorization`     | AUT-001–AUT-014         |
-| Dashboard inicial  | RN-DASH-001–003      | `features/dashboard`                                      | DASH-001–004            |
-| Usuarios           | RN-USR-001–010       | `features/users`, cinco callables administrativas         | USR-001–USR-019         |
-| Layout privado     | RN-LAY-001–012       | `layout/shell`, `shared/ui/icon`, `shared/ui/dialog`      | LAY-001–LAY-021         |
-| Categorías         | RN-CAT-001–012       | `features/categories`, cinco callables administrativas    | CAT-001–CAT-024         |
-| Fabricantes        | RN-FAB-001–012       | `features/manufacturers`, cinco callables administrativas | FAB-001–FAB-020         |
-| Modelos de activos | RN-MOD-001–030       | `features/asset-models`, nueve callables, Storage privado | MOD-001–MOD-053         |
-| Campus             | RN-CAM-001–015       | `features/campuses`, cinco callables administrativas      | CAM-001–CAM-031         |
-| Calidad local      | RN-DEV-001–003       | seed, emuladores, Playwright y verificador estructural    | DEV-001–DEV-003         |
-| Áreas              | Sin reglas aprobadas | Borrador documental; no existe implementación             | ARE-001–ARE-033 futuros |
+| Alcance            | Reglas               | Implementación o propuesta                             | Pruebas                                    |
+| ------------------ | -------------------- | ------------------------------------------------------ | ------------------------------------------ |
+| Autenticación      | RN-AUT-001–009       | Base implementada; permisos en bootstrap propuestos    | AUT-001–AUT-016 (015–016 futuros)          |
+| Dashboard inicial  | RN-DASH-001–003      | `features/dashboard`                                   | DASH-001–004                               |
+| Usuarios           | RN-USR-001–011       | Base implementada; permisos granulares propuestos      | USR-001–USR-030 (020–030 futuros)          |
+| Layout privado     | RN-LAY-001–012       | Base implementada; navegación por capacidad propuesta  | LAY-001–LAY-025 (022–025 futuros)          |
+| Categorías         | RN-CAT-001–012       | Base implementada; autorización granular propuesta     | CAT-001–CAT-027 (025–027 futuros)          |
+| Fabricantes        | RN-FAB-001–012       | Base implementada; autorización granular propuesta     | FAB-001–FAB-023 (021–023 futuros)          |
+| Modelos de activos | RN-MOD-001–030       | Base implementada; autorización granular propuesta     | MOD-001–MOD-058 (054–058 futuros)          |
+| Permisos           | RN-PER-001–012       | ADR-007 y contratos propuestos; sin implementación     | Cubiertos por criterios futuros anteriores |
+| Campus             | RN-CAM-001–015       | `features/campuses`, cinco callables administrativas   | CAM-001–CAM-031                            |
+| Calidad local      | RN-DEV-001–003       | seed, emuladores, Playwright y verificador estructural | DEV-001–DEV-003                            |
+| Áreas              | Sin reglas aprobadas | Borrador documental; no existe implementación          | ARE-001–ARE-033 futuros                    |
 
-Áreas incrementa el inventario documental, pero sus criterios no son obligatorios, no están en `trazabilidad.json` y no tienen evidencia de ejecución. El borrador no crea una carpeta `src/app/features/areas`, ruta, colección, Function, regla, dato o despliegue.
+Áreas y permisos granulares incrementan el inventario documental, pero sus criterios futuros no son obligatorios, no están en `trazabilidad.json` y no tienen evidencia de ejecución. Los documentos no crean rutas, colecciones, Functions, reglas, datos o despliegues.
 
 ## Significado de los estados
 

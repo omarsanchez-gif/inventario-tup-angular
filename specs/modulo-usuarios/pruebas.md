@@ -20,6 +20,20 @@
 - USR-018: una lectura iniciada por una sesión anterior no repuebla el listado después de invalidar y limpiar su generación. <!-- trace:required -->
 - USR-019: un error de duplicado iniciado en el formulario se anuncia dentro del diálogo en navegador real. <!-- trace:required -->
 
+## Criterios futuros del incremento de permisos
+
+- USR-020: crear un `usuario` persiste el mapa vacío y no muestra controles de permisos dentro del alta.
+- USR-021: un documento anterior sin `permisos` se interpreta sin acceso granular cuando su rol es `usuario`; un `admin` conserva acceso total por rol.
+- USR-022: solo un `admin` canónico puede reemplazar mediante `setAuthorizedUserPermissions` el mapa completo de otro registro con rol `usuario`.
+- USR-023: módulo, acción, duplicado, campo o combinación desconocidos se rechazan sin escritura parcial; toda acción distinta de `ver` exige `ver`.
+- USR-024: cambiar entre `admin` y `usuario` limpia permisos almacenados y nunca reactiva una configuración antigua al degradar el rol.
+- USR-025: desactivar vuelve inefectivos los permisos sin perder su configuración; reactivar recupera solo el mapa canónico vigente.
+- USR-026: `bootstrapAuthorization` entrega permisos sanitizados sin agregarlos a Custom Claims y una respuesta tardía no reemplaza la sesión actual.
+- USR-027: la tabla resume Acceso total, Sin permisos o cantidad de módulos y muestra la acción iconográfica solo para filas `usuario`.
+- USR-028: el diálogo separado usa fieldsets etiquetados, resuelve la dependencia de Ver, reemplaza el mapa una sola vez y conserva error, foco y reintento desde 320 px.
+- USR-029: cancelar, Escape, backdrop o cierre visible no ejecutan la callable ni alteran el mapa.
+- USR-030: un solicitante no puede asignarse permisos a sí mismo, modificar un `admin` mediante la matriz ni conceder acciones por payload desconocido.
+
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 
 - `npm run test:emulators` aprobó 5 pruebas integrales en dos suites con Auth, Functions y Firestore Emulator.

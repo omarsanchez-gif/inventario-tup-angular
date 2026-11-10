@@ -23,3 +23,11 @@
 - [x] Igualar la tipografía del botón `Configuraciones` con los enlaces principales del sidebar.
 - [x] Incorporar recorridos Playwright de teclado, foco, navegación móvil y viewport de 320 px con Emulator Suite.
 - [x] Mantener los rechazos de eliminación dentro de los cinco diálogos administrativos, sin alerta duplicada en el fondo.
+
+## Incremento futuro: permisos granulares
+
+- [x] Especificar visibilidad del grupo y enlaces por capacidad Ver.
+- [ ] Incorporar el estado de permisos efectivos al shell sin mutación externa.
+- [ ] Sustituir guards administrativos de los tres catálogos por guards de capacidad con revalidación canónica.
+- [ ] Mantener Usuarios y Campus exclusivos de `admin`.
+- [ ] Probar combinaciones de uno, dos, tres y ningún submenú en escritorio y desde 320 px.

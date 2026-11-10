@@ -16,7 +16,24 @@
 
 - RN-ROL-001: Los roles del primer incremento son `admin` y `usuario`.
 - RN-ROL-002: Solo `admin` administra usuarios.
-- RN-ROL-003: Los permisos futuros de inventario requieren especificación propia; el rol no los implica todavía.
+- RN-ROL-003: `admin` implica acceso total a los catálogos administrativos vigentes; `usuario` no implica acceso a ningún catálogo y depende de permisos explícitos.
+
+## Permisos granulares de catálogos — propuesta no implementada
+
+RN-PER-001–012 y las ampliaciones granulares de Layout, Categorías, Fabricantes y Modelos describen el incremento propuesto en ADR-007. Hasta implementarlo y validarlo, staging conserva la restricción exclusiva de `admin` documentada en el estado actual.
+
+- RN-PER-001: `usuarios` es la fuente canónica de permisos; Custom Claims conserva solo autorización y rol.
+- RN-PER-002: En este incremento solo son autorizables `categorias`, `fabricantes` y `modelosActivos`.
+- RN-PER-003: Cada módulo admite `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; cualquier acción distinta de `ver` exige también `ver`.
+- RN-PER-004: La ausencia del mapa, módulo o acción equivale a denegación para `usuario`; no existen concesiones implícitas por puesto, correo o coordinación.
+- RN-PER-005: Crear un usuario no asigna permisos. La asignación se realiza después mediante una acción independiente.
+- RN-PER-006: Solo un `admin` activo puede reemplazar el mapa completo de otro registro con rol `usuario`; el objetivo no administra sus propios privilegios.
+- RN-PER-007: Cambiar el rol limpia el mapa granular para impedir que permisos dormidos reaparezcan al degradar acceso.
+- RN-PER-008: Un usuario inactivo no tiene permisos efectivos, aunque su configuración se conserve para una posible reactivación.
+- RN-PER-009: Cada callable revalida el permiso canónico de su acción. Menú, botones y guards solo son defensas de presentación.
+- RN-PER-010: Una reducción entra en vigor inmediatamente en backend; una respuesta de autorización anterior nunca restaura permisos en una sesión nueva.
+- RN-PER-011: Los permisos de estos tres catálogos son globales y no anticipan Campus, Coordinaciones, Áreas o alcance sobre Activos.
+- RN-PER-012: `ver` Modelos permite obtener sus referencias sanitizadas y acceso temporal a sus imágenes, sin conceder acceso administrativo a Categorías o Fabricantes.
 
 ## Usuarios
 
@@ -30,6 +47,7 @@
 - RN-USR-008: El módulo admite un máximo inicial de 500 usuarios y no devuelve resultados parciales.
 - RN-USR-009: Ningún cliente lee `usuarios` directamente; incluso el listado administrativo se obtiene mediante una callable con revalidación canónica.
 - RN-USR-010: Al reducir acceso, actualizar claims y revocar refresh tokens son intentos independientes; el fallo de uno no omite el otro y la operación informa reconciliación requerida.
+- RN-USR-011: El listado administrativo entrega el mapa granular sanitizado para administrar y resumir permisos sin exponer campos técnicos.
 
 ## Dashboard inicial
 
@@ -43,9 +61,9 @@
 - RN-LAY-002: En escritorio el menú lateral se muestra inicialmente y el botón de menú lo oculta o muestra por completo, sin conservar una barra residual.
 - RN-LAY-003: En móvil el menú inicia cerrado, se presenta como drawer superpuesto y puede cerrarse con el botón, el fondo, Escape o la selección de una ruta.
 - RN-LAY-004: Tipografía, tamaños, colores, espaciado, radios, sombras, iconografía y estados interactivos proceden de tokens o primitivas globales.
-- RN-LAY-005: La navegación conserva las restricciones por rol; estandarizar su presentación no amplía autorizaciones.
+- RN-LAY-005: La navegación conserva las restricciones por rol y permiso; estandarizar su presentación no amplía autorizaciones.
 - RN-LAY-006: Altas, ediciones y confirmaciones de eliminación se presentan mediante el diálogo compartido; no se usan formularios administrativos inline ni confirmaciones nativas del navegador.
-- RN-LAY-007: `Configuraciones` es un grupo desplegable exclusivo de `admin`, no una ruta ni una pantalla independiente.
+- RN-LAY-007: `Configuraciones` es un grupo desplegable, no una ruta ni una pantalla independiente; aparece para `admin` o cuando un `usuario` posee `ver` en al menos un submódulo autorizado.
 - RN-LAY-008: Solo los módulos administrativos implementados y autorizados aparecen como opciones secundarias de `Configuraciones`.
 - RN-LAY-009: Las opciones secundarias usan texto y estado activo; el icono distintivo se reserva para el grupo principal.
 - RN-LAY-010: Si una ruta secundaria está activa, `Configuraciones` expresa su estado activo y se abre al navegar a ella; el usuario puede contraerlo manualmente sin perder el indicador del padre.
@@ -54,7 +72,7 @@
 
 ## Categorías
 
-- RN-CAT-001: Solo un `admin` autorizado puede listar y administrar categorías.
+- RN-CAT-001: Un `admin` o un `usuario` con la acción canónica correspondiente puede operar Categorías; cada callable exige su permiso específico.
 - RN-CAT-002: Los únicos campos capturados son `nombre` y `notas`; no existen tipo, acuerdo de uso, imagen ni opciones de notificación en este módulo.
 - RN-CAT-003: El nombre es obligatorio, tiene máximo 120 caracteres y es único después de normalizar mayúsculas, diacríticos y espacios.
 - RN-CAT-004: Las notas son opcionales, se recortan y admiten máximo 1,000 caracteres.
@@ -69,7 +87,7 @@
 
 ## Fabricantes
 
-- RN-FAB-001: Solo un `admin` autorizado puede listar y administrar fabricantes.
+- RN-FAB-001: Un `admin` o un `usuario` con la acción canónica correspondiente puede operar Fabricantes; cada callable exige su permiso específico.
 - RN-FAB-002: Los únicos campos capturados son `nombre` y `notas`; no se almacenan URL, URL de soporte, búsqueda de garantía, teléfono, correo de soporte ni imagen.
 - RN-FAB-003: El nombre es obligatorio, tiene máximo 120 caracteres y es único después de normalizar mayúsculas, diacríticos y espacios.
 - RN-FAB-004: Las notas son opcionales, se recortan y admiten máximo 1,000 caracteres.
@@ -84,7 +102,7 @@
 
 ## Modelos de activos
 
-- RN-MOD-001: Solo un `admin` autorizado puede listar y administrar Modelos de activos.
+- RN-MOD-001: Un `admin` o un `usuario` con la acción canónica correspondiente puede operar Modelos de activos; cada callable exige su permiso específico.
 - RN-MOD-002: Los únicos campos capturados son `nombre`, `categoriaId`, `fabricanteId`, `modeloNo`, `notas` e imagen opcional.
 - RN-MOD-003: El nombre es obligatorio, se normaliza y admite máximo 120 caracteres.
 - RN-MOD-004: Categoría y Fabricante son obligatorios y se guardan mediante identificadores estables; sus nombres no se duplican como fuente canónica.

@@ -71,7 +71,7 @@
 
 ### Grupo Configuraciones
 
-- `Configuraciones` es un botón desplegable de primer nivel con icono `settings`, visible exclusivamente a `admin`; no navega a una pantalla propia.
+- `Configuraciones` es un botón desplegable de primer nivel con icono `settings`; no navega a una pantalla propia. `admin` ve todas las opciones vigentes y `usuario` solo los submódulos donde posee `ver`.
 - Como elemento de primer nivel, usa exactamente la misma familia, tamaño y peso tipográfico que Dashboard y Usuarios.
 - El botón declara `aria-expanded` y `aria-controls`, admite teclado y conserva un objetivo mínimo de `44 × 44 px`.
 - Las opciones secundarias se presentan con texto, sangría y estado activo, sin exigir un icono individual.
@@ -81,6 +81,16 @@
 - Los enlaces secundarios ocupan todo el ancho disponible; la jerarquía visual se expresa mediante sangría interna sin reducir el fondo, foco ni área interactiva.
 - En móvil, activar una opción secundaria cierra el drawer; expandir o contraer el grupo no cierra el drawer.
 - `Usuarios` permanece como opción principal independiente.
+
+## Matriz de permisos de Usuario
+
+- La asignación se abre desde una acción iconográfica de la tabla y usa `AppDialog`; no se agrega al formulario de alta o identidad.
+- El icono de permisos se incorpora al registro `AppIcon` antes de implementar la acción y conserva nombre accesible y tooltip `Asignar permisos a <nombre>`.
+- Cada módulo usa un `fieldset` con `legend` visible y controles nativos etiquetados para Ver, Crear, Editar, Cambiar estado y Eliminar.
+- La dependencia de Ver se comunica por estado y texto; no se representa solo con color ni se dejan combinaciones inválidas.
+- En escritorio pueden alinearse acciones por columnas. Desde 320 px cada módulo se apila sin desplazamiento horizontal obligatorio y conserva objetivos de 44 × 44 px.
+- `Acceso total por rol`, `Sin permisos` y la cantidad de módulos se expresan como texto, no solo como badge de color.
+- Error y guardado permanecen dentro del diálogo; el foco retorna al botón de permisos que lo abrió.
 
 ## Diálogos y formularios administrativos
 
