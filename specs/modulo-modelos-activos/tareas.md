@@ -50,4 +50,4 @@
 - [x] Probar el adaptador real con Firestore Emulator y Storage Emulator, además de `FakeBucket`.
 - [x] Conservar un tombstone recuperable cuando Storage materializa escrituras después de vencer el arrendamiento.
 - [x] Impedir que `removeAssetModelImage` declare éxito mientras existan operaciones activas o pendientes.
-- [ ] Publicar y verificar este incremento de endurecimiento únicamente en staging.
+- [x] Publicar y verificar este incremento de endurecimiento únicamente en staging.

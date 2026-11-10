@@ -12,6 +12,7 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 
 - El SHA `58a0ab3f4e7452d349cf5bf93632258f0068aeac` aprobó la secuencia retener escrituras → vencer lease → recuperar sin objetos → materializar ambas variantes → recuperar de nuevo. La primera recuperación dejó `estado: cancelada` y `cargaFinalizada: false`; después el escritor registró `cargaFinalizada: true`, el reintento eliminó ambos objetos y la operación desapareció.
 - Retirar antes del vencimiento respondió `asset-model-image-reconciliation-required`, mantuvo la operación y solo confirmó éxito después del reintento. Las pruebas existentes de versión canónica, concurrencia, fallos parciales, eliminación de Modelo y Storage Emulator real permanecieron verdes dentro de 27 pruebas integrales.
+- En staging se actualizaron exclusivamente `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel`. Cloud Functions API confirmó estado `ACTIVE`, revisiones `00003` y HTTP 401 anónimo para las tres; no se ejecutó una mutación autenticada ni se crearon datos para esta verificación.
 
 ## Evidencia local del protocolo versionado — 9 de noviembre de 2026
 

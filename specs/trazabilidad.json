@@ -6,7 +6,7 @@
   "delivery": {
     "localValidation": "complete",
     "branchPublication": "pending-current-commits",
-    "stagingDeployment": "blocked-firebase-cli-reauth-required",
+    "stagingDeployment": "complete-affected-functions-only",
     "continuousIntegration": "not-triggered-without-pull-request",
     "manualAcceptance": "pending"
   },
