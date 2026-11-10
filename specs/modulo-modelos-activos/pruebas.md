@@ -14,6 +14,11 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 - Retirar antes del vencimiento respondió `asset-model-image-reconciliation-required`, mantuvo la operación y solo confirmó éxito después del reintento. Las pruebas existentes de versión canónica, concurrencia, fallos parciales, eliminación de Modelo y Storage Emulator real permanecieron verdes dentro de 27 pruebas integrales.
 - En staging se actualizaron exclusivamente `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel`. Cloud Functions API confirmó estado `ACTIVE`, revisiones `00003` y HTTP 401 anónimo para las tres; no se ejecutó una mutación autenticada ni se crearon datos para esta verificación.
 
+## Evidencia local de cierre concurrente — 10 de noviembre de 2026
+
+- Sobre `ef8ae667cb3d30104edc1cc4ebd4fc2f8d5ddd04`, MOD-052 pausó la transacción final después de borrar, permitió que el escritor registrara acuse y generaciones y comprobó que esa ronda respondió reconciliación sin retirar la evidencia. La ronda posterior eliminó los dos objetos y la operación.
+- MOD-053 completó ambos uploads, falló antes de `recordUploadCompletion` y durante `markCanceled`, venció el lease y recuperó por las dos generaciones físicas. Después permitió guardar y retirar una imagen nueva sin bloqueo heredado.
+
 ## Evidencia local del protocolo versionado — 9 de noviembre de 2026
 
 - Las 42 pruebas unitarias de Functions cubrieron JPEG, PNG, WebP, AVIF real y MIME incongruente; las 17 pruebas integrales comprobaron sustituciones concurrentes, eliminación frente a sustitución, compensación parcial y limpieza reintentable incluso después de eliminar el Modelo.
