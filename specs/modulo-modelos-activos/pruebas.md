@@ -8,6 +8,11 @@ La verificación remota posterior al despliegue confirmó las nueve callables `A
 
 La primera comprobación autenticada de un Modelo con imagen expuso `SigningError` en `getAssetModelImageAccess` y la interfaz mostró el placeholder seguro. Tras conceder a la cuenta runtime el vínculo propio mínimo para `iam.serviceAccounts.signBlob` y actualizar únicamente esa callable, una recarga autenticada confirmó que la alerta desapareció y la miniatura del Modelo `MSI` cargó. MOD-029 queda aceptada para emisión y consumo real de la variante `thumbnail`; las variantes restantes y su expiración conservan cobertura automatizada y aceptación manual pendiente.
 
+## Evidencia local de escrituras tardías — 10 de noviembre de 2026
+
+- El SHA `58a0ab3f4e7452d349cf5bf93632258f0068aeac` aprobó la secuencia retener escrituras → vencer lease → recuperar sin objetos → materializar ambas variantes → recuperar de nuevo. La primera recuperación dejó `estado: cancelada` y `cargaFinalizada: false`; después el escritor registró `cargaFinalizada: true`, el reintento eliminó ambos objetos y la operación desapareció.
+- Retirar antes del vencimiento respondió `asset-model-image-reconciliation-required`, mantuvo la operación y solo confirmó éxito después del reintento. Las pruebas existentes de versión canónica, concurrencia, fallos parciales, eliminación de Modelo y Storage Emulator real permanecieron verdes dentro de 27 pruebas integrales.
+
 ## Evidencia local del protocolo versionado — 9 de noviembre de 2026
 
 - Las 42 pruebas unitarias de Functions cubrieron JPEG, PNG, WebP, AVIF real y MIME incongruente; las 17 pruebas integrales comprobaron sustituciones concurrentes, eliminación frente a sustitución, compensación parcial y limpieza reintentable incluso después de eliminar el Modelo.

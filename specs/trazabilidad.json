@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "baseReviewSha": "8e0bbc36c6244bc3cd1906e39f859d8b1b772863",
-  "implementationSha": "1706695cc3d2a302ac490c3b917417bf4d6dacd2",
+  "baseReviewSha": "e20cdee4b20e83cba59346a7381f0544601348f2",
+  "implementationSha": "58a0ab3f4e7452d349cf5bf93632258f0068aeac",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
-    "branchPublication": "complete",
+    "branchPublication": "pending-current-commits",
     "stagingDeployment": "blocked-firebase-cli-reauth-required",
     "continuousIntegration": "not-triggered-without-pull-request",
     "manualAcceptance": "pending"
@@ -92,6 +92,22 @@
       "status": "passed",
       "command": "npm audit --omit=dev --audit-level=high",
       "result": "0 altas o críticas; 4 moderadas transitivas de google-gax",
+      "criteria": []
+    },
+    {
+      "id": "emulators-58a0ab3",
+      "sha": "58a0ab3f4e7452d349cf5bf93632258f0068aeac",
+      "status": "passed",
+      "command": "npm run test:emulators",
+      "result": "8 archivos y 27 pruebas con Auth, Firestore, Functions y Storage Emulator aprobadas; incluye escritura tardía, retirada pendiente, seed tras renombrado e integración real con Storage",
+      "criteria": ["MOD-050", "MOD-051", "DEV-003"]
+    },
+    {
+      "id": "full-regression-58a0ab3",
+      "sha": "58a0ab3f4e7452d349cf5bf93632258f0068aeac",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "55 Angular, 42 Functions, 27 Emulator Suite, 4 Chromium y 7 pruebas de trazabilidad aprobadas; lint, guardia visual, formato, builds, auditoría high y diff aprobaron",
       "criteria": []
     }
   ],
@@ -291,14 +307,16 @@
       "criterion": "MOD-050",
       "verification": "emulator",
       "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "emulators-58a0ab3"
     },
     {
       "requirement": "RN-MOD-028",
       "criterion": "MOD-051",
       "verification": "emulator",
       "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "emulators-58a0ab3"
     },
     {
       "requirement": "RN-DEV-001",
@@ -321,7 +339,8 @@
       "criterion": "DEV-003",
       "verification": "emulator",
       "tests": ["functions/src/seed-emulator.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "emulators-58a0ab3"
     }
   ]
 }
