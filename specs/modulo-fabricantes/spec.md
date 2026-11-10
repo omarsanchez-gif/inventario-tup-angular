@@ -2,11 +2,11 @@
 
 ## Estado
 
-Especificación aprobada y autorizada para implementación, pruebas y despliegue exclusivo a `inventario-stg` el 7 de noviembre de 2026. Producción, migración, Proveedores y Modelos de activos permanecen fuera de alcance.
+Especificación aprobada y autorizada para implementación, pruebas y despliegue exclusivo a `inventario-stg` el 7 de noviembre de 2026. Producción, migración y Proveedores permanecen fuera de alcance. Modelos de activos fue autorizado posteriormente y ya consume este catálogo.
 
 ## Objetivo
 
-Permitir que un `admin` gestione las marcas que producen los equipos y que posteriormente serán referenciadas por Modelos de activos, conservando únicamente la información necesaria para clasificar el inventario.
+Permitir que un `admin` gestione las marcas que producen los equipos y que son referenciadas por Modelos de activos, conservando únicamente la información necesaria para clasificar el inventario.
 
 ## Distinción funcional
 
@@ -53,9 +53,9 @@ El formulario contiene exclusivamente `Nombre` y `Notas`. Estado, identificadore
 - Alta y edición no muestran un campo de estado.
 - Activar o desactivar es una acción contextual separada.
 - Desactivar no elimina ni altera referencias históricas.
-- Los fabricantes inactivos no podrán seleccionarse en nuevos Modelos de activos cuando ese módulo sea especificado.
+- Los fabricantes inactivos no pueden seleccionarse en nuevos Modelos de activos.
 - Eliminar requiere confirmación y solo procede si ningún Modelo de activo referencia `fabricanteId`.
-- En este incremento no existe todavía un consumidor aprobado de `fabricanteId`; antes de autorizar el primer Modelo de activo se incorporará su consulta canónica fail-safe a `deleteManufacturer`.
+- Modelos de activos es el consumidor aprobado de `fabricanteId`; `deleteManufacturer` consulta `modelos_activos` de forma canónica y fail-safe.
 - Si el fabricante está en uso, la operación responde `manufacturer-in-use` y la interfaz indica que debe desactivarse.
 - Renombrar conserva `fabricanteId` y cambia en una transacción la reserva del nombre anterior por la nueva.
 
@@ -117,8 +117,7 @@ Entrada: `documentId`, `activo`.
 
 Entrada: `documentId`.
 
-- En el alcance vigente valida la entidad y su reserva de nombre; no existe todavía un consumidor aprobado que pueda crear referencias.
-- Antes de implementar Modelos de activos, su consulta canónica se incorporará a esta operación y cualquier referencia o error de verificación impedirá borrar.
+- Valida la entidad, su reserva de nombre y las referencias canónicas en `modelos_activos`; cualquier referencia o error de verificación impide borrar.
 - Elimina fabricante y reserva de nombre en una transacción.
 
 ## Códigos funcionales
@@ -174,7 +173,7 @@ Los datos históricos de soporte o URL existentes en Snipe-IT no se trasladarán
 ## Decisiones aprobadas
 
 1. Nombre y Notas son los únicos campos capturados.
-2. Se usa el ciclo activo/inactivo y la eliminación queda condicionada por futuros Modelos de activos.
+2. Se usa el ciclo activo/inactivo y la eliminación queda condicionada por los Modelos de activos que ya consumen el catálogo.
 3. No se muestra un contador de Modelos o Activos en este incremento.
 4. Se reutilizan la ruta administrativa, tabla, búsqueda, paginación, modales y acciones estandarizadas.
 

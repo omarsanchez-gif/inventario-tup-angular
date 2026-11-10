@@ -19,7 +19,7 @@ Permitir que un `admin` gestione los campus institucionales que servirán como r
 
 ## Alcance
 
-- Ruta privada `/configuraciones/campus`, visible únicamente a `admin` después de implementar y autorizar el módulo.
+- Ruta privada implementada `/configuraciones/campus`, visible únicamente a `admin`.
 - Listado administrativo completo, ordenado por nombre y limitado inicialmente a 100 registros.
 - Búsqueda automática local por código, nombre o notas.
 - Alta, edición, activación, desactivación y eliminación condicionada.
@@ -180,7 +180,7 @@ La interfaz traducirá estos códigos a mensajes institucionales y no expondrá 
 ### Navegación
 
 - `Configuraciones` permanece como grupo desplegable exclusivo de `admin`.
-- `Campus` será una opción secundaria de texto y navegará a `/configuraciones/campus` únicamente después de implementar, validar y autorizar el módulo.
+- `Campus` es una opción secundaria de texto y navega a `/configuraciones/campus` porque el módulo ya fue implementado, validado y autorizado.
 - No tendrá icono individual porque las opciones secundarias usan el icono compartido del grupo.
 - Áreas y Coordinaciones no aparecerán hasta contar con specs e implementación propias.
 

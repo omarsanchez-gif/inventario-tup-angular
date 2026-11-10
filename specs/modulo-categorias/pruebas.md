@@ -36,7 +36,7 @@
 - 3 archivos y 11 pruebas unitarias de Functions aprobaron; 7 corresponden a la lógica administrativa de Categorías.
 - Firestore Emulator aprobó 2 pruebas de integración: transacciones, unicidad concurrente, renombrado, estado, eliminación condicionada y denegación de acceso directo.
 - Compilación de Functions, lint Angular/Functions, guardia visual, formato y build de staging aprobaron.
-- CAT-023 permanece parcialmente diferida: el valor inicial y la protección están cubiertos, pero el ajuste por operaciones reales requiere los futuros módulos de Modelos y Activos.
+- CAT-023 permanece parcialmente diferida: el valor inicial y la protección están cubiertos; Modelos ya existe, pero el ajuste por operaciones reales requiere el futuro módulo de Activos, que será la fuente canónica.
 - CAT-024 quedó aprobada con Firestore Emulator el 7 de noviembre de 2026: una referencia de Modelo impide eliminar la Categoría y la transacción conserva categoría y reserva.
 - Firestore Rules, las cinco callables y Hosting se desplegaron por separado únicamente a `inventario-stg`.
 - Las cinco callables están `ACTIVE` en `us-central1`, usan Node.js 22 y rechazaron solicitudes anónimas con HTTP 401.

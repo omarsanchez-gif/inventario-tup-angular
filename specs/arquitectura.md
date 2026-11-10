@@ -40,12 +40,13 @@ Callable → caso de uso → repositorio → Admin SDK
 
 ## Navegación administrativa
 
-- `Configuraciones` será un grupo desplegable del sidebar, visible solo para `admin` y sin ruta propia.
+- `Configuraciones` es un grupo desplegable del sidebar, visible solo para `admin` y sin ruta propia.
 - La primera ruta secundaria aprobada es `/configuraciones/categorias`, protegida por guard administrativo.
 - Fabricantes usa `/configuraciones/fabricantes`, protegida por guard administrativo y visible como segunda opción secundaria.
 - Modelos de activos usa `/configuraciones/modelos-activos`, protegida por guard administrativo y visible como tercera opción secundaria.
 - Otros catálogos no aparecen hasta contar con especificación e implementación propias.
 - Campus usa `/configuraciones/campus`, protegida por guard administrativo y visible como cuarta opción secundaria.
+- Áreas conserva únicamente un borrador documental; no tiene ruta, opción de menú, código ni backend.
 - La activación visual del grupo no sustituye guards, callables ni reglas de seguridad.
 
 ## Backend de Categorías
@@ -56,7 +57,7 @@ Callable → caso de uso de Categorías → repositorio → Admin SDK
 
 Las callables desplegadas son `listCategories`, `createCategory`, `updateCategory`, `setCategoryStatus` y `deleteCategory`, todas en `us-central1`. La unicidad se reserva transaccionalmente en `categorias_nombres`; `deleteCategory` ya verifica referencias de Modelos de forma fail-safe sin cambiar el contrato público.
 
-`cantidadActivos` es un read model desnormalizado para evitar una consulta de agregación por cada categoría del listado. Inicia en cero y su mantenimiento no se habilitará hasta que las specs de Modelos, Activos y Migración definan todas las transiciones que incrementan, decrementan, transfieren o reconcilian el contador. La fuente canónica siempre será Activos.
+`cantidadActivos` es un read model desnormalizado para evitar una consulta de agregación por cada categoría del listado. Inicia en cero y su mantenimiento no se habilitará hasta que la spec de Activos defina todas las transiciones que incrementan, decrementan, transfieren o reconcilian el contador. La fuente canónica siempre será Activos; Modelos ya está implementado, pero no materializa activos individuales.
 
 ## Backend de Fabricantes
 
@@ -82,7 +83,7 @@ Se implementaron nueve callables en `us-central1`: `listAssetModels`, `getAssetM
 - `setAssetModelImage` recibe un archivo de máximo 2 MiB, valida los bytes, genera original normalizado y miniatura WebP y después actualiza metadata.
 - `getAssetModelImageAccess` firma únicamente los objetos del Modelo solicitado por cinco minutos; el listado no genera URLs para los 500 registros.
 - La interfaz solicita miniaturas solo para los diez registros visibles y puede reutilizarlas hasta su expiración.
-- Las cargas nuevas crean primero una operación arrendada en `modelos_activos_operaciones_imagen`, después escriben rutas inmutables por versión y finalmente confirman metadata de forma transaccional. Operaciones canceladas o vencidas y trabajos de `modelos_activos_limpiezas` convergen mediante los mismos flujos administrativos sin tocar una carga activa o versión canónica.
+- Las cargas nuevas crean primero una operación arrendada en `modelos_activos_operaciones_imagen`, después escriben rutas inmutables por versión y finalmente confirman metadata de forma transaccional. Operaciones canceladas o vencidas y trabajos de `modelos_activos_limpiezas` se reintentan mediante los mismos flujos administrativos sin tocar una carga activa o versión canónica. Solo se retira una operación con acuse durable previo o con ambas generaciones físicas observadas antes de borrar; con cero o una variante y sin acuse permanece reconciliación pendiente.
 - `sharp` 0.35.5 procesa las imágenes conforme a ADR-005 y está fijado como dependencia exacta de Functions.
 
 ## Ciclo de sesión

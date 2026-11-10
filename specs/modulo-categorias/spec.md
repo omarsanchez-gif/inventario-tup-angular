@@ -2,11 +2,11 @@
 
 ## Estado
 
-Especificación aprobada y autorizada para implementación, pruebas y despliegue exclusivo a `inventario-stg` el 7 de noviembre de 2026. Producción, migración y los módulos dependientes permanecen fuera de alcance.
+Especificación aprobada y autorizada para implementación, pruebas y despliegue exclusivo a `inventario-stg` el 7 de noviembre de 2026. Producción y migración permanecen fuera de alcance. Modelos de activos fue autorizado posteriormente y ya consume este catálogo; Activos continúa fuera de alcance.
 
 ## Objetivo
 
-Permitir que un `admin` gestione el catálogo de categorías que posteriormente clasificará Modelos de activos, conservando un alcance menor que Snipe-IT y sin trasladar campos que el sistema institucional no necesita.
+Permitir que un `admin` gestione el catálogo de categorías que clasifica los Modelos de activos, conservando un alcance menor que Snipe-IT y sin trasladar campos que el sistema institucional no necesita.
 
 ## Alcance
 
@@ -45,7 +45,7 @@ No se implementan `tipo`, acuerdo de uso, confirmaciones de aceptación, notific
 - Alta y edición no muestran un campo de estado.
 - Activar o desactivar es una acción contextual separada.
 - Desactivar no elimina ni altera referencias históricas.
-- Las categorías inactivas no podrán seleccionarse en nuevos Modelos de activos cuando ese módulo sea especificado.
+- Las categorías inactivas no pueden seleccionarse en nuevos Modelos de activos.
 - Eliminar requiere confirmación y solo procede si ningún consumidor aprobado referencia `categoriaId`.
 - Si una categoría está en uso, la operación responde `category-in-use` y la interfaz indica que debe desactivarse.
 - Renombrar conserva `categoriaId` y cambia en una transacción la reserva del nombre anterior por la nueva.

@@ -1,41 +1,69 @@
 # Matriz de trazabilidad
 
-| Alcance            | Reglas          | Implementación                                            | Pruebas         |
-| ------------------ | --------------- | --------------------------------------------------------- | --------------- |
-| Autenticación      | RN-AUT-001–009  | `core/auth`, `SessionScope`, `bootstrapAuthorization`     | AUT-001–AUT-014 |
-| Dashboard inicial  | RN-DASH-001–003 | `features/dashboard`                                      | DASH-001–004    |
-| Usuarios           | RN-USR-001–010  | `features/users`, callables administrativas               | USR-001–USR-019 |
-| Layout privado     | RN-LAY-001–012  | `layout/shell`, `shared/ui/icon`, `shared/ui/dialog`      | LAY-001–LAY-021 |
-| Categorías         | RN-CAT-001–012  | `features/categories`, cinco callables administrativas    | CAT-001–024     |
-| Fabricantes        | RN-FAB-001–012  | `features/manufacturers`, cinco callables administrativas | FAB-001–020     |
-| Modelos de activos | RN-MOD-001–030  | `features/asset-models`, nueve callables, Storage privado | MOD-001–MOD-053 |
-| Campus             | RN-CAM-001–015  | `features/campuses`, cinco callables administrativas      | CAM-001–031     |
-| Calidad local      | RN-DEV-001–003  | `scripts/seed-emulator.mjs`, control de trazabilidad      | DEV-001–DEV-003 |
+## Estado vigente — 10 de noviembre de 2026
 
-Estado: Login, layout estandarizado, Usuarios, Categorías, Fabricantes, Modelos de activos, Campus y `Configuraciones` están publicados en `inventario-stg`. Las 30 callables usan Node.js 22, `us-central1`, máximo 20 instancias y rechazo anónimo; Firestore niega acceso directo a Usuarios y catálogos y Storage permanece cerrado. Hosting publica encabezados defensivos y caché diferenciada. Las pruebas integrales con Auth, Functions, Firestore y Storage Emulator están aprobadas y CI reproduce la validación sin desplegar. La lectura autenticada de una miniatura quedó aceptada; faltan sustitución, eliminación, expiración, las demás aceptaciones funcionales reales y la revisión visual móvil. App Check, PITR, bitácora y producción permanecen como decisiones separadas.
+| Alcance            | Reglas               | Implementación o propuesta                                | Pruebas                 |
+| ------------------ | -------------------- | --------------------------------------------------------- | ----------------------- |
+| Autenticación      | RN-AUT-001–009       | `core/auth`, `SessionScope`, `bootstrapAuthorization`     | AUT-001–AUT-014         |
+| Dashboard inicial  | RN-DASH-001–003      | `features/dashboard`                                      | DASH-001–004            |
+| Usuarios           | RN-USR-001–010       | `features/users`, cinco callables administrativas         | USR-001–USR-019         |
+| Layout privado     | RN-LAY-001–012       | `layout/shell`, `shared/ui/icon`, `shared/ui/dialog`      | LAY-001–LAY-021         |
+| Categorías         | RN-CAT-001–012       | `features/categories`, cinco callables administrativas    | CAT-001–CAT-024         |
+| Fabricantes        | RN-FAB-001–012       | `features/manufacturers`, cinco callables administrativas | FAB-001–FAB-020         |
+| Modelos de activos | RN-MOD-001–030       | `features/asset-models`, nueve callables, Storage privado | MOD-001–MOD-053         |
+| Campus             | RN-CAM-001–015       | `features/campuses`, cinco callables administrativas      | CAM-001–CAM-031         |
+| Calidad local      | RN-DEV-001–003       | seed, emuladores, Playwright y verificador estructural    | DEV-001–DEV-003         |
+| Áreas              | Sin reglas aprobadas | Borrador documental; no existe implementación             | ARE-001–ARE-033 futuros |
 
-El manifiesto estructurado [trazabilidad.json](trazabilidad.json) relaciona los criterios reforzados con regla, archivo de prueba, estado y comando de evidencia. `npm run traceability:check` rechaza criterios duplicados, referencias inexistentes, rangos desactualizados y verificaciones automatizadas sin identificador en su prueba. Implementación, validación local, clon limpio, despliegue de staging, CI y aceptación manual se registran como estados independientes. El incremento de endurecimiento corresponde al SHA `29f9c7db512f2155426aedf83ed2c24bc7cb200a`; CI y la aceptación manual continúan pendientes hasta disponer de PR y sesión real, respectivamente.
+Áreas incrementa el inventario documental, pero sus criterios no son obligatorios, no están en `trazabilidad.json` y no tienen evidencia de ejecución. El borrador no crea una carpeta `src/app/features/areas`, ruta, colección, Function, regla, dato o despliegue.
 
-Fabricantes fue aprobado, implementado, validado y publicado únicamente en staging el 7 de noviembre de 2026. La protección de eliminación frente a `modelos_activos` quedó implementada y validada localmente antes del despliegue de Modelos.
+## Significado de los estados
 
-Modelos de activos fue aprobado, implementado, validado y publicado únicamente en staging el 7 de noviembre de 2026. Existen ruta, menú, contratos cerrados, nueve Functions `ACTIVE`, repositorio transaccional, bucket regional privado y procesamiento WebP. El Modelo de prueba creado por el responsable permitió aceptar la lectura autenticada de su miniatura después de corregir la firma con IAM mínimo; sustitución, eliminación y expiración permanecen pendientes.
+- **Inventariado:** identificador único encontrado en un documento `pruebas.md`; incluye criterios futuros.
+- **Obligatorio:** criterio aprobado que contiene `trace:required` y debe tener entrada estructurada.
+- **Trazado:** entrada válida que relaciona criterio, regla, archivo y tipo de verificación.
+- **Ejecución verificada:** evidencia automatizada registrada por el manifiesto y comprobada estructuralmente; no equivale por sí sola a CI, staging o aceptación real.
+- **Validado localmente:** comandos ejecutados sobre un SHA concreto.
+- **Publicado:** commit disponible en la rama remota.
+- **Integrado:** commit incorporado a `desarrollo`; no se deduce de haberlo publicado.
+- **Desplegado:** servicios concretos actualizados en staging.
+- **Aceptado:** comportamiento ejercido con sesión real; HTTP 200, Function `ACTIVE` o rechazo anónimo no lo sustituyen.
 
-Campus fue aprobado, implementado, validado y publicado únicamente en staging el 9 de noviembre de 2026. Las cinco Functions están `ACTIVE`, Firestore permanece cerrado y la ruta autenticada confirmó estado vacío y modal aprobado. No se crearon datos FCS, TUP ni producción.
+El manifiesto [trazabilidad.json](trazabilidad.json) y `npm run traceability:check` rechazan criterios obligatorios ausentes, duplicados, referencias inexistentes y evidencia ajena. Los estados manuales, pendientes y futuros son válidos, pero no se cuentan como aprobados.
 
-El endurecimiento de identidad, ciclo de sesión, imágenes y trazabilidad se validó localmente el 9 de noviembre de 2026 y se publicó únicamente en staging por servicios separados. Firestore Rules, las ocho Functions afectadas y Hosting aprobaron la verificación remota; no se modificaron Storage Rules, datos, índices, secretos ni producción.
+## Corte validado de implementación
 
-El incremento de seguimiento del 10 de noviembre de 2026 quedó implementado en `1706695cc3d2a302ac490c3b917417bf4d6dacd2` y fue validado de nuevo sobre ese SHA limpio: 55 pruebas Angular, 42 unitarias de Functions, 25 con Emulator Suite, 7 negativas de trazabilidad y 4 recorridos Chromium. La integración MOD-049 utilizó Admin SDK y el bucket real de Storage Emulator; no sustituyó el adaptador por `FakeBucket`. Formato, lint, guardia visual, builds, `git diff --check` y el umbral de auditoría aprobaron; la auditoría conserva cuatro moderadas transitivas de `google-gax` y cero altas o críticas. Este registro prueba validación local, no despliegue, CI ni aceptación manual.
+- SHA: `ef8ae667cb3d30104edc1cc4ebd4fc2f8d5ddd04`.
+- 55 pruebas Angular aprobadas.
+- 42 pruebas unitarias de Functions aprobadas.
+- 29 pruebas con Emulator Suite aprobadas.
+- 4 recorridos Chromium aprobados.
+- 7 casos negativos/positivos del verificador de trazabilidad aprobados.
+- Lint Angular/Functions, guardia visual, formato, builds de Functions y staging, `git diff --check` y auditoría de runtime con umbral high aprobados.
+- La auditoría conserva cuatro alertas moderadas transitivas de `google-gax` y cero altas o críticas.
+- MOD-049 atravesó Admin SDK, Firestore Emulator y Storage Emulator reales; no sustituyó el bucket por `FakeBucket`.
+- MOD-052 verificó que un acuse observado después de los borrados no cierre esa ronda.
+- MOD-053 verificó recuperación cuando ambos objetos existen sin acuse durable.
 
-La rama se publicó en GitHub, pero el conector no pudo abrir el PR hacia `desarrollo` porque respondió `must be a collaborator`; por ello CI no se disparó y su check `Validación continua / validate` permanece sin resultado para este incremento. El mismo conector no puede leer la protección de `desarrollo` (`Resource not accessible by integration`), de modo que no se afirma si el check es obligatorio. Firebase CLI exige `firebase login --reauth`, por lo que staging no se modificó y la aceptación remota continúa pendiente.
+Esta consolidación documental no vuelve a ejecutar esas suites y no traslada su evidencia a otro SHA.
 
-El seguimiento de escrituras tardías y seed posterior a renombrado quedó implementado y validado sobre el SHA limpio `58a0ab3f4e7452d349cf5bf93632258f0068aeac`: 55 pruebas Angular, 42 unitarias de Functions, 27 con Emulator Suite, 4 recorridos Chromium y 7 pruebas negativas de trazabilidad. Lint, guardia visual, formato, builds de Functions y staging, `git diff --check` y auditoría de runtime con umbral alto aprobaron; se conservan cuatro moderadas transitivas de `google-gax` y cero altas o críticas. La suite real de Storage Emulator aprobó junto con la carrera determinista de escrituras retenidas. Esta evidencia local se distingue de publicación, CI, despliegue y aceptación manual.
+## Publicación, integración, CI, staging y aceptación
 
-Después de renovar la sesión de Firebase CLI se actualizaron únicamente `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` en `inventario-stg`. Las tres revisiones `00003` quedaron `ACTIVE` y rechazaron solicitudes anónimas con HTTP 401. Hosting, Rules, datos y producción permanecieron intactos; la aceptación autenticada del ciclo tardío sigue pendiente.
+| Estado          | Situación vigente                                                                                                                                    |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rama publicada  | `codex/hardening-sesion-imagenes-trazabilidad` estaba publicada en `51e71dc599c55e63bed4ddf11ca0b1e91a9ed599` al iniciar esta consolidación          |
+| `desarrollo`    | Permanece en `179e79863e2a6c940c9a24165b219bfb8ce59cc1`; el endurecimiento no está integrado                                                         |
+| PR              | No existe; el conector respondió previamente `must be a collaborator` y no se repiten escrituras sin cambio de permisos                              |
+| CI              | `Validación continua / validate` no se ejecutó para el SHA final; tampoco se puede afirmar si es obligatorio en `desarrollo`                         |
+| Staging         | Alcance vigente publicado en `inventario-stg`; 30 callables, Rules cerradas y Hosting documentados                                                   |
+| Aceptación real | Parcial: lectura autenticada de miniatura y parte de Campus aceptadas; ciclo completo de imagen, otras mutaciones y revisión móvil siguen pendientes |
+| Producción      | No configurada ni autorizada                                                                                                                         |
 
-Los commits nuevos se publicaron sin force push en `codex/hardening-sesion-imagenes-trazabilidad`. La búsqueda no encontró un PR hacia `desarrollo`; el conector no permitió repetir su creación sin evidencia de un cambio de permisos y `gh` no tiene una sesión autenticada. El SHA final publicado no tiene estados ni ejecuciones de workflow asociadas, por lo que `Validación continua / validate` no se ejecutó. Los permisos disponibles tampoco permiten afirmar si ese check es obligatorio en `desarrollo`.
+## Evidencia histórica relevante
 
-La barrera de cierre de recuperación y la vía del escritor ausente quedaron implementadas y validadas sobre `ef8ae667cb3d30104edc1cc4ebd4fc2f8d5ddd04`: 55 pruebas Angular, 42 unitarias de Functions, 29 con Emulator Suite, 4 recorridos Chromium y 7 pruebas negativas de trazabilidad. Lint, guardia visual, formato, builds, `git diff --check` y auditoría high aprobaron; se mantienen cuatro moderadas transitivas y cero altas/críticas. Esta evidencia local se distingue de publicación, despliegue, CI y aceptación autenticada.
+- Categorías, Fabricantes y Modelos fueron publicados únicamente en staging el 7 de noviembre de 2026; Campus el 9 de noviembre.
+- El seguimiento de sesión, eliminaciones modales, trazabilidad, seed e imágenes se implementó inicialmente en `1706695cc3d2a302ac490c3b917417bf4d6dacd2` y se reforzó mediante `58a0ab3f4e7452d349cf5bf93632258f0068aeac` y `ef8ae667cb3d30104edc1cc4ebd4fc2f8d5ddd04`.
+- El cierre acumulado actualizó únicamente tres Functions de imagen en revisión `00004`, Firestore Rules con ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting con `main-525UVZWO.js` y `styles-CISTRGAV.css`.
+- Ese cierre no modificó Storage Rules, índices, datos, secretos ni producción.
 
-El incremento acumulado se publicó en staging por servicios separados: las tres Functions afectadas quedaron `ACTIVE` en revisión `00004` y rechazaron solicitudes anónimas; Firestore liberó el Ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf`; Hosting sirve `main-525UVZWO.js` y `styles-CISTRGAV.css` con HTTP 200. Esta verificación pública no sustituye la aceptación funcional autenticada, que permanece pendiente. Storage Rules, índices, datos y producción no se modificaron.
-
-Los commits de este cierre están publicados en la rama remota. La búsqueda sigue sin encontrar un PR hacia `desarrollo`; el SHA documental publicado no tiene estados ni ejecuciones de workflow asociadas, por lo que `Validación continua / validate` no se ejecutó. Los permisos disponibles no permiten abrir el PR ni comprobar si ese check es obligatorio.
+El resumen operativo, discrepancias y limitaciones están en [estado-actual.md](estado-actual.md); la evolución propuesta está en [plan-siguientes-modulos.md](plan-siguientes-modulos.md).

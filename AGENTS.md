@@ -67,12 +67,14 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 
 ## Fuera de alcance actual
 
-- Áreas, Coordinaciones y reestructuración de accesos de Usuarios.
+- Áreas, Coordinaciones y reestructuración de accesos de Usuarios. `specs/modulo-areas/` es un borrador propuesto y no autoriza implementación.
 - Activos, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.
 - Creación o despliegue de proyectos Firebase de producción.
 - Datos reales.
+
+El corte vigente y la separación entre implementación, validación, integración, staging y aceptación se resumen en `specs/estado-actual.md`; la secuencia futura no autorizada está en `specs/plan-siguientes-modulos.md`.
 
 ## Definición de terminado
 

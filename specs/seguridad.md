@@ -8,7 +8,7 @@
 - SEC-006: Cada callable valida Authentication, claims y el documento canónico activo.
 - SEC-007: Los errores expuestos se sanitizan y nunca incluyen tokens, secretos o stack traces.
 - SEC-008: La configuración pública de Firebase no se considera autorización; Security Rules y Functions son obligatorias.
-- SEC-009: Storage permanece cerrado hasta especificar rutas y consumidores.
+- SEC-009: Storage permanece cerrado a clientes; toda ruta y consumidor requiere especificación y acceso backend autorizado.
 - SEC-010: El token de Snipe-IT será un secreto exclusivo de herramientas backend.
 - SEC-011: `categorias` y `categorias_nombres` permanecen cerradas a toda lectura y escritura directa desde clientes; el módulo consume exclusivamente callables.
 - SEC-012: Las cinco callables de Categorías validan Authentication, claim administrativo y el documento canónico activo antes de acceder a datos.
@@ -31,15 +31,15 @@
 
 ## Modelos de activos
 
-- SEC-026: `modelos_activos` y `modelos_activos_claves` permanecerán cerradas a toda lectura y escritura directa desde clientes; el módulo consumirá exclusivamente callables.
-- SEC-027: Toda callable de Modelos validará Authentication, claim administrativo y el documento canónico activo antes de acceder a Firestore o Storage.
-- SEC-028: El rol `usuario`, perfiles inactivos y solicitudes anónimas no podrán listar, mutar ni obtener acceso temporal a imágenes de Modelos.
-- SEC-029: `getAssetModelCatalogs` expondrá únicamente identificador y nombre de Categorías y Fabricantes aplicables; no filtrará en Angular documentos administrativos completos.
-- SEC-030: `deleteCategory` y `deleteManufacturer` consultarán `modelos_activos` y fallarán de forma segura ante referencia, error o resultado no determinable antes de desplegar Modelos.
-- SEC-031: Storage Rules conservará denegación total; Admin SDK será el único escritor y las imágenes se leerán mediante URLs firmadas de máximo cinco minutos emitidas por callable.
-- SEC-032: Backend validará tamaño decodificado, firma real del archivo, dimensiones y formato; no confiará únicamente en extensión, nombre o MIME declarado por el cliente.
-- SEC-033: El procesamiento rechazará imágenes malformadas, bombas de descompresión y dimensiones fuera del límite técnico; eliminará metadatos antes de guardar WebP normalizado.
-- SEC-034: Sustitución, eliminación y borrado de Modelo aplicarán compensación entre Firestore y Storage y reportarán reconciliación cuando no pueda completarse la limpieza.
+- SEC-026: `modelos_activos` y `modelos_activos_claves` permanecen cerradas a toda lectura y escritura directa desde clientes; el módulo consume exclusivamente callables.
+- SEC-027: Toda callable de Modelos valida Authentication, claim administrativo y el documento canónico activo antes de acceder a Firestore o Storage.
+- SEC-028: El rol `usuario`, perfiles inactivos y solicitudes anónimas no pueden listar, mutar ni obtener acceso temporal a imágenes de Modelos.
+- SEC-029: `getAssetModelCatalogs` expone únicamente identificador y nombre de Categorías y Fabricantes aplicables; Angular no filtra documentos administrativos completos.
+- SEC-030: `deleteCategory` y `deleteManufacturer` consultan `modelos_activos` y fallan de forma segura ante referencia, error o resultado no determinable.
+- SEC-031: Storage Rules conserva denegación total; Admin SDK es el único escritor y las imágenes se leen mediante URLs firmadas de máximo cinco minutos emitidas por callable.
+- SEC-032: Backend valida tamaño decodificado, firma real del archivo, dimensiones y formato; no confía únicamente en extensión, nombre o MIME declarado por el cliente.
+- SEC-033: El procesamiento rechaza imágenes malformadas, bombas de descompresión y dimensiones fuera del límite técnico y elimina metadatos antes de guardar WebP normalizado.
+- SEC-034: Sustitución, eliminación y borrado de Modelo aplican compensación entre Firestore y Storage y reportan reconciliación cuando no puede completarse la limpieza.
 - SEC-035: La cuenta runtime `719448906735-compute@developer.gserviceaccount.com` recibe `roles/iam.serviceAccountTokenCreator` únicamente sobre sí misma para ejecutar `iam.serviceAccounts.signBlob`; no se concede ese rol a usuarios ni a nivel de proyecto y Storage continúa cerrado.
 - SEC-042: `modelos_activos_limpiezas` permanece cerrada a clientes; solo Admin SDK crea, reintenta y elimina trabajos de limpieza.
 - SEC-043: Las eliminaciones de objetos nuevos usan rutas versionadas y precondiciones de generación; una operación antigua no puede borrar la versión canónica posterior.
@@ -47,9 +47,9 @@
 
 ## Campus
 
-- SEC-036: `campus` y `campus_claves` permanecerán cerradas a toda lectura y escritura directa desde clientes; el módulo consumirá exclusivamente callables.
-- SEC-037: Las cinco callables de Campus validarán Authentication, claim administrativo y el documento canónico activo antes de acceder a Firestore.
-- SEC-038: `usuario`, perfiles inactivos y solicitudes anónimas no podrán listar ni mutar Campus.
-- SEC-039: Ningún payload administrativo podrá escribir campos normalizados, reservas, cantidades, estado inicial, identificadores o fechas.
-- SEC-040: `deleteCampus` fallará de forma segura ante una referencia, error o resultado no determinable y se ampliará antes de habilitar cada consumidor.
+- SEC-036: `campus` y `campus_claves` permanecen cerradas a toda lectura y escritura directa desde clientes; el módulo consume exclusivamente callables.
+- SEC-037: Las cinco callables de Campus validan Authentication, claim administrativo y el documento canónico activo antes de acceder a Firestore.
+- SEC-038: `usuario`, perfiles inactivos y solicitudes anónimas no pueden listar ni mutar Campus.
+- SEC-039: Ningún payload administrativo puede escribir campos normalizados, reservas, cantidades, estado inicial, identificadores o fechas.
+- SEC-040: `deleteCampus` falla de forma segura ante una referencia, error o resultado no determinable y se ampliará antes de habilitar cada consumidor.
 - SEC-041: Los futuros catálogos para consumidores expondrán únicamente identificador, código y nombre de Campus aplicables; no entregarán documentos administrativos completos.

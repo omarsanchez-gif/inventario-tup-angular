@@ -234,7 +234,7 @@ Entrada: `documentId`.
 - Es idempotente cuando el Modelo no tiene imagen.
 - Retira la metadata canónica y programa la limpieza de los objetos versionados con precondición de generación.
 - Procesa operaciones recuperables antes y después de retirar la metadata.
-- Reporta `asset-model-image-reconciliation-required` cuando una carga conserva un arrendamiento vigente o su escritor todavía no ha confirmado el fin de ambas escrituras; el diálogo permanece recuperable y un reintento posterior converge.
+- Reporta `asset-model-image-reconciliation-required` cuando una carga conserva un arrendamiento vigente o no existe evidencia suficiente del fin de ambas escrituras; el diálogo permanece recuperable y un reintento posterior procesa la evidencia disponible. Sin acuse y con cero o una variante observable, la operación continúa pendiente.
 - Una operación sin acuse solo deja de bloquear cuando una ronda posterior observa previamente el acuse durable o ambas generaciones físicas, ejecuta los borrados protegidos y retira la evidencia técnica. Un acuse llegado durante el cierre exige otra ronda.
 
 ### `getAssetModelImageAccess`
@@ -283,9 +283,9 @@ La interfaz traduce estos códigos a mensajes institucionales y no expone stack 
 ### Navegación
 
 - `Configuraciones` permanece como grupo desplegable de primer nivel solo para `admin`.
-- `Modelos de activos` será una opción secundaria de texto y navegará a `/configuraciones/modelos-activos`.
-- La opción solo se incorpora cuando el módulo esté implementado y autorizado.
-- El orden será `Categorías`, `Fabricantes`, `Modelos de activos`.
+- `Modelos de activos` es una opción secundaria de texto y navega a `/configuraciones/modelos-activos`.
+- La opción está publicada porque el módulo fue implementado y autorizado.
+- El orden vigente es `Categorías`, `Fabricantes`, `Modelos de activos`, `Campus`.
 - Activos no aparece hasta contar con especificación e implementación propias.
 
 ### Página
