@@ -10,6 +10,17 @@ Página → Facade con Signals → Gateway → Firebase SDK
 
 Los componentes no importan Firebase directamente.
 
+### Convenciones Angular verificadas
+
+- Los componentes usan detección `OnPush`; las rutas funcionales se cargan de forma diferida y declaran un título de documento.
+- Las facades son propietarias de su estado mutable. Las páginas consumen Signals de solo lectura y derivan presentación con `computed`.
+- `effect` se reserva para sincronizar Signals con APIs imperativas que requieren limpieza; no se usa para copiar o propagar estado derivable.
+- Los formularios administrativos continúan con Reactive Forms no anulables. Signal Forms no forma parte de la arquitectura vigente.
+- Las suscripciones, listeners, URLs temporales y temporizadores deben terminar al destruir el consumidor o invalidar la sesión.
+- Los guards son funcionales y devuelven una redirección declarativa; backend, Rules y perfil canónico siguen siendo la autorización efectiva.
+- Las plantillas usan control flow nativo, identidad estable en `@for` y componentes autocerrados cuando no proyectan contenido.
+- La guía técnica complementaria y su revisión registrada están en [Angular Skills para Codex](herramientas/angular-skills.md).
+
 ## Backend
 
 Cloud Functions callable en `us-central1`:

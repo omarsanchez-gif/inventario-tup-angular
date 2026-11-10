@@ -75,6 +75,34 @@ En una tarea Angular futura ya autorizada, solicitar explícitamente `angular-de
 
 Las validaciones se eligen según el cambio: pruebas afectadas, lint, guardia visual, formato y build cuando exista código Angular. La integración de la skill por sí sola no requiere desplegar Firebase.
 
+## Primera revisión aplicada
+
+El 10 de noviembre de 2026 se aplicó `angular-developer` sobre la rama `codex/hardening-sesion-imagenes-trazabilidad`, partiendo de `c9490aec92df418c902054b177d16a5b506908ae`. Se consultaron las referencias oficiales de componentes, Signals, efectos, formularios reactivos, inyección, rutas, guards, estilos, pruebas y convenciones de nombres.
+
+La revisión comprobó:
+
+- Angular 22 standalone con rutas diferidas y títulos accesibles.
+- `ChangeDetectionStrategy.OnPush` en todos los componentes de aplicación.
+- Signals privadas expuestas como solo lectura desde las facades y estado derivado mediante `computed`.
+- El único `effect` de producto sincroniza autorización con temporizadores imperativos de miniaturas; no propaga estado derivable entre Signals.
+- Formularios reactivos no anulables, validación declarativa y `markAllAsTouched()` en envíos inválidos.
+- Componentes de página sin acceso directo a Firebase; se conserva `Page → Facade → Gateway`.
+- Guards funcionales que devuelven `UrlTree`, sin presentarlos como autorización canónica.
+- Suscripciones con destrucción controlada, listeners y temporizadores liberados, `@for` con `track` y componentes vacíos autocerrados.
+- `AppDialog`, iconos, paginación, alertas y estilos globales compartidos conforme al sistema de diseño.
+
+No se justificó modificar código Angular: las recomendaciones pertinentes ya estaban implementadas y una migración a Signal Forms, Angular Aria, SSR, zoneless explícito o una refactorización general de pruebas cambiaría decisiones técnicas sin resolver un defecto observado. La revisión tampoco autoriza nuevos módulos ni altera contratos, datos o seguridad.
+
+Evidencia ejecutada en el mismo árbol:
+
+```powershell
+npm test
+npm run lint
+npm run build:staging
+```
+
+Resultados: 14 archivos y 55 pruebas Angular aprobados, lint completo y guardia visual aprobados, y build de staging generado con `main-525UVZWO.js` y `styles-CISTRGAV.css`. La primera ejecución de pruebas dentro del sandbox de Windows falló por acceso a una ruta temporal; la repetición fuera de ese aislamiento aprobó sin cambiar código. Como no hubo cambios de aplicación ni de Firebase, no corresponde un despliegue.
+
 ## Actualización deliberada
 
 1. Trabajar con el árbol limpio y revisar los cambios del origen entre el SHA bloqueado y el nuevo SHA.

@@ -63,6 +63,10 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 
 Los cambios de esta consolidación son documentales: no vuelven a ejecutar ni reemplazan la evidencia de `ef8ae66` y no requieren despliegue.
 
+## Revisión Angular posterior al corte
+
+El 10 de noviembre de 2026 se aplicó la skill oficial `angular-developer` al estado `c9490aec92df418c902054b177d16a5b506908ae`. La arquitectura standalone, `OnPush`, Signals de solo lectura, Reactive Forms, rutas, guards, limpieza de recursos y primitivas compartidas resultó conforme; no se detectó un defecto que ameritara cambiar código o Firebase. Aprobaron 55 pruebas Angular, lint completo con guardia visual y build de staging. La revisión y sus límites se detallan en [Angular Skills para Codex](herramientas/angular-skills.md); al ser un cambio documental, no se desplegó Hosting.
+
 ## Staging vigente
 
 - Proyecto exclusivo: `inventario-stg`; alias obligatorio `staging`.
