@@ -66,7 +66,7 @@ export interface AdminAssetModelsRepository {
   create(requesterUid: string, input: AssetModelDraft): Promise<string>;
   update(requesterUid: string, input: AssetModelUpdate): Promise<void>;
   setStatus(requesterUid: string, documentId: string, activo: boolean): Promise<void>;
-  delete(requesterUid: string, documentId: string): Promise<{ readonly hadImage: boolean }>;
+  delete(requesterUid: string, documentId: string): Promise<{ readonly cleanupRequired: true }>;
 }
 
 export interface AdminAssetModelsDependencies {
@@ -310,6 +310,6 @@ export async function deleteAssetModel(
   const request = assetModelRequestObject(data);
   allowAssetModelFields(request, ['documentId']);
   const documentId = assetModelDocumentId(request['documentId']);
-  const result = await dependencies.repository.delete(requester.uid, documentId);
-  return { documentId, hadImage: result.hadImage, status: 'completed' as const };
+  await dependencies.repository.delete(requester.uid, documentId);
+  return { documentId, cleanupRequired: true as const };
 }

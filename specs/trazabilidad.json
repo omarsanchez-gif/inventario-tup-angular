@@ -1,126 +1,197 @@
 {
-  "baseReviewSha": "179e79863e2a6c940c9a24165b219bfb8ce59cc1",
-  "implementationSha": "29f9c7db512f2155426aedf83ed2c24bc7cb200a",
-  "stages": {
-    "implementation": "complete",
-    "localValidation": "complete",
-    "cleanCheckout": "complete",
-    "stagingDeployment": "complete",
-    "ci": "pending-pull-request",
-    "manualAcceptance": "pending"
-  },
+  "version": 2,
+  "baseReviewSha": "8e0bbc36c6244bc3cd1906e39f859d8b1b772863",
+  "implementationSha": null,
+  "requiredMarker": "<!-- trace:required -->",
+  "matrixScopes": [
+    { "prefix": "AUT", "label": "Autenticación" },
+    { "prefix": "USR", "label": "Usuarios" },
+    { "prefix": "LAY", "label": "Layout privado" },
+    { "prefix": "MOD", "label": "Modelos de activos" },
+    { "prefix": "DEV", "label": "Calidad local" }
+  ],
+  "executionEvidence": [],
   "entries": [
     {
       "requirement": "RN-AUT-007",
       "criterion": "AUT-010",
       "verification": "automated",
-      "test": "functions/src/firestore-repositories.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:functions"
+      "tests": ["functions/src/firestore-repositories.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-AUT-008",
       "criterion": "AUT-011",
       "verification": "automated",
-      "test": "src/app/core/auth/auth.facade.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm test"
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-AUT-008",
       "criterion": "AUT-012",
       "verification": "browser",
-      "test": "e2e/inventory.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:e2e"
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-AUT-008",
       "criterion": "AUT-013",
       "verification": "automated",
-      "test": "src/app/core/auth/auth.facade.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm test"
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-AUT-009",
+      "criterion": "AUT-014",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-USR-009",
       "criterion": "USR-018",
       "verification": "automated",
-      "test": "src/app/features/users/state/users.facade.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm test"
+      "tests": ["src/app/features/users/state/users.facade.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-LAY-006",
       "criterion": "USR-019",
       "verification": "browser",
-      "test": "e2e/inventory.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:e2e"
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-LAY-003",
       "criterion": "LAY-020",
       "verification": "browser",
-      "test": "e2e/inventory.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:e2e"
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-LAY-012",
+      "criterion": "LAY-021",
+      "verification": "automated",
+      "tests": [
+        "src/app/features/users/users-page/users-page.spec.ts",
+        "src/app/features/categories/categories-page/categories-page.spec.ts",
+        "src/app/features/manufacturers/manufacturers-page/manufacturers-page.spec.ts",
+        "src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts",
+        "src/app/features/campuses/campuses-page/campuses-page.spec.ts"
+      ],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-MOD-021",
       "criterion": "MOD-036",
       "verification": "emulator",
-      "test": "functions/src/asset-model-images-emulator.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:emulators"
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-MOD-021",
       "criterion": "MOD-037",
       "verification": "emulator",
-      "test": "functions/src/asset-model-images-emulator.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:emulators"
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-MOD-022",
       "criterion": "MOD-038",
       "verification": "emulator",
-      "test": "functions/src/asset-model-images-emulator.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:emulators"
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-MOD-022",
       "criterion": "MOD-039",
       "verification": "emulator",
-      "test": "functions/src/asset-model-images-emulator.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:emulators"
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-MOD-022",
       "criterion": "MOD-040",
       "verification": "emulator",
-      "test": "functions/src/asset-model-images-emulator.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:emulators"
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-MOD-002",
       "criterion": "MOD-041",
       "verification": "browser",
-      "test": "e2e/inventory.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:e2e"
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-MOD-015",
+      "criterion": "MOD-042",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-MOD-015",
+      "criterion": "MOD-043",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "implemented-pending-verification"
     },
     {
       "requirement": "RN-MOD-014",
       "criterion": "MOD-044",
       "verification": "automated",
-      "test": "functions/src/asset-model-images.spec.ts",
-      "state": "implemented-local",
-      "evidence": "npm run test:functions"
+      "tests": ["functions/src/asset-model-images.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-MOD-023",
+      "criterion": "MOD-045",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/state/asset-models.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-MOD-024",
+      "criterion": "MOD-046",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-MOD-025",
+      "criterion": "MOD-047",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-MOD-026",
+      "criterion": "MOD-048",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-MOD-026",
+      "criterion": "MOD-049",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-storage-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-DEV-001",
+      "criterion": "DEV-001",
+      "verification": "emulator",
+      "tests": ["functions/src/seed-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-DEV-002",
+      "criterion": "DEV-002",
+      "verification": "automated",
+      "tests": ["scripts/check-traceability.spec.ts"],
+      "state": "implemented-pending-verification"
     }
   ]
 }

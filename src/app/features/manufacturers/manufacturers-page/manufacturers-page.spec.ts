@@ -121,6 +121,22 @@ describe('ManufacturersPage', () => {
     expect(manufacturers.delete).toHaveBeenCalledWith(manufacturer);
   });
 
+  it('LAY-021 shows a reference error inside the manufacturer deletion dialog', async () => {
+    manufacturers.delete.mockImplementationOnce(async () => {
+      manufacturers.error.set('El Fabricante está referenciado por un Modelo.');
+      return false;
+    });
+    action('Eliminar Dell').click();
+    fixture.detectChanges();
+    textButton('Eliminar fabricante').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dialog = element.querySelector<HTMLDialogElement>('dialog[open]')!;
+    expect(dialog.querySelector('[role="alert"]')?.textContent).toContain('está referenciado');
+    expect(element.querySelector('main > [role="alert"]')).toBeNull();
+  });
+
   it('filters automatically and paginates ten manufacturers', () => {
     manufacturers.filteredManufacturers.set(
       Array.from({ length: 12 }, (_, index) => ({

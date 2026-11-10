@@ -1,6 +1,10 @@
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { createHash } from 'node:crypto';
+
+import { normalizeCategoryName } from '../functions/lib/admin-categories.js';
+import { normalizeManufacturerName } from '../functions/lib/admin-manufacturers.js';
 
 const projectArgumentIndex = process.argv.indexOf('--project');
 const projectId = projectArgumentIndex >= 0 ? process.argv[projectArgumentIndex + 1] : '';
@@ -48,31 +52,81 @@ try {
 }
 await auth.setCustomUserClaims(uid, { authorized: true, role: 'admin' });
 
-await firestore.collection('usuarios').doc('synthetic-admin-e2e').set({
-  uid,
-  nombre: 'Administración E2E',
-  correo: email,
-  rol: 'admin',
-  activo: true,
-  fechaCreacion: Timestamp.now(),
-  ultimoAcceso: null,
-});
-await firestore.collection('categorias').doc('synthetic-category').set({
-  nombre: 'Categoría E2E',
-  nombreNormalizado: 'categoria e2e',
-  notas: null,
-  activo: true,
-  cantidadActivos: 0,
-  fechaCreacion: Timestamp.now(),
-  fechaActualizacion: Timestamp.now(),
-});
-await firestore.collection('fabricantes').doc('synthetic-manufacturer').set({
-  nombre: 'Fabricante E2E',
-  nombreNormalizado: 'fabricante e2e',
-  notas: null,
-  activo: true,
-  fechaCreacion: Timestamp.now(),
-  fechaActualizacion: Timestamp.now(),
+function nameKey(normalizedName) {
+  return createHash('sha256').update(normalizedName, 'utf8').digest('hex');
+}
+
+async function upsertCanonicalCatalog({
+  collection,
+  reservationCollection,
+  documentId,
+  reservationOwnerField,
+  name,
+  normalizedName,
+  additionalFields = {},
+}) {
+  const documentReference = firestore.collection(collection).doc(documentId);
+  const reservationReference = firestore
+    .collection(reservationCollection)
+    .doc(nameKey(normalizedName));
+  await firestore.runTransaction(async (transaction) => {
+    const [documentSnapshot, reservationSnapshot] = await Promise.all([
+      transaction.get(documentReference),
+      transaction.get(reservationReference),
+    ]);
+    if (
+      reservationSnapshot.exists &&
+      reservationSnapshot.data()?.[reservationOwnerField] !== documentId
+    ) {
+      throw new Error(`La reserva canónica de ${collection} pertenece a otro documento.`);
+    }
+    const timestamp = Timestamp.now();
+    transaction.set(documentReference, {
+      nombre: name,
+      nombreNormalizado: normalizedName,
+      notas: null,
+      activo: true,
+      ...additionalFields,
+      fechaCreacion: documentSnapshot.data()?.['fechaCreacion'] ?? timestamp,
+      fechaActualizacion: timestamp,
+    });
+    transaction.set(reservationReference, {
+      [reservationOwnerField]: documentId,
+      nombreNormalizado: normalizedName,
+    });
+  });
+}
+
+const userReference = firestore.collection('usuarios').doc('synthetic-admin-e2e');
+await firestore.runTransaction(async (transaction) => {
+  const snapshot = await transaction.get(userReference);
+  transaction.set(userReference, {
+    uid,
+    nombre: 'Administración E2E',
+    correo: email,
+    rol: 'admin',
+    activo: true,
+    fechaCreacion: snapshot.data()?.['fechaCreacion'] ?? Timestamp.now(),
+    ultimoAcceso: null,
+  });
 });
 
-console.log('Identidad y catálogos sintéticos preparados en demo-inventario-tup.');
+await upsertCanonicalCatalog({
+  collection: 'categorias',
+  reservationCollection: 'categorias_nombres',
+  documentId: 'synthetic-category',
+  reservationOwnerField: 'categoriaId',
+  name: 'Categoría E2E',
+  normalizedName: normalizeCategoryName('Categoría E2E'),
+  additionalFields: { cantidadActivos: 0 },
+});
+await upsertCanonicalCatalog({
+  collection: 'fabricantes',
+  reservationCollection: 'fabricantes_nombres',
+  documentId: 'synthetic-manufacturer',
+  reservationOwnerField: 'fabricanteId',
+  name: 'Fabricante E2E',
+  normalizedName: normalizeManufacturerName('Fabricante E2E'),
+});
+
+console.log('Identidad, catálogos y reservas sintéticas preparados en demo-inventario-tup.');

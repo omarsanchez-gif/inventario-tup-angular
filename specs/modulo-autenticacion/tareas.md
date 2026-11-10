@@ -15,3 +15,4 @@
 - [x] Revalidar correo dentro de la transacción de asociación de UID.
 - [x] Invalidar respuestas tardías, cambios de usuario y estados administrativos al perder sesión.
 - [x] Agregar cobertura determinista y recorridos de navegador con Auth Emulator.
+- [x] Descartar errores tardíos de `bootstrap` y renovación de claims por UID y generación sin afectar una sesión posterior.

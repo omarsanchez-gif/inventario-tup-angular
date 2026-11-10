@@ -125,7 +125,7 @@ emulatorSuite('asset models repositories and rules', () => {
     });
 
     const deletion = await models.delete(adminUid, documentId);
-    expect(deletion).toEqual({ hadImage: false });
+    expect(deletion).toEqual({ cleanupRequired: true });
     expect((await firestore.collection('modelos_activos').get()).empty).toBe(true);
     expect((await firestore.collection('modelos_activos_claves').get()).empty).toBe(true);
     await categories.delete(adminUid, categoryId);
@@ -136,12 +136,15 @@ emulatorSuite('asset models repositories and rules', () => {
     const baseUrl = `http://${emulatorHost}/v1/projects/${projectId}/databases/(default)/documents`;
     const modelRead = await fetch(`${baseUrl}/modelos_activos`);
     const keyRead = await fetch(`${baseUrl}/modelos_activos_claves`);
+    const operationRead = await fetch(`${baseUrl}/modelos_activos_operaciones_imagen`);
     const modelWrite = await fetch(`${baseUrl}/modelos_activos?documentId=forbidden`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ fields: { nombre: { stringValue: 'No autorizado' } } }),
     });
-    expect([modelRead.status, keyRead.status, modelWrite.status]).toEqual([403, 403, 403]);
+    expect([modelRead.status, keyRead.status, operationRead.status, modelWrite.status]).toEqual([
+      403, 403, 403, 403,
+    ]);
 
     if (!storageHost) return;
     const bucket = `${projectId}.appspot.com`;

@@ -22,9 +22,12 @@ Firestore y Cloud Storage tampoco comparten transacciones. El diseño debe evita
 - `getAssetModelImageAccess` entrega URLs firmadas de máximo cinco minutos después de validar perfil canónico; el listado solicita acceso solo para filas visibles.
 - Guardar datos y cargar imagen son operaciones separadas. Una falla de imagen no revierte ni duplica el Modelo.
 - Sustituir, retirar o eliminar un Modelo crea un trabajo idempotente en `modelos_activos_limpiezas`. Los objetos se borran con `ifGenerationMatch` cuando existe generación y el trabajo solo desaparece al confirmar ambas variantes.
-- Una carga parcial o una confirmación fallida registra primero la compensación; si no puede limpiarse inmediatamente, conserva el trabajo y responde reconciliación requerida.
+- Antes del primer objeto, la carga crea una operación en `modelos_activos_operaciones_imagen` con versión, rutas, estado `cargando` y un arrendamiento mayor al timeout de la callable. Tras guardar ambas variantes registra sus generaciones y pasa a `lista`.
+- La confirmación de metadata ocurre en una transacción que exige operación vigente, revalida Modelo y administrador, agenda la limpieza anterior y elimina la operación. Una operación cancelada o con arrendamiento vencido no puede publicar metadata.
+- Si una carga parcial o una confirmación falla, la operación pasa a `cancelada` y se recupera de inmediato cuando Firestore está disponible. Si también falla esa transición, el registro previo a Storage conserva rutas suficientes y se vuelve elegible al vencer su arrendamiento.
+- La recuperación reclama una operación como `limpiando`, contrasta su versión con la metadata canónica, descubre generaciones faltantes desde Storage y conserva el registro hasta confirmar ambos borrados. Nunca procesa una operación activa ni una versión canónica.
 - Las imágenes históricas sin layout o generaciones se interpretan como `legacy-v1`: se leen desde las dos rutas anteriores y se limpian sin migración masiva. Toda imagen nueva usa `versioned-v2`.
-- Las diferencias entre Firestore y Storage producen un código de reconciliación, se registran sin datos sensibles y pueden repararse repitiendo `removeAssetModelImage` o `deleteAssetModel` sobre la misma identidad.
+- Las diferencias entre Firestore y Storage producen un código de reconciliación, se registran sin datos sensibles y pueden repararse repitiendo `setAssetModelImage`, `removeAssetModelImage` o `deleteAssetModel` sobre la misma identidad. Estos flujos procesan operaciones abandonadas y trabajos anteriores antes de declarar éxito.
 
 ## Alternativas descartadas
 
@@ -67,3 +70,7 @@ SVG amplía la superficie de contenido activo y GIF puede introducir animación 
 ## Revisión de concurrencia y recuperación — 9 de noviembre de 2026
 
 La estrategia de rutas compartidas fue sustituida porque una limpieza retrasada podía borrar una imagen confirmada por otra solicitud. La versión `versioned-v2`, las generaciones de Storage y los trabajos persistentes resuelven la carrera entre solicitudes y permiten reanudar una limpieza aun cuando la metadata ya sea `null` o el documento del Modelo haya sido eliminado. No se migran silenciosamente objetos existentes.
+
+## Revisión de operación previa a Storage — 10 de noviembre de 2026
+
+Persistir la compensación después de subir objetos todavía permitía perder la única ruta de recuperación si Firestore fallaba dos veces. Se adopta una operación con arrendamiento creada antes de Storage. El arrendamiento impide que otra solicitud limpie una carga en curso; su vencimiento garantiza convergencia tras una caída. El documento canónico sigue siendo la única fuente de versiones confirmadas y los trabajos históricos de `modelos_activos_limpiezas` continúan siendo compatibles.

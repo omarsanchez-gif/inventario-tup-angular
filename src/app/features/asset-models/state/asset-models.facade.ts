@@ -117,7 +117,8 @@ export class AssetModelsFacade {
     }
     if (!this.sessionScope.isCurrent(generation)) return null;
     try {
-      await this.reloadModels();
+      if (!(await this.reloadModels(generation))) return null;
+      if (!this.sessionScope.isCurrent(generation)) return null;
       this.successState.set('Modelo guardado correctamente.');
       return { documentId, dataSaved: true, listRefreshed: true };
     } catch {
@@ -172,8 +173,11 @@ export class AssetModelsFacade {
     this.errorState.set('No fue posible cargar una imagen temporal.');
   }
 
-  private async reloadModels(): Promise<void> {
-    this.modelsState.set((await this.gateway.list()).items);
+  private async reloadModels(generation: number): Promise<boolean> {
+    const result = await this.gateway.list();
+    if (!this.sessionScope.isCurrent(generation)) return false;
+    this.modelsState.set(result.items);
+    return true;
   }
 
   private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
@@ -183,8 +187,7 @@ export class AssetModelsFacade {
     try {
       await operation();
       if (!this.sessionScope.isCurrent(generation)) return false;
-      await this.reloadModels();
-      if (!this.sessionScope.isCurrent(generation)) return false;
+      if (!(await this.reloadModels(generation))) return false;
       this.successState.set(successMessage);
       return true;
     } catch (error) {

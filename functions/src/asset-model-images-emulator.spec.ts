@@ -28,6 +28,7 @@ function deferred() {
 class FakeBucket {
   readonly objects = new Map<string, StoredObject>();
   failNextDelete = false;
+  failNextOriginalSave = false;
   failNextThumbnailSave = false;
   blockDeletes = false;
   deleteStarted = deferred();
@@ -37,6 +38,10 @@ class FakeBucket {
   file(path: string) {
     return {
       save: async (bytes: Buffer) => {
+        if (this.failNextOriginalSave && path.endsWith('/original.webp')) {
+          this.failNextOriginalSave = false;
+          throw new Error('injected save failure');
+        }
         if (this.failNextThumbnailSave && path.endsWith('/thumbnail.webp')) {
           this.failNextThumbnailSave = false;
           throw new Error('injected save failure');
@@ -49,6 +54,7 @@ class FakeBucket {
         if (!object) throw new Error('missing object');
         return [{ generation: object.generation }];
       },
+      exists: async () => [this.objects.has(path)],
       delete: async (options: { ignoreNotFound?: boolean; ifGenerationMatch?: string }) => {
         if (this.blockDeletes) {
           this.deleteStarted.resolve();
@@ -216,12 +222,107 @@ emulatorSuite('asset model image concurrency and recovery', () => {
     await expect(service.cleanupDeleted(documentId)).rejects.toMatchObject({
       functionalCode: 'asset-model-image-reconciliation-required',
     });
-    expect(deletion.hadImage).toBe(true);
+    expect(deletion.cleanupRequired).toBe(true);
     expect((await firestore.collection('modelos_activos_limpiezas').get()).empty).toBe(false);
 
     const retry = await repository.delete(adminUid, documentId);
-    expect(retry.hadImage).toBe(true);
+    expect(retry.cleanupRequired).toBe(true);
     await service.cleanupDeleted(documentId);
     expect((await firestore.collection('modelos_activos_limpiezas').get()).empty).toBe(true);
+  });
+
+  it('MOD-047 deletes a model with null metadata while its older cleanup is pending', async () => {
+    await service.set(adminUid, documentId, input());
+    bucket.failNextDelete = true;
+    await expect(service.remove(adminUid, documentId)).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
+    await bucket
+      .file(`modelos-activos/${documentId}/versiones/unrelated/original.webp`)
+      .save(Buffer.from('unrelated'));
+
+    const repository = createAdminAssetModelsRepository(firestore);
+    await expect(repository.delete(adminUid, documentId)).resolves.toEqual({
+      cleanupRequired: true,
+    });
+    await service.cleanupDeleted(documentId);
+
+    expect((await firestore.collection('modelos_activos_limpiezas').get()).empty).toBe(true);
+    expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
+      true,
+    );
+    expect(
+      bucket.objects.has(`modelos-activos/${documentId}/versiones/unrelated/original.webp`),
+    ).toBe(true);
+  });
+
+  it('MOD-048 recovers both objects when confirmation and immediate cancellation persistence fail', async () => {
+    const failing = createAssetModelImagesService(firestore, bucket as never, {
+      beforeConfirm: () => {
+        throw new Error('injected Firestore confirmation failure');
+      },
+      beforeCancel: () => {
+        throw new Error('injected Firestore compensation failure');
+      },
+    });
+    await expect(failing.set(adminUid, documentId, input())).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
+    expect(bucket.objects.size).toBe(2);
+    const operation = (await firestore.collection('modelos_activos_operaciones_imagen').get())
+      .docs[0];
+    expect(operation?.data()['estado']).toBe('lista');
+    await operation?.ref.update({ leaseUntil: Timestamp.fromMillis(Date.now() - 1) });
+
+    service = createAssetModelImagesService(firestore, bucket as never);
+    await service.remove(adminUid, documentId);
+
+    expect(bucket.objects.size).toBe(0);
+    expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
+      true,
+    );
+    expect(
+      (await firestore.collection('modelos_activos').doc(documentId).get()).data()?.['imagen'],
+    ).toBeNull();
+  });
+
+  it.each(['original', 'thumbnail'] as const)(
+    'MOD-048 compensates an individual %s variant failure',
+    async (variant) => {
+      if (variant === 'original') bucket.failNextOriginalSave = true;
+      else bucket.failNextThumbnailSave = true;
+
+      await expect(service.set(adminUid, documentId, input())).rejects.toMatchObject({
+        functionalCode: 'asset-model-image-upload-failed',
+      });
+
+      expect(bucket.objects.size).toBe(0);
+      expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
+        true,
+      );
+    },
+  );
+
+  it('MOD-048 never cleans a still-leased upload and recovery is idempotent', async () => {
+    const markReady = deferred();
+    const uploading = createAssetModelImagesService(firestore, bucket as never, {
+      beforeMarkReady: () => markReady.promise,
+    });
+    const upload = uploading.set(adminUid, documentId, input());
+    await expect.poll(async () => bucket.objects.size).toBe(2);
+
+    await expect(service.cleanupDeleted(documentId)).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
+    expect(bucket.objects.size).toBe(2);
+    markReady.resolve();
+    await upload;
+
+    await service.remove(adminUid, documentId);
+    await service.remove(adminUid, documentId);
+    expect(bucket.objects.size).toBe(0);
+    expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
+      true,
+    );
   });
 });

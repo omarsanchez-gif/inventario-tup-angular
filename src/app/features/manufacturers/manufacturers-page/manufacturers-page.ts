@@ -97,7 +97,10 @@ export class ManufacturersPage {
   }
 
   protected cancelDeletion(): void {
-    if (!this.manufacturers.saving()) this.pendingDeletion.set(null);
+    if (!this.manufacturers.saving()) {
+      this.manufacturers.clearMessages();
+      this.pendingDeletion.set(null);
+    }
   }
 
   protected async confirmDeletion(): Promise<void> {

@@ -4,6 +4,7 @@ import {
   FieldValue,
   Timestamp,
   type DocumentData,
+  type DocumentReference,
   type Firestore,
   type Transaction,
 } from 'firebase-admin/firestore';
@@ -25,17 +26,32 @@ import type {
 const MAX_PIXELS = 40_000_000;
 const MAX_DIMENSION = 10_000;
 const SIGNED_URL_DURATION_MS = 5 * 60 * 1000;
+const UPLOAD_LEASE_MS = 2 * 60 * 1000;
+const RECOVERY_LEASE_MS = 60 * 1000;
 const FORMAT_CONTENT_TYPE: Record<string, string> = {
   jpeg: 'image/jpeg',
   png: 'image/png',
   webp: 'image/webp',
 };
 type StorageBucket = ReturnType<ReturnType<typeof getStorage>['bucket']>;
+type OperationState = 'cargando' | 'lista' | 'cancelada' | 'limpiando';
 
 interface CleanupRecord extends StoredImageDescriptor {
   readonly documentId: string;
   readonly originalPath: string;
   readonly thumbnailPath: string;
+}
+
+interface ImageOperation extends CleanupRecord {
+  readonly state: OperationState;
+  readonly leaseUntil: Timestamp;
+}
+
+export interface AssetModelImagesServiceHooks {
+  readonly now?: () => number;
+  readonly beforeMarkReady?: () => Promise<void> | void;
+  readonly beforeConfirm?: () => Promise<void> | void;
+  readonly beforeCancel?: () => Promise<void> | void;
 }
 
 async function requireCanonicalAdmin(
@@ -138,49 +154,30 @@ export async function processAssetModelImage(input: AssetModelImageInput) {
 export function createAssetModelImagesService(
   firestore: Firestore,
   bucket: StorageBucket,
+  hooks: AssetModelImagesServiceHooks = {},
 ): AssetModelImagesService {
   const models = firestore.collection('modelos_activos');
   const cleanups = firestore.collection('modelos_activos_limpiezas');
+  const operations = firestore.collection('modelos_activos_operaciones_imagen');
+  const now = hooks.now ?? Date.now;
 
   function queueCleanup(
     transaction: Transaction,
     documentId: string,
     descriptor: StoredImageDescriptor,
   ): void {
-    const imagePaths = assetModelImagePaths(documentId, descriptor);
+    const paths = assetModelImagePaths(documentId, descriptor);
     transaction.set(cleanups.doc(assetModelCleanupId(documentId, descriptor.version)), {
       modeloId: documentId,
       version: descriptor.version,
-      originalPath: imagePaths.original,
-      thumbnailPath: imagePaths.thumbnail,
+      originalPath: paths.original,
+      thumbnailPath: paths.thumbnail,
       originalGeneration: descriptor.originalGeneration,
       thumbnailGeneration: descriptor.thumbnailGeneration,
       estado: 'pendiente',
       fechaCreacion: FieldValue.serverTimestamp(),
       fechaActualizacion: FieldValue.serverTimestamp(),
     });
-  }
-
-  async function persistCleanup(
-    documentId: string,
-    descriptor: StoredImageDescriptor,
-  ): Promise<void> {
-    const reference = cleanups.doc(assetModelCleanupId(documentId, descriptor.version));
-    const imagePaths = assetModelImagePaths(documentId, descriptor);
-    await reference.set(
-      {
-        modeloId: documentId,
-        version: descriptor.version,
-        originalPath: imagePaths.original,
-        thumbnailPath: imagePaths.thumbnail,
-        originalGeneration: descriptor.originalGeneration,
-        thumbnailGeneration: descriptor.thumbnailGeneration,
-        estado: 'pendiente',
-        fechaCreacion: FieldValue.serverTimestamp(),
-        fechaActualizacion: FieldValue.serverTimestamp(),
-      },
-      { merge: true },
-    );
   }
 
   function cleanupRecord(documentId: string, data: DocumentData): CleanupRecord {
@@ -210,6 +207,29 @@ export function createAssetModelImagesService(
     };
   }
 
+  function operationRecord(documentId: string, data: DocumentData): ImageOperation {
+    const record = cleanupRecord(documentId, data);
+    const state = data['estado'];
+    const leaseUntil = data['leaseUntil'];
+    if (
+      !['cargando', 'lista', 'cancelada', 'limpiando'].includes(state) ||
+      !(leaseUntil instanceof Timestamp)
+    ) {
+      throw new AdminAssetModelsError(
+        'asset-model-image-reconciliation-required',
+        'failed-precondition',
+        'La operación de imagen requiere reconciliación.',
+      );
+    }
+    return { ...record, state: state as OperationState, leaseUntil };
+  }
+
+  async function canonicalVersion(documentId: string): Promise<string | null> {
+    const snapshot = await models.doc(documentId).get();
+    if (!snapshot.exists) return null;
+    return imageState(snapshot.data())?.version ?? null;
+  }
+
   async function deleteObject(path: string, generation: string | null): Promise<void> {
     await bucket.file(path).delete({
       ignoreNotFound: true,
@@ -217,16 +237,102 @@ export function createAssetModelImagesService(
     });
   }
 
+  async function objectGeneration(path: string, known: string | null): Promise<string | null> {
+    if (known) return known;
+    const file = bucket.file(path);
+    const [exists] = await file.exists();
+    if (!exists) return null;
+    const [metadata] = await file.getMetadata();
+    return typeof metadata.generation === 'string' && metadata.generation
+      ? metadata.generation
+      : null;
+  }
+
   async function processPendingCleanups(documentId: string): Promise<void> {
     const snapshot = await cleanups.where('modeloId', '==', documentId).limit(50).get();
     for (const document of snapshot.docs) {
       const cleanup = cleanupRecord(documentId, document.data());
+      if ((await canonicalVersion(documentId)) === cleanup.version) {
+        await document.ref.delete();
+        continue;
+      }
       await Promise.all([
         deleteObject(cleanup.originalPath, cleanup.originalGeneration),
         deleteObject(cleanup.thumbnailPath, cleanup.thumbnailGeneration),
       ]);
       await document.ref.delete();
     }
+  }
+
+  async function claimRecoverableOperation(
+    reference: DocumentReference,
+    documentId: string,
+  ): Promise<'active' | 'canonical' | ImageOperation> {
+    return firestore.runTransaction(async (transaction) => {
+      const [operationSnapshot, modelSnapshot] = await Promise.all([
+        transaction.get(reference),
+        transaction.get(models.doc(documentId)),
+      ]);
+      if (!operationSnapshot.exists) return 'canonical';
+      const operation = operationRecord(documentId, operationSnapshot.data() ?? {});
+      const canonical = modelSnapshot.exists ? imageState(modelSnapshot.data())?.version : null;
+      if (canonical === operation.version) {
+        transaction.delete(reference);
+        return 'canonical';
+      }
+      const leaseExpired = operation.leaseUntil.toMillis() <= now();
+      if (operation.state !== 'cancelada' && !leaseExpired) return 'active';
+      transaction.update(reference, {
+        estado: 'limpiando',
+        leaseUntil: Timestamp.fromMillis(now() + RECOVERY_LEASE_MS),
+        fechaActualizacion: FieldValue.serverTimestamp(),
+      });
+      return { ...operation, state: 'limpiando' };
+    });
+  }
+
+  async function recoverOperation(
+    reference: DocumentReference,
+    documentId: string,
+  ): Promise<boolean> {
+    const claimed = await claimRecoverableOperation(reference, documentId);
+    if (claimed === 'canonical') return true;
+    if (claimed === 'active') return false;
+    const [originalGeneration, thumbnailGeneration] = await Promise.all([
+      objectGeneration(claimed.originalPath, claimed.originalGeneration),
+      objectGeneration(claimed.thumbnailPath, claimed.thumbnailGeneration),
+    ]);
+    await Promise.all([
+      deleteObject(claimed.originalPath, originalGeneration),
+      deleteObject(claimed.thumbnailPath, thumbnailGeneration),
+    ]);
+    await firestore.runTransaction(async (transaction) => {
+      const [operationSnapshot, modelSnapshot] = await Promise.all([
+        transaction.get(reference),
+        transaction.get(models.doc(documentId)),
+      ]);
+      if (!operationSnapshot.exists) return;
+      const operation = operationRecord(documentId, operationSnapshot.data() ?? {});
+      const canonical = modelSnapshot.exists ? imageState(modelSnapshot.data())?.version : null;
+      if (canonical === operation.version) {
+        throw new AdminAssetModelsError(
+          'asset-model-image-reconciliation-required',
+          'failed-precondition',
+          'La versión vigente no puede limpiarse.',
+        );
+      }
+      if (operation.version === claimed.version) transaction.delete(reference);
+    });
+    return true;
+  }
+
+  async function recoverAbandonedOperations(documentId: string): Promise<boolean> {
+    const snapshot = await operations.where('modeloId', '==', documentId).limit(50).get();
+    let complete = true;
+    for (const document of snapshot.docs) {
+      if (!(await recoverOperation(document.ref, documentId))) complete = false;
+    }
+    return complete;
   }
 
   async function saveObject(path: string, bytes: Buffer): Promise<string> {
@@ -246,22 +352,55 @@ export function createAssetModelImagesService(
     return metadata.generation;
   }
 
+  async function preflight(requesterUid: string, documentId: string): Promise<void> {
+    await firestore.runTransaction(async (transaction) => {
+      await requireCanonicalAdmin(transaction, firestore, requesterUid);
+      const snapshot = await transaction.get(models.doc(documentId));
+      if (!snapshot.exists) {
+        throw new AdminAssetModelsError(
+          'asset-model-not-found',
+          'not-found',
+          'El Modelo no existe.',
+        );
+      }
+      imageState(snapshot.data());
+    });
+  }
+
+  async function markCanceled(
+    reference: DocumentReference,
+    generations: { originalGeneration: string | null; thumbnailGeneration: string | null },
+  ): Promise<void> {
+    await hooks.beforeCancel?.();
+    await firestore.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(reference);
+      if (!snapshot.exists) return;
+      transaction.update(reference, {
+        ...generations,
+        estado: 'cancelada',
+        leaseUntil: Timestamp.fromMillis(now()),
+        fechaActualizacion: FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
+  async function cancelAndRecover(
+    reference: DocumentReference,
+    documentId: string,
+    generations: { originalGeneration: string | null; thumbnailGeneration: string | null },
+  ): Promise<boolean> {
+    try {
+      await markCanceled(reference, generations);
+      return await recoverOperation(reference, documentId);
+    } catch {
+      return false;
+    }
+  }
+
   return {
     async set(requesterUid, documentId, input) {
-      const reference = models.doc(documentId);
-      await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, firestore, requesterUid);
-        const snapshot = await transaction.get(reference);
-        if (!snapshot.exists) {
-          throw new AdminAssetModelsError(
-            'asset-model-not-found',
-            'not-found',
-            'El Modelo no existe.',
-          );
-        }
-        imageState(snapshot.data());
-      });
-
+      await preflight(requesterUid, documentId);
+      await recoverAbandonedOperations(documentId);
       const processed = await processAssetModelImage(input);
       const version = randomUUID();
       const descriptorBase: StoredImageDescriptor = {
@@ -270,21 +409,32 @@ export function createAssetModelImagesService(
         originalGeneration: null,
         thumbnailGeneration: null,
       };
-      const imagePaths = assetModelImagePaths(documentId, descriptorBase);
+      const paths = assetModelImagePaths(documentId, descriptorBase);
+      const operationReference = operations.doc(version);
+      await operationReference.create({
+        modeloId: documentId,
+        version,
+        originalPath: paths.original,
+        thumbnailPath: paths.thumbnail,
+        originalGeneration: null,
+        thumbnailGeneration: null,
+        estado: 'cargando',
+        leaseUntil: Timestamp.fromMillis(now() + UPLOAD_LEASE_MS),
+        fechaCreacion: FieldValue.serverTimestamp(),
+        fechaActualizacion: FieldValue.serverTimestamp(),
+      });
+
       const uploads = await Promise.allSettled([
-        saveObject(imagePaths.original, processed.original),
-        saveObject(imagePaths.thumbnail, processed.thumbnail),
+        saveObject(paths.original, processed.original),
+        saveObject(paths.thumbnail, processed.thumbnail),
       ]);
-      const descriptor: StoredImageDescriptor = {
-        ...descriptorBase,
+      const generations = {
         originalGeneration: uploads[0].status === 'fulfilled' ? uploads[0].value : null,
         thumbnailGeneration: uploads[1].status === 'fulfilled' ? uploads[1].value : null,
       };
       if (uploads.some((upload) => upload.status === 'rejected')) {
-        await persistCleanup(documentId, descriptor);
-        try {
-          await processPendingCleanups(documentId);
-        } catch {
+        const recovered = await cancelAndRecover(operationReference, documentId, generations);
+        if (!recovered) {
           throw new AdminAssetModelsError(
             'asset-model-image-reconciliation-required',
             'failed-precondition',
@@ -299,19 +449,63 @@ export function createAssetModelImagesService(
       }
 
       try {
+        await hooks.beforeMarkReady?.();
+        await firestore.runTransaction(async (transaction) => {
+          const operationSnapshot = await transaction.get(operationReference);
+          if (!operationSnapshot.exists) {
+            throw new AdminAssetModelsError(
+              'asset-model-image-reconciliation-required',
+              'failed-precondition',
+              'La operación de imagen ya no está vigente.',
+            );
+          }
+          const operation = operationRecord(documentId, operationSnapshot.data() ?? {});
+          if (operation.state !== 'cargando' || operation.leaseUntil.toMillis() <= now()) {
+            throw new AdminAssetModelsError(
+              'asset-model-image-reconciliation-required',
+              'failed-precondition',
+              'La operación de imagen venció.',
+            );
+          }
+          transaction.update(operationReference, {
+            ...generations,
+            estado: 'lista',
+            fechaActualizacion: FieldValue.serverTimestamp(),
+          });
+        });
+
+        await hooks.beforeConfirm?.();
         await firestore.runTransaction(async (transaction) => {
           await requireCanonicalAdmin(transaction, firestore, requesterUid);
-          const snapshot = await transaction.get(reference);
-          if (!snapshot.exists) {
+          const [modelSnapshot, operationSnapshot] = await Promise.all([
+            transaction.get(models.doc(documentId)),
+            transaction.get(operationReference),
+          ]);
+          if (!modelSnapshot.exists) {
             throw new AdminAssetModelsError(
               'asset-model-not-found',
               'not-found',
               'El Modelo no existe.',
             );
           }
-          const previous = imageState(snapshot.data());
+          if (!operationSnapshot.exists) {
+            throw new AdminAssetModelsError(
+              'asset-model-image-reconciliation-required',
+              'failed-precondition',
+              'La operación de imagen ya no está vigente.',
+            );
+          }
+          const operation = operationRecord(documentId, operationSnapshot.data() ?? {});
+          if (operation.state !== 'lista' || operation.leaseUntil.toMillis() <= now()) {
+            throw new AdminAssetModelsError(
+              'asset-model-image-reconciliation-required',
+              'failed-precondition',
+              'La operación de imagen ya no puede publicarse.',
+            );
+          }
+          const previous = imageState(modelSnapshot.data());
           if (previous) queueCleanup(transaction, documentId, previous);
-          transaction.update(reference, {
+          transaction.update(models.doc(documentId), {
             imagen: {
               contentType: 'image/webp',
               originalSize: processed.original.length,
@@ -319,18 +513,17 @@ export function createAssetModelImagesService(
               sha256: createHash('sha256').update(processed.original).digest('hex'),
               version,
               storageLayout: 'versioned-v2',
-              originalGeneration: descriptor.originalGeneration,
-              thumbnailGeneration: descriptor.thumbnailGeneration,
+              originalGeneration: generations.originalGeneration,
+              thumbnailGeneration: generations.thumbnailGeneration,
               fechaActualizacion: FieldValue.serverTimestamp(),
             },
             fechaActualizacion: FieldValue.serverTimestamp(),
           });
+          transaction.delete(operationReference);
         });
       } catch (error) {
-        await persistCleanup(documentId, descriptor);
-        try {
-          await processPendingCleanups(documentId);
-        } catch {
+        const recovered = await cancelAndRecover(operationReference, documentId, generations);
+        if (!recovered) {
           throw new AdminAssetModelsError(
             'asset-model-image-reconciliation-required',
             'failed-precondition',
@@ -352,9 +545,11 @@ export function createAssetModelImagesService(
     },
 
     async remove(requesterUid, documentId) {
-      const reference = models.doc(documentId);
+      await preflight(requesterUid, documentId);
+      await recoverAbandonedOperations(documentId);
       await firestore.runTransaction(async (transaction) => {
         await requireCanonicalAdmin(transaction, firestore, requesterUid);
+        const reference = models.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists) {
           throw new AdminAssetModelsError(
@@ -384,10 +579,9 @@ export function createAssetModelImagesService(
     },
 
     async access(requesterUid, documentId, variant): Promise<AssetModelImageAccess> {
-      const reference = models.doc(documentId);
       const descriptor = await firestore.runTransaction(async (transaction) => {
         await requireCanonicalAdmin(transaction, firestore, requesterUid);
-        const snapshot = await transaction.get(reference);
+        const snapshot = await transaction.get(models.doc(documentId));
         if (!snapshot.exists) {
           throw new AdminAssetModelsError(
             'asset-model-not-found',
@@ -403,8 +597,7 @@ export function createAssetModelImagesService(
             'El Modelo no tiene imagen.',
           );
         }
-        const rawImage = snapshot.data()?.['imagen'];
-        if (!(rawImage?.['fechaActualizacion'] instanceof Timestamp)) {
+        if (!(snapshot.data()?.['imagen']?.['fechaActualizacion'] instanceof Timestamp)) {
           throw new AdminAssetModelsError(
             'asset-model-image-reconciliation-required',
             'failed-precondition',
@@ -413,19 +606,19 @@ export function createAssetModelImagesService(
         }
         return image;
       });
-      const expires = new Date(Date.now() + SIGNED_URL_DURATION_MS);
-      const imagePaths = assetModelImagePaths(documentId, descriptor);
+      const expires = new Date(now() + SIGNED_URL_DURATION_MS);
+      const paths = assetModelImagePaths(documentId, descriptor);
       try {
         const [thumbnailUrl, originalUrl] = await Promise.all([
           variant === 'thumbnail' || variant === 'both'
             ? bucket
-                .file(imagePaths.thumbnail)
+                .file(paths.thumbnail)
                 .getSignedUrl({ action: 'read', expires, version: 'v4' })
                 .then(([url]) => url)
             : Promise.resolve(null),
           variant === 'original' || variant === 'both'
             ? bucket
-                .file(imagePaths.original)
+                .file(paths.original)
                 .getSignedUrl({ action: 'read', expires, version: 'v4' })
                 .then(([url]) => url)
             : Promise.resolve(null),
@@ -447,7 +640,15 @@ export function createAssetModelImagesService(
 
     async cleanupDeleted(documentId) {
       try {
+        const operationsComplete = await recoverAbandonedOperations(documentId);
         await processPendingCleanups(documentId);
+        const [pendingOperations, pendingCleanups] = await Promise.all([
+          operations.where('modeloId', '==', documentId).limit(1).get(),
+          cleanups.where('modeloId', '==', documentId).limit(1).get(),
+        ]);
+        if (!operationsComplete || !pendingOperations.empty || !pendingCleanups.empty) {
+          throw new Error('La reconciliación permanece pendiente.');
+        }
       } catch {
         throw new AdminAssetModelsError(
           'asset-model-image-reconciliation-required',

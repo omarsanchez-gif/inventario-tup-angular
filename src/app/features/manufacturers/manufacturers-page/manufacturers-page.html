@@ -10,7 +10,7 @@
     </button>
   </header>
 
-  @if (!formVisible() && manufacturers.error(); as error) {
+  @if (!formVisible() && !pendingDeletion() && manufacturers.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
   @if (manufacturers.success(); as success) {
@@ -71,6 +71,9 @@
         Solo se eliminará si no está vinculado con modelos de activos. Si está en uso deberá
         desactivarlo.
       </p>
+      @if (manufacturers.error(); as error) {
+        <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+      }
       <div class="dialog__actions">
         <button
           class="button button--secondary"

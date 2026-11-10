@@ -423,8 +423,8 @@ export const deleteAssetModel = onCall(options, async (request) =>
       request.data,
       assetModelDependencies(),
     );
-    if (result.hadImage) await assetModelImagesService.cleanupDeleted(result.documentId);
-    return result;
+    await assetModelImagesService.cleanupDeleted(result.documentId);
+    return { documentId: result.documentId, status: 'completed' as const };
   }),
 );
 

@@ -17,8 +17,8 @@
 - USR-015: el listado presenta 10 registros por página y el paginador informa intervalo, total y página actual con controles accesibles.
 - USR-016: si falla `setClaims` durante una reducción de acceso, aun se intenta revocar refresh tokens y se responde `reconciliation-required`.
 - USR-017: Auth, Functions y Firestore Emulator validan admin canónico, rechazo de `usuario` y anónimo, Rules cerradas, desactivación, claims, autoprotección y unicidad concurrente.
-- USR-018: una lectura iniciada por una sesión anterior no repuebla el listado después de invalidar y limpiar su generación.
-- USR-019: un error de duplicado iniciado en el formulario se anuncia dentro del diálogo en navegador real.
+- USR-018: una lectura iniciada por una sesión anterior no repuebla el listado después de invalidar y limpiar su generación. <!-- trace:required -->
+- USR-019: un error de duplicado iniciado en el formulario se anuncia dentro del diálogo en navegador real. <!-- trace:required -->
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 

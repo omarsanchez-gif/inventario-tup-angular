@@ -139,6 +139,22 @@ describe('CampusesPage', () => {
     expect(campuses.delete).toHaveBeenCalledWith(campus);
   });
 
+  it('LAY-021 shows a reconciliation error inside the campus deletion dialog', async () => {
+    campuses.delete.mockImplementationOnce(async () => {
+      campuses.error.set('El Campus requiere reconciliación antes de eliminarse.');
+      return false;
+    });
+    action('Eliminar FCS').click();
+    fixture.detectChanges();
+    textButton('Eliminar campus').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dialog = element.querySelector<HTMLDialogElement>('dialog[open]')!;
+    expect(dialog.querySelector('[role="alert"]')?.textContent).toContain('reconciliación');
+    expect(element.querySelector('main > [role="alert"]')).toBeNull();
+  });
+
   it('filters automatically and paginates ten campuses', () => {
     campuses.filteredCampuses.set(
       Array.from({ length: 12 }, (_, index) => ({

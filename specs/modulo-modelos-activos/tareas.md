@@ -43,3 +43,9 @@
 - [x] Presentar errores de operaciones del formulario dentro del diálogo.
 - [x] Comprobar el arranque y los cuatro recorridos Playwright desde un clon limpio del SHA de implementación.
 - [x] Publicar por separado Rules, ocho Functions afectadas y Hosting del endurecimiento únicamente en staging.
+- [x] Propagar la generación de sesión hasta recargas, mensajes y la fase posterior de imagen.
+- [x] Detener de forma terminal la renovación de miniaturas ante denegación, pérdida de sesión o destrucción.
+- [x] Procesar limpiezas y operaciones pendientes aun cuando el Modelo o su metadata vigente ya no existan.
+- [x] Persistir una operación arrendada antes del primer objeto y reconciliar cargas canceladas o vencidas.
+- [x] Probar el adaptador real con Firestore Emulator y Storage Emulator, además de `FakeBucket`.
+- [ ] Publicar y verificar este incremento de endurecimiento únicamente en staging.

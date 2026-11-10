@@ -82,7 +82,7 @@ Se implementaron nueve callables en `us-central1`: `listAssetModels`, `getAssetM
 - `setAssetModelImage` recibe un archivo de máximo 2 MiB, valida los bytes, genera original normalizado y miniatura WebP y después actualiza metadata.
 - `getAssetModelImageAccess` firma únicamente los objetos del Modelo solicitado por cinco minutos; el listado no genera URLs para los 500 registros.
 - La interfaz solicita miniaturas solo para los diez registros visibles y puede reutilizarlas hasta su expiración.
-- Las cargas nuevas usan rutas inmutables por versión y generaciones de objeto; los trabajos en `modelos_activos_limpiezas` reconcilian de forma idempotente sustituciones, retiros, cargas parciales y eliminación del Modelo.
+- Las cargas nuevas crean primero una operación arrendada en `modelos_activos_operaciones_imagen`, después escriben rutas inmutables por versión y finalmente confirman metadata de forma transaccional. Operaciones canceladas o vencidas y trabajos de `modelos_activos_limpiezas` convergen mediante los mismos flujos administrativos sin tocar una carga activa o versión canónica.
 - `sharp` 0.35.5 procesa las imágenes conforme a ADR-005 y está fijado como dependencia exacta de Functions.
 
 ## Ciclo de sesión
@@ -94,7 +94,7 @@ Se implementaron nueve callables en `us-central1`: `listAssetModels`, `getAssetM
 
 ## Verificación en navegador
 
-Playwright ejecuta Chromium contra Angular y Emulator Suite con datos sintéticos preparados por un script restringido a `demo-inventario-tup`. CI conserva esta validación separada de cualquier aceptación de Google o staging reales.
+Playwright ejecuta Chromium contra Angular y Emulator Suite con datos sintéticos preparados por un script restringido a `demo-inventario-tup`. El seed crea documentos y reservas canónicas de unicidad de forma idempotente. La integración de imágenes atraviesa además el bucket real de Storage Emulator; CI conserva estas validaciones separadas de cualquier aceptación de Google o staging reales.
 
 ## Endurecimiento transversal
 

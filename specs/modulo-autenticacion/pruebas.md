@@ -9,10 +9,11 @@
 - AUT-007: errores se muestran con mensajes funcionales sanitizados.
 - AUT-008: Login funciona por teclado y desde 320 px.
 - AUT-009: al negar una identidad se intentan retirar claims y revocar refresh tokens, incluso si una de las operaciones falla.
-- AUT-010: cambiar correo, o correo y rol, entre búsqueda y transacción rechaza la asociación; primer acceso válido, UID conflictivo e inactividad conservan su resultado.
-- AUT-011: una autorización que termina después de perder la sesión no restaura el perfil ni el contenido privado.
-- AUT-012: cerrar sesión en otra pestaña navega a Login y limpia los estados administrativos de la pestaña abierta.
-- AUT-013: cambiar de usuario descarta perfil, claims y respuestas de solicitudes pertenecientes al UID anterior.
+- AUT-010: cambiar correo, o correo y rol, entre búsqueda y transacción rechaza la asociación; primer acceso válido, UID conflictivo e inactividad conservan su resultado. <!-- trace:required -->
+- AUT-011: una autorización que termina después de perder la sesión no restaura el perfil ni el contenido privado. <!-- trace:required -->
+- AUT-012: cerrar sesión en otra pestaña navega a Login y limpia los estados administrativos de la pestaña abierta. <!-- trace:required -->
+- AUT-013: cambiar de usuario descarta perfil, claims y respuestas de solicitudes pertenecientes al UID anterior. <!-- trace:required -->
+- AUT-014: un error tardío de `bootstrap` o renovación de claims de A no cierra, limpia ni redirige una sesión B vigente; el error de la sesión vigente conserva el rechazo y cierre esperados. <!-- trace:required -->
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 

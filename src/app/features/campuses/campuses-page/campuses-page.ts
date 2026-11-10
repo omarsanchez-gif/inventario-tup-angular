@@ -105,7 +105,10 @@ export class CampusesPage {
   }
 
   protected cancelDeletion(): void {
-    if (!this.campuses.saving()) this.pendingDeletion.set(null);
+    if (!this.campuses.saving()) {
+      this.campuses.clearMessages();
+      this.pendingDeletion.set(null);
+    }
   }
 
   protected async confirmDeletion(): Promise<void> {

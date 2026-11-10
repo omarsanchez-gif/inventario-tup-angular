@@ -10,7 +10,7 @@
     </button>
   </header>
 
-  @if (!formVisible() && categories.error(); as error) {
+  @if (!formVisible() && !pendingDeletion() && categories.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
   @if (categories.success(); as success) {
@@ -71,6 +71,9 @@
         Solo se eliminará si no está vinculada con activos o modelos. Si está en uso deberá
         desactivarla.
       </p>
+      @if (categories.error(); as error) {
+        <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+      }
       <div class="dialog__actions">
         <button
           class="button button--secondary"

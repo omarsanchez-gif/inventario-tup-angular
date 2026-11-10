@@ -97,6 +97,65 @@ describe('AuthFacade session lifecycle', () => {
     expect(facade.user()).toMatchObject({ uid: 'user-b', nombre: 'Usuario B' });
   });
 
+  it('AUT-014 ignores a rejected bootstrap from A after B becomes authorized', async () => {
+    const first = deferred<BootstrapAuthorizationResult>();
+    bootstrap
+      .mockReturnValueOnce(first.promise)
+      .mockResolvedValueOnce(profile('user-b', 'Usuario B'));
+    const facade = TestBed.inject(AuthFacade);
+    facade.initialize();
+
+    emitSession({ uid: 'user-a' } as User);
+    emitSession({ uid: 'user-b' } as User);
+    await vi.waitFor(() => expect(facade.user()?.uid).toBe('user-b'));
+    first.reject(new Error('late bootstrap failure'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(facade.user()).toMatchObject({ uid: 'user-b', nombre: 'Usuario B' });
+    expect(authGateway.signOut).not.toHaveBeenCalled();
+    expect(router.navigateByUrl).not.toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
+  it('AUT-014 ignores a rejected claims refresh from A after B becomes authorized', async () => {
+    const firstClaims = deferred<IdTokenResult>();
+    bootstrap
+      .mockResolvedValueOnce(profile('user-a', 'Usuario A'))
+      .mockResolvedValueOnce(profile('user-b', 'Usuario B'));
+    vi.mocked(authGateway.refreshClaims)
+      .mockReturnValueOnce(firstClaims.promise)
+      .mockResolvedValueOnce({
+        claims: { authorized: true, role: 'admin' },
+      } as unknown as IdTokenResult);
+    const facade = TestBed.inject(AuthFacade);
+    facade.initialize();
+
+    emitSession({ uid: 'user-a' } as User);
+    await Promise.resolve();
+    emitSession({ uid: 'user-b' } as User);
+    await vi.waitFor(() => expect(facade.user()?.uid).toBe('user-b'));
+    firstClaims.reject(new Error('late claims failure'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(facade.user()).toMatchObject({ uid: 'user-b', nombre: 'Usuario B' });
+    expect(authGateway.signOut).not.toHaveBeenCalled();
+    expect(router.navigateByUrl).not.toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
+  it('AUT-014 still rejects and signs out the session that owns the current error', async () => {
+    bootstrap.mockRejectedValueOnce(new Error('current bootstrap failure'));
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+
+    emitSession({ uid: 'current-user' } as User);
+    await initialization;
+
+    expect(facade.user()).toBeNull();
+    expect(authGateway.signOut).toHaveBeenCalledOnce();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
   it('AUT-012 invalidates private state before waiting for Firebase sign-out', async () => {
     bootstrap.mockResolvedValue(profile('admin', 'Administración'));
     const facade = TestBed.inject(AuthFacade);

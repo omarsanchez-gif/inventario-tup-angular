@@ -45,7 +45,7 @@ function dependencies(items: readonly ManagedAssetModel[] = []): AdminAssetModel
       create: vi.fn().mockResolvedValue('new-model'),
       update: vi.fn().mockResolvedValue(undefined),
       setStatus: vi.fn().mockResolvedValue(undefined),
-      delete: vi.fn().mockResolvedValue({ hadImage: false }),
+      delete: vi.fn().mockResolvedValue({ cleanupRequired: true }),
     },
   };
 }

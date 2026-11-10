@@ -35,7 +35,7 @@ En otra terminal, cuando Emulator Suite ya responda:
     npm run seed:emulator
     npm start
 
-La aplicación local usa exclusivamente `demo-inventario-tup`. `seed:emulator` rechaza cualquier otro proyecto, comprueba Auth y Firestore Emulator y crea la identidad sintética `admin.e2e@tecplayacar.edu.mx`, su autorización canónica y dos catálogos mínimos. En compilación de desarrollo el botón de acceso usa esa identidad de Auth Emulator; staging conserva Google real.
+La aplicación local usa exclusivamente `demo-inventario-tup`. `seed:emulator` compila primero la lógica canónica, rechaza cualquier otro proyecto, comprueba Auth y Firestore Emulator y prepara de forma idempotente la identidad sintética `admin.e2e@tecplayacar.edu.mx`, su autorización canónica, dos catálogos mínimos y sus reservas de nombre. No reinicializa otras colecciones del emulador. En compilación de desarrollo el botón de acceso usa esa identidad de Auth Emulator; staging conserva Google real.
 
 Si Functions Emulator indica que no encuentra `functions/lib/index.js`, ejecute de nuevo `npm run functions:build` antes de iniciar los emuladores. Si Java no está disponible, confirme `java -version` con Java 21. Los puertos esperados son Auth 9099, Functions 5001, Firestore 8085, Storage 9199, UI 4000 y Angular 4200. Se usa 8085 para evitar la colisión documentada con software local que reserva 8080.
 

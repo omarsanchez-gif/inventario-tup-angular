@@ -128,6 +128,28 @@ describe('UsersPage dialogs', () => {
     expect(element.querySelector('dialog')).toBeFalsy();
   });
 
+  it('LAY-021 keeps an administrative deletion error inside the open dialog', async () => {
+    users.delete.mockImplementationOnce(async () => {
+      users.error.set('La cuenta administradora no puede eliminarse.');
+      return false;
+    });
+    actionButton('Eliminar a Usuario Prueba').click();
+    fixture.detectChanges();
+    button('Eliminar usuario').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dialog = element.querySelector<HTMLDialogElement>('dialog[open]')!;
+    expect(dialog.querySelector('[role="alert"]')?.textContent).toContain(
+      'La cuenta administradora no puede eliminarse.',
+    );
+    expect(element.querySelector('main > [role="alert"]')).toBeNull();
+    button('Cancelar').click();
+    fixture.detectChanges();
+    expect(users.clearMessages).toHaveBeenCalled();
+    expect(element.querySelector('dialog[open]')).toBeNull();
+  });
+
   it('renders record actions as accessible icon-only buttons', () => {
     const actions = [...element.querySelectorAll<HTMLButtonElement>('.record-actions button')];
 

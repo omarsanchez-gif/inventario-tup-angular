@@ -2,10 +2,21 @@ import { signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
 import type { AssetModelCatalogs } from '../data/asset-models.gateway';
 import { AssetModelsFacade } from '../state/asset-models.facade';
 import { AssetModelsPage } from './asset-models-page';
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+  return { promise, resolve, reject };
+}
 
 describe('AssetModelsPage', () => {
   const model: InventoryAssetModel = {
@@ -23,6 +34,7 @@ describe('AssetModelsPage', () => {
   };
   let fixture: ComponentFixture<AssetModelsPage>;
   let element: HTMLElement;
+  let authorized: WritableSignal<boolean>;
   let assetModels: {
     load: ReturnType<typeof vi.fn>;
     save: ReturnType<typeof vi.fn>;
@@ -78,12 +90,13 @@ describe('AssetModelsPage', () => {
       error: signal(null),
       success: signal(null),
     };
+    authorized = signal(true);
 
     await TestBed.configureTestingModule({
       imports: [AssetModelsPage],
       providers: [
         { provide: AssetModelsFacade, useValue: assetModels },
-        { provide: AuthFacade, useValue: { authorized: signal(true) } },
+        { provide: AuthFacade, useValue: { authorized } },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(AssetModelsPage);
@@ -155,6 +168,22 @@ describe('AssetModelsPage', () => {
     textButton('Eliminar modelo').click();
     await fixture.whenStable();
     expect(assetModels.delete).toHaveBeenCalledWith(model);
+  });
+
+  it('LAY-021 keeps a cleanup error inside the open model deletion dialog', async () => {
+    assetModels.delete.mockImplementationOnce(async () => {
+      assetModels.error.set('La imagen requiere reconciliación antes de eliminar el Modelo.');
+      return false;
+    });
+    action('Eliminar Latitude 5500').click();
+    fixture.detectChanges();
+    textButton('Eliminar modelo').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dialog = element.querySelector<HTMLDialogElement>('dialog[open]')!;
+    expect(dialog.querySelector('[role="alert"]')?.textContent).toContain('reconciliación');
+    expect(element.querySelector('main > [role="alert"]')).toBeNull();
   });
 
   it('filters automatically across the full toolbar and paginates ten records', () => {
@@ -256,6 +285,48 @@ describe('AssetModelsPage', () => {
     );
   });
 
+  it('MOD-045 does not start image upload after the saving session was invalidated', async () => {
+    const saved = deferred<{
+      documentId: string;
+      dataSaved: true;
+      listRefreshed: true;
+    }>();
+    assetModels.save.mockReturnValueOnce(saved.promise);
+    textButton('Nuevo modelo').click();
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      form: {
+        setValue(value: {
+          nombre: string;
+          categoriaId: string;
+          fabricanteId: string;
+          modeloNo: string;
+          notas: string;
+        }): void;
+      };
+      selectedImage: WritableSignal<File | null>;
+      submit(): Promise<void>;
+    };
+    component.form.setValue({
+      nombre: 'Modelo de sesión anterior',
+      categoriaId: 'category-1',
+      fabricanteId: 'manufacturer-1',
+      modeloNo: '',
+      notas: '',
+    });
+    component.selectedImage.set(
+      new File([new Uint8Array([1, 2, 3])], 'model.png', { type: 'image/png' }),
+    );
+
+    const submit = component.submit();
+    await vi.waitFor(() => expect(assetModels.save).toHaveBeenCalledOnce());
+    TestBed.inject(SessionScope).invalidate();
+    saved.resolve({ documentId: 'model-1', dataSaved: true, listRefreshed: true });
+    await submit;
+
+    expect(assetModels.setImage).not.toHaveBeenCalled();
+  });
+
   it('MOD-042 ignores a late original-image response after another model is opened', async () => {
     let resolveAccess!: (value: {
       thumbnailUrl: null;
@@ -298,6 +369,7 @@ describe('AssetModelsPage', () => {
       assetModels.imageAccess.mockRejectedValue(new Error('temporary failure'));
       const component = fixture.componentInstance as unknown as {
         setPage(page: number): void;
+        thumbnailRefreshTimer: unknown;
       };
 
       component.setPage(1);
@@ -307,6 +379,160 @@ describe('AssetModelsPage', () => {
       await vi.advanceTimersByTimeAsync(8_000);
 
       expect(assetModels.imageAccess).toHaveBeenCalledTimes(4);
+      expect(component.thumbnailRefreshTimer).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('MOD-046 stops after permission-denied even when an expired thumbnail was loaded', async () => {
+    vi.useFakeTimers();
+    try {
+      const withImage = { ...model, tieneImagen: true, imagenVersion: 'version-a' };
+      assetModels.models.set([withImage]);
+      assetModels.filteredModels.set([withImage]);
+      assetModels.imageAccess
+        .mockResolvedValueOnce({
+          thumbnailUrl: 'https://signed.example/expired',
+          originalUrl: null,
+          expiresAt: new Date(Date.now() - 1_000).toISOString(),
+          version: 'version-a',
+        })
+        .mockRejectedValueOnce({ code: 'functions/permission-denied' });
+      const component = fixture.componentInstance as unknown as {
+        setPage(page: number): void;
+        thumbnailRefreshTimer: unknown;
+      };
+
+      component.setPage(1);
+      await vi.advanceTimersByTimeAsync(1_000);
+      await Promise.resolve();
+
+      expect(assetModels.imageAccess).toHaveBeenCalledTimes(2);
+      expect(assetModels.reportImageReadError).toHaveBeenCalledOnce();
+      expect(component.thumbnailRefreshTimer).toBeNull();
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(assetModels.imageAccess).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('MOD-046 cancels a pending renewal when authorization disappears', async () => {
+    vi.useFakeTimers();
+    try {
+      const withImage = { ...model, tieneImagen: true, imagenVersion: 'version-a' };
+      assetModels.models.set([withImage]);
+      assetModels.filteredModels.set([withImage]);
+      assetModels.imageAccess.mockResolvedValue({
+        thumbnailUrl: 'https://signed.example/current',
+        originalUrl: null,
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+        version: 'version-a',
+      });
+      const component = fixture.componentInstance as unknown as {
+        setPage(page: number): void;
+        thumbnailRefreshTimer: unknown;
+      };
+
+      component.setPage(1);
+      await Promise.resolve();
+      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(component.thumbnailRefreshTimer).not.toBeNull();
+
+      authorized.set(false);
+      fixture.detectChanges();
+      await Promise.resolve();
+      expect(component.thumbnailRefreshTimer).toBeNull();
+      await vi.advanceTimersByTimeAsync(120_000);
+      expect(assetModels.imageAccess).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it.each(['terminal-first', 'transient-first'] as const)(
+    'MOD-046 preserves a terminal round result when errors resolve %s',
+    async (order) => {
+      vi.useFakeTimers();
+      try {
+        const records = [
+          { ...model, tieneImagen: true, imagenVersion: 'version-a' },
+          {
+            ...model,
+            documentId: 'model-2',
+            nombre: 'Modelo B',
+            tieneImagen: true,
+            imagenVersion: 'version-b',
+          },
+        ];
+        const terminal = deferred<never>();
+        const transient = deferred<never>();
+        assetModels.models.set(records);
+        assetModels.filteredModels.set(records);
+        assetModels.imageAccess
+          .mockReturnValueOnce(terminal.promise)
+          .mockReturnValueOnce(transient.promise);
+        const component = fixture.componentInstance as unknown as {
+          setPage(page: number): void;
+          thumbnailRefreshTimer: unknown;
+        };
+
+        component.setPage(1);
+        if (order === 'terminal-first') {
+          terminal.reject({ code: 'functions/permission-denied' });
+          await Promise.resolve();
+          transient.reject(new Error('temporary'));
+        } else {
+          transient.reject(new Error('temporary'));
+          await Promise.resolve();
+          terminal.reject({ code: 'functions/permission-denied' });
+        }
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(assetModels.imageAccess).toHaveBeenCalledTimes(2);
+        expect(component.thumbnailRefreshTimer).toBeNull();
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(assetModels.imageAccess).toHaveBeenCalledTimes(2);
+      } finally {
+        vi.useRealTimers();
+      }
+    },
+  );
+
+  it('MOD-046 invalidates pending thumbnail requests when the component is destroyed', async () => {
+    vi.useFakeTimers();
+    try {
+      const pending = deferred<{
+        thumbnailUrl: string;
+        originalUrl: null;
+        expiresAt: string;
+        version: string;
+      }>();
+      const withImage = { ...model, tieneImagen: true, imagenVersion: 'version-a' };
+      assetModels.models.set([withImage]);
+      assetModels.filteredModels.set([withImage]);
+      assetModels.imageAccess.mockReturnValueOnce(pending.promise);
+      const component = fixture.componentInstance as unknown as {
+        setPage(page: number): void;
+        thumbnailRefreshTimer: unknown;
+      };
+
+      component.setPage(1);
+      fixture.destroy();
+      pending.resolve({
+        thumbnailUrl: 'https://signed.example/late',
+        originalUrl: null,
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+        version: 'version-a',
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(component.thumbnailRefreshTimer).toBeNull();
+      expect(assetModels.reportImageReadError).not.toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
     }

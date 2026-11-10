@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   OnDestroy,
   signal,
@@ -9,6 +10,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
 import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { AppIcon } from '../../../shared/ui/icon/app-icon';
@@ -44,6 +46,7 @@ function fileBase64(file: File): Promise<string> {
 export class AssetModelsPage implements OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
   private readonly auth = inject(AuthFacade);
+  private readonly sessionScope = inject(SessionScope);
   protected readonly assetModels = inject(AssetModelsFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
@@ -62,7 +65,12 @@ export class AssetModelsPage implements OnDestroy {
   private thumbnailRefreshTimer: ReturnType<typeof setTimeout> | null = null;
   private thumbnailRefreshGeneration = 0;
   private thumbnailRetryAttempt = 0;
+  private thumbnailCycleStopped = false;
+  private destroyed = false;
   private dialogGeneration = 0;
+  private readonly authorizationWatcher = effect(() => {
+    if (!this.auth.authorized()) this.stopThumbnailRefreshCycle();
+  });
   protected readonly pageSize = 10;
   protected readonly currentPage = signal(1);
   protected readonly currentModel = computed(
@@ -105,9 +113,9 @@ export class AssetModelsPage implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.dialogGeneration += 1;
-    this.thumbnailRefreshGeneration += 1;
-    this.clearThumbnailRefreshTimer();
+    this.stopThumbnailRefreshCycle();
     this.revokePreview();
   }
 
@@ -189,6 +197,7 @@ export class AssetModelsPage implements OnDestroy {
     }
     this.formOperationError.set(null);
     this.operationPending.set(true);
+    const sessionGeneration = this.sessionScope.generation();
     const selected = this.selectedImage();
     let base64: string | null = null;
     if (selected) {
@@ -199,6 +208,10 @@ export class AssetModelsPage implements OnDestroy {
         this.operationPending.set(false);
         return;
       }
+    }
+    if (!this.sessionScope.isCurrent(sessionGeneration) || !this.auth.authorized()) {
+      this.operationPending.set(false);
+      return;
     }
     const raw = this.form.getRawValue();
     const input = {
@@ -216,6 +229,10 @@ export class AssetModelsPage implements OnDestroy {
       this.operationPending.set(false);
       return;
     }
+    if (!this.sessionScope.isCurrent(sessionGeneration) || !this.auth.authorized()) {
+      this.operationPending.set(false);
+      return;
+    }
     const documentId = saveResult.documentId;
     this.editingId.set(documentId);
 
@@ -224,6 +241,11 @@ export class AssetModelsPage implements OnDestroy {
       imageCompleted = await this.assetModels.setImage(documentId, selected, base64);
     } else if (this.removeCurrentImage()) {
       imageCompleted = await this.assetModels.removeImage(documentId);
+    }
+
+    if (!this.sessionScope.isCurrent(sessionGeneration) || !this.auth.authorized()) {
+      this.operationPending.set(false);
+      return;
     }
 
     if (imageCompleted) {
@@ -264,7 +286,10 @@ export class AssetModelsPage implements OnDestroy {
   }
 
   protected cancelDeletion(): void {
-    if (!this.busy()) this.pendingDeletion.set(null);
+    if (!this.busy()) {
+      this.assetModels.clearMessages();
+      this.pendingDeletion.set(null);
+    }
   }
 
   protected async confirmDeletion(): Promise<void> {
@@ -298,6 +323,10 @@ export class AssetModelsPage implements OnDestroy {
   }
 
   private async refreshVisibleThumbnails(): Promise<void> {
+    if (this.destroyed || this.thumbnailCycleStopped || !this.auth.authorized()) {
+      this.stopThumbnailRefreshCycle();
+      return;
+    }
     const generation = ++this.thumbnailRefreshGeneration;
     const visibleIds = new Set(this.paginatedModels().map((model) => model.documentId));
     this.thumbnailUrls.update((urls) =>
@@ -310,16 +339,14 @@ export class AssetModelsPage implements OnDestroy {
     }
     this.clearThumbnailRefreshTimer();
     const renewalThreshold = Date.now() + 5_000;
-    let retryNeeded = false;
-    let terminalFailure = false;
-    await Promise.all(
+    const outcomes = await Promise.all(
       this.paginatedModels().map(async (model) => {
-        if (!model.tieneImagen || !model.imagenVersion) return;
+        if (!model.tieneImagen || !model.imagenVersion) return 'skipped' as const;
         if (
           this.thumbnailVersions.get(model.documentId) === model.imagenVersion &&
           (this.thumbnailExpirations.get(model.documentId) ?? 0) > renewalThreshold
         ) {
-          return;
+          return 'current' as const;
         }
         try {
           const access = await this.assetModels.imageAccess(model.documentId, 'thumbnail');
@@ -331,17 +358,22 @@ export class AssetModelsPage implements OnDestroy {
             this.thumbnailVersions.set(model.documentId, model.imagenVersion!);
             this.thumbnailExpirations.set(model.documentId, Date.parse(access.expiresAt));
           }
+          return 'success' as const;
         } catch (error) {
-          if (generation === this.thumbnailRefreshGeneration) {
-            this.assetModels.reportImageReadError();
-            terminalFailure = this.isTerminalImageAccessError(error);
-            retryNeeded = !terminalFailure;
-          }
+          return this.isTerminalImageAccessError(error)
+            ? ('terminal' as const)
+            : ('transient' as const);
         }
       }),
     );
     if (generation !== this.thumbnailRefreshGeneration) return;
-    if (retryNeeded && !terminalFailure && this.auth.authorized()) {
+    const terminalFailure = outcomes.includes('terminal');
+    const retryNeeded = outcomes.includes('transient');
+    if (terminalFailure || !this.auth.authorized()) {
+      this.assetModels.reportImageReadError();
+      this.stopThumbnailRefreshCycle();
+    } else if (retryNeeded) {
+      this.assetModels.reportImageReadError();
       this.scheduleThumbnailRetry();
     } else {
       this.thumbnailRetryAttempt = 0;
@@ -350,23 +382,42 @@ export class AssetModelsPage implements OnDestroy {
   }
 
   private scheduleThumbnailRetry(): void {
-    if (this.thumbnailRetryAttempt >= 3) return;
+    if (
+      this.thumbnailRetryAttempt >= 3 ||
+      this.thumbnailCycleStopped ||
+      this.destroyed ||
+      !this.auth.authorized()
+    ) {
+      return;
+    }
     const delay = 1_000 * 2 ** this.thumbnailRetryAttempt;
     this.thumbnailRetryAttempt += 1;
     this.thumbnailRefreshTimer = setTimeout(() => {
       this.thumbnailRefreshTimer = null;
-      if (this.auth.authorized()) void this.refreshVisibleThumbnails();
+      if (!this.thumbnailCycleStopped && !this.destroyed && this.auth.authorized()) {
+        void this.refreshVisibleThumbnails();
+      }
     }, delay);
   }
 
   private scheduleThumbnailRefresh(): void {
+    if (this.thumbnailCycleStopped || this.destroyed || !this.auth.authorized()) return;
     const expirations = [...this.thumbnailExpirations.values()].filter(Number.isFinite);
     if (expirations.length === 0) return;
     const nextRenewal = Math.max(1_000, Math.min(...expirations) - Date.now() - 5_000);
     this.thumbnailRefreshTimer = setTimeout(() => {
       this.thumbnailRefreshTimer = null;
-      void this.refreshVisibleThumbnails();
+      if (!this.thumbnailCycleStopped && !this.destroyed && this.auth.authorized()) {
+        void this.refreshVisibleThumbnails();
+      }
     }, nextRenewal);
+  }
+
+  private stopThumbnailRefreshCycle(): void {
+    this.thumbnailCycleStopped = true;
+    this.thumbnailRetryAttempt = 0;
+    this.thumbnailRefreshGeneration += 1;
+    this.clearThumbnailRefreshTimer();
   }
 
   private clearThumbnailRefreshTimer(): void {

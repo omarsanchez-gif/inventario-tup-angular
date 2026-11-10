@@ -8,7 +8,7 @@
     <button class="button button--primary" type="button" (click)="openNew()">Nuevo usuario</button>
   </header>
 
-  @if (!formVisible() && users.error(); as error) {
+  @if (!formVisible() && !pendingDeletion() && users.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
   @if (users.success(); as success) {
@@ -81,6 +81,9 @@
       <p class="dialog__help">
         Esta acción revoca su acceso al sistema, pero no elimina su cuenta institucional de Google.
       </p>
+      @if (users.error(); as error) {
+        <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+      }
       <div class="dialog__actions">
         <button
           class="button button--secondary"

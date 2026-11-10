@@ -63,20 +63,30 @@ export class AuthFacade {
 
   async login(): Promise<void> {
     await this.initialize();
+    let operationUid = this.sessionUid;
+    let operationGeneration = this.authorizationGeneration;
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
       const user = await this.authGateway.signInWithGoogle();
-      const generation = this.activateSession(user.uid);
-      await this.authorize(user, generation);
+      operationUid = user.uid;
+      operationGeneration = this.activateSession(user.uid);
+      await this.authorize(user, operationGeneration);
+      this.requireCurrentSession(user.uid, operationGeneration);
       await this.router.navigateByUrl('/dashboard', { replaceUrl: true });
     } catch (error) {
-      if (error instanceof StaleSessionError) return;
+      if (
+        error instanceof StaleSessionError ||
+        !this.isCurrentSession(operationUid, operationGeneration)
+      ) {
+        return;
+      }
       this.invalidateSession(null, true);
       this.errorState.set(mapAuthError(error));
       await this.safeSignOut();
-    } finally {
       this.loadingState.set(false);
+    } finally {
+      if (this.isCurrentSession(operationUid, operationGeneration)) this.loadingState.set(false);
     }
   }
 
@@ -103,10 +113,12 @@ export class AuthFacade {
     try {
       await this.authorize(user, generation);
     } catch (error) {
-      if (error instanceof StaleSessionError) return;
+      if (error instanceof StaleSessionError || !this.isCurrentSession(user.uid, generation))
+        return;
       this.invalidateSession(null, true);
       this.errorState.set(mapAuthError(error));
       await this.safeSignOut();
+      this.loadingState.set(false);
       await this.navigateToLogin();
     } finally {
       if (this.authorizationGeneration === generation) this.loadingState.set(false);
@@ -169,9 +181,13 @@ export class AuthFacade {
   }
 
   private requireCurrentSession(uid: string, generation: number): void {
-    if (this.sessionUid !== uid || this.authorizationGeneration !== generation) {
+    if (!this.isCurrentSession(uid, generation)) {
       throw new StaleSessionError('La respuesta pertenece a una sesión anterior.');
     }
+  }
+
+  private isCurrentSession(uid: string | null, generation: number): boolean {
+    return this.sessionUid === uid && this.authorizationGeneration === generation;
   }
 
   private clearState(): void {

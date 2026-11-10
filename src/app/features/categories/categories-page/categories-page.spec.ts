@@ -119,6 +119,22 @@ describe('CategoriesPage', () => {
     expect(categories.delete).toHaveBeenCalledWith(category);
   });
 
+  it('LAY-021 shows a reference error inside the category deletion dialog', async () => {
+    categories.delete.mockImplementationOnce(async () => {
+      categories.error.set('La Categoría está referenciada por un Modelo.');
+      return false;
+    });
+    action('Eliminar Laptops').click();
+    fixture.detectChanges();
+    textButton('Eliminar categoría').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dialog = element.querySelector<HTMLDialogElement>('dialog[open]')!;
+    expect(dialog.querySelector('[role="alert"]')?.textContent).toContain('está referenciada');
+    expect(element.querySelector('main > [role="alert"]')).toBeNull();
+  });
+
   it('filters automatically and paginates ten categories', () => {
     categories.filteredCategories.set(
       Array.from({ length: 12 }, (_, index) => ({

@@ -22,3 +22,4 @@
 - [x] Extender los enlaces secundarios a todo el ancho disponible conservando su sangría interna.
 - [x] Igualar la tipografía del botón `Configuraciones` con los enlaces principales del sidebar.
 - [x] Incorporar recorridos Playwright de teclado, foco, navegación móvil y viewport de 320 px con Emulator Suite.
+- [x] Mantener los rechazos de eliminación dentro de los cinco diálogos administrativos, sin alerta duplicada en el fondo.

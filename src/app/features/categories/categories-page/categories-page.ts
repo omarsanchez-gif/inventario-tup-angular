@@ -97,7 +97,10 @@ export class CategoriesPage {
   }
 
   protected cancelDeletion(): void {
-    if (!this.categories.saving()) this.pendingDeletion.set(null);
+    if (!this.categories.saving()) {
+      this.categories.clearMessages();
+      this.pendingDeletion.set(null);
+    }
   }
 
   protected async confirmDeletion(): Promise<void> {

@@ -119,7 +119,10 @@ export class UsersPage {
   }
 
   protected cancelDeletion(): void {
-    if (!this.users.saving()) this.pendingDeletion.set(null);
+    if (!this.users.saving()) {
+      this.users.clearMessages();
+      this.pendingDeletion.set(null);
+    }
   }
 
   protected async confirmDeletion(): Promise<void> {

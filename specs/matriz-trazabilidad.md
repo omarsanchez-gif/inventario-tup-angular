@@ -2,14 +2,15 @@
 
 | Alcance            | Reglas          | Implementación                                            | Pruebas         |
 | ------------------ | --------------- | --------------------------------------------------------- | --------------- |
-| Autenticación      | RN-AUT-001–008  | `core/auth`, `SessionScope`, `bootstrapAuthorization`     | AUT-001–AUT-013 |
+| Autenticación      | RN-AUT-001–009  | `core/auth`, `SessionScope`, `bootstrapAuthorization`     | AUT-001–AUT-014 |
 | Dashboard inicial  | RN-DASH-001–003 | `features/dashboard`                                      | DASH-001–004    |
 | Usuarios           | RN-USR-001–010  | `features/users`, callables administrativas               | USR-001–USR-019 |
-| Layout privado     | RN-LAY-001–011  | `layout/shell`, `shared/ui/icon`, `shared/ui/dialog`      | LAY-001–LAY-020 |
+| Layout privado     | RN-LAY-001–012  | `layout/shell`, `shared/ui/icon`, `shared/ui/dialog`      | LAY-001–LAY-021 |
 | Categorías         | RN-CAT-001–012  | `features/categories`, cinco callables administrativas    | CAT-001–024     |
 | Fabricantes        | RN-FAB-001–012  | `features/manufacturers`, cinco callables administrativas | FAB-001–020     |
-| Modelos de activos | RN-MOD-001–022  | `features/asset-models`, nueve callables, Storage privado | MOD-001–MOD-044 |
+| Modelos de activos | RN-MOD-001–026  | `features/asset-models`, nueve callables, Storage privado | MOD-001–MOD-049 |
 | Campus             | RN-CAM-001–015  | `features/campuses`, cinco callables administrativas      | CAM-001–031     |
+| Calidad local      | RN-DEV-001–002  | `scripts/seed-emulator.mjs`, control de trazabilidad      | DEV-001–DEV-002 |
 
 Estado: Login, layout estandarizado, Usuarios, Categorías, Fabricantes, Modelos de activos, Campus y `Configuraciones` están publicados en `inventario-stg`. Las 30 callables usan Node.js 22, `us-central1`, máximo 20 instancias y rechazo anónimo; Firestore niega acceso directo a Usuarios y catálogos y Storage permanece cerrado. Hosting publica encabezados defensivos y caché diferenciada. Las pruebas integrales con Auth, Functions, Firestore y Storage Emulator están aprobadas y CI reproduce la validación sin desplegar. La lectura autenticada de una miniatura quedó aceptada; faltan sustitución, eliminación, expiración, las demás aceptaciones funcionales reales y la revisión visual móvil. App Check, PITR, bitácora y producción permanecen como decisiones separadas.
 

@@ -58,12 +58,17 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 - MOD-033: selectores no contienen botones de alta anidada; un catálogo inactivo vigente se distingue y solo puede conservarse.
 - MOD-034: búsqueda automática ocupa todo el ancho, incluye los cinco campos textuales, reinicia página y pagina diez registros.
 - MOD-035: tabla, miniatura/placeholder, badges, iconos, estados, previsualización, mensajes de carga parcial y diálogos funcionan por teclado y desde 320 px.
-- MOD-036: dos sustituciones concurrentes dejan original, miniatura y metadata en una sola versión confirmada.
-- MOD-037: eliminar mientras otra solicitud sustituye la imagen no borra la versión nueva.
-- MOD-038: una limpieza fallida permanece pendiente y un reintento la completa aunque `imagen` ya sea `null`.
-- MOD-039: fallar una de las dos escrituras compensa la otra y no confirma metadata parcial.
-- MOD-040: la limpieza asociada a un Modelo eliminado puede reanudarse sin restaurar el documento.
-- MOD-041: una creación confirmada seguida de fallo de lectura o imagen conserva `documentId`, reintenta como edición y no llama de nuevo a `create`.
-- MOD-042: respuestas tardías del Modelo anterior no alteran el diálogo actual; cerrar el diálogo o destruir la página invalida sus solicitudes.
-- MOD-043: la renovación de miniaturas aplica espera creciente, máximo tres reintentos y cancelación por sesión, denegación o destrucción.
-- MOD-044: JPEG, PNG, WebP y AVIF válidos producen ambas variantes WebP; MIME incongruente y formatos no autorizados se rechazan.
+- MOD-036: dos sustituciones concurrentes dejan original, miniatura y metadata en una sola versión confirmada. <!-- trace:required -->
+- MOD-037: eliminar mientras otra solicitud sustituye la imagen no borra la versión nueva. <!-- trace:required -->
+- MOD-038: una limpieza fallida permanece pendiente y un reintento la completa aunque `imagen` ya sea `null`. <!-- trace:required -->
+- MOD-039: fallar una de las dos escrituras compensa la otra y no confirma metadata parcial. <!-- trace:required -->
+- MOD-040: la limpieza asociada a un Modelo eliminado puede reanudarse sin restaurar el documento. <!-- trace:required -->
+- MOD-041: una creación confirmada seguida de fallo de lectura o imagen conserva `documentId`, reintenta como edición y no llama de nuevo a `create`. <!-- trace:required -->
+- MOD-042: respuestas tardías del Modelo anterior no alteran el diálogo actual; cerrar el diálogo o destruir la página invalida sus solicitudes. <!-- trace:required -->
+- MOD-043: la renovación de miniaturas aplica espera creciente, máximo tres reintentos y cancelación por sesión, denegación o destrucción. <!-- trace:required -->
+- MOD-044: JPEG, PNG, WebP y AVIF válidos producen ambas variantes WebP; MIME incongruente y formatos no autorizados se rechazan. <!-- trace:required -->
+- MOD-045: `save()` y las mutaciones propagan la generación hasta la recarga; cerrar sesión o cambiar de usuario antes de resolver el listado no restaura datos ni publica éxito. <!-- trace:required -->
+- MOD-046: un error terminal de miniatura prevalece sobre errores transitorios concurrentes, cancela solicitudes y temporizadores y no se reactiva por una expiración vencida. <!-- trace:required -->
+- MOD-047: retirar una imagen con fallo físico, eliminar después el Modelo y reintentar procesa el trabajo conocido aunque la metadata ya sea nula, sin tocar versiones ajenas. <!-- trace:required -->
+- MOD-048: toda carga registra una operación antes de Storage; fallos de confirmación y compensación dejan una vía recuperable que converge sin limpiar una carga activa ni una versión canónica. <!-- trace:required -->
+- MOD-049: una integración con Admin SDK, Firestore Emulator y Storage Emulator atraviesa el bucket real para carga, sustitución, metadata, generaciones, retirada y ausencia final de objetos o trabajos. <!-- trace:required -->

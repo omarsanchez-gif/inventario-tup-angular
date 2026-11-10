@@ -10,6 +10,7 @@
 - RN-AUT-006: No existe registro público ni autenticación por contraseña.
 - RN-AUT-007: La asociación inicial de UID revalida dentro de la transacción que el correo canónico siga coincidiendo con el correo autenticado y verificado.
 - RN-AUT-008: Cada cambio o pérdida de identidad invalida autorizaciones y lecturas pendientes; ningún resultado de una generación anterior puede restaurar perfil o datos privados.
+- RN-AUT-009: El éxito y el error de toda autorización o renovación de claims se aplican únicamente si conservan el UID y la generación que iniciaron la operación; un rechazo tardío nunca cierra una sesión posterior.
 
 ## Roles iniciales
 
@@ -49,6 +50,7 @@
 - RN-LAY-009: Las opciones secundarias usan texto y estado activo; el icono distintivo se reserva para el grupo principal.
 - RN-LAY-010: Si una ruta secundaria está activa, `Configuraciones` expresa su estado activo y se abre al navegar a ella; el usuario puede contraerlo manualmente sin perder el indicador del padre.
 - RN-LAY-011: En móvil, seleccionar una opción secundaria navega y cierra completamente el drawer.
+- RN-LAY-012: El error de una eliminación iniciada en un diálogo se anuncia dentro de ese diálogo, que permanece abierto y recuperable sin duplicar el mensaje en el fondo.
 
 ## Categorías
 
@@ -104,6 +106,15 @@
 - RN-MOD-020: Categorías y Fabricantes se administran en sus módulos propios; el modal de Modelo no contiene altas rápidas ni formularios anidados.
 - RN-MOD-021: Cada imagen confirmada usa una versión inmutable; original y miniatura pertenecen a esa misma versión y una limpieza anterior nunca puede borrar objetos de una versión posterior.
 - RN-MOD-022: Toda limpieza incompleta conserva un trabajo técnico reintentable e idempotente hasta confirmar ambos objetos; eliminar la metadata o el Modelo no equivale a completar la limpieza.
+- RN-MOD-023: Mutaciones y recargas de Modelos conservan la generación de sesión original en todas sus fases; ninguna respuesta tardía actualiza listados, mensajes o inicia una operación de imagen.
+- RN-MOD-024: Un error terminal de acceso a miniaturas detiene la ronda completa y sus temporizadores; solo los errores transitorios admiten hasta tres reintentos con espera creciente.
+- RN-MOD-025: Eliminar un Modelo procesa su imagen vigente, sus limpiezas anteriores y sus cargas recuperables; mientras exista trabajo técnico no confirmado responde reconciliación pendiente.
+- RN-MOD-026: Antes del primer objeto de una carga se persiste una operación con versión, rutas y arrendamiento. Solo una operación vigente puede confirmar metadata; una operación cancelada o vencida es recuperable y nunca puede borrar ni publicar una versión canónica posterior.
+
+## Calidad y entorno local
+
+- RN-DEV-001: Los datos sintéticos de Emulator Suite respetan los mismos documentos, normalización y reservas de unicidad que las callables, y su preparación es idempotente y exclusiva de `demo-inventario-tup`.
+- RN-DEV-002: Los criterios marcados como trazabilidad obligatoria en las specs deben tener una entrada estructurada válida; la evidencia de ejecución aprobada se registra separada de la mera presencia de un identificador en una prueba.
 
 ## Campus
 

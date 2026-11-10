@@ -8,7 +8,7 @@
     <button class="button button--primary" type="button" (click)="openNew()">Nuevo campus</button>
   </header>
 
-  @if (!formVisible() && campuses.error(); as error) {
+  @if (!formVisible() && !pendingDeletion() && campuses.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
   @if (campuses.success(); as success) {
@@ -84,6 +84,9 @@
         Solo se eliminará si no tiene áreas, coordinaciones, usuarios, activos u otras referencias.
         Si está en uso deberá desactivarlo.
       </p>
+      @if (campuses.error(); as error) {
+        <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+      }
       <div class="dialog__actions">
         <button
           class="button button--secondary"
