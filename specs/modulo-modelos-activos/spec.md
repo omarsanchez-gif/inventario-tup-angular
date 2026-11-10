@@ -233,7 +233,8 @@ Entrada: `documentId`.
 
 - Es idempotente cuando el Modelo no tiene imagen.
 - Retira la metadata canónica y programa la limpieza de los objetos versionados con precondición de generación.
-- Reporta reconciliación cuando no puede confirmar la limpieza.
+- Procesa operaciones recuperables antes y después de retirar la metadata.
+- Reporta `asset-model-image-reconciliation-required` cuando una carga conserva un arrendamiento vigente o su escritor todavía no ha confirmado el fin de ambas escrituras; el diálogo permanece recuperable y un reintento posterior converge.
 
 ### `getAssetModelImageAccess`
 

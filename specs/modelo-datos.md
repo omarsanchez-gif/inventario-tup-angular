@@ -206,6 +206,7 @@ modelos_activos_operaciones_imagen/{operacionId}
   originalGeneration: string | null
   thumbnailGeneration: string | null
   estado: "cargando" | "lista" | "cancelada" | "limpiando"
+  cargaFinalizada: boolean
   leaseUntil: Timestamp
   fechaCreacion: Timestamp
   fechaActualizacion: Timestamp
@@ -213,9 +214,11 @@ modelos_activos_operaciones_imagen/{operacionId}
 
 - La operación se crea antes de escribir el primer objeto y `operacionId` coincide con la versión UUID de esa carga.
 - `cargando` identifica una carga dentro de su arrendamiento; `lista` confirma ambas variantes y generaciones, pero todavía no la metadata canónica.
+- `cargaFinalizada` comienza en `false` y solo pasa a `true` cuando el escritor observa que ambas escrituras terminaron, hayan aprobado o fallado. Vencer o reclamar el arrendamiento no cambia por sí solo este dato.
 - La transacción de confirmación exige operación vigente, actualiza `modelos_activos.imagen`, agenda la limpieza de la versión anterior y elimina la operación.
 - `cancelada` y toda operación no canónica cuyo arrendamiento venció son elegibles para recuperación. Antes de tocar Storage se reclaman como `limpiando` y se vuelven a contrastar con la metadata canónica.
-- Un fallo de recuperación conserva el documento técnico y sus rutas. El trabajo se elimina únicamente después de confirmar la ausencia de ambos objetos.
+- Un fallo de recuperación conserva el documento técnico y sus rutas. Si `cargaFinalizada` es `false`, incluso una limpieza que todavía no encuentra objetos conserva la operación como tombstone cancelado porque las escrituras pueden materializarse después.
+- La operación solo se elimina cuando la metadata canónica confirma esa misma versión o cuando `cargaFinalizada` es `true` y la recuperación confirmó la ausencia de ambas variantes. La ausencia aislada del documento técnico nunca equivale a versión canónica.
 - `setAssetModelImage`, `removeAssetModelImage` y el reintento de `deleteAssetModel` retoman operaciones abandonadas; una operación activa impide declarar completa la limpieza de un Modelo eliminado.
 - Las generaciones se descubren desde Storage cuando una caída impidió persistirlas. Las eliminaciones utilizan precondición de generación y nunca alcanzan otra versión.
 - Los clientes no pueden leer o escribir esta colección; no se migran ni reescriben imágenes históricas.

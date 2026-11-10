@@ -43,7 +43,7 @@ emulatorSuite('synthetic emulator preparation', () => {
     await deleteApp(app);
   });
 
-  it('DEV-001 is idempotent and preserves canonical edit, duplicate and delete invariants', async () => {
+  it('DEV-001 and DEV-003 keep idempotent canonical reserves after repository renames', async () => {
     await seed();
     await seed();
 
@@ -68,6 +68,46 @@ emulatorSuite('synthetic emulator preparation', () => {
       nombreNormalizado: normalizeManufacturerName(manufacturerName),
       notas: 'Dato sintético',
     });
+    await seed();
+
+    expect(
+      (await firestore.collection('categorias').doc('synthetic-category').get()).data()?.['nombre'],
+    ).toBe(categoryName);
+    expect(
+      (await firestore.collection('fabricantes').doc('synthetic-manufacturer').get()).data()?.[
+        'nombre'
+      ],
+    ).toBe(manufacturerName);
+    expect((await firestore.collection('categorias_nombres').get()).size).toBe(1);
+    expect((await firestore.collection('fabricantes_nombres').get()).size).toBe(1);
+
+    const reusedCategoryId = await categories.create(adminUid, {
+      nombre: 'Categoría E2E',
+      nombreNormalizado: normalizeCategoryName('Categoría E2E'),
+      notas: null,
+    });
+    const reusedManufacturerId = await manufacturers.create(adminUid, {
+      nombre: 'Fabricante E2E',
+      nombreNormalizado: normalizeManufacturerName('Fabricante E2E'),
+      notas: null,
+    });
+    await seed();
+    const initialCategoryKey = createHash('sha256')
+      .update(normalizeCategoryName('Categoría E2E'), 'utf8')
+      .digest('hex');
+    const initialManufacturerKey = createHash('sha256')
+      .update(normalizeManufacturerName('Fabricante E2E'), 'utf8')
+      .digest('hex');
+    expect(
+      (await firestore.collection('categorias_nombres').doc(initialCategoryKey).get()).data()?.[
+        'categoriaId'
+      ],
+    ).toBe(reusedCategoryId);
+    expect(
+      (
+        await firestore.collection('fabricantes_nombres').doc(initialManufacturerKey).get()
+      ).data()?.['fabricanteId'],
+    ).toBe(reusedManufacturerId);
     await expect(
       categories.create(adminUid, {
         nombre: '  CATEGORIA e2e ACTUALIZADA ',

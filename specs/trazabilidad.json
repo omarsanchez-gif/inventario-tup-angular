@@ -287,6 +287,20 @@
       "evidenceId": "emulators-1706695"
     },
     {
+      "requirement": "RN-MOD-027",
+      "criterion": "MOD-050",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-MOD-028",
+      "criterion": "MOD-051",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
       "requirement": "RN-DEV-001",
       "criterion": "DEV-001",
       "verification": "emulator",
@@ -301,6 +315,13 @@
       "tests": ["scripts/check-traceability.spec.ts"],
       "state": "verified-local",
       "evidenceId": "traceability-1706695"
+    },
+    {
+      "requirement": "RN-DEV-003",
+      "criterion": "DEV-003",
+      "verification": "emulator",
+      "tests": ["functions/src/seed-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
     }
   ]
 }

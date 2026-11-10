@@ -63,17 +63,53 @@ async function upsertCanonicalCatalog({
   reservationOwnerField,
   name,
   normalizedName,
+  normalizeName,
   additionalFields = {},
 }) {
   const documentReference = firestore.collection(collection).doc(documentId);
-  const reservationReference = firestore
-    .collection(reservationCollection)
-    .doc(nameKey(normalizedName));
+  const reservations = firestore.collection(reservationCollection);
+  const initialReservationReference = reservations.doc(nameKey(normalizedName));
   await firestore.runTransaction(async (transaction) => {
-    const [documentSnapshot, reservationSnapshot] = await Promise.all([
-      transaction.get(documentReference),
-      transaction.get(reservationReference),
-    ]);
+    const documentSnapshot = await transaction.get(documentReference);
+    if (documentSnapshot.exists) {
+      const currentName = documentSnapshot.data()?.['nombre'];
+      const currentNormalizedName = documentSnapshot.data()?.['nombreNormalizado'];
+      if (
+        typeof currentName !== 'string' ||
+        typeof currentNormalizedName !== 'string' ||
+        normalizeName(currentName) !== currentNormalizedName
+      ) {
+        throw new Error(`El documento sintético de ${collection} no es canónico.`);
+      }
+      const currentReservationReference = reservations.doc(nameKey(currentNormalizedName));
+      const reservationReferences =
+        currentReservationReference.id === initialReservationReference.id
+          ? [currentReservationReference]
+          : [currentReservationReference, initialReservationReference];
+      const reservationSnapshots = await Promise.all(
+        reservationReferences.map((reference) => transaction.get(reference)),
+      );
+      const currentReservation = reservationSnapshots[0];
+      if (
+        currentReservation.exists &&
+        currentReservation.data()?.[reservationOwnerField] !== documentId
+      ) {
+        throw new Error(`La reserva canónica de ${collection} pertenece a otro documento.`);
+      }
+      if (!currentReservation.exists) {
+        transaction.create(currentReservationReference, {
+          [reservationOwnerField]: documentId,
+          nombreNormalizado: currentNormalizedName,
+        });
+      }
+      const staleInitialReservation = reservationSnapshots[1];
+      if (staleInitialReservation?.data()?.[reservationOwnerField] === documentId) {
+        transaction.delete(initialReservationReference);
+      }
+      return;
+    }
+
+    const reservationSnapshot = await transaction.get(initialReservationReference);
     if (
       reservationSnapshot.exists &&
       reservationSnapshot.data()?.[reservationOwnerField] !== documentId
@@ -90,7 +126,7 @@ async function upsertCanonicalCatalog({
       fechaCreacion: documentSnapshot.data()?.['fechaCreacion'] ?? timestamp,
       fechaActualizacion: timestamp,
     });
-    transaction.set(reservationReference, {
+    transaction.set(initialReservationReference, {
       [reservationOwnerField]: documentId,
       nombreNormalizado: normalizedName,
     });
@@ -118,6 +154,7 @@ await upsertCanonicalCatalog({
   reservationOwnerField: 'categoriaId',
   name: 'Categoría E2E',
   normalizedName: normalizeCategoryName('Categoría E2E'),
+  normalizeName: normalizeCategoryName,
   additionalFields: { cantidadActivos: 0 },
 });
 await upsertCanonicalCatalog({
@@ -127,6 +164,7 @@ await upsertCanonicalCatalog({
   reservationOwnerField: 'fabricanteId',
   name: 'Fabricante E2E',
   normalizedName: normalizeManufacturerName('Fabricante E2E'),
+  normalizeName: normalizeManufacturerName,
 });
 
 console.log('Identidad, catálogos y reservas sintéticas preparados en demo-inventario-tup.');

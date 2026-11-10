@@ -7,6 +7,7 @@
 - Emulator Suite usa `demo-inventario-tup`.
 - Firestore Emulator usa el puerto 8085; 8080 está ocupado por software local en el entorno Windows validado. Auth usa 9099, Functions 5001, Storage 9199 y la UI 4000.
 - La preparación sintética crea autorización, Categoría, Fabricante y sus reservas canónicas; puede repetirse sin duplicar datos y las pruebas ejercen edición, unicidad y eliminación mediante callables.
+- Si una Categoría o Fabricante sintético fue renombrado mediante el repositorio canónico, una nueva preparación conserva ese nombre y su reserva, no recrea la reserva inicial y no modifica reservas de otros documentos.
 - El proyecto Firebase de staging autorizado es `inventario-stg`, asociado exclusivamente al alias `staging`.
 - Desde el 6 de noviembre de 2026, todo cambio implementado y validado cuenta con autorización continua para desplegarse en `inventario-stg`, exclusivamente mediante `--only` sobre el servicio afectado y `--project staging`; esta autorización no incluye producción ni amplía el alcance funcional.
 - `inventario-stg` fue creado el 6 de noviembre de 2026.
@@ -69,6 +70,7 @@
 - Storage Rules permanecerá en denegación total; el binario viajará por callable y Admin SDK realizará las operaciones.
 - El acceso de lectura será temporal mediante URLs firmadas de máximo cinco minutos, emitidas solo después de revalidar al administrador canónico.
 - La prueba integral de imágenes utiliza Admin SDK contra Firestore y Storage Emulator reales para comprobar bytes WebP, metadata, sustitución y retirada; los dobles de Storage se conservan únicamente para fallos y carreras deterministas.
+- La regresión determinista de escrituras tardías retiene las dos escrituras del adaptador, vence el reloj del arrendamiento y prueba que la primera recuperación conserva el tombstone; es evidencia local pendiente de la validación completa del nuevo SHA y no constituye un despliegue.
 - El seguimiento del 10 de noviembre de 2026 validó `1706695cc3d2a302ac490c3b917417bf4d6dacd2`, pero antes de cualquier escritura remota `firebase projects:list` rechazó las credenciales locales y exigió `firebase login --reauth`. No se ejecutó `firebase deploy`, `inventario-stg` no se modificó y producción permaneció intacta. El despliegue deberá reanudarse por servicio con `--only` y `--project staging` después de renovar explícitamente la sesión de Firebase CLI.
 - El despliegue debe verificar en staging que las nueve callables queden activas, que las solicitudes anónimas sean rechazadas, que Rules permanezca cerrada y que Hosting sirva la ruta. La firma y el ciclo completo de imagen requieren una aceptación autenticada posterior.
 - No se almacenarán URLs permanentes, credenciales o contenido base64 en Firestore, logs o repositorio.

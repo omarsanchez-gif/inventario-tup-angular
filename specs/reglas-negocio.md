@@ -110,11 +110,14 @@
 - RN-MOD-024: Un error terminal de acceso a miniaturas detiene la ronda completa y sus temporizadores; solo los errores transitorios admiten hasta tres reintentos con espera creciente.
 - RN-MOD-025: Eliminar un Modelo procesa su imagen vigente, sus limpiezas anteriores y sus cargas recuperables; mientras exista trabajo técnico no confirmado responde reconciliación pendiente.
 - RN-MOD-026: Antes del primer objeto de una carga se persiste una operación con versión, rutas y arrendamiento. Solo una operación vigente puede confirmar metadata; una operación cancelada o vencida es recuperable y nunca puede borrar ni publicar una versión canónica posterior.
+- RN-MOD-027: El vencimiento de un arrendamiento no prueba que Storage dejó de escribir. La operación conserva `cargaFinalizada: false` hasta que el escritor observa el resultado de ambas variantes; la recuperación puede retirar objetos visibles, pero no elimina esa evidencia hasta que la carga finaliza o la versión consta como canónica.
+- RN-MOD-028: Retirar una imagen solo responde éxito cuando no quedan cargas activas, vencidas o canceladas pendientes; si una operación aún no puede reconciliarse responde `asset-model-image-reconciliation-required` y permite reintento.
 
 ## Calidad y entorno local
 
 - RN-DEV-001: Los datos sintéticos de Emulator Suite respetan los mismos documentos, normalización y reservas de unicidad que las callables, y su preparación es idempotente y exclusiva de `demo-inventario-tup`.
 - RN-DEV-002: Los criterios marcados como trazabilidad obligatoria en las specs deben tener una entrada estructurada válida; la evidencia de ejecución aprobada se registra separada de la mera presencia de un identificador en una prueba.
+- RN-DEV-003: Repetir la preparación sintética después de una edición canónica conserva el nombre vigente y su única reserva; no recrea el nombre inicial, no borra reservas ajenas y deja el nombre liberado disponible.
 
 ## Campus
 

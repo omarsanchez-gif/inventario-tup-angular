@@ -33,6 +33,9 @@ class FakeBucket {
   blockDeletes = false;
   deleteStarted = deferred();
   deleteRelease = deferred();
+  holdSaves = false;
+  saveStarted = 0;
+  saveRelease = deferred();
   private generation = 0;
 
   file(path: string) {
@@ -45,6 +48,10 @@ class FakeBucket {
         if (this.failNextThumbnailSave && path.endsWith('/thumbnail.webp')) {
           this.failNextThumbnailSave = false;
           throw new Error('injected save failure');
+        }
+        if (this.holdSaves) {
+          this.saveStarted += 1;
+          await this.saveRelease.promise;
         }
         this.generation += 1;
         this.objects.set(path, { bytes, generation: String(this.generation) });
@@ -319,6 +326,70 @@ emulatorSuite('asset model image concurrency and recovery', () => {
     await upload;
 
     await service.remove(adminUid, documentId);
+    await service.remove(adminUid, documentId);
+    expect(bucket.objects.size).toBe(0);
+    expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
+      true,
+    );
+  });
+
+  it('MOD-050 retains recovery evidence until delayed Storage writes finish', async () => {
+    let clock = Date.now();
+    bucket.holdSaves = true;
+    const uploading = createAssetModelImagesService(firestore, bucket as never, {
+      now: () => clock,
+      beforeCancel: () => {
+        throw new Error('retain operation for explicit retry');
+      },
+    });
+    const upload = uploading.set(adminUid, documentId, input());
+    await expect.poll(() => bucket.saveStarted).toBe(2);
+
+    clock += 3 * 60 * 1000;
+    await expect(uploading.remove(adminUid, documentId)).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
+    const retainedOperation = (
+      await firestore.collection('modelos_activos_operaciones_imagen').get()
+    ).docs[0];
+    expect(retainedOperation?.data()).toMatchObject({
+      estado: 'cancelada',
+      cargaFinalizada: false,
+    });
+    expect(bucket.objects.size).toBe(0);
+
+    bucket.saveRelease.resolve();
+    await expect(upload).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
+    expect(bucket.objects.size).toBe(2);
+    expect((await retainedOperation?.ref.get())?.data()).toMatchObject({
+      estado: 'cancelada',
+      cargaFinalizada: true,
+    });
+    await uploading.remove(adminUid, documentId);
+
+    expect(bucket.objects.size).toBe(0);
+    expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
+      true,
+    );
+    expect(
+      (await firestore.collection('modelos_activos').doc(documentId).get()).data()?.['imagen'],
+    ).toBeNull();
+  });
+
+  it('MOD-051 reports reconciliation while an unfinished upload still holds its lease', async () => {
+    bucket.holdSaves = true;
+    const upload = service.set(adminUid, documentId, input());
+    await expect.poll(() => bucket.saveStarted).toBe(2);
+
+    await expect(service.remove(adminUid, documentId)).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
+    expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).size).toBe(1);
+
+    bucket.saveRelease.resolve();
+    await upload;
     await service.remove(adminUid, documentId);
     expect(bucket.objects.size).toBe(0);
     expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
