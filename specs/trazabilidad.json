@@ -6,7 +6,7 @@
   "delivery": {
     "localValidation": "complete",
     "branchPublication": "pending-current-commits",
-    "stagingDeployment": "pending-current-increment",
+    "stagingDeployment": "complete-functions-rules-hosting",
     "continuousIntegration": "not-triggered-without-pull-request",
     "manualAcceptance": "pending"
   },

@@ -18,6 +18,7 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 
 - Sobre `ef8ae667cb3d30104edc1cc4ebd4fc2f8d5ddd04`, MOD-052 pausó la transacción final después de borrar, permitió que el escritor registrara acuse y generaciones y comprobó que esa ronda respondió reconciliación sin retirar la evidencia. La ronda posterior eliminó los dos objetos y la operación.
 - MOD-053 completó ambos uploads, falló antes de `recordUploadCompletion` y durante `markCanceled`, venció el lease y recuperó por las dos generaciones físicas. Después permitió guardar y retirar una imagen nueva sin bloqueo heredado.
+- En staging, las tres Functions afectadas quedaron `ACTIVE` en revisiones `00004` y rechazaron solicitudes anónimas. Se publicó además el Ruleset de Firestore `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting sirve `main-525UVZWO.js` y `styles-CISTRGAV.css`. No se ejecutó una mutación autenticada para esta verificación.
 
 ## Evidencia local del protocolo versionado — 9 de noviembre de 2026
 
