@@ -82,6 +82,48 @@ describe('asset model images', () => {
     ).rejects.toMatchObject({ functionalCode: 'asset-model-image-invalid' });
   });
 
+  it('MOD-023 MOD-044 processes JPEG, PNG, WebP and AVIF using decoded metadata', async () => {
+    const source = sharp({
+      create: { width: 32, height: 24, channels: 3, background: '#123456' },
+    });
+    const fixtures = await Promise.all([
+      source
+        .clone()
+        .jpeg()
+        .toBuffer()
+        .then((bytes) => ({ bytes, contentType: 'image/jpeg' })),
+      source
+        .clone()
+        .png()
+        .toBuffer()
+        .then((bytes) => ({ bytes, contentType: 'image/png' })),
+      source
+        .clone()
+        .webp()
+        .toBuffer()
+        .then((bytes) => ({ bytes, contentType: 'image/webp' })),
+      source
+        .clone()
+        .avif()
+        .toBuffer()
+        .then((bytes) => ({ bytes, contentType: 'image/avif' })),
+    ]);
+
+    for (const fixture of fixtures) {
+      const result = await processAssetModelImage({ fileName: 'fixture', ...fixture });
+      await expect(sharp(result.original).metadata()).resolves.toMatchObject({ format: 'webp' });
+      await expect(sharp(result.thumbnail).metadata()).resolves.toMatchObject({ format: 'webp' });
+    }
+
+    await expect(
+      processAssetModelImage({
+        fileName: 'mismatch.avif',
+        contentType: 'image/avif',
+        bytes: fixtures[1]!.bytes,
+      }),
+    ).rejects.toMatchObject({ functionalCode: 'asset-model-image-invalid' });
+  });
+
   it('maps signing failures to a controlled reconciliation error', async () => {
     const modelReference = { id: 'model-1' };
     const usersQuery = { limit: vi.fn().mockReturnThis() };

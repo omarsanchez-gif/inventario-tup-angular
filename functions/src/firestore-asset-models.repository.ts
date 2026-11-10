@@ -17,6 +17,11 @@ import {
   type AssetModelImageMetadata,
   type ManagedAssetModel,
 } from './admin-asset-models.js';
+import {
+  assetModelCleanupId,
+  assetModelImagePaths,
+  type StoredImageDescriptor,
+} from './asset-model-image-storage.js';
 
 function timestamp(value: unknown, code = 'asset-model-reconciliation-required'): string {
   if (!(value instanceof Timestamp)) {
@@ -58,6 +63,11 @@ function imageMetadata(value: unknown): AssetModelImageMetadata | null {
     thumbnailSize: data['thumbnailSize'] as number,
     sha256: data['sha256'],
     version: data['version'],
+    storageLayout: data['storageLayout'] === 'versioned-v2' ? 'versioned-v2' : 'legacy-v1',
+    originalGeneration:
+      typeof data['originalGeneration'] === 'string' ? data['originalGeneration'] : null,
+    thumbnailGeneration:
+      typeof data['thumbnailGeneration'] === 'string' ? data['thumbnailGeneration'] : null,
     fechaActualizacion: timestamp(data['fechaActualizacion']),
   };
 }
@@ -159,6 +169,7 @@ export function createAdminAssetModelsRepository(firestore: Firestore): AdminAss
   const categories = firestore.collection('categorias');
   const manufacturers = firestore.collection('fabricantes');
   const users = firestore.collection('usuarios');
+  const cleanups = firestore.collection('modelos_activos_limpiezas');
 
   return {
     async findCanonicalAdmin(uid) {
@@ -390,12 +401,19 @@ export function createAdminAssetModelsRepository(firestore: Firestore): AdminAss
         await requireCanonicalAdmin(transaction, users, requesterUid);
         const reference = models.doc(documentId);
         const snapshot = await transaction.get(reference);
-        if (!snapshot.exists)
-          throw new AdminAssetModelsError(
-            'asset-model-not-found',
-            'not-found',
-            'El Modelo no existe.',
+        if (!snapshot.exists) {
+          const pending = await transaction.get(
+            cleanups.where('modeloId', '==', documentId).limit(1),
           );
+          if (pending.empty) {
+            throw new AdminAssetModelsError(
+              'asset-model-not-found',
+              'not-found',
+              'El Modelo no existe.',
+            );
+          }
+          return { hadImage: true };
+        }
         const previous = rawModel(snapshot.id, snapshot.data() ?? {});
         const previousKey = keys.doc(
           identityKey({
@@ -410,6 +428,21 @@ export function createAdminAssetModelsRepository(firestore: Firestore): AdminAss
         );
         const keySnapshot = await transaction.get(previousKey);
         verifyIndex(keySnapshot.data(), documentId);
+        if (previous.imagen) {
+          const descriptor: StoredImageDescriptor = previous.imagen;
+          const imagePaths = assetModelImagePaths(documentId, descriptor);
+          transaction.set(cleanups.doc(assetModelCleanupId(documentId, descriptor.version)), {
+            modeloId: documentId,
+            version: descriptor.version,
+            originalPath: imagePaths.original,
+            thumbnailPath: imagePaths.thumbnail,
+            originalGeneration: descriptor.originalGeneration,
+            thumbnailGeneration: descriptor.thumbnailGeneration,
+            estado: 'pendiente',
+            fechaCreacion: FieldValue.serverTimestamp(),
+            fechaActualizacion: FieldValue.serverTimestamp(),
+          });
+        }
         transaction.delete(reference);
         transaction.delete(previousKey);
         return { hadImage: previous.imagen !== null };

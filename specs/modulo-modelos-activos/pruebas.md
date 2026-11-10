@@ -8,6 +8,13 @@ La verificación remota posterior al despliegue confirmó las nueve callables `A
 
 La primera comprobación autenticada de un Modelo con imagen expuso `SigningError` en `getAssetModelImageAccess` y la interfaz mostró el placeholder seguro. Tras conceder a la cuenta runtime el vínculo propio mínimo para `iam.serviceAccounts.signBlob` y actualizar únicamente esa callable, una recarga autenticada confirmó que la alerta desapareció y la miniatura del Modelo `MSI` cargó. MOD-029 queda aceptada para emisión y consumo real de la variante `thumbnail`; las variantes restantes y su expiración conservan cobertura automatizada y aceptación manual pendiente.
 
+## Evidencia local del protocolo versionado — 9 de noviembre de 2026
+
+- Las 42 pruebas unitarias de Functions cubrieron JPEG, PNG, WebP, AVIF real y MIME incongruente; las 17 pruebas integrales comprobaron sustituciones concurrentes, eliminación frente a sustitución, compensación parcial y limpieza reintentable incluso después de eliminar el Modelo.
+- Las 38 pruebas Angular comprobaron que una escritura confirmada conserva su `documentId`, que el reintento no vuelve a crear y que respuestas tardías no contaminan otro diálogo.
+- Los cuatro recorridos Playwright comprobaron recuperación tras fallo parcial, mensajes dentro del diálogo, teclado, foco y uso a 320 px sin desbordamiento global.
+- Lint, guardia visual, formato, compilación de Functions, build de staging, trazabilidad de 175 criterios y auditoría con umbral alto aprobaron. La auditoría conserva únicamente las cuatro moderadas aceptadas en ADR-002.
+
 ## Backend, referencias y seguridad
 
 - MOD-001: `admin` activo puede listar; `usuario`, anónimo y perfil inactivo son rechazados.
@@ -39,7 +46,7 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 - MOD-024: archivo mayor a 2 MiB, base64 inválido, MIME incongruente, GIF, SVG o contenido malformado se rechaza sin alterar la imagen vigente.
 - MOD-025: procesamiento rechaza más de 40 megapíxeles o más de 10,000 px por dimensión, aplica orientación, elimina metadata, conserva proporción y respeta 1,600 px y 256 px sin ampliar imágenes pequeñas.
 - MOD-026: alta de imagen actualiza metadata únicamente después de confirmar ambos objetos y nunca persiste binario o URL.
-- MOD-027: reemplazar sobrescribe rutas deterministas, cambia versión y no acumula objetos versionados.
+- MOD-027: reemplazar publica rutas inmutables por versión, cambia la metadata canónica y agenda la limpieza segura de versiones anteriores sin borrar una versión concurrente.
 - MOD-028: eliminar imagen es idempotente y reporta reconciliación si no puede confirmar limpieza.
 - MOD-029: acceso temporal requiere administrador canónico, firma solo variantes solicitadas y vence en máximo cinco minutos.
 - MOD-030: listado de 500 Modelos no genera URLs; la interfaz solicita miniaturas solo para las diez filas visibles y descarta accesos vencidos.
@@ -51,3 +58,12 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 - MOD-033: selectores no contienen botones de alta anidada; un catálogo inactivo vigente se distingue y solo puede conservarse.
 - MOD-034: búsqueda automática ocupa todo el ancho, incluye los cinco campos textuales, reinicia página y pagina diez registros.
 - MOD-035: tabla, miniatura/placeholder, badges, iconos, estados, previsualización, mensajes de carga parcial y diálogos funcionan por teclado y desde 320 px.
+- MOD-036: dos sustituciones concurrentes dejan original, miniatura y metadata en una sola versión confirmada.
+- MOD-037: eliminar mientras otra solicitud sustituye la imagen no borra la versión nueva.
+- MOD-038: una limpieza fallida permanece pendiente y un reintento la completa aunque `imagen` ya sea `null`.
+- MOD-039: fallar una de las dos escrituras compensa la otra y no confirma metadata parcial.
+- MOD-040: la limpieza asociada a un Modelo eliminado puede reanudarse sin restaurar el documento.
+- MOD-041: una creación confirmada seguida de fallo de lectura o imagen conserva `documentId`, reintenta como edición y no llama de nuevo a `create`.
+- MOD-042: respuestas tardías del Modelo anterior no alteran el diálogo actual; cerrar el diálogo o destruir la página invalida sus solicitudes.
+- MOD-043: la renovación de miniaturas aplica espera creciente, máximo tres reintentos y cancelación por sesión, denegación o destrucción.
+- MOD-044: JPEG, PNG, WebP y AVIF válidos producen ambas variantes WebP; MIME incongruente y formatos no autorizados se rechazan.

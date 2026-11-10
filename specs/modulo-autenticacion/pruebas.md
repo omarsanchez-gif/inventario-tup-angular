@@ -9,6 +9,10 @@
 - AUT-007: errores se muestran con mensajes funcionales sanitizados.
 - AUT-008: Login funciona por teclado y desde 320 px.
 - AUT-009: al negar una identidad se intentan retirar claims y revocar refresh tokens, incluso si una de las operaciones falla.
+- AUT-010: cambiar correo, o correo y rol, entre búsqueda y transacción rechaza la asociación; primer acceso válido, UID conflictivo e inactividad conservan su resultado.
+- AUT-011: una autorización que termina después de perder la sesión no restaura el perfil ni el contenido privado.
+- AUT-012: cerrar sesión en otra pestaña navega a Login y limpia los estados administrativos de la pestaña abierta.
+- AUT-013: cambiar de usuario descarta perfil, claims y respuestas de solicitudes pertenecientes al UID anterior.
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 
@@ -20,3 +24,9 @@
 
 - `bootstrapAuthorization` quedó `ACTIVE` en Node.js 22, `us-central1`, con máximo 20 instancias y rechazo anónimo HTTP 401.
 - Hosting conserva HTTP 200 y COOP `same-origin-allow-popups`; la aceptación manual del popup institucional es el control pendiente para cerrar el flujo real.
+
+## Evidencia local de ciclo de sesión — 9 de noviembre de 2026
+
+- Las 38 pruebas Angular y las 42 pruebas unitarias de Functions comprobaron la invalidación por generación, el descarte de respuestas tardías y la revalidación transaccional del correo autenticado.
+- Las 17 pruebas integrales con emuladores comprobaron primer acceso, inactividad, UID conflictivo y autorización canónica sin utilizar proyectos reales.
+- Playwright aprobó cuatro recorridos en Chromium, incluido cierre entre pestañas y rechazo de un perfil inactivo con datos sintéticos.

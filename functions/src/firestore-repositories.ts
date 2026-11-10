@@ -65,7 +65,7 @@ export function createAuthorizationRepository(firestore: Firestore): Authorizati
       const snapshot = await collection.where('correo', '==', email).limit(2).get();
       return snapshot.docs.map((document) => toAuthorizationRecord(document.id, document.data()));
     },
-    async recordSuccessfulAccess(record, authenticatedUid) {
+    async recordSuccessfulAccess(record, authenticatedUid, authenticatedEmail) {
       const reference = collection.doc(record.id);
       return firestore.runTransaction(async (transaction): Promise<CanonicalUserRecord> => {
         const snapshot = await transaction.get(reference);
@@ -77,6 +77,13 @@ export function createAuthorizationRepository(firestore: Firestore): Authorizati
           );
         }
         const current = toAuthorizationRecord(snapshot.id, snapshot.data() ?? {});
+        if (current.correo !== authenticatedEmail) {
+          throw new AuthorizationError(
+            'user-not-authorized',
+            'permission-denied',
+            'La identidad autorizada cambió durante el acceso.',
+          );
+        }
         if (!current.activo) {
           throw new AuthorizationError('user-inactive', 'permission-denied', 'Usuario inactivo.');
         }

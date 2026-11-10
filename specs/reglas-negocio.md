@@ -8,6 +8,8 @@
 - RN-AUT-004: Si el registro autorizado conserva `uid: null`, el primer acceso válido asocia el UID.
 - RN-AUT-005: El último acceso se registra con hora del servidor.
 - RN-AUT-006: No existe registro público ni autenticación por contraseña.
+- RN-AUT-007: La asociación inicial de UID revalida dentro de la transacción que el correo canónico siga coincidiendo con el correo autenticado y verificado.
+- RN-AUT-008: Cada cambio o pérdida de identidad invalida autorizaciones y lecturas pendientes; ningún resultado de una generación anterior puede restaurar perfil o datos privados.
 
 ## Roles iniciales
 
@@ -100,6 +102,8 @@
 - RN-MOD-018: El listado admite un máximo inicial de 500 Modelos, se ordena por nombre normalizado y nunca devuelve resultados parciales.
 - RN-MOD-019: Identificadores, claves de unicidad, normalización, metadatos de imagen y fechas son administrados por backend.
 - RN-MOD-020: Categorías y Fabricantes se administran en sus módulos propios; el modal de Modelo no contiene altas rápidas ni formularios anidados.
+- RN-MOD-021: Cada imagen confirmada usa una versión inmutable; original y miniatura pertenecen a esa misma versión y una limpieza anterior nunca puede borrar objetos de una versión posterior.
+- RN-MOD-022: Toda limpieza incompleta conserva un trabajo técnico reintentable e idempotente hasta confirmar ambos objetos; eliminar la metadata o el Modelo no equivale a completar la limpieza.
 
 ## Campus
 

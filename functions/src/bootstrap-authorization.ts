@@ -28,6 +28,7 @@ export interface AuthorizationRepository {
   recordSuccessfulAccess(
     record: AuthorizedUserRecord,
     authenticatedUid: string,
+    authenticatedEmail: string,
   ): Promise<CanonicalUserRecord>;
 }
 
@@ -129,7 +130,11 @@ export async function bootstrapAuthorization(
       throw new AuthorizationError('uid-conflict', 'permission-denied', 'El UID no coincide.');
     }
 
-    const canonical = await dependencies.repository.recordSuccessfulAccess(record, identity.uid);
+    const canonical = await dependencies.repository.recordSuccessfulAccess(
+      record,
+      identity.uid,
+      email,
+    );
     const currentClaims = await dependencies.claims.getClaims(identity.uid);
     const claimsUpdated =
       currentClaims['authorized'] !== true || currentClaims['role'] !== canonical.rol;

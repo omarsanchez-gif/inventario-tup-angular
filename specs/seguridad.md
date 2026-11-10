@@ -41,6 +41,8 @@
 - SEC-033: El procesamiento rechazará imágenes malformadas, bombas de descompresión y dimensiones fuera del límite técnico; eliminará metadatos antes de guardar WebP normalizado.
 - SEC-034: Sustitución, eliminación y borrado de Modelo aplicarán compensación entre Firestore y Storage y reportarán reconciliación cuando no pueda completarse la limpieza.
 - SEC-035: La cuenta runtime `719448906735-compute@developer.gserviceaccount.com` recibe `roles/iam.serviceAccountTokenCreator` únicamente sobre sí misma para ejecutar `iam.serviceAccounts.signBlob`; no se concede ese rol a usuarios ni a nivel de proyecto y Storage continúa cerrado.
+- SEC-042: `modelos_activos_limpiezas` permanece cerrada a clientes; solo Admin SDK crea, reintenta y elimina trabajos de limpieza.
+- SEC-043: Las eliminaciones de objetos nuevos usan rutas versionadas y precondiciones de generación; una operación antigua no puede borrar la versión canónica posterior.
 
 ## Campus
 

@@ -24,22 +24,36 @@ Estado actual en staging:
 
 ## Inicio local
 
-    npm install
+En un clon limpio:
+
+    npm ci
+    npm run functions:build
     npm run firebase:emulators
+
+En otra terminal, cuando Emulator Suite ya responda:
+
+    npm run seed:emulator
     npm start
 
-La aplicación local usa `demo-inventario-tup`. El inicio con Google dentro del emulador requiere una cuenta sintética y un documento correspondiente en `usuarios`.
+La aplicación local usa exclusivamente `demo-inventario-tup`. `seed:emulator` rechaza cualquier otro proyecto, comprueba Auth y Firestore Emulator y crea la identidad sintética `admin.e2e@tecplayacar.edu.mx`, su autorización canónica y dos catálogos mínimos. En compilación de desarrollo el botón de acceso usa esa identidad de Auth Emulator; staging conserva Google real.
+
+Si Functions Emulator indica que no encuentra `functions/lib/index.js`, ejecute de nuevo `npm run functions:build` antes de iniciar los emuladores. Si Java no está disponible, confirme `java -version` con Java 21. Los puertos esperados son Auth 9099, Functions 5001, Firestore 8085, Storage 9199, UI 4000 y Angular 4200. Se usa 8085 para evitar la colisión documentada con software local que reserva 8080.
 
 ## Validación
 
     npm test
     npm run test:functions
     npm run test:emulators
+    npm run traceability:check
+    npx playwright install chromium
+    npm run test:e2e
     npm run lint
     npm run format:check
     npm run functions:build
     npm run build:staging
     npm audit --omit=dev
+
+`npm run test:e2e` inicia Angular y Emulator Suite, prepara nuevamente los datos sintéticos y ejecuta Chromium. No usa credenciales, Google real, staging ni producción.
 
 ## Firebase real
 

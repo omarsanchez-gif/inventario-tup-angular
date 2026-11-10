@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { SystemUser } from '../../../shared/models/system-user';
 import { USERS_GATEWAY, type UserDraft, type UserUpdate } from '../data/users.gateway';
 
@@ -33,6 +34,7 @@ function userErrorMessage(error: unknown): string {
 @Injectable({ providedIn: 'root' })
 export class UsersFacade {
   private readonly gateway = inject(USERS_GATEWAY);
+  private readonly sessionScope = inject(SessionScope);
   private readonly usersState = signal<readonly SystemUser[]>([]);
   private readonly queryState = signal('');
   private readonly loadingState = signal(false);
@@ -55,19 +57,25 @@ export class UsersFacade {
       : this.usersState();
   });
 
+  constructor() {
+    this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+  }
+
   setQuery(query: string): void {
     this.queryState.set(query);
   }
 
   async load(): Promise<void> {
+    const generation = this.sessionScope.generation();
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
-      this.usersState.set((await this.gateway.list()).items);
+      const result = await this.gateway.list();
+      if (this.sessionScope.isCurrent(generation)) this.usersState.set(result.items);
     } catch (error) {
-      this.errorState.set(userErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.errorState.set(userErrorMessage(error));
     } finally {
-      this.loadingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
     }
   }
 
@@ -96,18 +104,29 @@ export class UsersFacade {
   }
 
   private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
+    const generation = this.sessionScope.generation();
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
+      if (!this.sessionScope.isCurrent(generation)) return false;
       await this.load();
+      if (!this.sessionScope.isCurrent(generation)) return false;
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      this.errorState.set(userErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.errorState.set(userErrorMessage(error));
       return false;
     } finally {
-      this.savingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
     }
+  }
+
+  private resetPrivateState(): void {
+    this.usersState.set([]);
+    this.queryState.set('');
+    this.loadingState.set(false);
+    this.savingState.set(false);
+    this.clearMessages();
   }
 }

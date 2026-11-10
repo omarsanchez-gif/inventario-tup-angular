@@ -21,3 +21,4 @@
 - [x] Permitir contraer `Configuraciones` con una ruta secundaria activa.
 - [x] Extender los enlaces secundarios a todo el ancho disponible conservando su sangría interna.
 - [x] Igualar la tipografía del botón `Configuraciones` con los enlaces principales del sidebar.
+- [x] Incorporar recorridos Playwright de teclado, foco, navegación móvil y viewport de 320 px con Emulator Suite.

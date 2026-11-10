@@ -8,7 +8,7 @@
     <button class="button button--primary" type="button" (click)="openNew()">Nuevo usuario</button>
   </header>
 
-  @if (users.error(); as error) {
+  @if (!formVisible() && users.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
   @if (users.success(); as success) {
@@ -22,6 +22,9 @@
       (dismissed)="closeForm()"
     >
       <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        @if (users.error(); as error) {
+          <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
         <div class="form-grid">
           <div class="field">
             <label for="user-name">Nombre</label>

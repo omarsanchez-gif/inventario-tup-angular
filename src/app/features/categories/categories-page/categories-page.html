@@ -10,7 +10,7 @@
     </button>
   </header>
 
-  @if (categories.error(); as error) {
+  @if (!formVisible() && categories.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
   @if (categories.success(); as success) {
@@ -24,6 +24,9 @@
       (dismissed)="closeForm()"
     >
       <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        @if (categories.error(); as error) {
+          <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
         <div class="form-grid form-grid--single">
           <div class="field">
             <label for="category-name">Nombre de la categoría</label>

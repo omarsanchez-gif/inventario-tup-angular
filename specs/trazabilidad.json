@@ -1,0 +1,117 @@
+{
+  "baseReviewSha": "179e79863e2a6c940c9a24165b219bfb8ce59cc1",
+  "entries": [
+    {
+      "requirement": "RN-AUT-007",
+      "criterion": "AUT-010",
+      "verification": "automated",
+      "test": "functions/src/firestore-repositories.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:functions"
+    },
+    {
+      "requirement": "RN-AUT-008",
+      "criterion": "AUT-011",
+      "verification": "automated",
+      "test": "src/app/core/auth/auth.facade.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm test"
+    },
+    {
+      "requirement": "RN-AUT-008",
+      "criterion": "AUT-012",
+      "verification": "browser",
+      "test": "e2e/inventory.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:e2e"
+    },
+    {
+      "requirement": "RN-AUT-008",
+      "criterion": "AUT-013",
+      "verification": "automated",
+      "test": "src/app/core/auth/auth.facade.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm test"
+    },
+    {
+      "requirement": "RN-USR-009",
+      "criterion": "USR-018",
+      "verification": "automated",
+      "test": "src/app/features/users/state/users.facade.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm test"
+    },
+    {
+      "requirement": "RN-LAY-006",
+      "criterion": "USR-019",
+      "verification": "browser",
+      "test": "e2e/inventory.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:e2e"
+    },
+    {
+      "requirement": "RN-LAY-003",
+      "criterion": "LAY-020",
+      "verification": "browser",
+      "test": "e2e/inventory.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:e2e"
+    },
+    {
+      "requirement": "RN-MOD-021",
+      "criterion": "MOD-036",
+      "verification": "emulator",
+      "test": "functions/src/asset-model-images-emulator.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:emulators"
+    },
+    {
+      "requirement": "RN-MOD-021",
+      "criterion": "MOD-037",
+      "verification": "emulator",
+      "test": "functions/src/asset-model-images-emulator.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:emulators"
+    },
+    {
+      "requirement": "RN-MOD-022",
+      "criterion": "MOD-038",
+      "verification": "emulator",
+      "test": "functions/src/asset-model-images-emulator.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:emulators"
+    },
+    {
+      "requirement": "RN-MOD-022",
+      "criterion": "MOD-039",
+      "verification": "emulator",
+      "test": "functions/src/asset-model-images-emulator.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:emulators"
+    },
+    {
+      "requirement": "RN-MOD-022",
+      "criterion": "MOD-040",
+      "verification": "emulator",
+      "test": "functions/src/asset-model-images-emulator.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:emulators"
+    },
+    {
+      "requirement": "RN-MOD-002",
+      "criterion": "MOD-041",
+      "verification": "browser",
+      "test": "e2e/inventory.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:e2e"
+    },
+    {
+      "requirement": "RN-MOD-014",
+      "criterion": "MOD-044",
+      "verification": "automated",
+      "test": "functions/src/asset-model-images.spec.ts",
+      "state": "implemented-local",
+      "evidence": "npm run test:functions"
+    }
+  ]
+}

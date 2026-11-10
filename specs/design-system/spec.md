@@ -110,6 +110,7 @@
 - Permite retirar la selección antes de guardar y revoca el object URL local al reemplazar, cerrar o destruir el componente.
 - Una imagen vigente muestra miniatura, estado y acciones textuales `Reemplazar imagen` y `Eliminar imagen` dentro del diálogo.
 - Carga, procesamiento, error parcial y reintento se anuncian con regiones de estado accesibles; no se simula un porcentaje que la callable no pueda medir.
+- Los errores originados por una operación iniciada en el diálogo se presentan dentro de su superficie mediante `role="alert"`; un error parcial aclara que el Modelo ya existe y conserva el formulario sobre el mismo identificador.
 - La tabla usa una miniatura con dimensiones reservadas y texto alternativo contextual; ante ausencia o error muestra un placeholder que no depende solo del color.
 - El campo se implementa por composición de primitivas globales; su SCSS encapsulado controla únicamente previsualización y distribución responsive.
 

@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
 import {
   ASSET_MODELS_GATEWAY,
@@ -40,9 +41,16 @@ function searchable(value: string): string {
     .toLocaleLowerCase('es-MX');
 }
 
+export interface AssetModelSaveResult {
+  readonly documentId: string;
+  readonly dataSaved: true;
+  readonly listRefreshed: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AssetModelsFacade {
   private readonly gateway = inject(ASSET_MODELS_GATEWAY);
+  private readonly sessionScope = inject(SessionScope);
   private readonly modelsState = signal<readonly InventoryAssetModel[]>([]);
   private readonly catalogsState = signal<AssetModelCatalogs>({ categorias: [], fabricantes: [] });
   private readonly queryState = signal('');
@@ -69,39 +77,57 @@ export class AssetModelsFacade {
       : this.modelsState();
   });
 
+  constructor() {
+    this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+  }
+
   setQuery(query: string): void {
     this.queryState.set(query);
   }
 
   async load(): Promise<void> {
+    const generation = this.sessionScope.generation();
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
       const [list, catalogs] = await Promise.all([this.gateway.list(), this.gateway.catalogs()]);
-      this.modelsState.set(list.items);
-      this.catalogsState.set(catalogs);
+      if (this.sessionScope.isCurrent(generation)) {
+        this.modelsState.set(list.items);
+        this.catalogsState.set(catalogs);
+      }
     } catch (error) {
-      this.errorState.set(errorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.errorState.set(errorMessage(error));
     } finally {
-      this.loadingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
     }
   }
 
-  async save(input: AssetModelDraft | AssetModelUpdate): Promise<string | null> {
+  async save(input: AssetModelDraft | AssetModelUpdate): Promise<AssetModelSaveResult | null> {
+    const generation = this.sessionScope.generation();
     this.savingState.set(true);
     this.clearMessages();
+    let documentId: string;
     try {
-      const documentId =
-        'documentId' in input ? input.documentId : await this.gateway.create(input);
+      documentId = 'documentId' in input ? input.documentId : await this.gateway.create(input);
       if ('documentId' in input) await this.gateway.update(input);
+    } catch (error) {
+      if (this.sessionScope.isCurrent(generation)) this.errorState.set(errorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
+      return null;
+    }
+    if (!this.sessionScope.isCurrent(generation)) return null;
+    try {
       await this.reloadModels();
       this.successState.set('Modelo guardado correctamente.');
-      return documentId;
-    } catch (error) {
-      this.errorState.set(errorMessage(error));
-      return null;
+      return { documentId, dataSaved: true, listRefreshed: true };
+    } catch {
+      if (!this.sessionScope.isCurrent(generation)) return null;
+      this.errorState.set(
+        'El Modelo quedó guardado, pero el listado no pudo actualizarse. Puede continuar con la imagen.',
+      );
+      return { documentId, dataSaved: true, listRefreshed: false };
     } finally {
-      this.savingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
     }
   }
 
@@ -151,18 +177,30 @@ export class AssetModelsFacade {
   }
 
   private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
+    const generation = this.sessionScope.generation();
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
+      if (!this.sessionScope.isCurrent(generation)) return false;
       await this.reloadModels();
+      if (!this.sessionScope.isCurrent(generation)) return false;
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      this.errorState.set(errorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.errorState.set(errorMessage(error));
       return false;
     } finally {
-      this.savingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
     }
+  }
+
+  private resetPrivateState(): void {
+    this.modelsState.set([]);
+    this.catalogsState.set({ categorias: [], fabricantes: [] });
+    this.queryState.set('');
+    this.loadingState.set(false);
+    this.savingState.set(false);
+    this.clearMessages();
   }
 }

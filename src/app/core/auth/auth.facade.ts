@@ -9,12 +9,16 @@ import type {
 } from '../../shared/models/authorized-user';
 import { mapAuthError } from './auth-error.mapper';
 import { AUTH_GATEWAY, AUTHORIZATION_GATEWAY } from './gateways';
+import { SessionScope } from './session-scope';
+
+class StaleSessionError extends Error {}
 
 @Injectable({ providedIn: 'root' })
 export class AuthFacade {
   private readonly authGateway = inject(AUTH_GATEWAY);
   private readonly authorizationGateway = inject(AUTHORIZATION_GATEWAY);
   private readonly router = inject(Router);
+  private readonly sessionScope = inject(SessionScope);
   private readonly userState = signal<AuthorizedUser | null>(null);
   private readonly loadingState = signal(true);
   private readonly initializedState = signal(false);
@@ -22,6 +26,8 @@ export class AuthFacade {
   private initializationPromise: Promise<void> | null = null;
   private authorizationPromise: Promise<BootstrapAuthorizationResult> | null = null;
   private authorizationUid: string | null = null;
+  private sessionUid: string | null = null;
+  private authorizationGeneration = 0;
 
   readonly user = this.userState.asReadonly();
   readonly loading = this.loadingState.asReadonly();
@@ -45,8 +51,9 @@ export class AuthFacade {
       this.authGateway.observeSession(
         (user) => void this.handleSession(user).finally(finish),
         (error) => {
-          this.clearState();
+          this.invalidateSession(null, true);
           this.errorState.set(mapAuthError(error));
+          void this.navigateToLogin();
           finish();
         },
       );
@@ -60,10 +67,12 @@ export class AuthFacade {
     this.errorState.set(null);
     try {
       const user = await this.authGateway.signInWithGoogle();
-      await this.authorize(user);
+      const generation = this.activateSession(user.uid);
+      await this.authorize(user, generation);
       await this.router.navigateByUrl('/dashboard', { replaceUrl: true });
     } catch (error) {
-      this.clearState();
+      if (error instanceof StaleSessionError) return;
+      this.invalidateSession(null, true);
       this.errorState.set(mapAuthError(error));
       await this.safeSignOut();
     } finally {
@@ -73,53 +82,96 @@ export class AuthFacade {
 
   async logout(): Promise<void> {
     this.loadingState.set(true);
-    this.clearState();
+    this.invalidateSession(null, true);
     try {
       await this.authGateway.signOut();
     } finally {
       this.loadingState.set(false);
-      await this.router.navigateByUrl('/login', { replaceUrl: true });
+      await this.navigateToLogin();
     }
   }
 
   private async handleSession(user: User | null): Promise<void> {
     if (!user) {
-      this.clearState();
+      const hadSession = this.sessionUid !== null;
+      this.invalidateSession(null);
+      if (hadSession || this.initializedState()) await this.navigateToLogin();
       return;
     }
+    const generation = this.activateSession(user.uid);
     this.loadingState.set(true);
     try {
-      await this.authorize(user);
+      await this.authorize(user, generation);
     } catch (error) {
-      this.clearState();
+      if (error instanceof StaleSessionError) return;
+      this.invalidateSession(null, true);
       this.errorState.set(mapAuthError(error));
       await this.safeSignOut();
+      await this.navigateToLogin();
     } finally {
-      this.loadingState.set(false);
+      if (this.authorizationGeneration === generation) this.loadingState.set(false);
     }
   }
 
-  private authorize(user: User): Promise<BootstrapAuthorizationResult> {
-    if (this.authorizationPromise && this.authorizationUid === user.uid) {
+  private authorize(user: User, generation: number): Promise<BootstrapAuthorizationResult> {
+    if (
+      this.authorizationPromise &&
+      this.authorizationUid === user.uid &&
+      this.authorizationGeneration === generation
+    ) {
       return this.authorizationPromise;
     }
     this.authorizationUid = user.uid;
-    this.authorizationPromise = this.performAuthorization(user).finally(() => {
+    const operation = this.performAuthorization(user, generation);
+    this.authorizationPromise = operation;
+    const cleanup = (): void => {
+      if (this.authorizationPromise !== operation) return;
       this.authorizationPromise = null;
       this.authorizationUid = null;
-    });
-    return this.authorizationPromise;
+    };
+    void operation.then(cleanup, cleanup);
+    return operation;
   }
 
-  private async performAuthorization(user: User): Promise<BootstrapAuthorizationResult> {
+  private async performAuthorization(
+    user: User,
+    generation: number,
+  ): Promise<BootstrapAuthorizationResult> {
     const profile = await this.authorizationGateway.bootstrap();
+    this.requireCurrentSession(user.uid, generation);
     const token = await this.authGateway.refreshClaims(user);
+    this.requireCurrentSession(user.uid, generation);
     if (token.claims['authorized'] !== true || token.claims['role'] !== profile.rol) {
       throw { details: { functionalCode: 'service-unavailable' } };
     }
     this.userState.set(profile);
     this.errorState.set(null);
     return profile;
+  }
+
+  private activateSession(uid: string): number {
+    if (this.sessionUid !== uid) {
+      this.sessionUid = uid;
+      this.authorizationGeneration += 1;
+      this.sessionScope.invalidate();
+      this.clearState();
+    }
+    return this.authorizationGeneration;
+  }
+
+  private invalidateSession(uid: null, force = false): void {
+    if (force || this.sessionUid !== uid) {
+      this.sessionUid = uid;
+      this.authorizationGeneration += 1;
+      this.sessionScope.invalidate();
+    }
+    this.clearState();
+  }
+
+  private requireCurrentSession(uid: string, generation: number): void {
+    if (this.sessionUid !== uid || this.authorizationGeneration !== generation) {
+      throw new StaleSessionError('La respuesta pertenece a una sesión anterior.');
+    }
   }
 
   private clearState(): void {
@@ -133,6 +185,12 @@ export class AuthFacade {
       await this.authGateway.signOut();
     } catch {
       // El error funcional original tiene prioridad.
+    }
+  }
+
+  private async navigateToLogin(): Promise<void> {
+    if (this.router.url !== '/login') {
+      await this.router.navigateByUrl('/login', { replaceUrl: true });
     }
   }
 }

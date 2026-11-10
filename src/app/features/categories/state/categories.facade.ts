@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { InventoryCategory } from '../../../shared/models/inventory-category';
 import {
   CATEGORIES_GATEWAY,
@@ -45,6 +46,7 @@ function searchable(value: string): string {
 @Injectable({ providedIn: 'root' })
 export class CategoriesFacade {
   private readonly gateway = inject(CATEGORIES_GATEWAY);
+  private readonly sessionScope = inject(SessionScope);
   private readonly categoriesState = signal<readonly InventoryCategory[]>([]);
   private readonly queryState = signal('');
   private readonly loadingState = signal(false);
@@ -67,19 +69,25 @@ export class CategoriesFacade {
       : this.categoriesState();
   });
 
+  constructor() {
+    this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+  }
+
   setQuery(query: string): void {
     this.queryState.set(query);
   }
 
   async load(): Promise<void> {
+    const generation = this.sessionScope.generation();
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
-      this.categoriesState.set((await this.gateway.list()).items);
+      const result = await this.gateway.list();
+      if (this.sessionScope.isCurrent(generation)) this.categoriesState.set(result.items);
     } catch (error) {
-      this.errorState.set(categoryErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.errorState.set(categoryErrorMessage(error));
     } finally {
-      this.loadingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
     }
   }
 
@@ -111,18 +119,29 @@ export class CategoriesFacade {
   }
 
   private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
+    const generation = this.sessionScope.generation();
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
+      if (!this.sessionScope.isCurrent(generation)) return false;
       await this.load();
+      if (!this.sessionScope.isCurrent(generation)) return false;
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      this.errorState.set(categoryErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.errorState.set(categoryErrorMessage(error));
       return false;
     } finally {
-      this.savingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
     }
+  }
+
+  private resetPrivateState(): void {
+    this.categoriesState.set([]);
+    this.queryState.set('');
+    this.loadingState.set(false);
+    this.savingState.set(false);
+    this.clearMessages();
   }
 }

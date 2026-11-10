@@ -1,6 +1,7 @@
 import { signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
 import type { AssetModelCatalogs } from '../data/asset-models.gateway';
 import { AssetModelsFacade } from '../state/asset-models.facade';
@@ -52,7 +53,11 @@ describe('AssetModelsPage', () => {
     };
     assetModels = {
       load: vi.fn().mockResolvedValue(undefined),
-      save: vi.fn().mockResolvedValue('model-1'),
+      save: vi.fn().mockResolvedValue({
+        documentId: 'model-1',
+        dataSaved: true,
+        listRefreshed: true,
+      }),
       setImage: vi.fn().mockResolvedValue(true),
       removeImage: vi.fn().mockResolvedValue(true),
       setStatus: vi.fn().mockResolvedValue(true),
@@ -76,7 +81,10 @@ describe('AssetModelsPage', () => {
 
     await TestBed.configureTestingModule({
       imports: [AssetModelsPage],
-      providers: [{ provide: AssetModelsFacade, useValue: assetModels }],
+      providers: [
+        { provide: AssetModelsFacade, useValue: assetModels },
+        { provide: AuthFacade, useValue: { authorized: signal(true) } },
+      ],
     }).compileComponents();
     fixture = TestBed.createComponent(AssetModelsPage);
     fixture.detectChanges();
@@ -203,5 +211,104 @@ describe('AssetModelsPage', () => {
     search.dispatchEvent(new Event('input'));
     await fixture.whenStable();
     expect(assetModels.imageAccess).toHaveBeenCalledTimes(22);
+  });
+
+  it('MOD-041 keeps the created document id when image processing fails and retries as update', async () => {
+    textButton('Nuevo modelo').click();
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      form: {
+        setValue(value: {
+          nombre: string;
+          categoriaId: string;
+          fabricanteId: string;
+          modeloNo: string;
+          notas: string;
+        }): void;
+      };
+      selectedImage: WritableSignal<File | null>;
+      submit(): Promise<void>;
+    };
+    component.form.setValue({
+      nombre: 'Modelo recuperable',
+      categoriaId: 'category-1',
+      fabricanteId: 'manufacturer-1',
+      modeloNo: '',
+      notas: '',
+    });
+    component.selectedImage.set(
+      new File([new Uint8Array([1, 2, 3])], 'model.png', { type: 'image/png' }),
+    );
+    assetModels.setImage.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+    await component.submit();
+    fixture.detectChanges();
+    expect(assetModels.save).toHaveBeenNthCalledWith(
+      1,
+      expect.not.objectContaining({ documentId: expect.anything() }),
+    );
+    expect(element.textContent).toContain('El Modelo ya existe');
+
+    await component.submit();
+    expect(assetModels.save).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ documentId: 'model-1' }),
+    );
+  });
+
+  it('MOD-042 ignores a late original-image response after another model is opened', async () => {
+    let resolveAccess!: (value: {
+      thumbnailUrl: null;
+      originalUrl: string;
+      expiresAt: string;
+      version: string;
+    }) => void;
+    assetModels.imageAccess.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveAccess = resolve;
+      }),
+    );
+    const first = { ...model, tieneImagen: true, imagenVersion: 'version-a' };
+    const second = { ...model, documentId: 'model-2', nombre: 'Modelo B' };
+    assetModels.models.set([first, second]);
+    const component = fixture.componentInstance as unknown as {
+      edit(value: InventoryAssetModel): void;
+      currentImageUrl: WritableSignal<string | null>;
+    };
+
+    component.edit(first);
+    component.edit(second);
+    resolveAccess({
+      thumbnailUrl: null,
+      originalUrl: 'https://signed.example/model-a',
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      version: 'version-a',
+    });
+    await fixture.whenStable();
+
+    expect(component.currentImageUrl()).toBeNull();
+  });
+
+  it('MOD-043 limits failed thumbnail renewal to three delayed retries', async () => {
+    vi.useFakeTimers();
+    try {
+      const withImage = { ...model, tieneImagen: true, imagenVersion: 'version-a' };
+      assetModels.models.set([withImage]);
+      assetModels.filteredModels.set([withImage]);
+      assetModels.imageAccess.mockRejectedValue(new Error('temporary failure'));
+      const component = fixture.componentInstance as unknown as {
+        setPage(page: number): void;
+      };
+
+      component.setPage(1);
+      await vi.advanceTimersByTimeAsync(1_000);
+      await vi.advanceTimersByTimeAsync(2_000);
+      await vi.advanceTimersByTimeAsync(4_000);
+      await vi.advanceTimersByTimeAsync(8_000);
+
+      expect(assetModels.imageAccess).toHaveBeenCalledTimes(4);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

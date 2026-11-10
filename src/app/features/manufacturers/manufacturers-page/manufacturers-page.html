@@ -10,7 +10,7 @@
     </button>
   </header>
 
-  @if (manufacturers.error(); as error) {
+  @if (!formVisible() && manufacturers.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
   @if (manufacturers.success(); as success) {
@@ -24,6 +24,9 @@
       (dismissed)="closeForm()"
     >
       <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        @if (manufacturers.error(); as error) {
+          <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
         <div class="form-grid form-grid--single">
           <div class="field">
             <label for="manufacturer-name">Nombre</label>

@@ -82,8 +82,19 @@ Se implementaron nueve callables en `us-central1`: `listAssetModels`, `getAssetM
 - `setAssetModelImage` recibe un archivo de máximo 2 MiB, valida los bytes, genera original normalizado y miniatura WebP y después actualiza metadata.
 - `getAssetModelImageAccess` firma únicamente los objetos del Modelo solicitado por cinco minutos; el listado no genera URLs para los 500 registros.
 - La interfaz solicita miniaturas solo para los diez registros visibles y puede reutilizarlas hasta su expiración.
-- Las imágenes usan rutas deterministas para evitar acumulación de versiones al reemplazar; las inconsistencias se detectan como reconciliación requerida.
+- Las cargas nuevas usan rutas inmutables por versión y generaciones de objeto; los trabajos en `modelos_activos_limpiezas` reconcilian de forma idempotente sustituciones, retiros, cargas parciales y eliminación del Modelo.
 - `sharp` 0.35.5 procesa las imágenes conforme a ADR-005 y está fijado como dependencia exacta de Functions.
+
+## Ciclo de sesión
+
+- `AuthFacade` asigna una generación a cada UID observado y la invalida al cerrar sesión, perderla o cambiar de usuario.
+- El perfil solo se publica si bootstrap y claims pertenecen a la generación y UID vigentes.
+- Las facades administrativas observan `SessionScope`, vacían su estado ante cada invalidación y descartan respuestas iniciadas por una generación anterior.
+- La pérdida de sesión navega a `/login`, lo que desmonta el shell privado; guards y backend continúan aplicando autorización efectiva.
+
+## Verificación en navegador
+
+Playwright ejecuta Chromium contra Angular y Emulator Suite con datos sintéticos preparados por un script restringido a `demo-inventario-tup`. CI conserva esta validación separada de cualquier aceptación de Google o staging reales.
 
 ## Endurecimiento transversal
 

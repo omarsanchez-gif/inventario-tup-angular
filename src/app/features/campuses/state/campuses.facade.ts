@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { InventoryCampus } from '../../../shared/models/inventory-campus';
 import { CAMPUSES_GATEWAY, type CampusDraft, type CampusUpdate } from '../data/campuses.gateway';
 
@@ -49,6 +50,7 @@ function searchable(value: string): string {
 @Injectable({ providedIn: 'root' })
 export class CampusesFacade {
   private readonly gateway = inject(CAMPUSES_GATEWAY);
+  private readonly sessionScope = inject(SessionScope);
   private readonly campusesState = signal<readonly InventoryCampus[]>([]);
   private readonly queryState = signal('');
   private readonly loadingState = signal(false);
@@ -71,19 +73,25 @@ export class CampusesFacade {
       : this.campusesState();
   });
 
+  constructor() {
+    this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+  }
+
   setQuery(query: string): void {
     this.queryState.set(query);
   }
 
   async load(): Promise<void> {
+    const generation = this.sessionScope.generation();
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
-      this.campusesState.set((await this.gateway.list()).items);
+      const result = await this.gateway.list();
+      if (this.sessionScope.isCurrent(generation)) this.campusesState.set(result.items);
     } catch (error) {
-      this.errorState.set(campusErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.errorState.set(campusErrorMessage(error));
     } finally {
-      this.loadingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
     }
   }
 
@@ -115,18 +123,29 @@ export class CampusesFacade {
   }
 
   private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
+    const generation = this.sessionScope.generation();
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
+      if (!this.sessionScope.isCurrent(generation)) return false;
       await this.load();
+      if (!this.sessionScope.isCurrent(generation)) return false;
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      this.errorState.set(campusErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.errorState.set(campusErrorMessage(error));
       return false;
     } finally {
-      this.savingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
     }
+  }
+
+  private resetPrivateState(): void {
+    this.campusesState.set([]);
+    this.queryState.set('');
+    this.loadingState.set(false);
+    this.savingState.set(false);
+    this.clearMessages();
   }
 }

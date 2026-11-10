@@ -5,6 +5,7 @@
 - Angular usa Firebase Authentication y Cloud Functions callable.
 - Firestore conserva el perfil canónico.
 - Emulator Suite usa `demo-inventario-tup`.
+- Firestore Emulator usa el puerto 8085; 8080 está ocupado por software local en el entorno Windows validado. Auth usa 9099, Functions 5001, Storage 9199 y la UI 4000.
 - El proyecto Firebase de staging autorizado es `inventario-stg`, asociado exclusivamente al alias `staging`.
 - Desde el 6 de noviembre de 2026, todo cambio implementado y validado cuenta con autorización continua para desplegarse en `inventario-stg`, exclusivamente mediante `--only` sobre el servicio afectado y `--project staging`; esta autorización no incluye producción ni amplía el alcance funcional.
 - `inventario-stg` fue creado el 6 de noviembre de 2026.
@@ -63,7 +64,7 @@
 ## Modelos de activos
 
 - El bucket predeterminado `inventario-stg.firebasestorage.app` se inicializó el 7 de noviembre de 2026 como bucket regional en `US-CENTRAL1`, clase Standard y reglas de producción cerradas; no se cargaron objetos.
-- La implementación usa exclusivamente ese bucket de staging y las rutas `modelos-activos/{modeloId}/original.webp` y `thumbnail.webp`.
+- Las cargas nuevas usan exclusivamente ese bucket de staging y rutas inmutables `modelos-activos/{modeloId}/versiones/{version}/original.webp` y `thumbnail.webp`; las rutas históricas sin versión solo se leen o limpian de forma compatible.
 - Storage Rules permanecerá en denegación total; el binario viajará por callable y Admin SDK realizará las operaciones.
 - El acceso de lectura será temporal mediante URLs firmadas de máximo cinco minutos, emitidas solo después de revalidar al administrador canónico.
 - El despliegue debe verificar en staging que las nueve callables queden activas, que las solicitudes anónimas sean rechazadas, que Rules permanezca cerrada y que Hosting sirva la ruta. La firma y el ciclo completo de imagen requieren una aceptación autenticada posterior.

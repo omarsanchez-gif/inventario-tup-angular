@@ -8,7 +8,7 @@
     <button class="button button--primary" type="button" (click)="openNew()">Nuevo modelo</button>
   </header>
 
-  @if (assetModels.error(); as error) {
+  @if (!formVisible() && assetModels.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
   @if (assetModels.success(); as success) {
@@ -18,10 +18,19 @@
   @if (formVisible()) {
     <app-dialog
       [title]="editingId() ? 'Editar modelo' : 'Nuevo modelo'"
-      [dismissible]="!assetModels.saving()"
+      [dismissible]="!busy()"
       (dismissed)="closeForm()"
     >
       <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        @if (assetModels.error(); as error) {
+          <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
+        @if (fileError(); as error) {
+          <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
+        @if (formOperationError(); as error) {
+          <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
         <div class="form-grid form-grid--single">
           <div class="field">
             <label for="asset-model-name">Nombre del modelo de activo</label>
@@ -74,13 +83,10 @@
               id="asset-model-image"
               type="file"
               accept="image/jpeg,image/png,image/webp,image/avif"
-              [disabled]="assetModels.saving()"
+              [disabled]="busy()"
               (change)="selectImage($event)"
             />
             <small>JPEG, PNG, WebP o AVIF. Máximo 2 MiB.</small>
-            @if (fileError(); as error) {
-              <small role="alert">{{ error }}</small>
-            }
             @if (imagePreview(); as preview) {
               <img
                 class="image-preview"
@@ -117,13 +123,13 @@
           <button
             class="button button--secondary"
             type="button"
-            [disabled]="assetModels.saving()"
+            [disabled]="busy()"
             (click)="closeForm()"
           >
             Cancelar
           </button>
-          <button class="button button--primary" type="submit" [disabled]="assetModels.saving()">
-            {{ assetModels.saving() ? 'Guardando…' : 'Guardar modelo' }}
+          <button class="button button--primary" type="submit" [disabled]="busy()">
+            {{ busy() ? 'Guardando…' : 'Guardar modelo' }}
           </button>
         </div>
       </form>
@@ -131,11 +137,7 @@
   }
 
   @if (pendingDeletion(); as model) {
-    <app-dialog
-      title="Eliminar modelo"
-      [dismissible]="!assetModels.saving()"
-      (dismissed)="cancelDeletion()"
-    >
+    <app-dialog title="Eliminar modelo" [dismissible]="!busy()" (dismissed)="cancelDeletion()">
       <p class="dialog__message">¿Eliminar el modelo {{ model.nombre }}?</p>
       <p class="dialog__help">
         Solo se eliminará si no está vinculado con Activos. Si está en uso deberá desactivarlo.
@@ -144,7 +146,7 @@
         <button
           class="button button--secondary"
           type="button"
-          [disabled]="assetModels.saving()"
+          [disabled]="busy()"
           (click)="cancelDeletion()"
         >
           Cancelar
@@ -152,7 +154,7 @@
         <button
           class="button button--danger"
           type="button"
-          [disabled]="assetModels.saving()"
+          [disabled]="busy()"
           (click)="confirmDeletion()"
         >
           {{ assetModels.saving() ? 'Eliminando…' : 'Eliminar modelo' }}
@@ -234,7 +236,7 @@
                   <button
                     class="icon-button icon-button--secondary"
                     type="button"
-                    [disabled]="assetModels.saving()"
+                    [disabled]="busy()"
                     [attr.aria-label]="'Editar ' + model.nombre"
                     [attr.title]="'Editar ' + model.nombre"
                     (click)="edit(model)"
@@ -244,7 +246,7 @@
                   <button
                     class="icon-button icon-button--secondary"
                     type="button"
-                    [disabled]="assetModels.saving()"
+                    [disabled]="busy()"
                     [attr.aria-label]="
                       model.activo ? 'Desactivar ' + model.nombre : 'Activar ' + model.nombre
                     "
@@ -258,7 +260,7 @@
                   <button
                     class="icon-button icon-button--danger"
                     type="button"
-                    [disabled]="assetModels.saving()"
+                    [disabled]="busy()"
                     [attr.aria-label]="'Eliminar ' + model.nombre"
                     [attr.title]="'Eliminar ' + model.nombre"
                     (click)="requestDeletion(model)"

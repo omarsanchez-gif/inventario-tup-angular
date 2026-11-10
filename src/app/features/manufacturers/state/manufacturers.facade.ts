@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { InventoryManufacturer } from '../../../shared/models/inventory-manufacturer';
 import {
   MANUFACTURERS_GATEWAY,
@@ -45,6 +46,7 @@ function searchable(value: string): string {
 @Injectable({ providedIn: 'root' })
 export class ManufacturersFacade {
   private readonly gateway = inject(MANUFACTURERS_GATEWAY);
+  private readonly sessionScope = inject(SessionScope);
   private readonly manufacturersState = signal<readonly InventoryManufacturer[]>([]);
   private readonly queryState = signal('');
   private readonly loadingState = signal(false);
@@ -67,19 +69,26 @@ export class ManufacturersFacade {
       : this.manufacturersState();
   });
 
+  constructor() {
+    this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+  }
+
   setQuery(query: string): void {
     this.queryState.set(query);
   }
 
   async load(): Promise<void> {
+    const generation = this.sessionScope.generation();
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
-      this.manufacturersState.set((await this.gateway.list()).items);
+      const result = await this.gateway.list();
+      if (this.sessionScope.isCurrent(generation)) this.manufacturersState.set(result.items);
     } catch (error) {
-      this.errorState.set(manufacturerErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation))
+        this.errorState.set(manufacturerErrorMessage(error));
     } finally {
-      this.loadingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
     }
   }
 
@@ -111,18 +120,30 @@ export class ManufacturersFacade {
   }
 
   private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
+    const generation = this.sessionScope.generation();
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
+      if (!this.sessionScope.isCurrent(generation)) return false;
       await this.load();
+      if (!this.sessionScope.isCurrent(generation)) return false;
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      this.errorState.set(manufacturerErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation))
+        this.errorState.set(manufacturerErrorMessage(error));
       return false;
     } finally {
-      this.savingState.set(false);
+      if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
     }
+  }
+
+  private resetPrivateState(): void {
+    this.manufacturersState.set([]);
+    this.queryState.set('');
+    this.loadingState.set(false);
+    this.savingState.set(false);
+    this.clearMessages();
   }
 }

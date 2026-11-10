@@ -14,13 +14,17 @@
     "functions:build": "npm --workspace functions run build",
     "test:functions": "vitest run functions/src",
     "test:categories:emulator": "firebase emulators:exec --only firestore --project demo-inventario-tup \"vitest run functions/src/categories-firestore.spec.ts\"",
-    "test:emulators": "npm run functions:build && firebase emulators:exec --only auth,firestore,functions,storage --project demo-inventario-tup \"vitest run --no-file-parallelism functions/src/categories-firestore.spec.ts functions/src/manufacturers-firestore.spec.ts functions/src/campuses-firestore.spec.ts functions/src/asset-models-firestore.spec.ts functions/src/users-emulator.spec.ts\"",
+    "test:emulators": "npm run functions:build && firebase emulators:exec --only auth,firestore,functions,storage --project demo-inventario-tup \"vitest run --no-file-parallelism functions/src/categories-firestore.spec.ts functions/src/manufacturers-firestore.spec.ts functions/src/campuses-firestore.spec.ts functions/src/asset-models-firestore.spec.ts functions/src/asset-model-images-emulator.spec.ts functions/src/users-emulator.spec.ts\"",
     "lint": "ng lint && npm run lint:functions && npm run lint:visual",
     "lint:functions": "eslint functions/src --max-warnings=0",
     "lint:visual": "node scripts/check-visual-primitives.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "firebase:emulators": "firebase emulators:start --project demo-inventario-tup"
+    "firebase:emulators": "firebase emulators:start --project demo-inventario-tup",
+    "firebase:emulators:e2e": "npm run functions:build && firebase emulators:start --only auth,firestore,functions,storage --project demo-inventario-tup",
+    "seed:emulator": "node scripts/seed-emulator.mjs --project demo-inventario-tup",
+    "test:e2e": "playwright test",
+    "traceability:check": "node scripts/check-traceability.mjs"
   },
   "private": true,
   "workspaces": [
@@ -35,6 +39,10 @@
     }
   },
   "packageManager": "npm@11.13.0",
+  "engines": {
+    "node": "22.x",
+    "npm": "11.13.0"
+  },
   "dependencies": {
     "@angular/common": "^22.2.0",
     "@angular/compiler": "^22.2.0",
@@ -51,6 +59,7 @@
     "@angular/cli": "^22.2.0",
     "@angular/compiler-cli": "^22.2.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.0",
     "angular-eslint": "22.1.0",
     "eslint": "^10.6.0",
     "firebase-tools": "^15.27.0",

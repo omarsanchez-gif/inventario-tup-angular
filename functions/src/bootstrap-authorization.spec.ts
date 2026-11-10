@@ -40,17 +40,23 @@ function dependencies(): AuthorizationDependencies {
 
 describe('bootstrapAuthorization', () => {
   it('authorizes an active institutional profile and synchronizes claims', async () => {
+    const deps = dependencies();
     const result = await bootstrapAuthorization(
       {
         uid: 'uid-admin',
         email: 'Admin@tecplayacar.edu.mx',
         emailVerified: true,
       },
-      dependencies(),
+      deps,
     );
 
     expect(result.rol).toBe('admin');
     expect(result.claimsUpdated).toBe(true);
+    expect(deps.repository.recordSuccessfulAccess).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'admin' }),
+      'uid-admin',
+      'admin@tecplayacar.edu.mx',
+    );
   });
 
   it('rejects an external domain', async () => {

@@ -116,6 +116,9 @@ modelos_activos/{modeloId}
     thumbnailSize: number
     sha256: string
     version: string
+    storageLayout: "versioned-v2"
+    originalGeneration: string
+    thumbnailGeneration: string
     fechaActualizacion: Timestamp
   } | null
   fechaCreacion: Timestamp
@@ -134,6 +137,7 @@ Restricciones:
 - `activo` inicia en `true` y solo cambia mediante el caso de uso de estado.
 - `imagen` es metadata administrada por backend; no contiene URLs ni contenido binario.
 - `version` cambia después de cada sustitución válida y permite invalidar presentaciones anteriores.
+- `storageLayout`, `originalGeneration` y `thumbnailGeneration` vinculan la metadata con los dos objetos exactos confirmados; los documentos históricos sin esos campos se interpretan como `legacy-v1` hasta su siguiente sustitución o eliminación.
 - `fechaCreacion`, `fechaActualizacion` e `imagen.fechaActualizacion` usan tiempo del servidor.
 
 ## Índice técnico `modelos_activos_claves`
@@ -158,16 +162,38 @@ modelos_activos_claves/{claveKey}
 Bucket de staging: `inventario-stg.firebasestorage.app`, ubicación regional `US-CENTRAL1`, clase Standard. Producción no tiene bucket autorizado.
 
 ```text
-modelos-activos/{modeloId}/original.webp
-modelos-activos/{modeloId}/thumbnail.webp
+modelos-activos/{modeloId}/versiones/{version}/original.webp
+modelos-activos/{modeloId}/versiones/{version}/thumbnail.webp
 ```
 
-- Las rutas son deterministas y no se guardan como URLs públicas.
+- Las rutas son deterministas por `modeloId` y `version`, son inmutables y no se guardan como URLs públicas.
 - `original.webp` se orienta según EXIF, elimina metadatos y limita sus dimensiones máximas a 1,600 × 1,600 píxeles sin ampliar imágenes pequeñas.
 - `thumbnail.webp` limita sus dimensiones a 256 × 256 píxeles sin deformar.
 - Los objetos solo se escriben o eliminan con Admin SDK; Storage Rules mantiene denegación total para clientes.
 - La callable de acceso entrega URLs firmadas de corta duración únicamente después de revalidar al administrador canónico.
 - Un fallo entre Storage y Firestore se resuelve mediante compensación y un estado funcional de reconciliación; ninguna URL se persiste en Firestore.
+- Las rutas históricas `modelos-activos/{modeloId}/original.webp` y `thumbnail.webp` se leen y limpian de forma compatible, pero ninguna carga nueva vuelve a escribirlas.
+
+## Colección técnica `modelos_activos_limpiezas`
+
+```text
+modelos_activos_limpiezas/{operacionId}
+  modeloId: string
+  version: string
+  originalPath: string
+  thumbnailPath: string
+  originalGeneration: string | null
+  thumbnailGeneration: string | null
+  estado: "pendiente"
+  fechaCreacion: Timestamp
+  fechaActualizacion: Timestamp
+```
+
+- `operacionId` es el SHA-256 de `modeloId + version`, por lo que reintentar la misma limpieza no crea trabajos duplicados.
+- El trabajo se crea en la misma transacción que retira o sustituye la metadata, o como compensación persistente si una carga no se confirma.
+- Cada objeto nuevo se elimina con precondición de generación; una versión anterior nunca apunta a las rutas de una versión posterior.
+- El trabajo se elimina únicamente después de confirmar la limpieza idempotente de original y miniatura.
+- Ningún cliente puede leer o escribir esta colección y no se ejecuta una migración masiva de imágenes históricas.
 
 ## Colección `campus`
 

@@ -1,6 +1,7 @@
 import type { FunctionsErrorCode } from 'firebase-functions/https';
 
 import type { AdminIdentity } from './admin-users.js';
+import type { AssetModelImageStorageLayout } from './asset-model-image-storage.js';
 
 export const MAX_SUPPORTED_ASSET_MODELS = 500;
 
@@ -10,6 +11,9 @@ export interface AssetModelImageMetadata {
   readonly thumbnailSize: number;
   readonly sha256: string;
   readonly version: string;
+  readonly storageLayout: AssetModelImageStorageLayout;
+  readonly originalGeneration: string | null;
+  readonly thumbnailGeneration: string | null;
   readonly fechaActualizacion: string;
 }
 

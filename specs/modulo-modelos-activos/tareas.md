@@ -35,3 +35,9 @@
 - [x] Verificar evidencia remota sin crear datos reales ni tocar producción.
 - [x] Corregir el `SigningError` de la primera prueba autenticada con un vínculo IAM propio y verificar la miniatura del Modelo de prueba existente.
 - [ ] Completar aceptación funcional y visual autenticada en escritorio y móvil.
+- [x] Sustituir rutas compartidas por versiones inmutables y generaciones de Storage.
+- [x] Persistir y reintentar limpiezas incompletas para imagen y eliminación de Modelo.
+- [x] Corregir detección AVIF de Sharp (`heif` con compresión `av1`).
+- [x] Conservar el ID después de una escritura confirmada y recuperar imagen/listado sin duplicar.
+- [x] Invalidar respuestas fuera de orden y limitar reintentos de miniaturas.
+- [x] Presentar errores de operaciones del formulario dentro del diálogo.
