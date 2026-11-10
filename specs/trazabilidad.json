@@ -3,6 +3,13 @@
   "baseReviewSha": "8e0bbc36c6244bc3cd1906e39f859d8b1b772863",
   "implementationSha": "1706695cc3d2a302ac490c3b917417bf4d6dacd2",
   "requiredMarker": "<!-- trace:required -->",
+  "delivery": {
+    "localValidation": "complete",
+    "branchPublication": "complete",
+    "stagingDeployment": "blocked-firebase-cli-reauth-required",
+    "continuousIntegration": "not-triggered-without-pull-request",
+    "manualAcceptance": "pending"
+  },
   "matrixScopes": [
     { "prefix": "AUT", "label": "Autenticación" },
     { "prefix": "USR", "label": "Usuarios" },

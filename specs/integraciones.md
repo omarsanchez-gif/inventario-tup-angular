@@ -69,6 +69,7 @@
 - Storage Rules permanecerá en denegación total; el binario viajará por callable y Admin SDK realizará las operaciones.
 - El acceso de lectura será temporal mediante URLs firmadas de máximo cinco minutos, emitidas solo después de revalidar al administrador canónico.
 - La prueba integral de imágenes utiliza Admin SDK contra Firestore y Storage Emulator reales para comprobar bytes WebP, metadata, sustitución y retirada; los dobles de Storage se conservan únicamente para fallos y carreras deterministas.
+- El seguimiento del 10 de noviembre de 2026 validó `1706695cc3d2a302ac490c3b917417bf4d6dacd2`, pero antes de cualquier escritura remota `firebase projects:list` rechazó las credenciales locales y exigió `firebase login --reauth`. No se ejecutó `firebase deploy`, `inventario-stg` no se modificó y producción permaneció intacta. El despliegue deberá reanudarse por servicio con `--only` y `--project staging` después de renovar explícitamente la sesión de Firebase CLI.
 - El despliegue debe verificar en staging que las nueve callables queden activas, que las solicitudes anónimas sean rechazadas, que Rules permanezca cerrada y que Hosting sirva la ruta. La firma y el ciclo completo de imagen requieren una aceptación autenticada posterior.
 - No se almacenarán URLs permanentes, credenciales o contenido base64 en Firestore, logs o repositorio.
 - La API de Snipe-IT seguirá siendo solo una fuente futura de migración backend; la pantalla no extraerá imágenes ni datos externos.
