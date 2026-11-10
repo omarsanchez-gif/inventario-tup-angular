@@ -396,4 +396,92 @@ emulatorSuite('asset model image concurrency and recovery', () => {
       true,
     );
   });
+
+  it('MOD-052 does not close a recovery round with an acknowledgement observed after deletion', async () => {
+    let clock = Date.now();
+    bucket.holdSaves = true;
+    const finalizeStarted = deferred();
+    const finalizeRelease = deferred();
+    const uploading = createAssetModelImagesService(firestore, bucket as never, {
+      now: () => clock,
+      beforeCancel: () => {
+        throw new Error('retain writer acknowledgement for explicit recovery');
+      },
+    });
+    const recovering = createAssetModelImagesService(firestore, bucket as never, {
+      now: () => clock,
+      beforeFinalizeRecovery: async () => {
+        finalizeStarted.resolve();
+        await finalizeRelease.promise;
+      },
+    });
+    const upload = uploading.set(adminUid, documentId, input());
+    await expect.poll(() => bucket.saveStarted).toBe(2);
+
+    clock += 3 * 60 * 1000;
+    const firstRecovery = recovering.remove(adminUid, documentId);
+    await finalizeStarted.promise;
+    bucket.saveRelease.resolve();
+    await expect(upload).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
+    expect(bucket.objects.size).toBe(2);
+
+    finalizeRelease.resolve();
+    await expect(firstRecovery).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
+    const retained = (await firestore.collection('modelos_activos_operaciones_imagen').get())
+      .docs[0];
+    expect(retained?.data()).toMatchObject({
+      estado: 'cancelada',
+      cargaFinalizada: true,
+      originalGeneration: expect.any(String),
+      thumbnailGeneration: expect.any(String),
+    });
+    expect(bucket.objects.size).toBe(2);
+
+    await recovering.remove(adminUid, documentId);
+    expect(bucket.objects.size).toBe(0);
+    expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
+      true,
+    );
+  });
+
+  it('MOD-053 recovers an absent writer from both authoritative Storage generations', async () => {
+    let clock = Date.now();
+    const abandoned = createAssetModelImagesService(firestore, bucket as never, {
+      now: () => clock,
+      beforeMarkReady: () => {
+        throw new Error('Firestore unavailable before acknowledgement');
+      },
+      beforeCancel: () => {
+        throw new Error('Firestore unavailable during compensation');
+      },
+    });
+    await expect(abandoned.set(adminUid, documentId, input())).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
+    expect(bucket.objects.size).toBe(2);
+    expect(
+      (await firestore.collection('modelos_activos_operaciones_imagen').get()).docs[0]?.data(),
+    ).toMatchObject({ estado: 'cargando', cargaFinalizada: false });
+
+    clock += 3 * 60 * 1000;
+    const recovered = createAssetModelImagesService(firestore, bucket as never, {
+      now: () => clock,
+    });
+    await recovered.remove(adminUid, documentId);
+    expect(bucket.objects.size).toBe(0);
+    expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
+      true,
+    );
+
+    await recovered.set(adminUid, documentId, input());
+    await recovered.remove(adminUid, documentId);
+    expect(bucket.objects.size).toBe(0);
+    expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
+      true,
+    );
+  });
 });

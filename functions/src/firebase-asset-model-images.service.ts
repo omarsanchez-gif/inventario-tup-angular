@@ -53,6 +53,7 @@ export interface AssetModelImagesServiceHooks {
   readonly beforeMarkReady?: () => Promise<void> | void;
   readonly beforeConfirm?: () => Promise<void> | void;
   readonly beforeCancel?: () => Promise<void> | void;
+  readonly beforeFinalizeRecovery?: () => Promise<void> | void;
 }
 
 async function requireCanonicalAdmin(
@@ -311,6 +312,9 @@ export function createAssetModelImagesService(
       deleteObject(claimed.originalPath, originalGeneration),
       deleteObject(claimed.thumbnailPath, thumbnailGeneration),
     ]);
+    const cleanupCoveredFinishedWriter =
+      claimed.uploadFinished || (originalGeneration !== null && thumbnailGeneration !== null);
+    await hooks.beforeFinalizeRecovery?.();
     return firestore.runTransaction(async (transaction) => {
       const [operationSnapshot, modelSnapshot] = await Promise.all([
         transaction.get(reference),
@@ -327,13 +331,13 @@ export function createAssetModelImagesService(
         );
       }
       if (operation.version !== claimed.version) return false;
-      if (operation.uploadFinished) {
+      if (cleanupCoveredFinishedWriter) {
         transaction.delete(reference);
         return true;
       }
       transaction.update(reference, {
-        originalGeneration,
-        thumbnailGeneration,
+        originalGeneration: originalGeneration ?? operation.originalGeneration,
+        thumbnailGeneration: thumbnailGeneration ?? operation.thumbnailGeneration,
         estado: 'cancelada',
         leaseUntil: Timestamp.fromMillis(now()),
         fechaActualizacion: FieldValue.serverTimestamp(),

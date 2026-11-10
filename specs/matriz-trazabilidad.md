@@ -8,7 +8,7 @@
 | Layout privado     | RN-LAY-001–012  | `layout/shell`, `shared/ui/icon`, `shared/ui/dialog`      | LAY-001–LAY-021 |
 | Categorías         | RN-CAT-001–012  | `features/categories`, cinco callables administrativas    | CAT-001–024     |
 | Fabricantes        | RN-FAB-001–012  | `features/manufacturers`, cinco callables administrativas | FAB-001–020     |
-| Modelos de activos | RN-MOD-001–028  | `features/asset-models`, nueve callables, Storage privado | MOD-001–MOD-051 |
+| Modelos de activos | RN-MOD-001–030  | `features/asset-models`, nueve callables, Storage privado | MOD-001–MOD-053 |
 | Campus             | RN-CAM-001–015  | `features/campuses`, cinco callables administrativas      | CAM-001–031     |
 | Calidad local      | RN-DEV-001–003  | `scripts/seed-emulator.mjs`, control de trazabilidad      | DEV-001–DEV-003 |
 
@@ -33,3 +33,5 @@ El seguimiento de escrituras tardías y seed posterior a renombrado quedó imple
 Después de renovar la sesión de Firebase CLI se actualizaron únicamente `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` en `inventario-stg`. Las tres revisiones `00003` quedaron `ACTIVE` y rechazaron solicitudes anónimas con HTTP 401. Hosting, Rules, datos y producción permanecieron intactos; la aceptación autenticada del ciclo tardío sigue pendiente.
 
 Los commits nuevos se publicaron sin force push en `codex/hardening-sesion-imagenes-trazabilidad`. La búsqueda no encontró un PR hacia `desarrollo`; el conector no permitió repetir su creación sin evidencia de un cambio de permisos y `gh` no tiene una sesión autenticada. El SHA final publicado no tiene estados ni ejecuciones de workflow asociadas, por lo que `Validación continua / validate` no se ejecutó. Los permisos disponibles tampoco permiten afirmar si ese check es obligatorio en `desarrollo`.
+
+La barrera de cierre de recuperación y la vía del escritor ausente están implementadas localmente y pendientes de asociarse a un SHA validado. Esta línea no acredita todavía validación completa, publicación, despliegue, CI ni aceptación manual del nuevo incremento.

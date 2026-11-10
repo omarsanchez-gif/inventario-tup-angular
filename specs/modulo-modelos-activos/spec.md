@@ -235,6 +235,7 @@ Entrada: `documentId`.
 - Retira la metadata canónica y programa la limpieza de los objetos versionados con precondición de generación.
 - Procesa operaciones recuperables antes y después de retirar la metadata.
 - Reporta `asset-model-image-reconciliation-required` cuando una carga conserva un arrendamiento vigente o su escritor todavía no ha confirmado el fin de ambas escrituras; el diálogo permanece recuperable y un reintento posterior converge.
+- Una operación sin acuse solo deja de bloquear cuando una ronda posterior observa previamente el acuse durable o ambas generaciones físicas, ejecuta los borrados protegidos y retira la evidencia técnica. Un acuse llegado durante el cierre exige otra ronda.
 
 ### `getAssetModelImageAccess`
 

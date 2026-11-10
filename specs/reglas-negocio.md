@@ -112,6 +112,8 @@
 - RN-MOD-026: Antes del primer objeto de una carga se persiste una operación con versión, rutas y arrendamiento. Solo una operación vigente puede confirmar metadata; una operación cancelada o vencida es recuperable y nunca puede borrar ni publicar una versión canónica posterior.
 - RN-MOD-027: El vencimiento de un arrendamiento no prueba que Storage dejó de escribir. La operación conserva `cargaFinalizada: false` hasta que el escritor observa el resultado de ambas variantes; la recuperación puede retirar objetos visibles, pero no elimina esa evidencia hasta que la carga finaliza o la versión consta como canónica.
 - RN-MOD-028: Retirar una imagen solo responde éxito cuando no quedan cargas activas, vencidas o canceladas pendientes; si una operación aún no puede reconciliarse responde `asset-model-image-reconciliation-required` y permite reintento.
+- RN-MOD-029: Una ronda de recuperación solo puede retirar la operación si antes de inspeccionar y borrar Storage ya observó `cargaFinalizada: true` o descubrió las generaciones de ambas variantes. Un acuse que aparece después de los borrados no valida esa ronda.
+- RN-MOD-030: Cuando el escritor terminó sin persistir su acuse, la existencia simultánea de ambas generaciones en las rutas inmutables constituye evidencia autoritativa de finalización física para esa versión; la recuperación las borra con precondición y libera la operación sin inventar `cargaFinalizada`.
 
 ## Calidad y entorno local
 

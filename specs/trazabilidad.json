@@ -319,6 +319,20 @@
       "evidenceId": "emulators-58a0ab3"
     },
     {
+      "requirement": "RN-MOD-029",
+      "criterion": "MOD-052",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-MOD-030",
+      "criterion": "MOD-053",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
       "requirement": "RN-DEV-001",
       "criterion": "DEV-001",
       "verification": "emulator",
