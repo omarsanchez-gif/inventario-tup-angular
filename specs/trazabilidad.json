@@ -1,5 +1,14 @@
 {
   "baseReviewSha": "179e79863e2a6c940c9a24165b219bfb8ce59cc1",
+  "implementationSha": "29f9c7db512f2155426aedf83ed2c24bc7cb200a",
+  "stages": {
+    "implementation": "complete",
+    "localValidation": "complete",
+    "cleanCheckout": "complete",
+    "stagingDeployment": "complete",
+    "ci": "pending-pull-request",
+    "manualAcceptance": "pending"
+  },
   "entries": [
     {
       "requirement": "RN-AUT-007",

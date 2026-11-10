@@ -20,3 +20,7 @@ Las pruebas unitarias y Emulator Suite no comprobaban sincronización entre pest
 ## Seguridad
 
 El script rechaza cualquier proyecto distinto de `demo-inventario-tup` y verifica que los emuladores respondan antes de escribir. La contraseña es sintética y solo existe en Auth Emulator. CI no utiliza credenciales, proyectos reales ni datos de staging.
+
+## Evidencia
+
+El 9 de noviembre de 2026 se creó un clon local aislado del SHA `29f9c7db512f2155426aedf83ed2c24bc7cb200a`. `npm ci` reconstruyó 1,249 paquetes desde el lockfile y `npm run test:e2e` compiló Functions, inició Auth/Firestore/Functions/Storage Emulator, sembró la identidad sintética, inició Angular y aprobó los cuatro recorridos en Chromium. El host de verificación tenía Node.js 24 y emitió la advertencia esperada de `engines`; la ejecución canónica y CI permanecen fijadas a Node.js 22.

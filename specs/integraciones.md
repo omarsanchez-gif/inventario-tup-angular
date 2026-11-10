@@ -75,6 +75,8 @@
 - Firestore y Storage rechazaron acceso anónimo directo con HTTP 403. Hosting sirve la ruta de Modelos y los bundles `main-ALBLFGKY.js`, `styles-CISTRGAV.css` y `chunk-CA-BBvnz.js` con HTTP 200; la versión final descarta miniaturas fuera de página y renueva accesos próximos a vencer.
 - La primera prueba autenticada de miniatura del 7 de noviembre de 2026 detectó `SigningError`: la cuenta runtime podía validar Firestore y Storage, pero no firmar URLs. La política IAM confirmó que faltaba el vínculo propio `roles/iam.serviceAccountTokenCreator`.
 - Con autorización expresa se agregó ese rol únicamente a `719448906735-compute@developer.gserviceaccount.com` sobre sí misma y se actualizó solo `getAssetModelImageAccess`. Tras recargar la sesión administrativa, desapareció la alerta y se mostró la imagen del Modelo `MSI`; el bucket continuó cerrado a acceso directo. Sustitución, eliminación, expiración y revisión móvil permanecen pendientes de aceptación autenticada.
+- El 9 de noviembre de 2026 se publicó el endurecimiento versionado mediante despliegues separados de Firestore Rules, ocho Functions afectadas y Hosting. `bootstrapAuthorization`, `listAssetModels`, `updateAssetModel`, `setAssetModelStatus`, `deleteAssetModel`, `setAssetModelImage`, `removeAssetModelImage` y `getAssetModelImageAccess` quedaron `ACTIVE` en Node.js 22 y rechazaron solicitudes anónimas con HTTP 401.
+- Hosting respondió HTTP 200 y sirvió `main-6R3WBRSA.js` y `styles-CISTRGAV.css`; Firestore rechazó con HTTP 403 la lectura anónima de `modelos_activos_limpiezas`. No se desplegaron Storage Rules, índices, secretos, datos, migración ni producción.
 
 ## Campus
 

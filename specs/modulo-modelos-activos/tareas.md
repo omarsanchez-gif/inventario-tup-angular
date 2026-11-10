@@ -41,3 +41,5 @@
 - [x] Conservar el ID después de una escritura confirmada y recuperar imagen/listado sin duplicar.
 - [x] Invalidar respuestas fuera de orden y limitar reintentos de miniaturas.
 - [x] Presentar errores de operaciones del formulario dentro del diálogo.
+- [x] Comprobar el arranque y los cuatro recorridos Playwright desde un clon limpio del SHA de implementación.
+- [x] Publicar por separado Rules, ocho Functions afectadas y Hosting del endurecimiento únicamente en staging.
