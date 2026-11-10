@@ -46,6 +46,14 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Interfaz WCAG 2.2 AA y responsive desde 320 px.
 - Ante contradicción o ambigüedad funcional, detener la implementación y actualizar specs.
 
+## Skill Angular oficial
+
+- Para tareas Angular sobre componentes, templates, estado reactivo, formularios, inyección de dependencias, navegación, accesibilidad, estilos o pruebas, consultar `.agents/skills/angular-developer/SKILL.md` y únicamente las referencias pertinentes a la tarea.
+- Las especificaciones aprobadas determinan alcance, reglas, contratos y aceptación; la skill aporta orientación técnica y no autoriza módulos, cambios funcionales, arquitectura, dependencias o herramientas nuevas. Ante contradicción, explicar el efecto y conservar los contratos aprobados hasta contar con una decisión que los modifique.
+- Conservar Angular standalone y TypeScript estricto, `Page → Facade → Gateway`, la estrategia vigente de Signals y formularios, las primitivas compartidas incluido `AppDialog`, WCAG 2.2 AA desde 320 px, el descarte de respuestas tardías de sesiones anteriores y la autorización canónica mediante backend y callables.
+- Signal Forms, SSR, Angular Aria, MCP, migraciones y demás recomendaciones opcionales requieren un incremento especificado y aprobado; su presencia en la skill no implica adopción automática.
+- Para cambios de código, ejecutar las validaciones proporcionales del repositorio. Instalar o actualizar esta skill no es un servicio Firebase desplegable.
+
 ## Alcance autorizado inicial
 
 - Base Angular standalone estricta.

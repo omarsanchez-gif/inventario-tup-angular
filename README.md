@@ -65,3 +65,5 @@ La configuración web de Firebase es pública y no funciona como secreto. Las re
 ## Especificaciones
 
 La fuente de verdad está en [specs](specs/). Consulte primero el [estado actual consolidado](specs/estado-actual.md) y el [plan propuesto de siguientes módulos](specs/plan-siguientes-modulos.md). Áreas cuenta únicamente con un [borrador pendiente de aprobación](specs/modulo-areas/spec.md); Activos y la migración desde Snipe-IT se definirán antes de implementarse.
+
+Las tareas Angular cuentan con la skill oficial `angular-developer`, instalada localmente para Codex. Su procedencia, uso y mantenimiento están en la [guía de Angular Skills](specs/herramientas/angular-skills.md).
