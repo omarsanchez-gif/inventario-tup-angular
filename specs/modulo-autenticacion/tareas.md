@@ -19,8 +19,8 @@
 - [x] Ampliar `bootstrapAuthorization` con permisos sanitizados conforme a ADR-007 sin incorporarlos a claims.
 - [x] Revalidar capacidades en guards y al recuperar foco, conservando deduplicación y generación de sesión.
 
-## Ampliación propuesta: Campus
+## Ampliación autorizada: Campus
 
 - [x] Especificar `campus[]` con denegación compatible para documentos anteriores.
-- [ ] Obtener validación expresa del responsable.
-- [ ] Incorporar Campus al bootstrap y sus regresiones sin modificar Custom Claims.
+- [x] Obtener validación expresa del responsable.
+- [x] Incorporar Campus al bootstrap y sus regresiones sin modificar Custom Claims.

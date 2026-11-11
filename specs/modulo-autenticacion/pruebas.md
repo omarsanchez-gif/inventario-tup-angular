@@ -17,9 +17,9 @@
 - AUT-015: `bootstrapAuthorization` entrega el mapa efectivo sanitizado sin agregarlo a Custom Claims; `admin` recibe acceso total y `usuario` denegación por defecto o sus acciones canónicas. <!-- trace:required -->
 - AUT-016: una revalidación de permisos tardía de A no modifica menú, acciones, perfil o navegación de una sesión B vigente. <!-- trace:required -->
 
-## Criterio propuesto para Campus
+## Criterio obligatorio para Campus
 
-- AUT-017: `bootstrapAuthorization` incorpora `campus[]`, interpreta su ausencia histórica como denegación para `usuario` y conserva acceso total efectivo de `admin` sin ampliar Custom Claims.
+- AUT-017: `bootstrapAuthorization` incorpora `campus[]`, interpreta su ausencia histórica como denegación para `usuario` y conserva acceso total efectivo de `admin` sin ampliar Custom Claims. <!-- trace:required -->
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 

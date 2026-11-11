@@ -14,6 +14,7 @@
     { "prefix": "AUT", "label": "Autenticación" },
     { "prefix": "USR", "label": "Usuarios" },
     { "prefix": "LAY", "label": "Layout privado" },
+    { "prefix": "CAM", "label": "Campus" },
     { "prefix": "MOD", "label": "Modelos de activos" },
     { "prefix": "DEV", "label": "Calidad local" }
   ],
@@ -570,6 +571,104 @@
       "tests": ["functions/src/users-emulator.spec.ts"],
       "state": "verified-local",
       "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-015",
+      "criterion": "AUT-017",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-015",
+      "criterion": "USR-031",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-013",
+      "criterion": "USR-032",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-016",
+      "criterion": "USR-033",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-016",
+      "criterion": "USR-034",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-LAY-007",
+      "criterion": "LAY-026",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-009",
+      "criterion": "LAY-027",
+      "verification": "automated",
+      "tests": ["src/app/app.routes.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-CAM-002",
+      "criterion": "CAM-032",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-014",
+      "criterion": "CAM-033",
+      "verification": "emulator",
+      "tests": ["functions/src/campuses-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-009",
+      "criterion": "CAM-034",
+      "verification": "automated",
+      "tests": ["src/app/features/campuses/campuses-page/campuses-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-015",
+      "criterion": "CAM-035",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-013",
+      "criterion": "CAM-036",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-016",
+      "criterion": "CAM-037",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-010",
+      "criterion": "CAM-038",
+      "verification": "automated",
+      "tests": ["src/app/features/campuses/state/campuses.facade.spec.ts"],
+      "state": "implemented-pending-verification"
     }
   ]
 }

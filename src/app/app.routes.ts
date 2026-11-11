@@ -63,7 +63,7 @@ export const routes: Routes = [
       },
       {
         path: 'configuraciones/campus',
-        canActivate: [adminGuard],
+        canActivate: [capabilityGuard('campus')],
         loadComponent: () =>
           import('./features/campuses/campuses-page/campuses-page').then(
             (component) => component.CampusesPage,

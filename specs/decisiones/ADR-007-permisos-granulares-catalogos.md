@@ -2,11 +2,11 @@
 
 ## Estado
 
-El primer incremento para Categorías, Fabricantes y Modelos fue aprobado, implementado, validado y desplegado exclusivamente a staging el 11 de noviembre de 2026. La ampliación de este ADR para Campus queda propuesta y pendiente de validación expresa del responsable; todavía no autoriza código ni despliegue.
+El primer incremento para Categorías, Fabricantes y Modelos fue aprobado, implementado, validado y desplegado exclusivamente a staging el 11 de noviembre de 2026. La ampliación para Campus fue aprobada expresamente ese mismo día y autoriza implementación, pruebas y despliegue exclusivo a staging.
 
 ## Contexto
 
-Los módulos Categorías, Fabricantes y Modelos de activos ya admiten permisos granulares para usuarios seleccionados sin convertirlos en administradores generales. Campus permanece restringido al rol `admin`, aunque su catálogo ya está implementado y presenta la misma necesidad operativa.
+Los módulos Categorías, Fabricantes, Modelos de activos y Campus admiten permisos granulares para usuarios seleccionados sin convertirlos en administradores generales.
 
 Campus ya existe como catálogo administrativo y puede incorporarse como cuarto módulo funcional. Áreas, Coordinaciones y el alcance sobre Activos constituyen otra dimensión de autorización que todavía no está cerrada; esta ampliación no debe inventar campos provisionales para esa cobertura.
 
@@ -33,7 +33,7 @@ Módulos autorizables en el incremento desplegado:
 - `fabricantes`
 - `modelosActivos`
 
-Ampliación propuesta:
+Ampliación autorizada:
 
 - `campus`
 
@@ -67,7 +67,7 @@ En Campus, `ver` habilitará ruta, submenú y `listCampuses`; las otras cuatro a
 
 ### Evolución compatible del mapa
 
-- El mapa canónico propuesto contendrá cuatro módulos: Categorías, Fabricantes, Modelos y Campus.
+- El mapa canónico contiene cuatro módulos: Categorías, Fabricantes, Modelos y Campus.
 - Un documento histórico sin `permisos.campus` se interpreta con Campus denegado para `usuario`; no requiere migración destructiva.
 - `admin` conserva acceso total por rol aunque el mapa almacenado sea anterior.
 - `setAuthorizedUserPermissions` seguirá reemplazando el mapa completo y exigirá exactamente el vocabulario canónico vigente. Al activarse Campus, omitirlo o enviar un módulo desconocido responderá `user-permissions-invalid` sin escritura parcial.
@@ -84,7 +84,7 @@ Los permisos no se sincronizan a claims ni requieren revocar tokens por sí solo
 
 - El administrador administra autorizaciones; no es el único capturista de catálogos.
 - `Configuraciones` se muestra a `admin` o a un `usuario` con al menos un permiso `ver`, y contiene solo enlaces autorizados.
-- Usuarios permanece exclusivo de `admin`. Campus seguirá exclusivo de `admin` hasta aprobar, implementar y desplegar esta ampliación.
+- Usuarios permanece exclusivo de `admin`. Campus se habilita mediante `campus.ver` sin ampliar el rol general del usuario.
 - No se crean puestos, perfiles reutilizables, Jefe/Auxiliar, Coordinaciones, Áreas ni coberturas.
 - Firestore y Storage continúan cerrados a clientes.
 - Cada ampliación adapta las callables existentes del módulo incorporado; no duplica endpoints por rol.

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { InventoryCampus } from '../../../shared/models/inventory-campus';
 import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { AppIcon } from '../../../shared/ui/icon/app-icon';
@@ -16,6 +17,7 @@ import { CampusesFacade } from '../state/campuses.facade';
 })
 export class CampusesPage {
   private readonly formBuilder = inject(FormBuilder);
+  protected readonly auth = inject(AuthFacade);
   protected readonly campuses = inject(CampusesFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);

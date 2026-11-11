@@ -34,12 +34,13 @@
 - [x] Desplegar exclusivamente los servicios afectados a staging después de validar y recibir autorización de implementación.
 - [ ] Ejecutar aceptación autenticada sin usar datos reales ni producción.
 
-## Ampliación propuesta: permisos de Campus
+## Ampliación autorizada: permisos de Campus
 
 - [x] Separar permiso funcional de Campus del futuro alcance por Campus, Coordinación y Área.
 - [x] Definir compatibilidad por denegación para documentos sin `permisos.campus`.
 - [x] Definir reemplazo completo de cuatro módulos y rechazo atómico de clientes anteriores.
 - [x] Definir el cuarto bloque del diálogo y el resumen de hasta cuatro módulos.
-- [ ] Obtener validación expresa del responsable sobre esta ampliación.
+- [x] Obtener validación expresa del responsable sobre esta ampliación.
+- [x] Incorporar Campus al contrato canónico, al diálogo y a las regresiones.
 - [ ] Implementar contratos, backend, interfaz y regresiones únicamente después de la aprobación.
 - [ ] Desplegar Functions antes de Hosting y verificar que una pestaña anterior falle sin sobrescribir permisos.

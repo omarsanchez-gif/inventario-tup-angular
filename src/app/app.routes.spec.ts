@@ -43,7 +43,8 @@ describe('application route permissions', () => {
     ['configuraciones/categorias', 'categorias'],
     ['configuraciones/fabricantes', 'fabricantes'],
     ['configuraciones/modelos-activos', 'modelosActivos'],
-  ] as const)('LAY-024 maps %s to the exact module capability %s', async (path, module) => {
+    ['configuraciones/campus', 'campus'],
+  ] as const)('LAY-024 LAY-027 maps %s to the exact module capability %s', async (path, module) => {
     await expect(activate(path)).resolves.toBe(true);
     expect(auth.can).toHaveBeenCalledWith(module, 'ver');
   });

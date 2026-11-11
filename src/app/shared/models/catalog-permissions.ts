@@ -1,4 +1,4 @@
-export const permissionModules = ['categorias', 'fabricantes', 'modelosActivos'] as const;
+export const permissionModules = ['categorias', 'fabricantes', 'modelosActivos', 'campus'] as const;
 export const permissionActions = ['ver', 'crear', 'editar', 'cambiarEstado', 'eliminar'] as const;
 
 export type PermissionModule = (typeof permissionModules)[number];
@@ -6,7 +6,7 @@ export type PermissionAction = (typeof permissionActions)[number];
 export type PermissionMap = Readonly<Record<PermissionModule, readonly PermissionAction[]>>;
 
 export function emptyPermissionMap(): PermissionMap {
-  return { categorias: [], fabricantes: [], modelosActivos: [] };
+  return { categorias: [], fabricantes: [], modelosActivos: [], campus: [] };
 }
 
 export function fullPermissionMap(): PermissionMap {
@@ -14,6 +14,7 @@ export function fullPermissionMap(): PermissionMap {
     categorias: [...permissionActions],
     fabricantes: [...permissionActions],
     modelosActivos: [...permissionActions],
+    campus: [...permissionActions],
   };
 }
 

@@ -44,15 +44,15 @@ Estos escenarios definen la aceptación del módulo aprobado.
 
 Los escenarios CAM-026 a CAM-030 se implementarán en los módulos consumidores correspondientes; se conservan aquí para definir el contrato que Campus deberá soportar.
 
-## Criterios propuestos para permisos granulares
+## Criterios obligatorios para permisos granulares
 
-- CAM-032: `admin` conserva acceso total; `usuario` con `campus.ver` lista y navega, mientras otro `usuario`, un perfil inactivo y anónimo son rechazados.
-- CAM-033: crear, editar, cambiar estado y eliminar exigen exactamente su acción canónica además de Ver; poseer otra acción no eleva acceso.
-- CAM-034: la interfaz muestra Nuevo, Editar, Activar/Desactivar y Eliminar únicamente cuando corresponde, pero una invocación directa sin capacidad también es rechazada sin modificar Campus o reservas.
-- CAM-035: un documento anterior sin `permisos.campus` se interpreta con acceso denegado para `usuario` y total para `admin`, sin migración ni escritura automática.
-- CAM-036: el diálogo de Usuarios incorpora Campus como cuarto módulo, conserva dependencia de Ver, cancelación sin persistencia, accesibilidad y resumen de cero a cuatro módulos.
-- CAM-037: después de habilitar el contrato de cuatro módulos, un payload anterior de tres módulos responde `user-permissions-invalid` y conserva íntegro el mapa previo.
-- CAM-038: retirar `campus.ver` entra en vigor inmediatamente en backend y, tras revalidar, elimina ruta, submenú y acciones sin afectar permisos de otros módulos.
+- CAM-032: `admin` conserva acceso total; `usuario` con `campus.ver` lista y navega, mientras otro `usuario`, un perfil inactivo y anónimo son rechazados. <!-- trace:required -->
+- CAM-033: crear, editar, cambiar estado y eliminar exigen exactamente su acción canónica además de Ver; poseer otra acción no eleva acceso. <!-- trace:required -->
+- CAM-034: la interfaz muestra Nuevo, Editar, Activar/Desactivar y Eliminar únicamente cuando corresponde, pero una invocación directa sin capacidad también es rechazada sin modificar Campus o reservas. <!-- trace:required -->
+- CAM-035: un documento anterior sin `permisos.campus` se interpreta con acceso denegado para `usuario` y total para `admin`, sin migración ni escritura automática. <!-- trace:required -->
+- CAM-036: el diálogo de Usuarios incorpora Campus como cuarto módulo, conserva dependencia de Ver, cancelación sin persistencia, accesibilidad y resumen de cero a cuatro módulos. <!-- trace:required -->
+- CAM-037: después de habilitar el contrato de cuatro módulos, un payload anterior de tres módulos responde `user-permissions-invalid` y conserva íntegro el mapa previo. <!-- trace:required -->
+- CAM-038: retirar `campus.ver` entra en vigor inmediatamente en backend y, tras revalidar, elimina ruta, submenú y acciones sin afectar permisos de otros módulos. <!-- trace:required -->
 
 ## Evidencia local — 9 de noviembre de 2026
 

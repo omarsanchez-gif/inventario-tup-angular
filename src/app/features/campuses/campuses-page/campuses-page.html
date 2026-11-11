@@ -5,7 +5,9 @@
       <h1 class="page-title" id="campuses-title">Campus</h1>
       <p>Administre los campus que organizarán las áreas y los activos institucionales.</p>
     </div>
-    <button class="button button--primary" type="button" (click)="openNew()">Nuevo campus</button>
+    @if (auth.can('campus', 'crear')) {
+      <button class="button button--primary" type="button" (click)="openNew()">Nuevo campus</button>
+    }
   </header>
 
   @if (!formVisible() && !pendingDeletion() && campuses.error(); as error) {
@@ -164,40 +166,46 @@
               </td>
               <td>
                 <div class="record-actions">
-                  <button
-                    class="icon-button icon-button--secondary"
-                    type="button"
-                    [disabled]="campuses.saving()"
-                    [attr.aria-label]="'Editar ' + campus.codigo"
-                    [attr.title]="'Editar ' + campus.codigo"
-                    (click)="edit(campus)"
-                  >
-                    <app-icon name="edit" />
-                  </button>
-                  <button
-                    class="icon-button icon-button--secondary"
-                    type="button"
-                    [disabled]="campuses.saving()"
-                    [attr.aria-label]="
-                      campus.activo ? 'Desactivar ' + campus.codigo : 'Activar ' + campus.codigo
-                    "
-                    [attr.title]="
-                      campus.activo ? 'Desactivar ' + campus.codigo : 'Activar ' + campus.codigo
-                    "
-                    (click)="toggleStatus(campus)"
-                  >
-                    <app-icon [name]="campus.activo ? 'deactivate' : 'activate'" />
-                  </button>
-                  <button
-                    class="icon-button icon-button--danger"
-                    type="button"
-                    [disabled]="campuses.saving()"
-                    [attr.aria-label]="'Eliminar ' + campus.codigo"
-                    [attr.title]="'Eliminar ' + campus.codigo"
-                    (click)="requestDeletion(campus)"
-                  >
-                    <app-icon name="delete" />
-                  </button>
+                  @if (auth.can('campus', 'editar')) {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="campuses.saving()"
+                      [attr.aria-label]="'Editar ' + campus.codigo"
+                      [attr.title]="'Editar ' + campus.codigo"
+                      (click)="edit(campus)"
+                    >
+                      <app-icon name="edit" />
+                    </button>
+                  }
+                  @if (auth.can('campus', 'cambiarEstado')) {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="campuses.saving()"
+                      [attr.aria-label]="
+                        campus.activo ? 'Desactivar ' + campus.codigo : 'Activar ' + campus.codigo
+                      "
+                      [attr.title]="
+                        campus.activo ? 'Desactivar ' + campus.codigo : 'Activar ' + campus.codigo
+                      "
+                      (click)="toggleStatus(campus)"
+                    >
+                      <app-icon [name]="campus.activo ? 'deactivate' : 'activate'" />
+                    </button>
+                  }
+                  @if (auth.can('campus', 'eliminar')) {
+                    <button
+                      class="icon-button icon-button--danger"
+                      type="button"
+                      [disabled]="campuses.saving()"
+                      [attr.aria-label]="'Eliminar ' + campus.codigo"
+                      [attr.title]="'Eliminar ' + campus.codigo"
+                      (click)="requestDeletion(campus)"
+                    >
+                      <app-icon name="delete" />
+                    </button>
+                  }
                 </div>
               </td>
             </tr>

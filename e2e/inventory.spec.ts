@@ -144,7 +144,7 @@ test('USR-022 assigns catalog permissions after user creation', async ({ page })
     correo: 'capturista.e2e@tecplayacar.edu.mx',
     rol: 'usuario',
     activo: true,
-    permisos: { categorias: [], fabricantes: [], modelosActivos: [] },
+    permisos: { categorias: [], fabricantes: [], modelosActivos: [], campus: [] },
     fechaCreacion: new Date(),
     ultimoAcceso: null,
   });
@@ -162,6 +162,7 @@ test('USR-022 assigns catalog permissions after user creation', async ({ page })
       categorias: ['ver', 'editar'],
       fabricantes: [],
       modelosActivos: [],
+      campus: [],
     });
   } finally {
     await reference.delete();

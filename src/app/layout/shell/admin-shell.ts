@@ -39,7 +39,8 @@ export class AdminShell implements OnDestroy {
       this.auth.role() === 'admin' ||
       this.auth.can('categorias', 'ver') ||
       this.auth.can('fabricantes', 'ver') ||
-      this.auth.can('modelosActivos', 'ver'),
+      this.auth.can('modelosActivos', 'ver') ||
+      this.auth.can('campus', 'ver'),
   );
   protected readonly menuActionLabel = computed(() =>
     this.navigationOpen() ? 'Ocultar menú principal' : 'Mostrar menú principal',

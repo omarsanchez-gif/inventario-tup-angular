@@ -6,7 +6,7 @@ El modelo implementado comprende autorización, Categorías, Fabricantes, Modelo
 
 ## Colección `usuarios`
 
-El bloque `permisos` de tres módulos pertenece al incremento de ADR-007 desplegado el 11 de noviembre de 2026. La ampliación propuesta para Campus todavía no autoriza modificar documentos ni backend.
+El bloque `permisos` de cuatro módulos pertenece al incremento de ADR-007 autorizado el 11 de noviembre de 2026. La ausencia histórica de `campus` se sanitiza como denegación para `usuario`.
 
 ```text
 usuarios/{documentId}
@@ -33,10 +33,10 @@ Restricciones:
 - Nuevos documentos con rol `usuario` se crean con las tres listas vacías. `admin` obtiene acceso total por rol y no depende del contenido del mapa.
 - La ausencia del campo en documentos anteriores se interpreta como mapa vacío para `usuario`; la implementación no requiere reescribirlos para denegar acceso.
 - Cambiar el rol reemplaza `permisos` por las tres listas vacías. Desactivar conserva el mapa, pero lo vuelve inefectivo.
-- `permisos` no incluye Campus, Coordinaciones, Áreas, Activos, puestos o perfiles reutilizables.
+- `permisos` no incluye Coordinaciones, Áreas, Activos, puestos o perfiles reutilizables.
 - No se agregan entidades de Snipe-IT hasta aprobar su mapeo.
 
-### Ampliación propuesta del mapa para Campus
+### Mapa canónico con Campus
 
 Después de su aprobación, el mapa completo pasará a ser:
 

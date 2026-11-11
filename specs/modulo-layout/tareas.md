@@ -32,9 +32,9 @@
 - [x] Mantener Usuarios y Campus exclusivos de `admin` en el primer incremento.
 - [x] Probar combinaciones de uno, dos, tres y ningún submenú en escritorio y desde 320 px.
 
-## Ampliación propuesta: Campus
+## Ampliación autorizada: Campus
 
 - [x] Especificar visibilidad y guard de Campus mediante `campus.ver`.
 - [x] Conservar Usuarios exclusivo de `admin` y Campus independiente del alcance territorial.
-- [ ] Obtener validación expresa del responsable.
-- [ ] Incorporar Campus al registro del shell y probar combinaciones de cero a cuatro submenús.
+- [x] Obtener validación expresa del responsable.
+- [x] Incorporar Campus al registro del shell y probar combinaciones de cero a cuatro submenús.

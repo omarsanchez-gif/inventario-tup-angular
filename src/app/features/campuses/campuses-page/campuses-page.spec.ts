@@ -1,6 +1,7 @@
 import { signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { InventoryCampus } from '../../../shared/models/inventory-campus';
 import { CampusesFacade } from '../state/campuses.facade';
 import { CampusesPage } from './campuses-page';
@@ -19,6 +20,7 @@ describe('CampusesPage', () => {
   };
   let fixture: ComponentFixture<CampusesPage>;
   let element: HTMLElement;
+  let can: ReturnType<typeof vi.fn>;
   let campuses: {
     load: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
@@ -57,10 +59,14 @@ describe('CampusesPage', () => {
       success: signal(null),
       filteredCampuses: signal([campus]),
     };
+    can = vi.fn().mockReturnValue(true);
 
     await TestBed.configureTestingModule({
       imports: [CampusesPage],
-      providers: [{ provide: CampusesFacade, useValue: campuses }],
+      providers: [
+        { provide: CampusesFacade, useValue: campuses },
+        { provide: AuthFacade, useValue: { can } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CampusesPage);
@@ -110,6 +116,23 @@ describe('CampusesPage', () => {
       'Desactivar FCS',
       'Eliminar FCS',
     ]);
+  });
+
+  it('CAM-034 renders only the Campus actions granted to the current user', () => {
+    can.mockImplementation((_module: string, actionName: string) =>
+      ['ver', 'editar'].includes(actionName),
+    );
+    fixture.destroy();
+    fixture = TestBed.createComponent(CampusesPage);
+    fixture.detectChanges();
+    element = fixture.nativeElement as HTMLElement;
+
+    expect(element.textContent).not.toContain('Nuevo campus');
+    expect(
+      [...element.querySelectorAll<HTMLButtonElement>('.record-actions button')].map((button) =>
+        button.getAttribute('aria-label'),
+      ),
+    ).toEqual(['Editar FCS']);
   });
 
   it('uses shared dialogs with only code, name and notes', async () => {

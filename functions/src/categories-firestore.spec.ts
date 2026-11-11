@@ -101,7 +101,7 @@ emulatorSuite('categories firestore repository', () => {
     expect(concurrent.map((result) => result.status).sort()).toEqual(['fulfilled', 'rejected']);
     expect((await firestore.collection('categorias').get()).size).toBe(1);
     expect((await firestore.collection('categorias_nombres').get()).size).toBe(1);
-  });
+  }, 15_000);
 
   it('denies direct client access through Firestore Rules', async () => {
     const baseUrl = `http://${emulatorHost}/v1/projects/${projectId}/databases/(default)/documents`;

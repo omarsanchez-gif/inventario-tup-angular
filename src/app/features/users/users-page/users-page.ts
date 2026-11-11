@@ -6,6 +6,7 @@ import type { UserRole } from '../../../shared/models/authorized-user';
 import type { SystemUser } from '../../../shared/models/system-user';
 import {
   permissionActions,
+  permissionModules,
   type PermissionAction,
   type PermissionMap,
   type PermissionModule,
@@ -37,6 +38,7 @@ export class UsersPage {
     { id: 'categorias', label: 'Categorías' },
     { id: 'fabricantes', label: 'Fabricantes' },
     { id: 'modelosActivos', label: 'Modelos de activos' },
+    { id: 'campus', label: 'Campus' },
   ];
   protected readonly permissionOptions: readonly {
     readonly id: PermissionAction;
@@ -68,6 +70,7 @@ export class UsersPage {
     categorias: this.permissionControls(),
     fabricantes: this.permissionControls(),
     modelosActivos: this.permissionControls(),
+    campus: this.permissionControls(),
   });
 
   constructor() {
@@ -164,7 +167,7 @@ export class UsersPage {
   protected openPermissions(user: SystemUser): void {
     if (user.rol !== 'usuario' || this.isSelf(user)) return;
     this.users.clearMessages();
-    for (const module of ['categorias', 'fabricantes', 'modelosActivos'] as const) {
+    for (const module of permissionModules) {
       const actions = user.permisos[module];
       this.permissionsForm.controls[module].setValue({
         ver: actions.includes('ver'),
@@ -200,7 +203,7 @@ export class UsersPage {
     if (!user || this.users.saving()) return;
     const raw = this.permissionsForm.getRawValue();
     const permissions = Object.fromEntries(
-      (['categorias', 'fabricantes', 'modelosActivos'] as const).map((module) => [
+      permissionModules.map((module) => [
         module,
         permissionActions.filter((action) => raw[module][action]),
       ]),
@@ -210,7 +213,7 @@ export class UsersPage {
 
   protected permissionSummary(user: SystemUser): string {
     if (user.rol === 'admin') return 'Acceso total por rol';
-    const count = (['categorias', 'fabricantes', 'modelosActivos'] as const).filter((module) =>
+    const count = permissionModules.filter((module) =>
       user.permisos[module].includes('ver'),
     ).length;
     return count === 0 ? 'Sin permisos' : count === 1 ? '1 módulo' : `${count} módulos`;

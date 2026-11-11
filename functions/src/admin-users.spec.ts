@@ -98,6 +98,7 @@ describe('admin users', () => {
       categorias: ['ver', 'crear'] as const,
       fabricantes: [] as const,
       modelosActivos: ['ver', 'editar'] as const,
+      campus: [] as const,
     };
     vi.mocked(deps.repository.setPermissions).mockResolvedValue({
       documentId: 'target',
@@ -125,7 +126,7 @@ describe('admin users', () => {
         { uid: 'uid-admin', authorized: true, role: 'admin' },
         {
           documentId: 'target',
-          permisos: { categorias: ['editar'], fabricantes: [], modelosActivos: [] },
+          permisos: { categorias: ['editar'], fabricantes: [], modelosActivos: [], campus: [] },
         },
         deps,
       ),

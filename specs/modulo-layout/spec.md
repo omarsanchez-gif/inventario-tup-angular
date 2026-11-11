@@ -2,7 +2,7 @@
 
 ## Estado
 
-El layout base y el filtrado de Categorías, Fabricantes y Modelos están implementados y desplegados. Mostrar Campus a usuarios con capacidad explícita es una ampliación propuesta pendiente de validación; hasta aprobarla permanece exclusivo de `admin`.
+El layout base y el filtrado independiente de Categorías, Fabricantes, Modelos y Campus están implementados. Su publicación se limita a staging.
 
 ## Objetivo
 
@@ -50,7 +50,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 
 ## Autorización
 
-El layout solo presenta rutas ya autorizadas. `Usuarios` se mantiene exclusivo de `admin`. En la versión vigente Campus también permanece exclusivo de `admin`; después de aprobar e implementar la ampliación, un `usuario` verá Campus únicamente con `campus.ver`. `Configuraciones` aparece completo para `admin`; para `usuario` aparece cuando existe al menos un permiso `ver` y contiene solo los módulos concedidos. Un grupo vacío no se renderiza. Guards y Functions conservan la autorización efectiva y el grupo no muestra enlaces de módulos todavía no implementados.
+El layout solo presenta rutas ya autorizadas. `Usuarios` se mantiene exclusivo de `admin`; un `usuario` ve Campus únicamente con `campus.ver`. `Configuraciones` aparece completo para `admin`; para `usuario` aparece cuando existe al menos un permiso `ver` y contiene solo los módulos concedidos. Un grupo vacío no se renderiza. Guards y Functions conservan la autorización efectiva y el grupo no muestra enlaces de módulos todavía no implementados.
 
 Una revalidación de permisos actualiza menú y acciones solo si pertenece al UID y generación vigentes. Ocultar un enlace no sustituye la denegación backend.
 

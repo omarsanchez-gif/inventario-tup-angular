@@ -1,6 +1,11 @@
 import type { DocumentData, Query, Transaction } from 'firebase-admin/firestore';
 
-export const PERMISSION_MODULES = ['categorias', 'fabricantes', 'modelosActivos'] as const;
+export const PERMISSION_MODULES = [
+  'categorias',
+  'fabricantes',
+  'modelosActivos',
+  'campus',
+] as const;
 export const PERMISSION_ACTIONS = ['ver', 'crear', 'editar', 'cambiarEstado', 'eliminar'] as const;
 
 export type PermissionModule = (typeof PERMISSION_MODULES)[number];
@@ -8,7 +13,7 @@ export type PermissionAction = (typeof PERMISSION_ACTIONS)[number];
 export type PermissionMap = Readonly<Record<PermissionModule, readonly PermissionAction[]>>;
 
 export function emptyPermissionMap(): PermissionMap {
-  return { categorias: [], fabricantes: [], modelosActivos: [] };
+  return { categorias: [], fabricantes: [], modelosActivos: [], campus: [] };
 }
 
 export function fullPermissionMap(): PermissionMap {
@@ -16,6 +21,7 @@ export function fullPermissionMap(): PermissionMap {
     categorias: [...PERMISSION_ACTIONS],
     fabricantes: [...PERMISSION_ACTIONS],
     modelosActivos: [...PERMISSION_ACTIONS],
+    campus: [...PERMISSION_ACTIONS],
   };
 }
 

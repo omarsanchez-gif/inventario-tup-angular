@@ -34,12 +34,12 @@
 - USR-029: cancelar, Escape, backdrop o cierre visible no ejecutan la callable ni alteran el mapa. <!-- trace:required -->
 - USR-030: un solicitante no puede asignarse permisos a sí mismo, modificar un `admin` mediante la matriz ni conceder acciones por payload desconocido. <!-- trace:required -->
 
-## Criterios propuestos para Campus
+## Criterios obligatorios para Campus
 
-- USR-031: un documento anterior sin `permisos.campus` se sanitiza con Campus vacío para `usuario` y acceso total para `admin`, sin reescribir Firestore.
-- USR-032: el diálogo presenta Campus como cuarto módulo, mantiene la dependencia de Ver y resume correctamente entre cero y cuatro módulos autorizados.
-- USR-033: `setAuthorizedUserPermissions` acepta el mapa completo de cuatro módulos y rechaza sin escritura parcial un mapa anterior de tres módulos, campos adicionales o acciones desconocidas.
-- USR-034: una pestaña anterior abierta durante el despliegue no puede borrar un permiso de Campus; recibe error recuperable y, tras recargar, muestra el mapa canónico vigente.
+- USR-031: un documento anterior sin `permisos.campus` se sanitiza con Campus vacío para `usuario` y acceso total para `admin`, sin reescribir Firestore. <!-- trace:required -->
+- USR-032: el diálogo presenta Campus como cuarto módulo, mantiene la dependencia de Ver y resume correctamente entre cero y cuatro módulos autorizados. <!-- trace:required -->
+- USR-033: `setAuthorizedUserPermissions` acepta el mapa completo de cuatro módulos y rechaza sin escritura parcial un mapa anterior de tres módulos, campos adicionales o acciones desconocidas. <!-- trace:required -->
+- USR-034: una pestaña anterior abierta durante el despliegue no puede borrar un permiso de Campus; recibe error recuperable y, tras recargar, muestra el mapa canónico vigente. <!-- trace:required -->
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 

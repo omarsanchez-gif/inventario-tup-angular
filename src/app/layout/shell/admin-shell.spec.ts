@@ -218,7 +218,7 @@ describe('AdminShell', () => {
     expect(element.textContent).not.toContain('Categorías');
   });
 
-  it('LAY-022 LAY-023 shows only granted configuration links to usuario', () => {
+  it('LAY-022 LAY-023 LAY-026 shows only granted configuration links to usuario', () => {
     roleState.set('usuario');
     can.mockImplementation((module: string) => module === 'fabricantes');
     createShell();
@@ -231,5 +231,19 @@ describe('AdminShell', () => {
     ).toEqual(['Fabricantes']);
     expect(element.textContent).not.toContain('Usuarios');
     expect(element.textContent).not.toContain('Campus');
+  });
+
+  it('LAY-026 shows Campus independently when it is the only granted module', () => {
+    roleState.set('usuario');
+    can.mockImplementation((module: string) => module === 'campus');
+    createShell();
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('.navigation__group-toggle')!.click();
+    fixture.detectChanges();
+
+    expect(
+      [...element.querySelectorAll('.navigation__sublink')].map((link) => link.textContent?.trim()),
+    ).toEqual(['Campus']);
+    expect(element.textContent).not.toContain('Usuarios');
   });
 });

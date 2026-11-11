@@ -2,7 +2,7 @@
 
 ## Estado
 
-El módulo base fue aprobado, implementado y desplegado exclusivamente a `inventario-stg`. La ampliación para permitir acceso granular a `usuario` se encuentra propuesta y pendiente de validación expresa; todavía no autoriza código ni despliegue. No autoriza crear datos de negocio, migrar Snipe-IT ni modificar producción.
+El módulo base fue aprobado, implementado y desplegado exclusivamente a `inventario-stg`. La ampliación para permitir acceso granular a `usuario` fue autorizada expresamente el 11 de noviembre de 2026; autoriza código, pruebas y despliegue exclusivo a staging. No autoriza crear datos de negocio, migrar Snipe-IT ni modificar producción.
 
 ## Objetivo
 
@@ -19,7 +19,7 @@ Permitir que un `admin` y, después de aprobar la ampliación, un `usuario` expr
 
 ## Alcance
 
-- Ruta privada implementada `/configuraciones/campus`, actualmente visible únicamente a `admin`; la ampliación propuesta la habilitará también con `campus.ver`.
+- Ruta privada implementada `/configuraciones/campus`, visible para `admin` o para un `usuario` activo con `campus.ver`.
 - Listado administrativo completo, ordenado por nombre y limitado inicialmente a 100 registros.
 - Búsqueda automática local por código, nombre o notas.
 - Alta, edición, activación, desactivación y eliminación condicionada.
@@ -94,17 +94,17 @@ Ambos valores son read models. Las entidades futuras serán la fuente canónica 
 ## Autorización
 
 - En la versión vigente solo `admin` autenticado, autorizado y activo puede acceder a la ruta o invocar sus callables.
-- Hasta aprobar y desplegar la ampliación, `usuario`, perfiles inactivos y solicitudes anónimas no pueden listar ni mutar Campus.
+- Un `usuario` sin la acción canónica exacta, perfiles inactivos y solicitudes anónimas no pueden listar ni mutar Campus.
 - Angular no accederá directamente a `campus` ni a `campus_claves`.
 - Cada callable verificará Authentication, claim administrativo y el documento canónico `usuarios`.
 - El guard y la visibilidad del menú serán defensas de presentación, no autorización efectiva.
 - Esta spec no define alcance sobre inventario; la reestructuración de accesos a Activos se realizará después de definir Áreas y coberturas de Coordinaciones.
 
-### Ampliación granular propuesta
+### Autorización granular vigente
 
-- Campus será el cuarto módulo del mapa canónico con `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`.
-- `campus.ver` habilitará ruta, submenú y `listCampuses`.
-- `campus.crear`, `campus.editar`, `campus.cambiarEstado` y `campus.eliminar` protegerán respectivamente `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus` y exigirán también `ver`.
+- Campus es el cuarto módulo del mapa canónico con `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`.
+- `campus.ver` habilita ruta, submenú y `listCampuses`.
+- `campus.crear`, `campus.editar`, `campus.cambiarEstado` y `campus.eliminar` protegen respectivamente `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus` y exigen también `ver`.
 - Cada callable revalidará el permiso exacto dentro de su operación; poseer otra acción no elevará acceso.
 - Un documento anterior sin `permisos.campus` equivaldrá a lista vacía para `usuario`. `admin` conservará acceso total por rol.
 - Los permisos serán globales para administrar el catálogo. No indican qué Campus, Áreas, Coordinaciones o Activos puede consultar operativamente el usuario.
@@ -195,7 +195,7 @@ La interfaz traducirá estos códigos a mensajes institucionales y no expondrá 
 ### Navegación
 
 - `Configuraciones` permanece completo para `admin`; para `usuario` solo contiene módulos con `ver` explícito.
-- En la versión vigente `Campus` sigue exclusivo de `admin`. Después de aprobar la ampliación será visible para `usuario` únicamente con `campus.ver` y navegará a `/configuraciones/campus`.
+- `Campus` es visible para `admin` y para `usuario` únicamente con `campus.ver`; navega a `/configuraciones/campus`.
 - No tendrá icono individual porque las opciones secundarias usan el icono compartido del grupo.
 - Áreas y Coordinaciones no aparecerán hasta contar con specs e implementación propias.
 
@@ -237,7 +237,7 @@ La interfaz traducirá estos códigos a mensajes institucionales y no expondrá 
 4. El formulario no asigna Áreas ni Coordinaciones.
 5. Las cantidades de Áreas y Activos son read models no editables que permanecen en cero hasta contar con fuentes aprobadas.
 6. FCS y TUP son registros administrativos, no constantes ni datos creados por el despliegue.
-7. La ampliación propuesta concede permisos funcionales sobre el catálogo Campus y no define alcance territorial sobre inventario.
+7. La ampliación autorizada concede permisos funcionales sobre el catálogo Campus y no define alcance territorial sobre inventario.
 
 ## Estado de publicación
 

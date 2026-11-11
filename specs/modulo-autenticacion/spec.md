@@ -2,7 +2,7 @@
 
 ## Estado
 
-El contrato base y la entrega de permisos sanitizados para Categorías, Fabricantes y Modelos están implementados y desplegados. Incorporar `campus` a la respuesta es una ampliación propuesta pendiente de validación expresa.
+El contrato base y la entrega de permisos sanitizados para Categorías, Fabricantes, Modelos y Campus están implementados. La publicación del contrato de cuatro módulos se limita a staging.
 
 ## Objetivo
 
@@ -36,7 +36,7 @@ Angular mantiene una generación por identidad. Bootstrap, renovación de claims
 
 ADR-007 amplía `bootstrapAuthorization` para devolver el mapa granular sanitizado desde `usuarios`; no lo copia a Custom Claims. `admin` recibe acceso efectivo total y `usuario` solo sus acciones explícitas. La misma operación revalida capacidades al entrar a una ruta protegida o recuperar foco, sin aceptar resultados de otra generación de sesión.
 
-La ampliación propuesta para Campus agregará `campus[]` a la respuesta. Un documento anterior se sanitizará con esa lista vacía para `usuario`; la ausencia del campo nunca concederá acceso y no exigirá migración.
+La respuesta incluye `campus[]`. Un documento anterior se sanitiza con esa lista vacía para `usuario`; la ausencia del campo nunca concede acceso y no exige migración.
 
 ## Fuera de alcance
 

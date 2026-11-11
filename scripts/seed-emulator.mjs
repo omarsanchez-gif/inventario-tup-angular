@@ -142,7 +142,7 @@ await firestore.runTransaction(async (transaction) => {
     correo: email,
     rol: 'admin',
     activo: true,
-    permisos: { categorias: [], fabricantes: [], modelosActivos: [] },
+    permisos: { categorias: [], fabricantes: [], modelosActivos: [], campus: [] },
     fechaCreacion: snapshot.data()?.['fechaCreacion'] ?? Timestamp.now(),
     ultimoAcceso: null,
   });

@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
+import { AuthFacade } from '../../../core/auth/auth.facade';
 import { SessionScope } from '../../../core/auth/session-scope';
 import type { InventoryCampus } from '../../../shared/models/inventory-campus';
 import { CAMPUSES_GATEWAY, type CampusDraft, type CampusUpdate } from '../data/campuses.gateway';
@@ -40,6 +41,10 @@ function campusErrorMessage(error: unknown): string {
   }
 }
 
+function permissionDenied(error: unknown): boolean {
+  return (error as FunctionalError)?.details?.functionalCode === 'permission-denied';
+}
+
 function searchable(value: string): string {
   return value
     .normalize('NFKD')
@@ -51,6 +56,7 @@ function searchable(value: string): string {
 export class CampusesFacade {
   private readonly gateway = inject(CAMPUSES_GATEWAY);
   private readonly sessionScope = inject(SessionScope);
+  private readonly auth = inject(AuthFacade);
   private readonly campusesState = signal<readonly InventoryCampus[]>([]);
   private readonly queryState = signal('');
   private readonly loadingState = signal(false);
@@ -89,7 +95,13 @@ export class CampusesFacade {
       const result = await this.gateway.list();
       if (this.sessionScope.isCurrent(generation)) this.campusesState.set(result.items);
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) this.errorState.set(campusErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) {
+        if (permissionDenied(error)) {
+          this.campusesState.set([]);
+          void this.auth.refreshAuthorization();
+        }
+        this.errorState.set(campusErrorMessage(error));
+      }
     } finally {
       if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
     }
@@ -134,7 +146,13 @@ export class CampusesFacade {
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) this.errorState.set(campusErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) {
+        if (permissionDenied(error)) {
+          this.campusesState.set([]);
+          void this.auth.refreshAuthorization();
+        }
+        this.errorState.set(campusErrorMessage(error));
+      }
       return false;
     } finally {
       if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);

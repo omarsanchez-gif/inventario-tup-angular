@@ -16,6 +16,7 @@ emulatorSuite('campuses firestore repository', () => {
   const firestore = getFirestore(app);
   const repository = createAdminCampusesRepository(firestore);
   const adminUid = 'campus-admin';
+  const userUid = 'campus-user';
 
   async function clearFirestore(): Promise<void> {
     await fetch(
@@ -35,6 +36,19 @@ emulatorSuite('campuses firestore repository', () => {
       fechaCreacion: new Date(),
       ultimoAcceso: null,
     });
+    await firestore
+      .collection('usuarios')
+      .doc('user')
+      .set({
+        uid: userUid,
+        nombre: 'Usuario de prueba',
+        correo: 'user@tecplayacar.edu.mx',
+        rol: 'usuario',
+        activo: true,
+        permisos: { categorias: [], fabricantes: [], modelosActivos: [], campus: ['ver'] },
+        fechaCreacion: new Date(),
+        ultimoAcceso: null,
+      });
   });
 
   afterAll(async () => {
@@ -99,6 +113,30 @@ emulatorSuite('campuses firestore repository', () => {
     expect((await firestore.collection('campus').get()).size).toBe(1);
     expect((await firestore.collection('campus_claves').get()).size).toBe(2);
   }, 15_000);
+
+  it('CAM-033 CAM-034 revalidates the exact canonical action inside mutations', async () => {
+    expect(await repository.hasCanonicalPermission(userUid, 'ver')).toBe(true);
+    expect(await repository.hasCanonicalPermission(userUid, 'crear')).toBe(false);
+    await expect(repository.create(userUid, draft('USR', 'Campus Usuario'))).rejects.toMatchObject({
+      functionalCode: 'permission-denied',
+    });
+
+    const documentId = await repository.create(adminUid, draft('PERM', 'Campus Permisos'));
+    await firestore
+      .collection('usuarios')
+      .doc('user')
+      .update({
+        'permisos.campus': ['ver', 'editar'],
+      });
+    await repository.update(userUid, {
+      documentId,
+      ...draft('PERM', 'Campus Permisos Editado'),
+      notas: null,
+    });
+    await expect(repository.delete(userUid, documentId)).rejects.toMatchObject({
+      functionalCode: 'permission-denied',
+    });
+  });
 
   it('denies direct client access through Firestore Rules', async () => {
     const baseUrl = `http://${emulatorHost}/v1/projects/${projectId}/databases/(default)/documents`;

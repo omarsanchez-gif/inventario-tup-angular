@@ -17,6 +17,10 @@ import {
   type CampusUpdate,
   type ManagedCampus,
 } from './admin-campuses.js';
+import {
+  hasCanonicalPermission as canonicalPermissionGranted,
+  type PermissionAction,
+} from './catalog-permissions.js';
 
 type CampusKeyType = 'codigo' | 'nombre';
 
@@ -97,12 +101,18 @@ export function createAdminCampusesRepository(firestore: Firestore): AdminCampus
   const keys = firestore.collection('campus_claves');
   const users = firestore.collection('usuarios');
 
-  async function requireCanonicalAdmin(transaction: Transaction, uid: string): Promise<void> {
-    const snapshot = await transaction.get(users.where('uid', '==', uid).limit(2));
+  async function requireCanonicalPermission(
+    transaction: Transaction,
+    uid: string,
+    action: PermissionAction,
+  ): Promise<void> {
     if (
-      snapshot.size !== 1 ||
-      snapshot.docs[0]?.data()['activo'] !== true ||
-      snapshot.docs[0]?.data()['rol'] !== 'admin'
+      !(await canonicalPermissionGranted(
+        transaction,
+        users.where('uid', '==', uid).limit(2),
+        'campus',
+        action,
+      ))
     ) {
       throw new AdminCampusesError('permission-denied', 'permission-denied', 'Acceso denegado.');
     }
@@ -123,12 +133,12 @@ export function createAdminCampusesRepository(firestore: Firestore): AdminCampus
   }
 
   return {
-    async findCanonicalAdmin(uid) {
-      const snapshot = await users.where('uid', '==', uid).limit(2).get();
-      return (
-        snapshot.size === 1 &&
-        snapshot.docs[0]?.data()['activo'] === true &&
-        snapshot.docs[0]?.data()['rol'] === 'admin'
+    async hasCanonicalPermission(uid, action) {
+      return canonicalPermissionGranted(
+        null,
+        users.where('uid', '==', uid).limit(2),
+        'campus',
+        action,
       );
     },
     async list(limit) {
@@ -140,7 +150,7 @@ export function createAdminCampusesRepository(firestore: Firestore): AdminCampus
       const codeReference = indexReference('codigo', input.codigoNormalizado);
       const nameReference = indexReference('nombre', input.nombreNormalizado);
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'crear');
         const [campusSnapshot, codeSnapshot, nameSnapshot] = await Promise.all([
           transaction.get(campuses.limit(MAX_SUPPORTED_CAMPUSES + 1)),
           transaction.get(codeReference),
@@ -198,7 +208,7 @@ export function createAdminCampusesRepository(firestore: Firestore): AdminCampus
     },
     async update(requesterUid: string, input: CampusUpdate) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'editar');
         const campusReference = campuses.doc(input.documentId);
         const campusSnapshot = await transaction.get(campusReference);
         if (!campusSnapshot.exists) {
@@ -265,7 +275,7 @@ export function createAdminCampusesRepository(firestore: Firestore): AdminCampus
     },
     async setStatus(requesterUid, documentId, activo) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'cambiarEstado');
         const reference = campuses.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists) {
@@ -282,7 +292,7 @@ export function createAdminCampusesRepository(firestore: Firestore): AdminCampus
     },
     async delete(requesterUid, documentId) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'eliminar');
         const reference = campuses.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists) {

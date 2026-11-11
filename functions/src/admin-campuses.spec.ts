@@ -35,7 +35,7 @@ function campus(index = 1, overrides: Partial<ManagedCampus> = {}): ManagedCampu
 function dependencies(items: readonly ManagedCampus[] = []): AdminCampusesDependencies {
   return {
     repository: {
-      findCanonicalAdmin: vi.fn().mockResolvedValue(true),
+      hasCanonicalPermission: vi.fn().mockResolvedValue(true),
       list: vi.fn().mockResolvedValue(items),
       create: vi.fn().mockResolvedValue('new-campus'),
       update: vi.fn().mockResolvedValue(undefined),
@@ -46,13 +46,13 @@ function dependencies(items: readonly ManagedCampus[] = []): AdminCampusesDepend
 }
 
 describe('admin campuses', () => {
-  it('rejects requests without an authenticated canonical admin', async () => {
+  it('CAM-033 rejects requests without the exact canonical permission', async () => {
     await expect(listCampuses(null, dependencies())).rejects.toMatchObject({
       functionalCode: 'unauthenticated',
     });
 
     const deps = dependencies();
-    deps.repository.findCanonicalAdmin = vi.fn().mockResolvedValue(false);
+    deps.repository.hasCanonicalPermission = vi.fn().mockResolvedValue(false);
     await expect(listCampuses(admin, deps)).rejects.toMatchObject({
       functionalCode: 'permission-denied',
     });
@@ -78,6 +78,7 @@ describe('admin campuses', () => {
       nombreNormalizado: 'ciencias de la salud',
       notas: 'Campus FCS',
     });
+    expect(deps.repository.hasCanonicalPermission).toHaveBeenCalledWith('uid-admin', 'crear');
     await expect(
       createCampus(
         admin,
@@ -111,6 +112,7 @@ describe('admin campuses', () => {
     ]);
 
     const result = await listCampuses(admin, deps);
+    expect(deps.repository.hasCanonicalPermission).toHaveBeenCalledWith('uid-admin', 'ver');
     expect(result.items.map((item) => item.nombre)).toEqual(['FCS', 'TUP']);
     expect(result.items[0]).toMatchObject({ cantidadAreas: 3, cantidadActivos: 0 });
     expect(result.items[0]).not.toHaveProperty('nombreNormalizado');
@@ -144,5 +146,20 @@ describe('admin campuses', () => {
     });
     expect(deps.repository.setStatus).toHaveBeenCalledWith('uid-admin', 'campus-1', false);
     expect(deps.repository.delete).toHaveBeenCalledWith('uid-admin', 'campus-1');
+    expect(deps.repository.hasCanonicalPermission).toHaveBeenNthCalledWith(
+      1,
+      'uid-admin',
+      'editar',
+    );
+    expect(deps.repository.hasCanonicalPermission).toHaveBeenNthCalledWith(
+      2,
+      'uid-admin',
+      'cambiarEstado',
+    );
+    expect(deps.repository.hasCanonicalPermission).toHaveBeenNthCalledWith(
+      3,
+      'uid-admin',
+      'eliminar',
+    );
   });
 });

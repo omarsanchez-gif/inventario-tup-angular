@@ -177,12 +177,13 @@ describe('UsersPage dialogs', () => {
     );
   });
 
-  it('USR-022 USR-028 assigns permissions in a separate recoverable dialog', async () => {
+  it('USR-022 USR-028 USR-032 CAM-036 assigns permissions in a separate recoverable dialog', async () => {
     actionButton('Asignar permisos a Usuario Prueba').click();
     fixture.detectChanges();
     expect(element.querySelector('.dialog__title')?.textContent).toContain(
       'Asignar permisos a Usuario Prueba',
     );
+    expect(element.querySelector('#campus-ver')).toBeTruthy();
 
     const edit = element.querySelector<HTMLInputElement>('#categorias-editar')!;
     edit.click();
@@ -194,7 +195,7 @@ describe('UsersPage dialogs', () => {
     fixture.detectChanges();
     expect(users.setPermissions).toHaveBeenCalledWith(
       managedUser,
-      expect.objectContaining({ categorias: ['ver', 'editar'] }),
+      expect.objectContaining({ categorias: ['ver', 'editar'], campus: [] }),
     );
     expect(element.querySelector('dialog[open]')).toBeNull();
   });

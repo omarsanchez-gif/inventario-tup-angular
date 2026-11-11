@@ -95,7 +95,7 @@
                   Modelos de activos
                 </a>
               }
-              @if (auth.role() === 'admin') {
+              @if (auth.can('campus', 'ver')) {
                 <a
                   class="navigation__sublink"
                   routerLink="/configuraciones/campus"
