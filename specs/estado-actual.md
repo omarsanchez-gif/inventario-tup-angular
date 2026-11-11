@@ -6,7 +6,7 @@
 - Rama inspeccionada: `codex/hardening-sesion-imagenes-trazabilidad`.
 - SHA publicado al iniciar la consolidación: `51e71dc599c55e63bed4ddf11ca0b1e91a9ed599`.
 - SHA de implementación de permisos, rutas y Campus con validación completa: `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`.
-- SHA del acordeón de permisos publicado en Hosting de staging: `77d84903f9ca5ad528014cd11518f74a8f1e29d2`.
+- SHA de la corrección del acordeón publicada en Hosting de staging: `f6a91de5deea6d8c16c8075150112078e8909a59`.
 - `desarrollo` local y remoto: `179e79863e2a6c940c9a24165b219bfb8ce59cc1`.
 - La rama de trabajo permanece por delante de `desarrollo` y todavía no está integrada.
 
@@ -53,9 +53,9 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 | Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                                                                                   |
 | ------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Especificado y aprobado   | Sí para los módulos de la tabla; Áreas no       | Specs y tareas vigentes                                                                                                                                                              |
-| Implementado              | Sí para el alcance vigente                      | Backend de cuatro módulos en `2883ff5`; acordeón de permisos en `77d8490`                                                                                                            |
-| Validado localmente       | Sí; UI sobre `77d8490`, backend sobre `2883ff5` | 73 Angular y 5 Chromium para el acordeón; la evidencia backend previa conserva 47 Functions y 31 Emulator Suite. Trazabilidad, lint, guardia visual, formato, build y diff aprobados |
-| Publicado en rama         | Sí                                              | La rama remota incluye el backend `2883ff5`, el acordeón `77d8490` y su evidencia documental                                                                                         |
+| Implementado              | Sí para el alcance vigente                      | Backend de cuatro módulos en `2883ff5`; acordeón corregido en `f6a91de`                                                                                                              |
+| Validado localmente       | Sí; UI sobre `f6a91de`, backend sobre `2883ff5` | 73 Angular y 5 Chromium para el acordeón; la evidencia backend previa conserva 47 Functions y 31 Emulator Suite. Trazabilidad, lint, guardia visual, formato, build y diff aprobados |
+| Publicado en rama         | Sí                                              | La rama remota incluye el backend `2883ff5`, el acordeón corregido en `f6a91de` y su evidencia documental                                                                            |
 | Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama está 13 commits delante                                                                                                                 |
 | Verificado por CI         | No para este incremento                         | No existe PR y no hay ejecución de `Validación continua / validate` asociada al SHA final                                                                                            |
 | Desplegado en staging     | Sí, dentro del alcance documentado              | 12 Functions de autorización/Usuarios/Campus y Hosting actualizados; Rules, datos y producción intactos                                                                              |
@@ -70,12 +70,12 @@ El 10 de noviembre de 2026 se aplicó la skill oficial `angular-developer` al es
 
 ## Incremento autorizado: permisos granulares
 
-El 10 de noviembre de 2026 se especificó un incremento que permite asignar después del alta permisos Ver, Crear, Editar, Cambiar estado y Eliminar sobre Categorías, Fabricantes y Modelos. El 11 de noviembre se amplió a Campus, se validó el backend sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724` y se desplegó únicamente a staging. Ese mismo día la matriz se compactó en un acordeón accesible sobre `77d84903f9ca5ad528014cd11518f74a8f1e29d2` y se publicó solo en Hosting. `admin` conserva acceso total; `usuario` inicia sin permisos y recibe solo acciones explícitas desde una acción separada de la tabla de Usuarios. No incluye Coordinaciones, Áreas ni alcance sobre Activos. La aceptación funcional autenticada permanece pendiente. Su decisión está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
+El 10 de noviembre de 2026 se especificó un incremento que permite asignar después del alta permisos Ver, Crear, Editar, Cambiar estado y Eliminar sobre Categorías, Fabricantes y Modelos. El 11 de noviembre se amplió a Campus, se validó el backend sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724` y se desplegó únicamente a staging. Ese mismo día la matriz se compactó en un acordeón; una revisión autenticada detectó que sus paneles permanecían visibles y la corrección estructural `f6a91de5deea6d8c16c8075150112078e8909a59` se publicó solo en Hosting. `admin` conserva acceso total; `usuario` inicia sin permisos y recibe solo acciones explícitas desde una acción separada de la tabla de Usuarios. No incluye Coordinaciones, Áreas ni alcance sobre Activos. La aceptación funcional autenticada permanece pendiente. Su decisión está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
 
 ## Staging vigente
 
 - Proyecto exclusivo: `inventario-stg`; alias obligatorio `staging`.
-- Hosting responde HTTP 200 y el acordeón de permisos sirve `main-G6DKMJDP.js` y `styles-YBUAO7AQ.css`.
+- Hosting responde HTTP 200 y el acordeón corregido sirve `main-2AWLN5BY.js` y `styles-6O34NL67.css`.
 - Las 30 callables usan Node.js 22 y `us-central1`; las verificaciones anónimas documentadas recibieron HTTP 401.
 - Firestore Rules niega acceso directo a las colecciones administrativas y Storage Rules conserva denegación total.
 - El último incremento de recuperación desplegó `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` en revisión `00004`, el ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting.

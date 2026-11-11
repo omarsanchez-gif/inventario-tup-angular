@@ -1,7 +1,7 @@
 {
   "version": 2,
   "baseReviewSha": "4a3407b14acd7a069ec62f39d1e6ee5a3b04ac1f",
-  "implementationSha": "77d84903f9ca5ad528014cd11518f74a8f1e29d2",
+  "implementationSha": "f6a91de5deea6d8c16c8075150112078e8909a59",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
@@ -192,7 +192,15 @@
       "sha": "77d84903f9ca5ad528014cd11518f74a8f1e29d2",
       "status": "passed",
       "command": "npm test; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run build:staging; git diff --check; Firebase Hosting staging verification",
-      "result": "73 pruebas Angular y 5 recorridos Chromium aprobados; trazabilidad, lint, guardia visual, formato, build y diff aprobaron; Hosting HTTP 200 con main-G6DKMJDP.js y styles-YBUAO7AQ.css",
+      "result": "La suite aprobó, pero solo comprobaba atributos y no la visibilidad calculada; una regla local mantuvo todos los paneles visibles, por lo que esta ejecución no acredita USR-035",
+      "criteria": []
+    },
+    {
+      "id": "permissions-accordion-fix-f6a91de",
+      "sha": "f6a91de5deea6d8c16c8075150112078e8909a59",
+      "status": "passed",
+      "command": "npm test; npm run test:e2e; npm run lint; npm run format:check; npm run build:staging; git diff --check; Firebase Hosting staging verification",
+      "result": "73 pruebas Angular y 5 recorridos Chromium aprobados; las regresiones comprueban presencia y ausencia real de paneles; lint, guardia visual, formato, build y diff aprobaron; Hosting HTTP 200 con main-2AWLN5BY.js y styles-6O34NL67.css",
       "criteria": ["USR-035"]
     }
   ],
@@ -649,7 +657,7 @@
       "verification": "automated",
       "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
       "state": "deployed-staging",
-      "evidenceId": "permissions-accordion-77d8490"
+      "evidenceId": "permissions-accordion-fix-f6a91de"
     },
     {
       "requirement": "RN-LAY-007",

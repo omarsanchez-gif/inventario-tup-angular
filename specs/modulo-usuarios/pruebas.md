@@ -79,10 +79,11 @@
 
 ## Evidencia del acordeón de permisos — 11 de noviembre de 2026
 
-- USR-035 aprobó sobre `77d84903f9ca5ad528014cd11518f74a8f1e29d2`: apertura inicial, expansión exclusiva, atributos accesibles, resumen dinámico y conservación de selecciones se verificaron en componente y en Chromium con Emulator Suite.
-- La regresión aprobó 17 archivos y 73 pruebas Angular, 5 recorridos Chromium, trazabilidad estructural y sus 7 pruebas negativas, lint, guardia visual, formato, build de staging y `git diff --check`.
-- Se desplegó únicamente Hosting con `--only hosting --project staging`; `/usuarios`, `main-G6DKMJDP.js` y `styles-YBUAO7AQ.css` respondieron HTTP 200. Functions, Rules, Storage, índices, datos, secretos, IAM y producción permanecieron intactos.
-- La aceptación visual autenticada del acordeón en escritorio y 320 px permanece pendiente y no se presenta como aprobada por las pruebas automatizadas.
+- La primera implementación `77d84903f9ca5ad528014cd11518f74a8f1e29d2` no acreditó USR-035: aunque cambiaba `aria-expanded` y el atributo `hidden`, el `display: grid` encapsulado mantuvo visibles todos los paneles. La captura autenticada detectó la insuficiencia de las pruebas anteriores.
+- La corrección `f6a91de5deea6d8c16c8075150112078e8909a59` renderiza estructuralmente solo el panel activo mediante `@if`; contraer un módulo lo retira del DOM sin perder los valores del `FormGroup`.
+- La regresión nueva verifica presencia y ausencia reales de cada panel, expansión exclusiva y conservación de selecciones. Aprobaron 17 archivos y 73 pruebas Angular, 5 recorridos Chromium, lint, guardia visual, formato, build de staging y `git diff --check`.
+- Se desplegó únicamente Hosting con `--only hosting --project staging`; `/usuarios`, `main-2AWLN5BY.js` y `styles-6O34NL67.css` respondieron HTTP 200. Functions, Rules, Storage, índices, datos, secretos, IAM y producción permanecieron intactos.
+- Queda pendiente confirmar visualmente la corrección con la sesión institucional; la evidencia automatizada sí comprueba ahora el estado visible real en Chromium.
 
 ## Evidencia local — búsqueda y paginación
 
