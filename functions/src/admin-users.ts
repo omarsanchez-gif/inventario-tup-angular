@@ -1,6 +1,7 @@
 import type { FunctionsErrorCode } from 'firebase-functions/https';
 
 import type { UserRole } from './bootstrap-authorization.js';
+import { validatePermissionMap, type PermissionMap } from './catalog-permissions.js';
 
 export const MAX_SUPPORTED_USERS = 500;
 
@@ -19,6 +20,7 @@ export interface ManagedUser {
   readonly activo: boolean;
   readonly fechaCreacion: string | null;
   readonly ultimoAcceso: string | null;
+  readonly permisos: PermissionMap;
 }
 
 export interface AdminUsersRepository {
@@ -29,6 +31,11 @@ export interface AdminUsersRepository {
   setStatus(requesterUid: string, documentId: string, activo: boolean): Promise<ManagedUser>;
   prepareDeletion(requesterUid: string, documentId: string): Promise<ManagedUser>;
   completeDeletion(requesterUid: string, documentId: string): Promise<void>;
+  setPermissions(
+    requesterUid: string,
+    documentId: string,
+    permissions: PermissionMap,
+  ): Promise<ManagedUser>;
 }
 
 export interface UserDraft {
@@ -266,4 +273,28 @@ export async function deleteAuthorizedUser(
   await synchronize(user, dependencies, true);
   await dependencies.repository.completeDeletion(requester.uid, id);
   return { documentId: id, status: 'completed' as const };
+}
+
+export async function setAuthorizedUserPermissions(
+  identity: AdminIdentity | null,
+  data: unknown,
+  dependencies: AdminUsersDependencies,
+) {
+  const requester = await requireAdmin(identity, dependencies);
+  const request = requestObject(data);
+  allowedFields(request, ['documentId', 'permisos']);
+  const permissions = validatePermissionMap(request['permisos']);
+  if (!permissions) {
+    throw new AdminUsersError(
+      'user-permissions-invalid',
+      'invalid-argument',
+      'Los permisos no son válidos.',
+    );
+  }
+  const user = await dependencies.repository.setPermissions(
+    requester.uid,
+    documentId(request),
+    permissions,
+  );
+  return { documentId: user.documentId, permisos: user.permisos, status: 'completed' as const };
 }

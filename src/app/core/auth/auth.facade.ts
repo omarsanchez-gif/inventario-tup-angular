@@ -10,6 +10,11 @@ import type {
 import { mapAuthError } from './auth-error.mapper';
 import { AUTH_GATEWAY, AUTHORIZATION_GATEWAY } from './gateways';
 import { SessionScope } from './session-scope';
+import {
+  hasPermission,
+  type PermissionAction,
+  type PermissionModule,
+} from '../../shared/models/catalog-permissions';
 
 class StaleSessionError extends Error {}
 
@@ -28,6 +33,7 @@ export class AuthFacade {
   private authorizationUid: string | null = null;
   private sessionUid: string | null = null;
   private authorizationGeneration = 0;
+  private firebaseUser: User | null = null;
 
   readonly user = this.userState.asReadonly();
   readonly loading = this.loadingState.asReadonly();
@@ -35,6 +41,32 @@ export class AuthFacade {
   readonly error = this.errorState.asReadonly();
   readonly authorized = computed(() => this.userState() !== null);
   readonly role = computed<UserRole | null>(() => this.userState()?.rol ?? null);
+
+  can(module: PermissionModule, action: PermissionAction): boolean {
+    const user = this.userState();
+    return hasPermission(user?.rol ?? null, user?.permisos, module, action);
+  }
+
+  async refreshAuthorization(): Promise<boolean> {
+    await this.initialize();
+    const user = this.firebaseUser;
+    if (!user) return false;
+    const generation = this.authorizationGeneration;
+    try {
+      await this.authorize(user, generation);
+      this.requireCurrentSession(user.uid, generation);
+      return true;
+    } catch (error) {
+      if (error instanceof StaleSessionError || !this.isCurrentSession(user.uid, generation)) {
+        return false;
+      }
+      this.invalidateSession(null, true);
+      this.errorState.set(mapAuthError(error));
+      await this.safeSignOut();
+      await this.navigateToLogin();
+      return false;
+    }
+  }
 
   initialize(): Promise<void> {
     if (this.initializationPromise) return this.initializationPromise;
@@ -69,6 +101,7 @@ export class AuthFacade {
     this.errorState.set(null);
     try {
       const user = await this.authGateway.signInWithGoogle();
+      this.firebaseUser = user;
       operationUid = user.uid;
       operationGeneration = this.activateSession(user.uid);
       await this.authorize(user, operationGeneration);
@@ -103,11 +136,13 @@ export class AuthFacade {
 
   private async handleSession(user: User | null): Promise<void> {
     if (!user) {
+      this.firebaseUser = null;
       const hadSession = this.sessionUid !== null;
       this.invalidateSession(null);
       if (hadSession || this.initializedState()) await this.navigateToLogin();
       return;
     }
+    this.firebaseUser = user;
     const generation = this.activateSession(user.uid);
     this.loadingState.set(true);
     try {
@@ -172,6 +207,7 @@ export class AuthFacade {
   }
 
   private invalidateSession(uid: null, force = false): void {
+    this.firebaseUser = null;
     if (force || this.sessionUid !== uid) {
       this.sessionUid = uid;
       this.authorizationGeneration += 1;

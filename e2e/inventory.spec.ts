@@ -135,3 +135,35 @@ test('LAY-020 keeps mobile navigation and forms usable at 320 px', async ({ page
   );
   expect(hasGlobalOverflow).toBe(false);
 });
+
+test('USR-022 assigns catalog permissions after user creation', async ({ page }) => {
+  const reference = firestore.collection('usuarios').doc('permission-target-e2e');
+  await reference.set({
+    uid: null,
+    nombre: 'Capturista E2E',
+    correo: 'capturista.e2e@tecplayacar.edu.mx',
+    rol: 'usuario',
+    activo: true,
+    permisos: { categorias: [], fabricantes: [], modelosActivos: [] },
+    fechaCreacion: new Date(),
+    ultimoAcceso: null,
+  });
+  try {
+    await login(page);
+    await page.goto('/usuarios');
+    await page.getByLabel('Buscar por nombre o correo').fill('Capturista E2E');
+    await page.getByRole('button', { name: 'Asignar permisos a Capturista E2E' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel('Editar', { exact: true }).first().check();
+    await expect(dialog.getByLabel('Ver', { exact: true }).first()).toBeChecked();
+    await dialog.getByRole('button', { name: 'Guardar permisos' }).click();
+    await expect(dialog).toBeHidden();
+    expect((await reference.get()).data()?.['permisos']).toEqual({
+      categorias: ['ver', 'editar'],
+      fabricantes: [],
+      modelosActivos: [],
+    });
+  } finally {
+    await reference.delete();
+  }
+});

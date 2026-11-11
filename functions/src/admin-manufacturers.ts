@@ -1,6 +1,7 @@
 import type { FunctionsErrorCode } from 'firebase-functions/https';
 
 import type { AdminIdentity } from './admin-users.js';
+import type { PermissionAction } from './catalog-permissions.js';
 
 export const MAX_SUPPORTED_MANUFACTURERS = 500;
 
@@ -25,7 +26,7 @@ export interface ManufacturerUpdate extends ManufacturerDraft {
 }
 
 export interface AdminManufacturersRepository {
-  findCanonicalAdmin(uid: string): Promise<boolean>;
+  hasCanonicalPermission(uid: string, action: PermissionAction): Promise<boolean>;
   list(limit: number): Promise<readonly ManagedManufacturer[]>;
   create(requesterUid: string, input: ManufacturerDraft): Promise<string>;
   update(requesterUid: string, input: ManufacturerUpdate): Promise<void>;
@@ -47,9 +48,10 @@ export class AdminManufacturersError extends Error {
   }
 }
 
-async function requireAdmin(
+async function requirePermission(
   identity: AdminIdentity | null,
   dependencies: AdminManufacturersDependencies,
+  action: PermissionAction,
 ): Promise<AdminIdentity> {
   if (!identity) {
     throw new AdminManufacturersError(
@@ -58,10 +60,10 @@ async function requireAdmin(
       'Se requiere una sesión.',
     );
   }
-  if (!identity.authorized || identity.role !== 'admin') {
+  if (!identity.authorized) {
     throw new AdminManufacturersError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
-  if (!(await dependencies.repository.findCanonicalAdmin(identity.uid))) {
+  if (!(await dependencies.repository.hasCanonicalPermission(identity.uid, action))) {
     throw new AdminManufacturersError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
   return identity;
@@ -171,7 +173,7 @@ export async function listManufacturers(
   identity: AdminIdentity | null,
   dependencies: AdminManufacturersDependencies,
 ) {
-  await requireAdmin(identity, dependencies);
+  await requirePermission(identity, dependencies, 'ver');
   const manufacturers = await dependencies.repository.list(MAX_SUPPORTED_MANUFACTURERS + 1);
   if (manufacturers.length > MAX_SUPPORTED_MANUFACTURERS) {
     throw new AdminManufacturersError(
@@ -202,7 +204,7 @@ export async function createManufacturer(
   data: unknown,
   dependencies: AdminManufacturersDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'crear');
   const request = requestObject(data);
   allowedFields(request, ['nombre', 'notas']);
   const documentId = await dependencies.repository.create(requester.uid, draft(request));
@@ -214,7 +216,7 @@ export async function updateManufacturer(
   data: unknown,
   dependencies: AdminManufacturersDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'editar');
   const request = requestObject(data);
   allowedFields(request, ['documentId', 'nombre', 'notas']);
   const documentId = manufacturerDocumentId(request);
@@ -227,7 +229,7 @@ export async function setManufacturerStatus(
   data: unknown,
   dependencies: AdminManufacturersDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'cambiarEstado');
   const request = requestObject(data);
   allowedFields(request, ['documentId', 'activo']);
   const documentId = manufacturerDocumentId(request);
@@ -244,7 +246,7 @@ export async function deleteManufacturer(
   data: unknown,
   dependencies: AdminManufacturersDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'eliminar');
   const request = requestObject(data);
   allowedFields(request, ['documentId']);
   const documentId = manufacturerDocumentId(request);

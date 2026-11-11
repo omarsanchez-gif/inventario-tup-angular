@@ -2,7 +2,7 @@
 
 ## Estado
 
-Propuesto para validación funcional el 10 de noviembre de 2026. No autoriza implementación, cambios de datos ni despliegue.
+Aprobado para implementación, pruebas y despliegue exclusivo a staging el 11 de noviembre de 2026. La validación y el despliegue todavía deben documentarse antes de declararlo completado.
 
 ## Contexto
 

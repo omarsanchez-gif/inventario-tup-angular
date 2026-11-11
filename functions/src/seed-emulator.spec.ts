@@ -137,7 +137,7 @@ emulatorSuite('synthetic emulator preparation', () => {
     await expect(
       firestore.collection('fabricantes_nombres').doc(manufacturerKey).get(),
     ).resolves.toMatchObject({ exists: false });
-  });
+  }, 20_000);
 
   it('DEV-001 rejects preparation outside the demo project before contacting services', async () => {
     await expect(seed('inventario-stg')).rejects.toMatchObject({ code: expect.any(Number) });

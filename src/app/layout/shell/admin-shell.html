@@ -41,6 +41,8 @@
           <app-icon name="users" />
           <span>Usuarios</span>
         </a>
+      }
+      @if (settingsVisible()) {
         <div class="navigation-group">
           <button
             class="navigation__link navigation__group-toggle"
@@ -60,42 +62,50 @@
           </button>
           @if (settingsExpanded()) {
             <div class="navigation__subnav" id="settings-navigation">
-              <a
-                class="navigation__sublink"
-                routerLink="/configuraciones/categorias"
-                routerLinkActive="navigation__sublink--active"
-                ariaCurrentWhenActive="page"
-                (click)="closeNavigationOnMobile()"
-              >
-                Categorías
-              </a>
-              <a
-                class="navigation__sublink"
-                routerLink="/configuraciones/fabricantes"
-                routerLinkActive="navigation__sublink--active"
-                ariaCurrentWhenActive="page"
-                (click)="closeNavigationOnMobile()"
-              >
-                Fabricantes
-              </a>
-              <a
-                class="navigation__sublink"
-                routerLink="/configuraciones/modelos-activos"
-                routerLinkActive="navigation__sublink--active"
-                ariaCurrentWhenActive="page"
-                (click)="closeNavigationOnMobile()"
-              >
-                Modelos de activos
-              </a>
-              <a
-                class="navigation__sublink"
-                routerLink="/configuraciones/campus"
-                routerLinkActive="navigation__sublink--active"
-                ariaCurrentWhenActive="page"
-                (click)="closeNavigationOnMobile()"
-              >
-                Campus
-              </a>
+              @if (auth.can('categorias', 'ver')) {
+                <a
+                  class="navigation__sublink"
+                  routerLink="/configuraciones/categorias"
+                  routerLinkActive="navigation__sublink--active"
+                  ariaCurrentWhenActive="page"
+                  (click)="closeNavigationOnMobile()"
+                >
+                  Categorías
+                </a>
+              }
+              @if (auth.can('fabricantes', 'ver')) {
+                <a
+                  class="navigation__sublink"
+                  routerLink="/configuraciones/fabricantes"
+                  routerLinkActive="navigation__sublink--active"
+                  ariaCurrentWhenActive="page"
+                  (click)="closeNavigationOnMobile()"
+                >
+                  Fabricantes
+                </a>
+              }
+              @if (auth.can('modelosActivos', 'ver')) {
+                <a
+                  class="navigation__sublink"
+                  routerLink="/configuraciones/modelos-activos"
+                  routerLinkActive="navigation__sublink--active"
+                  ariaCurrentWhenActive="page"
+                  (click)="closeNavigationOnMobile()"
+                >
+                  Modelos de activos
+                </a>
+              }
+              @if (auth.role() === 'admin') {
+                <a
+                  class="navigation__sublink"
+                  routerLink="/configuraciones/campus"
+                  routerLinkActive="navigation__sublink--active"
+                  ariaCurrentWhenActive="page"
+                  (click)="closeNavigationOnMobile()"
+                >
+                  Campus
+                </a>
+              }
             </div>
           }
         </div>

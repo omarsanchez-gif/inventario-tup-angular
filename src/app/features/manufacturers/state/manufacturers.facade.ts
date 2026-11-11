@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { SessionScope } from '../../../core/auth/session-scope';
+import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { InventoryManufacturer } from '../../../shared/models/inventory-manufacturer';
 import {
   MANUFACTURERS_GATEWAY,
@@ -36,6 +37,10 @@ function manufacturerErrorMessage(error: unknown): string {
   }
 }
 
+function permissionDenied(error: unknown): boolean {
+  return (error as FunctionalError)?.details?.functionalCode === 'permission-denied';
+}
+
 function searchable(value: string): string {
   return value
     .normalize('NFKD')
@@ -47,6 +52,7 @@ function searchable(value: string): string {
 export class ManufacturersFacade {
   private readonly gateway = inject(MANUFACTURERS_GATEWAY);
   private readonly sessionScope = inject(SessionScope);
+  private readonly auth = inject(AuthFacade);
   private readonly manufacturersState = signal<readonly InventoryManufacturer[]>([]);
   private readonly queryState = signal('');
   private readonly loadingState = signal(false);
@@ -85,8 +91,13 @@ export class ManufacturersFacade {
       const result = await this.gateway.list();
       if (this.sessionScope.isCurrent(generation)) this.manufacturersState.set(result.items);
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation))
+      if (this.sessionScope.isCurrent(generation)) {
+        if (permissionDenied(error)) {
+          this.manufacturersState.set([]);
+          void this.auth.refreshAuthorization();
+        }
         this.errorState.set(manufacturerErrorMessage(error));
+      }
     } finally {
       if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
     }
@@ -131,8 +142,13 @@ export class ManufacturersFacade {
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation))
+      if (this.sessionScope.isCurrent(generation)) {
+        if (permissionDenied(error)) {
+          this.manufacturersState.set([]);
+          void this.auth.refreshAuthorization();
+        }
         this.errorState.set(manufacturerErrorMessage(error));
+      }
       return false;
     } finally {
       if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);

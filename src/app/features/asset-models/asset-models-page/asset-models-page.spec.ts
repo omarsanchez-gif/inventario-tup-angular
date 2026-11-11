@@ -35,6 +35,7 @@ describe('AssetModelsPage', () => {
   let fixture: ComponentFixture<AssetModelsPage>;
   let element: HTMLElement;
   let authorized: WritableSignal<boolean>;
+  let authCan: ReturnType<typeof vi.fn>;
   let assetModels: {
     load: ReturnType<typeof vi.fn>;
     save: ReturnType<typeof vi.fn>;
@@ -91,12 +92,13 @@ describe('AssetModelsPage', () => {
       success: signal(null),
     };
     authorized = signal(true);
+    authCan = vi.fn().mockReturnValue(true);
 
     await TestBed.configureTestingModule({
       imports: [AssetModelsPage],
       providers: [
         { provide: AssetModelsFacade, useValue: assetModels },
-        { provide: AuthFacade, useValue: { authorized } },
+        { provide: AuthFacade, useValue: { authorized, can: authCan } },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(AssetModelsPage);
@@ -139,6 +141,21 @@ describe('AssetModelsPage', () => {
         button.textContent?.trim(),
       ),
     ).toEqual(['', '', '']);
+  });
+
+  it('MOD-058 shows only actions granted by the current capability map', () => {
+    authCan.mockImplementation(
+      (_module: string, actionName: string) => actionName === 'ver' || actionName === 'editar',
+    );
+    fixture.destroy();
+    fixture = TestBed.createComponent(AssetModelsPage);
+    fixture.detectChanges();
+    element = fixture.nativeElement as HTMLElement;
+
+    expect(element.textContent).not.toContain('Nuevo modelo');
+    expect(element.querySelector('[aria-label="Editar Latitude 5500"]')).toBeTruthy();
+    expect(element.querySelector('[aria-label="Desactivar Latitude 5500"]')).toBeNull();
+    expect(element.querySelector('[aria-label="Eliminar Latitude 5500"]')).toBeNull();
   });
 
   it('uses the approved modal fields and excludes historical Snipe-IT fields', () => {

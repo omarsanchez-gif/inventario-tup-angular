@@ -4,6 +4,7 @@ import { provideRouter, Router } from '@angular/router';
 
 import { AuthFacade } from '../../core/auth/auth.facade';
 import type { AuthorizedUser } from '../../shared/models/authorized-user';
+import { fullPermissionMap } from '../../shared/models/catalog-permissions';
 import { AdminShell } from './admin-shell';
 
 @Component({ template: '' })
@@ -16,12 +17,14 @@ describe('AdminShell', () => {
     correo: 'omar.sanchez@tecplayacar.edu.mx',
     rol: 'admin',
     activo: true,
+    permisos: fullPermissionMap(),
   };
   let desktop = true;
   let fixture: ComponentFixture<AdminShell>;
   let logout: ReturnType<typeof vi.fn>;
   let viewportListener: ((event: MediaQueryListEvent) => void) | undefined;
   let roleState: WritableSignal<'admin' | 'usuario' | null>;
+  let can: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     Object.defineProperty(window, 'matchMedia', {
@@ -47,6 +50,7 @@ describe('AdminShell', () => {
     logout = vi.fn();
     const userState = signal<AuthorizedUser | null>(user);
     roleState = signal<'admin' | 'usuario' | null>('admin');
+    can = vi.fn(() => roleState() === 'admin');
 
     await TestBed.configureTestingModule({
       imports: [AdminShell],
@@ -64,6 +68,8 @@ describe('AdminShell', () => {
           useValue: {
             user: userState.asReadonly(),
             role: roleState.asReadonly(),
+            can,
+            refreshAuthorization: vi.fn().mockResolvedValue(true),
             logout,
           },
         },
@@ -210,5 +216,20 @@ describe('AdminShell', () => {
 
     expect(element.querySelector('.navigation__group-toggle')).toBeFalsy();
     expect(element.textContent).not.toContain('Categorías');
+  });
+
+  it('LAY-022 LAY-023 shows only granted configuration links to usuario', () => {
+    roleState.set('usuario');
+    can.mockImplementation((module: string) => module === 'fabricantes');
+    createShell();
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('.navigation__group-toggle')!.click();
+    fixture.detectChanges();
+
+    expect(
+      [...element.querySelectorAll('.navigation__sublink')].map((link) => link.textContent?.trim()),
+    ).toEqual(['Fabricantes']);
+    expect(element.textContent).not.toContain('Usuarios');
+    expect(element.textContent).not.toContain('Campus');
   });
 });

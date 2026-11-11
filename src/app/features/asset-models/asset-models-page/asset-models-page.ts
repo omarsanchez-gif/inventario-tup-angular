@@ -45,7 +45,7 @@ function fileBase64(file: File): Promise<string> {
 })
 export class AssetModelsPage implements OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly auth = inject(AuthFacade);
+  protected readonly auth = inject(AuthFacade);
   private readonly sessionScope = inject(SessionScope);
   protected readonly assetModels = inject(AssetModelsFacade);
   protected readonly formVisible = signal(false);

@@ -373,6 +373,146 @@
       "tests": ["functions/src/seed-emulator.spec.ts"],
       "state": "verified-local",
       "evidenceId": "emulators-58a0ab3"
+    },
+    {
+      "requirement": "RN-PER-001",
+      "criterion": "AUT-015",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-010",
+      "criterion": "AUT-016",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-005",
+      "criterion": "USR-020",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-004",
+      "criterion": "USR-021",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-006",
+      "criterion": "USR-022",
+      "verification": "browser",
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-003",
+      "criterion": "USR-023",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-007",
+      "criterion": "USR-024",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-008",
+      "criterion": "USR-025",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-001",
+      "criterion": "USR-026",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-USR-011",
+      "criterion": "USR-027",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-005",
+      "criterion": "USR-028",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-005",
+      "criterion": "USR-029",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-006",
+      "criterion": "USR-030",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-LAY-005",
+      "criterion": "LAY-022",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-LAY-005",
+      "criterion": "LAY-023",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-009",
+      "criterion": "LAY-024",
+      "verification": "automated",
+      "tests": ["src/app/core/guards/capability.guard.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-010",
+      "criterion": "LAY-025",
+      "verification": "automated",
+      "tests": ["src/app/core/guards/capability.guard.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-009",
+      "criterion": "CAT-025",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-003",
+      "criterion": "CAT-026",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-009",
+      "criterion": "CAT-027",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "implemented-pending-verification"
     }
   ]
 }

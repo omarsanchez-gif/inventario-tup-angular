@@ -1,4 +1,9 @@
 import type { FunctionsErrorCode } from 'firebase-functions/https';
+import {
+  fullPermissionMap,
+  sanitizePermissionMap,
+  type PermissionMap,
+} from './catalog-permissions.js';
 
 export type UserRole = 'admin' | 'usuario';
 
@@ -15,6 +20,7 @@ export interface AuthorizedUserRecord {
   readonly correo: string;
   readonly rol: unknown;
   readonly activo: boolean;
+  readonly permisos: PermissionMap;
 }
 
 export interface CanonicalUserRecord extends AuthorizedUserRecord {
@@ -151,6 +157,8 @@ export async function bootstrapAuthorization(
       rol: canonical.rol,
       activo: true as const,
       claimsUpdated,
+      permisos:
+        canonical.rol === 'admin' ? fullPermissionMap() : sanitizePermissionMap(canonical.permisos),
     };
   } catch (error) {
     if (error instanceof AuthorizationError) {

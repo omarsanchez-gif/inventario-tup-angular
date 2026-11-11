@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { SessionScope } from '../../../core/auth/session-scope';
+import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { InventoryCategory } from '../../../shared/models/inventory-category';
 import {
   CATEGORIES_GATEWAY,
@@ -36,6 +37,10 @@ function categoryErrorMessage(error: unknown): string {
   }
 }
 
+function permissionDenied(error: unknown): boolean {
+  return (error as FunctionalError)?.details?.functionalCode === 'permission-denied';
+}
+
 function searchable(value: string): string {
   return value
     .normalize('NFKD')
@@ -47,6 +52,7 @@ function searchable(value: string): string {
 export class CategoriesFacade {
   private readonly gateway = inject(CATEGORIES_GATEWAY);
   private readonly sessionScope = inject(SessionScope);
+  private readonly auth = inject(AuthFacade);
   private readonly categoriesState = signal<readonly InventoryCategory[]>([]);
   private readonly queryState = signal('');
   private readonly loadingState = signal(false);
@@ -85,7 +91,13 @@ export class CategoriesFacade {
       const result = await this.gateway.list();
       if (this.sessionScope.isCurrent(generation)) this.categoriesState.set(result.items);
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) this.errorState.set(categoryErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) {
+        if (permissionDenied(error)) {
+          this.categoriesState.set([]);
+          void this.auth.refreshAuthorization();
+        }
+        this.errorState.set(categoryErrorMessage(error));
+      }
     } finally {
       if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
     }
@@ -130,7 +142,13 @@ export class CategoriesFacade {
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) this.errorState.set(categoryErrorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) {
+        if (permissionDenied(error)) {
+          this.categoriesState.set([]);
+          void this.auth.refreshAuthorization();
+        }
+        this.errorState.set(categoryErrorMessage(error));
+      }
       return false;
     } finally {
       if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);

@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { SessionScope } from '../../../core/auth/session-scope';
+import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
 import {
   ASSET_MODELS_GATEWAY,
@@ -34,6 +35,10 @@ function errorMessage(error: unknown): string {
     : 'No fue posible completar la operación.';
 }
 
+function permissionDenied(error: unknown): boolean {
+  return (error as FunctionalError)?.details?.functionalCode === 'permission-denied';
+}
+
 function searchable(value: string): string {
   return value
     .normalize('NFKD')
@@ -51,6 +56,7 @@ export interface AssetModelSaveResult {
 export class AssetModelsFacade {
   private readonly gateway = inject(ASSET_MODELS_GATEWAY);
   private readonly sessionScope = inject(SessionScope);
+  private readonly auth = inject(AuthFacade);
   private readonly modelsState = signal<readonly InventoryAssetModel[]>([]);
   private readonly catalogsState = signal<AssetModelCatalogs>({ categorias: [], fabricantes: [] });
   private readonly queryState = signal('');
@@ -96,7 +102,7 @@ export class AssetModelsFacade {
         this.catalogsState.set(catalogs);
       }
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) this.errorState.set(errorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.handleError(error);
     } finally {
       if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
     }
@@ -111,7 +117,7 @@ export class AssetModelsFacade {
       documentId = 'documentId' in input ? input.documentId : await this.gateway.create(input);
       if ('documentId' in input) await this.gateway.update(input);
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) this.errorState.set(errorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.handleError(error);
       if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
       return null;
     }
@@ -191,7 +197,7 @@ export class AssetModelsFacade {
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) this.errorState.set(errorMessage(error));
+      if (this.sessionScope.isCurrent(generation)) this.handleError(error);
       return false;
     } finally {
       if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
@@ -205,5 +211,14 @@ export class AssetModelsFacade {
     this.loadingState.set(false);
     this.savingState.set(false);
     this.clearMessages();
+  }
+
+  private handleError(error: unknown): void {
+    if (permissionDenied(error)) {
+      this.modelsState.set([]);
+      this.catalogsState.set({ categorias: [], fabricantes: [] });
+      void this.auth.refreshAuthorization();
+    }
+    this.errorState.set(errorMessage(error));
   }
 }

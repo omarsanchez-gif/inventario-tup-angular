@@ -4,8 +4,10 @@ import {
   createAuthorizedUser,
   listAuthorizedUsers,
   setAuthorizedUserStatus,
+  setAuthorizedUserPermissions,
   type AdminUsersDependencies,
 } from './admin-users.js';
+import { emptyPermissionMap } from './catalog-permissions.js';
 
 function dependencies(): AdminUsersDependencies {
   return {
@@ -20,6 +22,7 @@ function dependencies(): AdminUsersDependencies {
         activo: true,
         fechaCreacion: null,
         ultimoAcceso: null,
+        permisos: emptyPermissionMap(),
       }),
       list: vi.fn().mockResolvedValue([]),
       create: vi.fn().mockResolvedValue('new-user'),
@@ -27,6 +30,7 @@ function dependencies(): AdminUsersDependencies {
       setStatus: vi.fn(),
       prepareDeletion: vi.fn(),
       completeDeletion: vi.fn(),
+      setPermissions: vi.fn(),
     },
     claims: {
       setClaims: vi.fn(),
@@ -73,6 +77,7 @@ describe('admin users', () => {
       activo: false,
       fechaCreacion: null,
       ultimoAcceso: null,
+      permisos: emptyPermissionMap(),
     });
     vi.mocked(deps.claims.setClaims).mockRejectedValueOnce(new Error('claims unavailable'));
 
@@ -85,5 +90,45 @@ describe('admin users', () => {
     ).rejects.toMatchObject({ functionalCode: 'reconciliation-required' });
 
     expect(deps.claims.revokeRefreshTokens).toHaveBeenCalledWith('uid-target');
+  });
+
+  it('replaces a valid complete permission map and rejects invalid dependencies', async () => {
+    const deps = dependencies();
+    const permisos = {
+      categorias: ['ver', 'crear'] as const,
+      fabricantes: [] as const,
+      modelosActivos: ['ver', 'editar'] as const,
+    };
+    vi.mocked(deps.repository.setPermissions).mockResolvedValue({
+      documentId: 'target',
+      uid: 'uid-target',
+      nombre: 'Target',
+      correo: 'target@tecplayacar.edu.mx',
+      rol: 'usuario',
+      activo: true,
+      fechaCreacion: null,
+      ultimoAcceso: null,
+      permisos,
+    });
+
+    await expect(
+      setAuthorizedUserPermissions(
+        { uid: 'uid-admin', authorized: true, role: 'admin' },
+        { documentId: 'target', permisos },
+        deps,
+      ),
+    ).resolves.toMatchObject({ documentId: 'target', permisos });
+    expect(deps.repository.setPermissions).toHaveBeenCalledWith('uid-admin', 'target', permisos);
+
+    await expect(
+      setAuthorizedUserPermissions(
+        { uid: 'uid-admin', authorized: true, role: 'admin' },
+        {
+          documentId: 'target',
+          permisos: { categorias: ['editar'], fabricantes: [], modelosActivos: [] },
+        },
+        deps,
+      ),
+    ).rejects.toMatchObject({ functionalCode: 'user-permissions-invalid' });
   });
 });

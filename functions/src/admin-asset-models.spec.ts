@@ -36,7 +36,7 @@ function assetModel(index = 1, overrides: Partial<ManagedAssetModel> = {}): Mana
 function dependencies(items: readonly ManagedAssetModel[] = []): AdminAssetModelsDependencies {
   return {
     repository: {
-      findCanonicalAdmin: vi.fn().mockResolvedValue(true),
+      hasCanonicalPermission: vi.fn().mockResolvedValue(true),
       list: vi.fn().mockResolvedValue(items),
       listCatalogs: vi.fn().mockResolvedValue({
         categorias: [{ documentId: 'category-1', nombre: 'Laptops' }],
@@ -51,19 +51,23 @@ function dependencies(items: readonly ManagedAssetModel[] = []): AdminAssetModel
 }
 
 describe('admin asset models', () => {
-  it('requires an authenticated canonical admin', async () => {
+  it('MOD-054 requires an authenticated identity with the canonical module permission', async () => {
     await expect(listAssetModels(null, dependencies())).rejects.toMatchObject({
       functionalCode: 'unauthenticated',
     });
-    await expect(
-      listAssetModels({ uid: 'user', authorized: true, role: 'usuario' }, dependencies()),
-    ).rejects.toMatchObject({ functionalCode: 'permission-denied' });
-
     const deps = dependencies();
-    deps.repository.findCanonicalAdmin = vi.fn().mockResolvedValue(false);
-    await expect(listAssetModels(admin, deps)).rejects.toMatchObject({
+    deps.repository.hasCanonicalPermission = vi.fn().mockResolvedValue(false);
+    await expect(
+      listAssetModels({ uid: 'user', authorized: true, role: 'usuario' }, deps),
+    ).rejects.toMatchObject({
       functionalCode: 'permission-denied',
     });
+
+    const allowed = dependencies();
+    await expect(
+      listAssetModels({ uid: 'user', authorized: true, role: 'usuario' }, allowed),
+    ).resolves.toMatchObject({ total: 0 });
+    expect(allowed.repository.hasCanonicalPermission).toHaveBeenCalledWith('user', 'ver');
   });
 
   it('normalizes identity fields and sends only the declared draft', async () => {
@@ -128,7 +132,7 @@ describe('admin asset models', () => {
     expect(deps.repository.create).not.toHaveBeenCalled();
   });
 
-  it('returns sorted sanitized models and active catalogs', async () => {
+  it('MOD-057 returns sorted sanitized models and active catalogs', async () => {
     const deps = dependencies([
       assetModel(2, { nombre: 'ThinkPad', nombreNormalizado: 'thinkpad' }),
       assetModel(1, { nombre: 'Latitude', nombreNormalizado: 'latitude' }),
@@ -152,7 +156,7 @@ describe('admin asset models', () => {
     });
   });
 
-  it('forwards controlled update, status and deletion commands', async () => {
+  it('MOD-055 forwards controlled update, status and deletion commands', async () => {
     const deps = dependencies();
     await updateAssetModel(
       admin,

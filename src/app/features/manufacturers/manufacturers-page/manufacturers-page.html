@@ -5,9 +5,11 @@
       <h1 class="page-title" id="manufacturers-title">Fabricantes</h1>
       <p>Administre las marcas que producen los modelos de activos.</p>
     </div>
-    <button class="button button--primary" type="button" (click)="openNew()">
-      Nuevo fabricante
-    </button>
+    @if (auth.can('fabricantes', 'crear')) {
+      <button class="button button--primary" type="button" (click)="openNew()">
+        Nuevo fabricante
+      </button>
+    }
   </header>
 
   @if (!formVisible() && !pendingDeletion() && manufacturers.error(); as error) {
@@ -149,44 +151,50 @@
               </td>
               <td>
                 <div class="record-actions">
-                  <button
-                    class="icon-button icon-button--secondary"
-                    type="button"
-                    [disabled]="manufacturers.saving()"
-                    [attr.aria-label]="'Editar ' + manufacturer.nombre"
-                    [attr.title]="'Editar ' + manufacturer.nombre"
-                    (click)="edit(manufacturer)"
-                  >
-                    <app-icon name="edit" />
-                  </button>
-                  <button
-                    class="icon-button icon-button--secondary"
-                    type="button"
-                    [disabled]="manufacturers.saving()"
-                    [attr.aria-label]="
-                      manufacturer.activo
-                        ? 'Desactivar ' + manufacturer.nombre
-                        : 'Activar ' + manufacturer.nombre
-                    "
-                    [attr.title]="
-                      manufacturer.activo
-                        ? 'Desactivar ' + manufacturer.nombre
-                        : 'Activar ' + manufacturer.nombre
-                    "
-                    (click)="toggleStatus(manufacturer)"
-                  >
-                    <app-icon [name]="manufacturer.activo ? 'deactivate' : 'activate'" />
-                  </button>
-                  <button
-                    class="icon-button icon-button--danger"
-                    type="button"
-                    [disabled]="manufacturers.saving()"
-                    [attr.aria-label]="'Eliminar ' + manufacturer.nombre"
-                    [attr.title]="'Eliminar ' + manufacturer.nombre"
-                    (click)="requestDeletion(manufacturer)"
-                  >
-                    <app-icon name="delete" />
-                  </button>
+                  @if (auth.can('fabricantes', 'editar')) {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="manufacturers.saving()"
+                      [attr.aria-label]="'Editar ' + manufacturer.nombre"
+                      [attr.title]="'Editar ' + manufacturer.nombre"
+                      (click)="edit(manufacturer)"
+                    >
+                      <app-icon name="edit" />
+                    </button>
+                  }
+                  @if (auth.can('fabricantes', 'cambiarEstado')) {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="manufacturers.saving()"
+                      [attr.aria-label]="
+                        manufacturer.activo
+                          ? 'Desactivar ' + manufacturer.nombre
+                          : 'Activar ' + manufacturer.nombre
+                      "
+                      [attr.title]="
+                        manufacturer.activo
+                          ? 'Desactivar ' + manufacturer.nombre
+                          : 'Activar ' + manufacturer.nombre
+                      "
+                      (click)="toggleStatus(manufacturer)"
+                    >
+                      <app-icon [name]="manufacturer.activo ? 'deactivate' : 'activate'" />
+                    </button>
+                  }
+                  @if (auth.can('fabricantes', 'eliminar')) {
+                    <button
+                      class="icon-button icon-button--danger"
+                      type="button"
+                      [disabled]="manufacturers.saving()"
+                      [attr.aria-label]="'Eliminar ' + manufacturer.nombre"
+                      [attr.title]="'Eliminar ' + manufacturer.nombre"
+                      (click)="requestDeletion(manufacturer)"
+                    >
+                      <app-icon name="delete" />
+                    </button>
+                  }
                 </div>
               </td>
             </tr>

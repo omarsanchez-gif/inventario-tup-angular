@@ -70,7 +70,7 @@ export async function setAssetModelImage(
   data: unknown,
   dependencies: AssetModelImageDependencies,
 ) {
-  const requester = await requireAssetModelAdmin(identity, dependencies);
+  const requester = await requireAssetModelAdmin(identity, dependencies, 'editar');
   const request = assetModelRequestObject(data);
   allowAssetModelFields(request, ['documentId', 'fileName', 'contentType', 'base64']);
   const documentId = assetModelDocumentId(request['documentId']);
@@ -104,7 +104,7 @@ export async function removeAssetModelImage(
   data: unknown,
   dependencies: AssetModelImageDependencies,
 ) {
-  const requester = await requireAssetModelAdmin(identity, dependencies);
+  const requester = await requireAssetModelAdmin(identity, dependencies, 'editar');
   const request = assetModelRequestObject(data);
   allowAssetModelFields(request, ['documentId']);
   const documentId = assetModelDocumentId(request['documentId']);
@@ -117,7 +117,7 @@ export async function getAssetModelImageAccess(
   data: unknown,
   dependencies: AssetModelImageDependencies,
 ) {
-  const requester = await requireAssetModelAdmin(identity, dependencies);
+  const requester = await requireAssetModelAdmin(identity, dependencies, 'ver');
   const request = assetModelRequestObject(data);
   allowAssetModelFields(request, ['documentId', 'variant']);
   const documentId = assetModelDocumentId(request['documentId']);

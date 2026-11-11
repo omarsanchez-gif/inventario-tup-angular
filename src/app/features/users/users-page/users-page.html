@@ -8,7 +8,7 @@
     <button class="button button--primary" type="button" (click)="openNew()">Nuevo usuario</button>
   </header>
 
-  @if (!formVisible() && !pendingDeletion() && users.error(); as error) {
+  @if (!formVisible() && !pendingDeletion() && !permissionsUser() && users.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
   @if (users.success(); as success) {
@@ -105,6 +105,57 @@
     </app-dialog>
   }
 
+  @if (permissionsUser(); as user) {
+    <app-dialog
+      [title]="'Asignar permisos a ' + user.nombre"
+      [dismissible]="!users.saving()"
+      (dismissed)="closePermissions()"
+    >
+      <form class="dialog-form" [formGroup]="permissionsForm" (ngSubmit)="savePermissions()">
+        <p class="dialog__help">
+          El acceso se aplica a los catálogos globales. Las áreas y el alcance de activos se
+          configurarán en un incremento posterior.
+        </p>
+        @if (users.error(); as error) {
+          <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
+        <div class="permissions-grid">
+          @for (module of permissionModules; track module.id) {
+            <fieldset class="permissions-group" [formGroupName]="module.id">
+              <legend>{{ module.label }}</legend>
+              <div class="permissions-group__actions">
+                @for (action of permissionOptions; track action.id) {
+                  <label class="checkbox-field" [for]="module.id + '-' + action.id">
+                    <input
+                      [id]="module.id + '-' + action.id"
+                      type="checkbox"
+                      [formControlName]="action.id"
+                      (change)="permissionChanged(module.id, action.id)"
+                    />
+                    {{ action.label }}
+                  </label>
+                }
+              </div>
+            </fieldset>
+          }
+        </div>
+        <div class="dialog__actions">
+          <button
+            class="button button--secondary"
+            type="button"
+            [disabled]="users.saving()"
+            (click)="closePermissions()"
+          >
+            Cancelar
+          </button>
+          <button class="button button--primary" type="submit" [disabled]="users.saving()">
+            {{ users.saving() ? 'Guardando…' : 'Guardar permisos' }}
+          </button>
+        </div>
+      </form>
+    </app-dialog>
+  }
+
   <div class="table-toolbar">
     <div class="field table-search">
       <label for="user-search">Buscar por nombre o correo</label>
@@ -138,6 +189,7 @@
             <th scope="col">Rol</th>
             <th scope="col">Estado</th>
             <th scope="col">Último acceso</th>
+            <th scope="col">Permisos</th>
             <th scope="col">Acciones</th>
           </tr>
         </thead>
@@ -157,8 +209,21 @@
                 </span>
               </td>
               <td>{{ formatAccess(user.ultimoAcceso) }}</td>
+              <td>{{ permissionSummary(user) }}</td>
               <td>
                 <div class="record-actions">
+                  @if (user.rol === 'usuario') {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="isSelf(user) || users.saving()"
+                      [attr.aria-label]="'Asignar permisos a ' + user.nombre"
+                      [attr.title]="'Asignar permisos a ' + user.nombre"
+                      (click)="openPermissions(user)"
+                    >
+                      <app-icon name="permissions" />
+                    </button>
+                  }
                   <button
                     class="icon-button icon-button--secondary"
                     type="button"

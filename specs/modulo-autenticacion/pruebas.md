@@ -14,8 +14,8 @@
 - AUT-012: cerrar sesión en otra pestaña navega a Login y limpia los estados administrativos de la pestaña abierta. <!-- trace:required -->
 - AUT-013: cambiar de usuario descarta perfil, claims y respuestas de solicitudes pertenecientes al UID anterior. <!-- trace:required -->
 - AUT-014: un error tardío de `bootstrap` o renovación de claims de A no cierra, limpia ni redirige una sesión B vigente; el error de la sesión vigente conserva el rechazo y cierre esperados. <!-- trace:required -->
-- AUT-015: `bootstrapAuthorization` entrega el mapa efectivo sanitizado sin agregarlo a Custom Claims; `admin` recibe acceso total y `usuario` denegación por defecto o sus acciones canónicas.
-- AUT-016: una revalidación de permisos tardía de A no modifica menú, acciones, perfil o navegación de una sesión B vigente.
+- AUT-015: `bootstrapAuthorization` entrega el mapa efectivo sanitizado sin agregarlo a Custom Claims; `admin` recibe acceso total y `usuario` denegación por defecto o sus acciones canónicas. <!-- trace:required -->
+- AUT-016: una revalidación de permisos tardía de A no modifica menú, acciones, perfil o navegación de una sesión B vigente. <!-- trace:required -->
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 

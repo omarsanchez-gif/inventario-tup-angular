@@ -22,6 +22,10 @@ import {
   assetModelImagePaths,
   type StoredImageDescriptor,
 } from './asset-model-image-storage.js';
+import {
+  hasCanonicalPermission as canonicalPermissionGranted,
+  type PermissionAction,
+} from './catalog-permissions.js';
 
 function timestamp(value: unknown, code = 'asset-model-reconciliation-required'): string {
   if (!(value instanceof Timestamp)) {
@@ -126,16 +130,19 @@ function identityKey(input: AssetModelDraft): string {
     .digest('hex');
 }
 
-async function requireCanonicalAdmin(
+async function requireCanonicalPermission(
   transaction: Transaction,
   users: FirebaseFirestore.CollectionReference,
   uid: string,
+  action: PermissionAction,
 ): Promise<void> {
-  const snapshot = await transaction.get(users.where('uid', '==', uid).limit(2));
   if (
-    snapshot.size !== 1 ||
-    snapshot.docs[0]?.data()['activo'] !== true ||
-    snapshot.docs[0]?.data()['rol'] !== 'admin'
+    !(await canonicalPermissionGranted(
+      transaction,
+      users.where('uid', '==', uid).limit(2),
+      'modelosActivos',
+      action,
+    ))
   ) {
     throw new AdminAssetModelsError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
@@ -173,12 +180,12 @@ export function createAdminAssetModelsRepository(firestore: Firestore): AdminAss
   const imageOperations = firestore.collection('modelos_activos_operaciones_imagen');
 
   return {
-    async findCanonicalAdmin(uid) {
-      const snapshot = await users.where('uid', '==', uid).limit(2).get();
-      return (
-        snapshot.size === 1 &&
-        snapshot.docs[0]?.data()['activo'] === true &&
-        snapshot.docs[0]?.data()['rol'] === 'admin'
+    async hasCanonicalPermission(uid, action) {
+      return canonicalPermissionGranted(
+        null,
+        users.where('uid', '==', uid).limit(2),
+        'modelosActivos',
+        action,
       );
     },
     async list(limit) {
@@ -264,7 +271,7 @@ export function createAdminAssetModelsRepository(firestore: Firestore): AdminAss
       const reference = models.doc();
       const keyReference = keys.doc(identityKey(input));
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, users, requesterUid);
+        await requireCanonicalPermission(transaction, users, requesterUid, 'crear');
         const [modelSnapshot, keySnapshot] = await Promise.all([
           transaction.get(models.limit(MAX_SUPPORTED_ASSET_MODELS + 1)),
           transaction.get(keyReference),
@@ -313,7 +320,7 @@ export function createAdminAssetModelsRepository(firestore: Firestore): AdminAss
     },
     async update(requesterUid, input) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, users, requesterUid);
+        await requireCanonicalPermission(transaction, users, requesterUid, 'editar');
         const reference = models.doc(input.documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists) {
@@ -380,7 +387,7 @@ export function createAdminAssetModelsRepository(firestore: Firestore): AdminAss
     },
     async setStatus(requesterUid, documentId, activo) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, users, requesterUid);
+        await requireCanonicalPermission(transaction, users, requesterUid, 'cambiarEstado');
         const reference = models.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists)
@@ -399,7 +406,7 @@ export function createAdminAssetModelsRepository(firestore: Firestore): AdminAss
     },
     async delete(requesterUid, documentId) {
       return firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, users, requesterUid);
+        await requireCanonicalPermission(transaction, users, requesterUid, 'eliminar');
         const reference = models.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists) {

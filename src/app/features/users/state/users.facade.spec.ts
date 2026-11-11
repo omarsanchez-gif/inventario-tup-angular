@@ -4,6 +4,7 @@ import { SessionScope } from '../../../core/auth/session-scope';
 import type { SystemUser } from '../../../shared/models/system-user';
 import { USERS_GATEWAY } from '../data/users.gateway';
 import { UsersFacade } from './users.facade';
+import { fullPermissionMap } from '../../../shared/models/catalog-permissions';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -47,6 +48,7 @@ describe('UsersFacade session isolation', () => {
           activo: true,
           fechaCreacion: null,
           ultimoAcceso: null,
+          permisos: fullPermissionMap(),
         },
       ],
     });

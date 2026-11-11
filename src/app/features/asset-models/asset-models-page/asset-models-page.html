@@ -5,7 +5,9 @@
       <h1 class="page-title" id="asset-models-title">Modelos de activos</h1>
       <p>Administre los modelos que clasificarán los activos institucionales.</p>
     </div>
-    <button class="button button--primary" type="button" (click)="openNew()">Nuevo modelo</button>
+    @if (auth.can('modelosActivos', 'crear')) {
+      <button class="button button--primary" type="button" (click)="openNew()">Nuevo modelo</button>
+    }
   </header>
 
   @if (!formVisible() && !pendingDeletion() && assetModels.error(); as error) {
@@ -236,40 +238,46 @@
               </td>
               <td>
                 <div class="record-actions">
-                  <button
-                    class="icon-button icon-button--secondary"
-                    type="button"
-                    [disabled]="busy()"
-                    [attr.aria-label]="'Editar ' + model.nombre"
-                    [attr.title]="'Editar ' + model.nombre"
-                    (click)="edit(model)"
-                  >
-                    <app-icon name="edit" />
-                  </button>
-                  <button
-                    class="icon-button icon-button--secondary"
-                    type="button"
-                    [disabled]="busy()"
-                    [attr.aria-label]="
-                      model.activo ? 'Desactivar ' + model.nombre : 'Activar ' + model.nombre
-                    "
-                    [attr.title]="
-                      model.activo ? 'Desactivar ' + model.nombre : 'Activar ' + model.nombre
-                    "
-                    (click)="toggleStatus(model)"
-                  >
-                    <app-icon [name]="model.activo ? 'deactivate' : 'activate'" />
-                  </button>
-                  <button
-                    class="icon-button icon-button--danger"
-                    type="button"
-                    [disabled]="busy()"
-                    [attr.aria-label]="'Eliminar ' + model.nombre"
-                    [attr.title]="'Eliminar ' + model.nombre"
-                    (click)="requestDeletion(model)"
-                  >
-                    <app-icon name="delete" />
-                  </button>
+                  @if (auth.can('modelosActivos', 'editar')) {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="busy()"
+                      [attr.aria-label]="'Editar ' + model.nombre"
+                      [attr.title]="'Editar ' + model.nombre"
+                      (click)="edit(model)"
+                    >
+                      <app-icon name="edit" />
+                    </button>
+                  }
+                  @if (auth.can('modelosActivos', 'cambiarEstado')) {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="busy()"
+                      [attr.aria-label]="
+                        model.activo ? 'Desactivar ' + model.nombre : 'Activar ' + model.nombre
+                      "
+                      [attr.title]="
+                        model.activo ? 'Desactivar ' + model.nombre : 'Activar ' + model.nombre
+                      "
+                      (click)="toggleStatus(model)"
+                    >
+                      <app-icon [name]="model.activo ? 'deactivate' : 'activate'" />
+                    </button>
+                  }
+                  @if (auth.can('modelosActivos', 'eliminar')) {
+                    <button
+                      class="icon-button icon-button--danger"
+                      type="button"
+                      [disabled]="busy()"
+                      [attr.aria-label]="'Eliminar ' + model.nombre"
+                      [attr.title]="'Eliminar ' + model.nombre"
+                      (click)="requestDeletion(model)"
+                    >
+                      <app-icon name="delete" />
+                    </button>
+                  }
                 </div>
               </td>
             </tr>

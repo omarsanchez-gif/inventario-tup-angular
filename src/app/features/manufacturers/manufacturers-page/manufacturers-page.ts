@@ -6,6 +6,7 @@ import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { AppIcon } from '../../../shared/ui/icon/app-icon';
 import { AppPagination } from '../../../shared/ui/pagination/app-pagination';
 import { ManufacturersFacade } from '../state/manufacturers.facade';
+import { AuthFacade } from '../../../core/auth/auth.facade';
 
 @Component({
   selector: 'app-manufacturers-page',
@@ -17,6 +18,7 @@ import { ManufacturersFacade } from '../state/manufacturers.facade';
 export class ManufacturersPage {
   private readonly formBuilder = inject(FormBuilder);
   protected readonly manufacturers = inject(ManufacturersFacade);
+  protected readonly auth = inject(AuthFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly pendingDeletion = signal<InventoryManufacturer | null>(null);

@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { adminGuard } from './core/guards/admin.guard';
 import { authorizedGuard } from './core/guards/authorized.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { capabilityGuard } from './core/guards/capability.guard';
 
 export const routes: Routes = [
   {
@@ -28,14 +29,14 @@ export const routes: Routes = [
       },
       {
         path: 'usuarios',
-        canActivate: [adminGuard],
+        canActivate: [capabilityGuard('categorias')],
         loadComponent: () =>
           import('./features/users/users-page/users-page').then((component) => component.UsersPage),
         title: 'Usuarios | Sistema de Inventario TUP',
       },
       {
         path: 'configuraciones/categorias',
-        canActivate: [adminGuard],
+        canActivate: [capabilityGuard('fabricantes')],
         loadComponent: () =>
           import('./features/categories/categories-page/categories-page').then(
             (component) => component.CategoriesPage,
@@ -44,7 +45,7 @@ export const routes: Routes = [
       },
       {
         path: 'configuraciones/fabricantes',
-        canActivate: [adminGuard],
+        canActivate: [capabilityGuard('modelosActivos')],
         loadComponent: () =>
           import('./features/manufacturers/manufacturers-page/manufacturers-page').then(
             (component) => component.ManufacturersPage,

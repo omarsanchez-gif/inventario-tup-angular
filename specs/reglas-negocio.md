@@ -18,9 +18,9 @@
 - RN-ROL-002: Solo `admin` administra usuarios.
 - RN-ROL-003: `admin` implica acceso total a los catálogos administrativos vigentes; `usuario` no implica acceso a ningún catálogo y depende de permisos explícitos.
 
-## Permisos granulares de catálogos — propuesta no implementada
+## Permisos granulares de catálogos — incremento autorizado
 
-RN-PER-001–012 y las ampliaciones granulares de Layout, Categorías, Fabricantes y Modelos describen el incremento propuesto en ADR-007. Hasta implementarlo y validarlo, staging conserva la restricción exclusiva de `admin` documentada en el estado actual.
+RN-PER-001–012 y las ampliaciones granulares de Layout, Categorías, Fabricantes y Modelos describen el incremento autorizado en ADR-007. La implementación local está en validación; staging conserva la versión anterior hasta completar y documentar su despliegue explícito.
 
 - RN-PER-001: `usuarios` es la fuente canónica de permisos; Custom Claims conserva solo autorización y rol.
 - RN-PER-002: En este incremento solo son autorizables `categorias`, `fabricantes` y `modelosActivos`.

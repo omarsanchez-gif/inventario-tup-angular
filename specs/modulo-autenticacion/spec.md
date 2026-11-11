@@ -2,7 +2,7 @@
 
 ## Estado
 
-El contrato base está implementado. La ampliación de `bootstrapAuthorization` con permisos sanitizados pertenece a ADR-007 y permanece propuesta, sin código o despliegue.
+El contrato base está implementado. La ampliación de `bootstrapAuthorization` con permisos sanitizados pertenece a ADR-007, fue autorizada el 11 de noviembre de 2026 y está en implementación.
 
 ## Objetivo
 
@@ -34,7 +34,7 @@ Errores: `unauthenticated`, `domain-not-allowed`, `user-not-authorized`, `user-i
 
 Angular mantiene una generación por identidad. Bootstrap, renovación de claims y lecturas administrativas solo pueden publicar estado si UID y generación continúan vigentes. `onAuthStateChanged(null)` y el logout invalidan primero la generación y luego retiran el shell privado.
 
-Cuando se implemente ADR-007, `bootstrapAuthorization` devolverá el mapa granular sanitizado desde `usuarios`; no lo copiará a Custom Claims. `admin` recibirá acceso efectivo total y `usuario` solo sus acciones explícitas. La misma operación servirá para revalidar capacidades al entrar a una ruta protegida o recuperar foco, sin aceptar resultados de otra generación de sesión.
+ADR-007 amplía `bootstrapAuthorization` para devolver el mapa granular sanitizado desde `usuarios`; no lo copia a Custom Claims. `admin` recibe acceso efectivo total y `usuario` solo sus acciones explícitas. La misma operación revalida capacidades al entrar a una ruta protegida o recuperar foco, sin aceptar resultados de otra generación de sesión.
 
 ## Fuera de alcance
 

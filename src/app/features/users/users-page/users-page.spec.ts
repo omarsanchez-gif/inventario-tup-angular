@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { AuthorizedUser } from '../../../shared/models/authorized-user';
+import { emptyPermissionMap, fullPermissionMap } from '../../../shared/models/catalog-permissions';
 import type { SystemUser } from '../../../shared/models/system-user';
 import { UsersFacade } from '../state/users.facade';
 import { UsersPage } from './users-page';
@@ -14,6 +15,7 @@ describe('UsersPage dialogs', () => {
     correo: 'admin@tecplayacar.edu.mx',
     rol: 'admin',
     activo: true,
+    permisos: fullPermissionMap(),
   };
   const managedUser: SystemUser = {
     documentId: 'user-1',
@@ -24,6 +26,7 @@ describe('UsersPage dialogs', () => {
     activo: true,
     fechaCreacion: '2026-11-06T12:00:00.000Z',
     ultimoAcceso: null,
+    permisos: emptyPermissionMap(),
   };
   let fixture: ComponentFixture<UsersPage>;
   let element: HTMLElement;
@@ -33,6 +36,7 @@ describe('UsersPage dialogs', () => {
     update: ReturnType<typeof vi.fn>;
     setStatus: ReturnType<typeof vi.fn>;
     delete: ReturnType<typeof vi.fn>;
+    setPermissions: ReturnType<typeof vi.fn>;
     clearMessages: ReturnType<typeof vi.fn>;
     query: WritableSignal<string>;
     loading: WritableSignal<boolean>;
@@ -56,6 +60,7 @@ describe('UsersPage dialogs', () => {
       update: vi.fn().mockResolvedValue(true),
       setStatus: vi.fn().mockResolvedValue(true),
       delete: vi.fn().mockResolvedValue(true),
+      setPermissions: vi.fn().mockResolvedValue(true),
       clearMessages: vi.fn(),
       query: signal(''),
       loading: signal(false),
@@ -150,24 +155,58 @@ describe('UsersPage dialogs', () => {
     expect(element.querySelector('dialog[open]')).toBeNull();
   });
 
-  it('renders record actions as accessible icon-only buttons', () => {
+  it('USR-027 renders permission summary and accessible icon-only actions', () => {
     const actions = [...element.querySelectorAll<HTMLButtonElement>('.record-actions button')];
 
-    expect(actions).toHaveLength(3);
-    expect(actions.map((action) => action.textContent?.trim())).toEqual(['', '', '']);
+    expect(actions).toHaveLength(4);
+    expect(actions.map((action) => action.textContent?.trim())).toEqual(['', '', '', '']);
     expect(actions.map((action) => action.getAttribute('aria-label'))).toEqual([
+      'Asignar permisos a Usuario Prueba',
       'Editar a Usuario Prueba',
       'Desactivar a Usuario Prueba',
       'Eliminar a Usuario Prueba',
     ]);
     expect(actions.map((action) => action.getAttribute('title'))).toEqual([
+      'Asignar permisos a Usuario Prueba',
       'Editar a Usuario Prueba',
       'Desactivar a Usuario Prueba',
       'Eliminar a Usuario Prueba',
     ]);
     expect(actions.map((action) => action.querySelector('svg')?.getAttribute('data-icon'))).toEqual(
-      ['edit', 'deactivate', 'delete'],
+      ['permissions', 'edit', 'deactivate', 'delete'],
     );
+  });
+
+  it('USR-022 USR-028 assigns permissions in a separate recoverable dialog', async () => {
+    actionButton('Asignar permisos a Usuario Prueba').click();
+    fixture.detectChanges();
+    expect(element.querySelector('.dialog__title')?.textContent).toContain(
+      'Asignar permisos a Usuario Prueba',
+    );
+
+    const edit = element.querySelector<HTMLInputElement>('#categorias-editar')!;
+    edit.click();
+    fixture.detectChanges();
+    expect(element.querySelector<HTMLInputElement>('#categorias-ver')?.checked).toBe(true);
+
+    button('Guardar permisos').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(users.setPermissions).toHaveBeenCalledWith(
+      managedUser,
+      expect.objectContaining({ categorias: ['ver', 'editar'] }),
+    );
+    expect(element.querySelector('dialog[open]')).toBeNull();
+  });
+
+  it('USR-029 cancels permission assignment without persisting changes', () => {
+    actionButton('Asignar permisos a Usuario Prueba').click();
+    fixture.detectChanges();
+    button('Cancelar').click();
+    fixture.detectChanges();
+
+    expect(users.setPermissions).not.toHaveBeenCalled();
+    expect(element.querySelector('dialog[open]')).toBeNull();
   });
 
   it('filters automatically and resets the paginated table to the first page', () => {

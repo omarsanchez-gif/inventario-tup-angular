@@ -2,7 +2,7 @@
 
 ## Estado
 
-Especificación base aprobada, implementada y desplegada exclusivamente a `inventario-stg`. Producción y migración permanecen fuera de alcance. Modelos de activos ya consume este catálogo; Activos continúa fuera de alcance. La autorización granular de ADR-007 permanece propuesta y no está implementada o desplegada.
+Especificación base aprobada, implementada y desplegada exclusivamente a `inventario-stg`. Producción y migración permanecen fuera de alcance. Modelos de activos ya consume este catálogo; Activos continúa fuera de alcance. La autorización granular de ADR-007 fue autorizada el 11 de noviembre de 2026 y está en implementación.
 
 ## Objetivo
 

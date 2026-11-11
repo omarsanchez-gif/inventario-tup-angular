@@ -3,6 +3,7 @@ import { httpsCallable } from 'firebase/functions';
 
 import { FIREBASE_FUNCTIONS } from '../../../core/firebase/firebase.tokens';
 import type { UserDraft, UsersGateway, UsersListResult, UserUpdate } from './users.gateway';
+import type { PermissionMap } from '../../../shared/models/catalog-permissions';
 
 @Injectable()
 export class FirebaseUsersGateway implements UsersGateway {
@@ -36,5 +37,12 @@ export class FirebaseUsersGateway implements UsersGateway {
       this.functions,
       'deleteAuthorizedUser',
     )({ documentId });
+  }
+
+  async setPermissions(documentId: string, permisos: PermissionMap): Promise<void> {
+    await httpsCallable<{ documentId: string; permisos: PermissionMap }, unknown>(
+      this.functions,
+      'setAuthorizedUserPermissions',
+    )({ documentId, permisos });
   }
 }

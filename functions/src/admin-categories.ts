@@ -1,6 +1,7 @@
 import type { FunctionsErrorCode } from 'firebase-functions/https';
 
 import type { AdminIdentity } from './admin-users.js';
+import type { PermissionAction } from './catalog-permissions.js';
 
 export const MAX_SUPPORTED_CATEGORIES = 500;
 
@@ -26,7 +27,7 @@ export interface CategoryUpdate extends CategoryDraft {
 }
 
 export interface AdminCategoriesRepository {
-  findCanonicalAdmin(uid: string): Promise<boolean>;
+  hasCanonicalPermission(uid: string, action: PermissionAction): Promise<boolean>;
   list(limit: number): Promise<readonly ManagedCategory[]>;
   create(requesterUid: string, input: CategoryDraft): Promise<string>;
   update(requesterUid: string, input: CategoryUpdate): Promise<void>;
@@ -48,17 +49,18 @@ export class AdminCategoriesError extends Error {
   }
 }
 
-async function requireAdmin(
+async function requirePermission(
   identity: AdminIdentity | null,
   dependencies: AdminCategoriesDependencies,
+  action: PermissionAction,
 ): Promise<AdminIdentity> {
   if (!identity) {
     throw new AdminCategoriesError('unauthenticated', 'unauthenticated', 'Se requiere una sesión.');
   }
-  if (!identity.authorized || identity.role !== 'admin') {
+  if (!identity.authorized) {
     throw new AdminCategoriesError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
-  if (!(await dependencies.repository.findCanonicalAdmin(identity.uid))) {
+  if (!(await dependencies.repository.hasCanonicalPermission(identity.uid, action))) {
     throw new AdminCategoriesError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
   return identity;
@@ -156,7 +158,7 @@ export async function listCategories(
   identity: AdminIdentity | null,
   dependencies: AdminCategoriesDependencies,
 ) {
-  await requireAdmin(identity, dependencies);
+  await requirePermission(identity, dependencies, 'ver');
   const categories = await dependencies.repository.list(MAX_SUPPORTED_CATEGORIES + 1);
   if (categories.length > MAX_SUPPORTED_CATEGORIES) {
     throw new AdminCategoriesError(
@@ -188,7 +190,7 @@ export async function createCategory(
   data: unknown,
   dependencies: AdminCategoriesDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'crear');
   const request = requestObject(data);
   allowedFields(request, ['nombre', 'notas']);
   const documentId = await dependencies.repository.create(requester.uid, draft(request));
@@ -200,7 +202,7 @@ export async function updateCategory(
   data: unknown,
   dependencies: AdminCategoriesDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'editar');
   const request = requestObject(data);
   allowedFields(request, ['documentId', 'nombre', 'notas']);
   const documentId = categoryDocumentId(request);
@@ -216,7 +218,7 @@ export async function setCategoryStatus(
   data: unknown,
   dependencies: AdminCategoriesDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'cambiarEstado');
   const request = requestObject(data);
   allowedFields(request, ['documentId', 'activo']);
   const documentId = categoryDocumentId(request);
@@ -233,7 +235,7 @@ export async function deleteCategory(
   data: unknown,
   dependencies: AdminCategoriesDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'eliminar');
   const request = requestObject(data);
   allowedFields(request, ['documentId']);
   const documentId = categoryDocumentId(request);

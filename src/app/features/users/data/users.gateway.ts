@@ -2,6 +2,7 @@ import { InjectionToken } from '@angular/core';
 
 import type { UserRole } from '../../../shared/models/authorized-user';
 import type { SystemUser } from '../../../shared/models/system-user';
+import type { PermissionMap } from '../../../shared/models/catalog-permissions';
 
 export interface UserDraft {
   readonly nombre: string;
@@ -29,6 +30,7 @@ export interface UsersGateway {
   update(input: UserUpdate): Promise<void>;
   setStatus(documentId: string, activo: boolean): Promise<void>;
   delete(documentId: string): Promise<void>;
+  setPermissions(documentId: string, permissions: PermissionMap): Promise<void>;
 }
 
 export const USERS_GATEWAY = new InjectionToken<UsersGateway>('USERS_GATEWAY');

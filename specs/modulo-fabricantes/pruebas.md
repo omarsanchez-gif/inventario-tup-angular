@@ -28,7 +28,7 @@ Estos escenarios definen la aceptación del módulo aprobado.
 - FAB-019: tabla, badges, acciones iconográficas, estados de carga/error/vacío y diálogos funcionan por teclado y desde 320 px.
 - FAB-020: la confirmación de eliminación identifica al fabricante, explica la restricción por Modelos y mantiene el registro cuando backend responde `manufacturer-in-use`.
 
-## Criterios futuros de permisos
+## Criterios del incremento de permisos
 
 - FAB-021: `admin` conserva acceso total; `usuario` con `fabricantes.ver` lista y navega, mientras otro `usuario` y anónimo son rechazados.
 - FAB-022: crear, editar, cambiar estado y eliminar exigen exactamente su acción canónica además de Ver; poseer otra acción no eleva acceso.

@@ -15,6 +15,10 @@ import {
   type CategoryDraft,
   type ManagedCategory,
 } from './admin-categories.js';
+import {
+  hasCanonicalPermission as canonicalPermissionGranted,
+  type PermissionAction,
+} from './catalog-permissions.js';
 
 function timestamp(value: unknown): string {
   if (!(value instanceof Timestamp)) {
@@ -89,24 +93,30 @@ export function createAdminCategoriesRepository(firestore: Firestore): AdminCate
   const users = firestore.collection('usuarios');
   const assetModels = firestore.collection('modelos_activos');
 
-  async function requireCanonicalAdmin(transaction: Transaction, uid: string): Promise<void> {
-    const snapshot = await transaction.get(users.where('uid', '==', uid).limit(2));
+  async function requireCanonicalPermission(
+    transaction: Transaction,
+    uid: string,
+    action: PermissionAction,
+  ): Promise<void> {
     if (
-      snapshot.size !== 1 ||
-      snapshot.docs[0]?.data()['activo'] !== true ||
-      snapshot.docs[0]?.data()['rol'] !== 'admin'
+      !(await canonicalPermissionGranted(
+        transaction,
+        users.where('uid', '==', uid).limit(2),
+        'categorias',
+        action,
+      ))
     ) {
       throw new AdminCategoriesError('permission-denied', 'permission-denied', 'Acceso denegado.');
     }
   }
 
   return {
-    async findCanonicalAdmin(uid) {
-      const snapshot = await users.where('uid', '==', uid).limit(2).get();
-      return (
-        snapshot.size === 1 &&
-        snapshot.docs[0]?.data()['activo'] === true &&
-        snapshot.docs[0]?.data()['rol'] === 'admin'
+    async hasCanonicalPermission(uid, action) {
+      return canonicalPermissionGranted(
+        null,
+        users.where('uid', '==', uid).limit(2),
+        'categorias',
+        action,
       );
     },
     async list(limit) {
@@ -117,7 +127,7 @@ export function createAdminCategoriesRepository(firestore: Firestore): AdminCate
       const categoryReference = categories.doc();
       const indexReference = names.doc(nameKey(input.nombreNormalizado));
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'crear');
         const [categorySnapshot, indexSnapshot] = await Promise.all([
           transaction.get(categories.limit(MAX_SUPPORTED_CATEGORIES + 1)),
           transaction.get(indexReference),
@@ -154,7 +164,7 @@ export function createAdminCategoriesRepository(firestore: Firestore): AdminCate
     },
     async update(requesterUid, input) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'editar');
         const categoryReference = categories.doc(input.documentId);
         const categorySnapshot = await transaction.get(categoryReference);
         if (!categorySnapshot.exists) {
@@ -195,7 +205,7 @@ export function createAdminCategoriesRepository(firestore: Firestore): AdminCate
     },
     async setStatus(requesterUid, documentId, activo) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'cambiarEstado');
         const reference = categories.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists) {
@@ -216,7 +226,7 @@ export function createAdminCategoriesRepository(firestore: Firestore): AdminCate
     },
     async delete(requesterUid, documentId) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'eliminar');
         const reference = categories.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists) {

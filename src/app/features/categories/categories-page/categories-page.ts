@@ -6,6 +6,7 @@ import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { AppIcon } from '../../../shared/ui/icon/app-icon';
 import { AppPagination } from '../../../shared/ui/pagination/app-pagination';
 import { CategoriesFacade } from '../state/categories.facade';
+import { AuthFacade } from '../../../core/auth/auth.facade';
 
 @Component({
   selector: 'app-categories-page',
@@ -17,6 +18,7 @@ import { CategoriesFacade } from '../state/categories.facade';
 export class CategoriesPage {
   private readonly formBuilder = inject(FormBuilder);
   protected readonly categories = inject(CategoriesFacade);
+  protected readonly auth = inject(AuthFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly pendingDeletion = signal<InventoryCategory | null>(null);

@@ -89,7 +89,7 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 - MOD-052: si el escritor registra `cargaFinalizada: true` después de los borrados y antes de la transacción final, esa ronda conserva operación y generaciones, responde reconciliación y una ronda posterior elimina ambos objetos antes de cerrar. <!-- trace:required -->
 - MOD-053: si ambos uploads terminan pero Firestore falla antes del acuse y durante la compensación, el reintento vencido descubre ambas generaciones, limpia la versión y deja utilizables una carga y retirada posteriores. <!-- trace:required -->
 
-## Criterios futuros de permisos
+## Criterios del incremento de permisos
 
 - MOD-054: `admin` conserva acceso total; `usuario` con `modelosActivos.ver` lista, navega y obtiene miniaturas, mientras otro `usuario` y anónimo son rechazados.
 - MOD-055: Crear, Editar, Cambiar estado y Eliminar exigen exactamente su acción canónica además de Ver; poseer otra acción no eleva acceso.

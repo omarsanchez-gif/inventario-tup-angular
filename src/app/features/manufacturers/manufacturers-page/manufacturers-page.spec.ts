@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import type { InventoryManufacturer } from '../../../shared/models/inventory-manufacturer';
 import { ManufacturersFacade } from '../state/manufacturers.facade';
 import { ManufacturersPage } from './manufacturers-page';
+import { AuthFacade } from '../../../core/auth/auth.facade';
 
 describe('ManufacturersPage', () => {
   const manufacturer: InventoryManufacturer = {
@@ -16,6 +17,7 @@ describe('ManufacturersPage', () => {
   };
   let fixture: ComponentFixture<ManufacturersPage>;
   let element: HTMLElement;
+  let authCan: ReturnType<typeof vi.fn>;
   let manufacturers: {
     load: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
@@ -54,10 +56,14 @@ describe('ManufacturersPage', () => {
       success: signal(null),
       filteredManufacturers: signal([manufacturer]),
     };
+    authCan = vi.fn().mockReturnValue(true);
 
     await TestBed.configureTestingModule({
       imports: [ManufacturersPage],
-      providers: [{ provide: ManufacturersFacade, useValue: manufacturers }],
+      providers: [
+        { provide: ManufacturersFacade, useValue: manufacturers },
+        { provide: AuthFacade, useValue: { can: authCan } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ManufacturersPage);
@@ -93,6 +99,21 @@ describe('ManufacturersPage', () => {
       'Desactivar Dell',
       'Eliminar Dell',
     ]);
+  });
+
+  it('FAB-023 shows only the actions granted to the current user', () => {
+    authCan.mockImplementation(
+      (_module: string, actionName: string) => actionName === 'ver' || actionName === 'editar',
+    );
+    fixture.destroy();
+    fixture = TestBed.createComponent(ManufacturersPage);
+    fixture.detectChanges();
+    element = fixture.nativeElement as HTMLElement;
+
+    expect(element.textContent).not.toContain('Nuevo fabricante');
+    expect(element.querySelector('[aria-label="Editar Dell"]')).toBeTruthy();
+    expect(element.querySelector('[aria-label="Desactivar Dell"]')).toBeNull();
+    expect(element.querySelector('[aria-label="Eliminar Dell"]')).toBeNull();
   });
 
   it('uses shared dialogs with only name and notes for create, edit and deletion', async () => {

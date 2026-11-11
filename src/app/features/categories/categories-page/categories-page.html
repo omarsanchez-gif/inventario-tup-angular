@@ -5,9 +5,11 @@
       <h1 class="page-title" id="categories-title">Categorías</h1>
       <p>Administre las categorías que clasificarán los modelos de activos.</p>
     </div>
-    <button class="button button--primary" type="button" (click)="openNew()">
-      Nueva categoría
-    </button>
+    @if (auth.can('categorias', 'crear')) {
+      <button class="button button--primary" type="button" (click)="openNew()">
+        Nueva categoría
+      </button>
+    }
   </header>
 
   @if (!formVisible() && !pendingDeletion() && categories.error(); as error) {
@@ -149,44 +151,50 @@
               </td>
               <td>
                 <div class="record-actions">
-                  <button
-                    class="icon-button icon-button--secondary"
-                    type="button"
-                    [disabled]="categories.saving()"
-                    [attr.aria-label]="'Editar ' + category.nombre"
-                    [attr.title]="'Editar ' + category.nombre"
-                    (click)="edit(category)"
-                  >
-                    <app-icon name="edit" />
-                  </button>
-                  <button
-                    class="icon-button icon-button--secondary"
-                    type="button"
-                    [disabled]="categories.saving()"
-                    [attr.aria-label]="
-                      category.activo
-                        ? 'Desactivar ' + category.nombre
-                        : 'Activar ' + category.nombre
-                    "
-                    [attr.title]="
-                      category.activo
-                        ? 'Desactivar ' + category.nombre
-                        : 'Activar ' + category.nombre
-                    "
-                    (click)="toggleStatus(category)"
-                  >
-                    <app-icon [name]="category.activo ? 'deactivate' : 'activate'" />
-                  </button>
-                  <button
-                    class="icon-button icon-button--danger"
-                    type="button"
-                    [disabled]="categories.saving()"
-                    [attr.aria-label]="'Eliminar ' + category.nombre"
-                    [attr.title]="'Eliminar ' + category.nombre"
-                    (click)="requestDeletion(category)"
-                  >
-                    <app-icon name="delete" />
-                  </button>
+                  @if (auth.can('categorias', 'editar')) {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="categories.saving()"
+                      [attr.aria-label]="'Editar ' + category.nombre"
+                      [attr.title]="'Editar ' + category.nombre"
+                      (click)="edit(category)"
+                    >
+                      <app-icon name="edit" />
+                    </button>
+                  }
+                  @if (auth.can('categorias', 'cambiarEstado')) {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="categories.saving()"
+                      [attr.aria-label]="
+                        category.activo
+                          ? 'Desactivar ' + category.nombre
+                          : 'Activar ' + category.nombre
+                      "
+                      [attr.title]="
+                        category.activo
+                          ? 'Desactivar ' + category.nombre
+                          : 'Activar ' + category.nombre
+                      "
+                      (click)="toggleStatus(category)"
+                    >
+                      <app-icon [name]="category.activo ? 'deactivate' : 'activate'" />
+                    </button>
+                  }
+                  @if (auth.can('categorias', 'eliminar')) {
+                    <button
+                      class="icon-button icon-button--danger"
+                      type="button"
+                      [disabled]="categories.saving()"
+                      [attr.aria-label]="'Eliminar ' + category.nombre"
+                      [attr.title]="'Eliminar ' + category.nombre"
+                      (click)="requestDeletion(category)"
+                    >
+                      <app-icon name="delete" />
+                    </button>
+                  }
                 </div>
               </td>
             </tr>

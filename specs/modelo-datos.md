@@ -6,7 +6,7 @@ El modelo implementado comprende autorización, Categorías, Fabricantes, Modelo
 
 ## Colección `usuarios`
 
-El bloque `permisos` de este contrato pertenece al incremento propuesto en ADR-007 y todavía no está implementado o desplegado. Los demás campos describen el contrato vigente.
+El bloque `permisos` de este contrato pertenece al incremento autorizado en ADR-007. Su implementación fue autorizada el 11 de noviembre de 2026; la validación y el despliegue todavía deben documentarse antes de declararlo completado.
 
 ```text
 usuarios/{documentId}

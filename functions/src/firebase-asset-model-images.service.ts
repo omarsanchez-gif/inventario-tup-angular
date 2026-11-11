@@ -22,6 +22,10 @@ import type {
   AssetModelImageInput,
   AssetModelImagesService,
 } from './asset-model-images.js';
+import {
+  hasCanonicalPermission as canonicalPermissionGranted,
+  type PermissionAction,
+} from './catalog-permissions.js';
 
 const MAX_PIXELS = 40_000_000;
 const MAX_DIMENSION = 10_000;
@@ -56,18 +60,19 @@ export interface AssetModelImagesServiceHooks {
   readonly beforeFinalizeRecovery?: () => Promise<void> | void;
 }
 
-async function requireCanonicalAdmin(
+async function requireCanonicalPermission(
   transaction: Transaction,
   firestore: Firestore,
   uid: string,
+  action: PermissionAction,
 ): Promise<void> {
-  const snapshot = await transaction.get(
-    firestore.collection('usuarios').where('uid', '==', uid).limit(2),
-  );
   if (
-    snapshot.size !== 1 ||
-    snapshot.docs[0]?.data()['activo'] !== true ||
-    snapshot.docs[0]?.data()['rol'] !== 'admin'
+    !(await canonicalPermissionGranted(
+      transaction,
+      firestore.collection('usuarios').where('uid', '==', uid).limit(2),
+      'modelosActivos',
+      action,
+    ))
   ) {
     throw new AdminAssetModelsError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
@@ -374,7 +379,7 @@ export function createAssetModelImagesService(
 
   async function preflight(requesterUid: string, documentId: string): Promise<void> {
     await firestore.runTransaction(async (transaction) => {
-      await requireCanonicalAdmin(transaction, firestore, requesterUid);
+      await requireCanonicalPermission(transaction, firestore, requesterUid, 'editar');
       const snapshot = await transaction.get(models.doc(documentId));
       if (!snapshot.exists) {
         throw new AdminAssetModelsError(
@@ -574,7 +579,7 @@ export function createAssetModelImagesService(
 
         await hooks.beforeConfirm?.();
         await firestore.runTransaction(async (transaction) => {
-          await requireCanonicalAdmin(transaction, firestore, requesterUid);
+          await requireCanonicalPermission(transaction, firestore, requesterUid, 'editar');
           const [modelSnapshot, operationSnapshot] = await Promise.all([
             transaction.get(models.doc(documentId)),
             transaction.get(operationReference),
@@ -657,7 +662,7 @@ export function createAssetModelImagesService(
         );
       }
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, firestore, requesterUid);
+        await requireCanonicalPermission(transaction, firestore, requesterUid, 'editar');
         const reference = models.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists) {
@@ -692,7 +697,7 @@ export function createAssetModelImagesService(
 
     async access(requesterUid, documentId, variant): Promise<AssetModelImageAccess> {
       const descriptor = await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, firestore, requesterUid);
+        await requireCanonicalPermission(transaction, firestore, requesterUid, 'ver');
         const snapshot = await transaction.get(models.doc(documentId));
         if (!snapshot.exists) {
           throw new AdminAssetModelsError(

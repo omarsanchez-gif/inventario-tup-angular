@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import type { IdTokenResult, User } from 'firebase/auth';
 
 import type { BootstrapAuthorizationResult } from '../../shared/models/authorized-user';
+import { fullPermissionMap } from '../../shared/models/catalog-permissions';
+import { emptyPermissionMap } from '../../shared/models/catalog-permissions';
 import { AuthFacade } from './auth.facade';
 import { AUTH_GATEWAY, AUTHORIZATION_GATEWAY, type AuthGateway } from './gateways';
 
@@ -24,6 +26,7 @@ function profile(uid: string, nombre: string): BootstrapAuthorizationResult {
     rol: 'admin',
     activo: true,
     claimsUpdated: false,
+    permisos: fullPermissionMap(),
   };
 }
 
@@ -80,7 +83,7 @@ describe('AuthFacade session lifecycle', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login', { replaceUrl: true });
   });
 
-  it('AUT-013 does not mix a late response from the previous user with the current session', async () => {
+  it('AUT-013 AUT-016 does not mix a late response from the previous user with the current session', async () => {
     const first = deferred<BootstrapAuthorizationResult>();
     const second = deferred<BootstrapAuthorizationResult>();
     bootstrap.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
@@ -169,5 +172,31 @@ describe('AuthFacade session lifecycle', () => {
     expect(facade.user()).toBeNull();
     expect(authGateway.signOut).toHaveBeenCalledOnce();
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
+  it('AUT-015 revalidates the canonical permission map without changing claims', async () => {
+    const initial: BootstrapAuthorizationResult = {
+      uid: 'catalog-user',
+      nombre: 'Capturista',
+      correo: 'catalog-user@tecplayacar.edu.mx',
+      rol: 'usuario',
+      activo: true,
+      claimsUpdated: false,
+      permisos: { ...emptyPermissionMap(), categorias: ['ver', 'editar'] },
+    };
+    const reduced = { ...initial, permisos: emptyPermissionMap() };
+    bootstrap.mockResolvedValueOnce(initial).mockResolvedValueOnce(reduced);
+    vi.mocked(authGateway.refreshClaims).mockResolvedValue({
+      claims: { authorized: true, role: 'usuario' },
+    } as unknown as IdTokenResult);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+    emitSession({ uid: 'catalog-user' } as User);
+    await initialization;
+
+    expect(facade.can('categorias', 'editar')).toBe(true);
+    await expect(facade.refreshAuthorization()).resolves.toBe(true);
+    expect(facade.can('categorias', 'ver')).toBe(false);
+    expect(facade.can('fabricantes', 'ver')).toBe(false);
   });
 });

@@ -6,8 +6,10 @@ export interface AuthorizedUser {
   readonly correo: string;
   readonly rol: UserRole;
   readonly activo: true;
+  readonly permisos: PermissionMap;
 }
 
 export interface BootstrapAuthorizationResult extends AuthorizedUser {
   readonly claimsUpdated: boolean;
 }
+import type { PermissionMap } from './catalog-permissions';

@@ -13,7 +13,7 @@ const admin = { uid: 'uid-admin', authorized: true, role: 'admin' } as const;
 function dependencies(): AssetModelImageDependencies {
   return {
     repository: {
-      findCanonicalAdmin: vi.fn().mockResolvedValue(true),
+      hasCanonicalPermission: vi.fn().mockResolvedValue(true),
       list: vi.fn(),
       listCatalogs: vi.fn(),
       create: vi.fn(),
@@ -31,6 +31,26 @@ function dependencies(): AssetModelImageDependencies {
 }
 
 describe('asset model images', () => {
+  it('MOD-056 requires edit permission before uploading an image', async () => {
+    const deps = dependencies();
+    deps.repository.hasCanonicalPermission = vi.fn().mockResolvedValue(false);
+
+    await expect(
+      setAssetModelImage(
+        { uid: 'user', authorized: true, role: 'usuario' },
+        {
+          documentId: 'model-1',
+          fileName: 'image.png',
+          contentType: 'image/png',
+          base64: Buffer.from('png').toString('base64'),
+        },
+        deps,
+      ),
+    ).rejects.toMatchObject({ functionalCode: 'permission-denied' });
+    expect(deps.repository.hasCanonicalPermission).toHaveBeenCalledWith('user', 'editar');
+    expect(deps.images.set).not.toHaveBeenCalled();
+  });
+
   it('accepts only the declared content types and two MiB payload', async () => {
     const deps = dependencies();
     await expect(

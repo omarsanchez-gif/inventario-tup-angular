@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { SessionScope } from '../../../core/auth/session-scope';
 import type { SystemUser } from '../../../shared/models/system-user';
+import type { PermissionMap } from '../../../shared/models/catalog-permissions';
 import { USERS_GATEWAY, type UserDraft, type UserUpdate } from '../data/users.gateway';
 
 interface FunctionalError {
@@ -26,6 +27,12 @@ function userErrorMessage(error: unknown): string {
       return 'Se alcanzó el límite de usuarios soportado por esta versión.';
     case 'reconciliation-required':
       return 'El cambio requiere reconciliación. Reintente o revise la autorización.';
+    case 'user-permissions-invalid':
+      return 'La selección de permisos no es válida.';
+    case 'user-permissions-role-managed':
+      return 'El acceso de un administrador se controla por su rol.';
+    case 'user-permissions-self-forbidden':
+      return 'No puede administrar sus propios permisos.';
     default:
       return 'No fue posible completar la operación.';
   }
@@ -96,6 +103,13 @@ export class UsersFacade {
 
   async delete(user: SystemUser): Promise<boolean> {
     return this.mutate(() => this.gateway.delete(user.documentId), 'Usuario eliminado.');
+  }
+
+  async setPermissions(user: SystemUser, permissions: PermissionMap): Promise<boolean> {
+    return this.mutate(
+      () => this.gateway.setPermissions(user.documentId, permissions),
+      'Permisos actualizados correctamente.',
+    );
   }
 
   clearMessages(): void {

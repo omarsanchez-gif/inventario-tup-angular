@@ -2,7 +2,7 @@
 
 ## Estado
 
-El layout base está implementado y desplegado. El filtrado de Configuraciones por capacidades de `usuario` pertenece a ADR-007 y permanece propuesto, sin código o despliegue.
+El layout base está implementado y desplegado. El filtrado de Configuraciones por capacidades de `usuario` pertenece a ADR-007, fue autorizado el 11 de noviembre de 2026 y está en implementación.
 
 ## Objetivo
 

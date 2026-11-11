@@ -46,6 +46,7 @@ import {
   deleteAuthorizedUser as deleteUser,
   listAuthorizedUsers as listUsers,
   setAuthorizedUserStatus as setUserStatus,
+  setAuthorizedUserPermissions as setUserPermissions,
   updateAuthorizedUser as updateUser,
   type AdminIdentity,
   type AdminUsersDependencies,
@@ -290,6 +291,12 @@ export const updateAuthorizedUser = onCall(options, async (request) =>
 
 export const setAuthorizedUserStatus = onCall(options, async (request) =>
   executeAdmin(() => setUserStatus(adminIdentity(request.auth), request.data, adminDependencies())),
+);
+
+export const setAuthorizedUserPermissions = onCall(options, async (request) =>
+  executeAdmin(() =>
+    setUserPermissions(adminIdentity(request.auth), request.data, adminDependencies()),
+  ),
 );
 
 export const deleteAuthorizedUser = onCall(options, async (request) =>

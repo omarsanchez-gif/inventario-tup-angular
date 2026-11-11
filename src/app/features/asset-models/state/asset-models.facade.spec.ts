@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { SessionScope } from '../../../core/auth/session-scope';
+import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
 import { ASSET_MODELS_GATEWAY } from '../data/asset-models.gateway';
 import { AssetModelsFacade } from './asset-models.facade';
@@ -41,7 +42,11 @@ describe('AssetModelsFacade save recovery', () => {
       imageAccess: vi.fn(),
     };
     TestBed.configureTestingModule({
-      providers: [AssetModelsFacade, { provide: ASSET_MODELS_GATEWAY, useValue: gateway }],
+      providers: [
+        AssetModelsFacade,
+        { provide: ASSET_MODELS_GATEWAY, useValue: gateway },
+        { provide: AuthFacade, useValue: { refreshAuthorization: vi.fn() } },
+      ],
     });
     const facade = TestBed.inject(AssetModelsFacade);
 
@@ -76,7 +81,11 @@ describe('AssetModelsFacade save recovery', () => {
       imageAccess: vi.fn(),
     };
     TestBed.configureTestingModule({
-      providers: [AssetModelsFacade, { provide: ASSET_MODELS_GATEWAY, useValue: gateway }],
+      providers: [
+        AssetModelsFacade,
+        { provide: ASSET_MODELS_GATEWAY, useValue: gateway },
+        { provide: AuthFacade, useValue: { refreshAuthorization: vi.fn() } },
+      ],
     });
     const facade = TestBed.inject(AssetModelsFacade);
     const session = TestBed.inject(SessionScope);
@@ -111,7 +120,11 @@ describe('AssetModelsFacade save recovery', () => {
       imageAccess: vi.fn(),
     };
     TestBed.configureTestingModule({
-      providers: [AssetModelsFacade, { provide: ASSET_MODELS_GATEWAY, useValue: gateway }],
+      providers: [
+        AssetModelsFacade,
+        { provide: ASSET_MODELS_GATEWAY, useValue: gateway },
+        { provide: AuthFacade, useValue: { refreshAuthorization: vi.fn() } },
+      ],
     });
     const facade = TestBed.inject(AssetModelsFacade);
     const session = TestBed.inject(SessionScope);
@@ -140,7 +153,11 @@ describe('AssetModelsFacade save recovery', () => {
       imageAccess: vi.fn(),
     };
     TestBed.configureTestingModule({
-      providers: [AssetModelsFacade, { provide: ASSET_MODELS_GATEWAY, useValue: gateway }],
+      providers: [
+        AssetModelsFacade,
+        { provide: ASSET_MODELS_GATEWAY, useValue: gateway },
+        { provide: AuthFacade, useValue: { refreshAuthorization: vi.fn() } },
+      ],
     });
     const facade = TestBed.inject(AssetModelsFacade);
     const session = TestBed.inject(SessionScope);

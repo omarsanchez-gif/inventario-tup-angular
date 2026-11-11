@@ -5,6 +5,7 @@ import {
   bootstrapAuthorization,
   type AuthorizationDependencies,
 } from './bootstrap-authorization.js';
+import { emptyPermissionMap, fullPermissionMap } from './catalog-permissions.js';
 
 function dependencies(): AuthorizationDependencies {
   return {
@@ -18,6 +19,7 @@ function dependencies(): AuthorizationDependencies {
           correo: 'admin@tecplayacar.edu.mx',
           rol: 'admin',
           activo: true,
+          permisos: emptyPermissionMap(),
         },
       ]),
       recordSuccessfulAccess: vi.fn().mockResolvedValue({
@@ -27,6 +29,7 @@ function dependencies(): AuthorizationDependencies {
         correo: 'admin@tecplayacar.edu.mx',
         rol: 'admin',
         activo: true,
+        permisos: emptyPermissionMap(),
       }),
     },
     claims: {
@@ -52,6 +55,7 @@ describe('bootstrapAuthorization', () => {
 
     expect(result.rol).toBe('admin');
     expect(result.claimsUpdated).toBe(true);
+    expect(result.permisos).toEqual(fullPermissionMap());
     expect(deps.repository.recordSuccessfulAccess).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'admin' }),
       'uid-admin',

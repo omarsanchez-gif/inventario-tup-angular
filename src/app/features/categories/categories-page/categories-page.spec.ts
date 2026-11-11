@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import type { InventoryCategory } from '../../../shared/models/inventory-category';
 import { CategoriesFacade } from '../state/categories.facade';
 import { CategoriesPage } from './categories-page';
+import { AuthFacade } from '../../../core/auth/auth.facade';
 
 describe('CategoriesPage', () => {
   const category: InventoryCategory = {
@@ -58,7 +59,10 @@ describe('CategoriesPage', () => {
 
     await TestBed.configureTestingModule({
       imports: [CategoriesPage],
-      providers: [{ provide: CategoriesFacade, useValue: categories }],
+      providers: [
+        { provide: CategoriesFacade, useValue: categories },
+        { provide: AuthFacade, useValue: { can: vi.fn().mockReturnValue(true) } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CategoriesPage);

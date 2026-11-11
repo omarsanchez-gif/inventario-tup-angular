@@ -31,7 +31,7 @@ function category(index = 1, overrides: Partial<ManagedCategory> = {}): ManagedC
 function dependencies(items: readonly ManagedCategory[] = []): AdminCategoriesDependencies {
   return {
     repository: {
-      findCanonicalAdmin: vi.fn().mockResolvedValue(true),
+      hasCanonicalPermission: vi.fn().mockResolvedValue(true),
       list: vi.fn().mockResolvedValue(items),
       create: vi.fn().mockResolvedValue('new-category'),
       update: vi.fn().mockResolvedValue(undefined),
@@ -42,16 +42,22 @@ function dependencies(items: readonly ManagedCategory[] = []): AdminCategoriesDe
 }
 
 describe('admin categories', () => {
-  it('rejects requests without an authenticated canonical admin', async () => {
+  it('requires the canonical permission and allows an authorized user', async () => {
     await expect(listCategories(null, dependencies())).rejects.toMatchObject({
       functionalCode: 'unauthenticated',
     });
 
     const deps = dependencies();
-    deps.repository.findCanonicalAdmin = vi.fn().mockResolvedValue(false);
+    deps.repository.hasCanonicalPermission = vi.fn().mockResolvedValue(false);
     await expect(listCategories(admin, deps)).rejects.toMatchObject({
       functionalCode: 'permission-denied',
     });
+
+    const allowed = dependencies();
+    await expect(
+      listCategories({ uid: 'user', authorized: true, role: 'usuario' }, allowed),
+    ).resolves.toMatchObject({ total: 0 });
+    expect(allowed.repository.hasCanonicalPermission).toHaveBeenCalledWith('user', 'ver');
   });
 
   it('normalizes category names consistently', () => {

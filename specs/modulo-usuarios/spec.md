@@ -2,7 +2,7 @@
 
 ## Estado
 
-El módulo base está implementado y desplegado en staging. El incremento de permisos granulares descrito a continuación es una propuesta para validación del responsable; todavía no está implementado, probado ni desplegado.
+El módulo base está implementado y desplegado en staging. El incremento de permisos granulares descrito a continuación fue autorizado expresamente el 11 de noviembre de 2026 y está en implementación; su validación y despliegue se documentarán por separado.
 
 ## Objetivo
 
@@ -33,7 +33,7 @@ Permitir que `admin` gestione las autorizaciones institucionales del sistema.
 - Solo `admin` puede reemplazar permisos de otro registro con rol `usuario`; nadie administra sus propios privilegios granulares.
 - Cambiar el rol limpia el mapa de permisos para impedir reactivación accidental de autorizaciones antiguas.
 
-## Modelo de permisos propuesto
+## Modelo de permisos autorizado
 
 Los permisos se guardan en el documento canónico `usuarios` como un mapa completo:
 
@@ -62,7 +62,7 @@ permisos:
 - En una fila `admin`, la tabla muestra `Acceso total por rol` y no ofrece una matriz editable.
 - La interfaz funciona desde 320 px: los módulos se apilan y cada control conserva etiqueta, foco y objetivo táctil.
 
-## Contrato callable propuesto
+## Contrato callable autorizado
 
 ### `setAuthorizedUserPermissions`
 

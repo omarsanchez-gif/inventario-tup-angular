@@ -2,7 +2,7 @@
 
 ## Estado
 
-El endurecimiento y las restricciones administrativas desplegadas se describen en `estado-actual.md`. SEC-045–048 y las referencias a acciones granulares en SEC-012/013, SEC-022/023 y SEC-027/028 pertenecen a ADR-007 y todavía no están implementadas o desplegadas; hasta entonces las callables de los tres catálogos continúan exigiendo `admin`.
+El endurecimiento y las restricciones administrativas desplegadas se describen en `estado-actual.md`. SEC-045–048 y las referencias a acciones granulares en SEC-012/013, SEC-022/023 y SEC-027/028 pertenecen a ADR-007. Su implementación local está en validación; staging conserva la versión anterior hasta completar y documentar el despliegue explícito.
 
 - SEC-001: Firestore aplica denegación por defecto.
 - SEC-002: `usuarios` es la fuente canónica de autorización; los claims son una proyección.

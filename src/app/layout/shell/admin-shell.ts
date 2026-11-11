@@ -34,6 +34,13 @@ export class AdminShell implements OnDestroy {
     this.currentUrl().startsWith('/configuraciones/'),
   );
   protected readonly settingsExpanded = this.settingsOpen.asReadonly();
+  protected readonly settingsVisible = computed(
+    () =>
+      this.auth.role() === 'admin' ||
+      this.auth.can('categorias', 'ver') ||
+      this.auth.can('fabricantes', 'ver') ||
+      this.auth.can('modelosActivos', 'ver'),
+  );
   protected readonly menuActionLabel = computed(() =>
     this.navigationOpen() ? 'Ocultar menú principal' : 'Mostrar menú principal',
   );
@@ -75,6 +82,11 @@ export class AdminShell implements OnDestroy {
   @HostListener('document:keydown.escape')
   protected closeNavigationWithEscape(): void {
     if (!this.desktop() && this.navigationOpen()) this.navigationOpen.set(false);
+  }
+
+  @HostListener('window:focus')
+  protected refreshPermissions(): void {
+    void this.auth.refreshAuthorization();
   }
 
   protected toggleNavigation(): void {
