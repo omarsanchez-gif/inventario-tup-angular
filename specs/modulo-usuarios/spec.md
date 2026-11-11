@@ -2,7 +2,7 @@
 
 ## Estado
 
-El módulo base está implementado y desplegado en staging. El incremento de permisos granulares descrito a continuación fue autorizado expresamente el 11 de noviembre de 2026 y está en implementación; su validación y despliegue se documentarán por separado.
+El módulo base y el incremento de permisos para Categorías, Fabricantes y Modelos están implementados y desplegados en staging. La ampliación para Campus está propuesta y pendiente de validación expresa; todavía no autoriza código ni despliegue.
 
 ## Objetivo
 
@@ -15,7 +15,7 @@ Permitir que `admin` gestione las autorizaciones institucionales del sistema.
 - Alta, edición, activación, desactivación y eliminación.
 - Roles iniciales `admin` y `usuario`.
 - Sincronización de claims y revocación cuando exista UID.
-- Asignación posterior e independiente de permisos sobre Categorías, Fabricantes y Modelos de activos.
+- Asignación posterior e independiente de permisos sobre Categorías, Fabricantes y Modelos de activos; Campus se incorporará únicamente después de aprobar la ampliación propuesta.
 
 ## Reglas críticas
 
@@ -51,6 +51,21 @@ permisos:
 - Los permisos son institucionales y globales para estos catálogos; no contienen Campus, Coordinaciones o Áreas.
 - Los Custom Claims no incluyen este mapa. `usuarios` permanece como autoridad y `bootstrapAuthorization` devuelve una copia sanitizada para presentación y guards.
 
+### Ampliación propuesta para Campus
+
+El mapa completo propuesto añadirá:
+
+```text
+permisos:
+  campus: ("ver" | "crear" | "editar" | "cambiarEstado" | "eliminar")[]
+```
+
+- La ausencia de `campus` en documentos anteriores se interpreta como lista vacía para `usuario` y acceso total para `admin` por rol.
+- La tabla podrá resumir `1 módulo` hasta `4 módulos`; Campus aparecerá como cuarto `fieldset` del mismo diálogo.
+- Guardar seguirá siendo un reemplazo completo y atómico. Una vez desplegado el contrato nuevo, la entrada deberá contener exactamente Categorías, Fabricantes, Modelos y Campus.
+- Un cliente anterior que envíe solo tres módulos recibirá `user-permissions-invalid`; el mapa existente no se modificará y la interfaz solicitará recargar.
+- Conceder Campus no concede acceso a Activos de un Campus ni asigna Coordinaciones o Áreas.
+
 ## Administración de permisos
 
 - La tabla agrega una columna `Permisos` con `Acceso total`, `Sin permisos`, `1 módulo`, `2 módulos` o `3 módulos`.
@@ -84,6 +99,7 @@ Comportamiento:
 - Rechaza campos, módulos, acciones, duplicados o dependencias desconocidas sin realizar escrituras parciales.
 - No modifica nombre, correo, UID, rol, estado, fechas ni claims.
 - Responde con el mapa sanitizado persistido.
+- `campus` será obligatorio en la entrada únicamente después de aprobar y desplegar la ampliación; hasta entonces el contrato vigente continúa siendo el de tres módulos.
 
 Códigos funcionales nuevos:
 
@@ -114,4 +130,4 @@ Códigos funcionales nuevos:
 
 ## Fuera de alcance
 
-Importación masiva, invitaciones, auditoría completa, perfiles reutilizables, puestos Jefe/Auxiliar, permisos para Campus o Usuarios, Coordinaciones, Áreas, alcance de Activos y roles adicionales.
+Importación masiva, invitaciones, auditoría completa, perfiles reutilizables, puestos Jefe/Auxiliar, permisos para Usuarios, Coordinaciones, Áreas, alcance de Activos y roles adicionales. La ampliación propuesta solo incorpora el permiso funcional del catálogo Campus.

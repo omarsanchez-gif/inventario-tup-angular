@@ -20,7 +20,7 @@
 
 ## Permisos granulares de catálogos — incremento autorizado
 
-RN-PER-001–012 y las ampliaciones granulares de Layout, Categorías, Fabricantes y Modelos describen el incremento autorizado en ADR-007. La implementación local está en validación; staging conserva la versión anterior hasta completar y documentar su despliegue explícito.
+RN-PER-001–012 y las ampliaciones granulares de Layout, Categorías, Fabricantes y Modelos describen el incremento implementado y desplegado en staging conforme a ADR-007.
 
 - RN-PER-001: `usuarios` es la fuente canónica de permisos; Custom Claims conserva solo autorización y rol.
 - RN-PER-002: En este incremento solo son autorizables `categorias`, `fabricantes` y `modelosActivos`.
@@ -32,8 +32,16 @@ RN-PER-001–012 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-PER-008: Un usuario inactivo no tiene permisos efectivos, aunque su configuración se conserve para una posible reactivación.
 - RN-PER-009: Cada callable revalida el permiso canónico de su acción. Menú, botones y guards solo son defensas de presentación.
 - RN-PER-010: Una reducción entra en vigor inmediatamente en backend; una respuesta de autorización anterior nunca restaura permisos en una sesión nueva.
-- RN-PER-011: Los permisos de estos tres catálogos son globales y no anticipan Campus, Coordinaciones, Áreas o alcance sobre Activos.
+- RN-PER-011: Los permisos de los tres catálogos del primer incremento son globales y no anticipan Campus, Coordinaciones, Áreas o alcance sobre Activos.
 - RN-PER-012: `ver` Modelos permite obtener sus referencias sanitizadas y acceso temporal a sus imágenes, sin conceder acceso administrativo a Categorías o Fabricantes.
+
+### Ampliación propuesta para Campus
+
+- RN-PER-013: Campus se incorporará como cuarto módulo autorizable únicamente después de aprobar esta ampliación; mientras tanto conserva acceso exclusivo de `admin`.
+- RN-PER-014: `campus` admitirá `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; cada callable exigirá exactamente su acción y toda acción distinta de `ver` requerirá también `ver`.
+- RN-PER-015: Para `usuario`, la ausencia de `permisos.campus` equivaldrá a denegación. `admin` conservará acceso total por rol sin migrar documentos anteriores.
+- RN-PER-016: Al habilitar Campus, la callable de asignación exigirá el mapa completo de los cuatro módulos. Un cliente anterior que omita Campus será rechazado sin modificar permisos almacenados.
+- RN-PER-017: Los permisos de Campus administrarán el catálogo institucional completo; no representan alcance sobre Activos, Áreas, Coordinaciones o sedes asignadas al usuario.
 
 ## Usuarios
 
@@ -156,3 +164,7 @@ RN-PER-001–012 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-CAM-013: `cantidadAreas` y `cantidadActivos` son contadores derivados, no editables, que permanecen en cero hasta implementar sus fuentes canónicas.
 - RN-CAM-014: FCS y TUP son datos administrativos esperados y no constantes codificadas ni documentos creados automáticamente durante despliegue.
 - RN-CAM-015: Una Coordinación futura podrá cubrir varios Campus sin duplicarse; la relación se definirá fuera del documento de Campus.
+
+### Autorización funcional propuesta
+
+- RN-CAM-016: Después de aprobar e implementar RN-PER-013–017, un `usuario` con la acción canónica correspondiente podrá operar Campus; cada callable revalidará su permiso exacto y el menú o guard no serán autoridad.

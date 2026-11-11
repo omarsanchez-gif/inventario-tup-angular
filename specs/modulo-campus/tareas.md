@@ -35,3 +35,16 @@
 - [ ] Antes de implementar coberturas de Coordinaciones, ampliar `deleteCampus` con su comprobación fail-safe.
 - [ ] Antes de reestructurar Usuarios, definir asignaciones de Campus, Coordinación y Áreas sin ampliar los roles iniciales.
 - [ ] Antes de implementar Activos, ampliar `deleteCampus` y el mantenimiento de `cantidadActivos` con todas sus transiciones y reconciliación.
+
+## Incremento propuesto: permisos granulares
+
+- [x] Definir Campus como cuarto módulo del mapa funcional sin mezclarlo con alcance territorial.
+- [x] Mapear Ver/Crear/Editar/Cambiar estado/Eliminar a las cinco callables existentes.
+- [x] Definir compatibilidad para documentos anteriores sin `permisos.campus`.
+- [x] Definir rechazo atómico de clientes anteriores que envíen un mapa incompleto.
+- [x] Definir guard, submenú y acciones visibles como defensas de presentación.
+- [x] Documentar escenarios de regresión y orden seguro de despliegue.
+- [ ] Obtener validación expresa del responsable sobre esta ampliación.
+- [ ] Implementar backend, frontend y pruebas después de la aprobación.
+- [ ] Desplegar Functions afectadas antes de Hosting, únicamente a staging.
+- [ ] Completar aceptación autenticada con `admin`, usuario parcial y usuario sin Campus.

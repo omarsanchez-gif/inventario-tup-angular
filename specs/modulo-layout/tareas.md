@@ -24,10 +24,17 @@
 - [x] Incorporar recorridos Playwright de teclado, foco, navegación móvil y viewport de 320 px con Emulator Suite.
 - [x] Mantener los rechazos de eliminación dentro de los cinco diálogos administrativos, sin alerta duplicada en el fondo.
 
-## Incremento futuro: permisos granulares
+## Incremento implementado: permisos granulares
 
 - [x] Especificar visibilidad del grupo y enlaces por capacidad Ver.
-- [ ] Incorporar el estado de permisos efectivos al shell sin mutación externa.
-- [ ] Sustituir guards administrativos de los tres catálogos por guards de capacidad con revalidación canónica.
-- [ ] Mantener Usuarios y Campus exclusivos de `admin`.
-- [ ] Probar combinaciones de uno, dos, tres y ningún submenú en escritorio y desde 320 px.
+- [x] Incorporar el estado de permisos efectivos al shell sin mutación externa.
+- [x] Sustituir guards administrativos de los tres catálogos por guards de capacidad con revalidación canónica.
+- [x] Mantener Usuarios y Campus exclusivos de `admin` en el primer incremento.
+- [x] Probar combinaciones de uno, dos, tres y ningún submenú en escritorio y desde 320 px.
+
+## Ampliación propuesta: Campus
+
+- [x] Especificar visibilidad y guard de Campus mediante `campus.ver`.
+- [x] Conservar Usuarios exclusivo de `admin` y Campus independiente del alcance territorial.
+- [ ] Obtener validación expresa del responsable.
+- [ ] Incorporar Campus al registro del shell y probar combinaciones de cero a cuatro submenús.

@@ -1,22 +1,22 @@
 # Matriz de trazabilidad
 
-## Estado vigente — 10 de noviembre de 2026
+## Estado vigente — 11 de noviembre de 2026
 
-| Alcance            | Reglas               | Implementación o propuesta                             | Pruebas                                    |
-| ------------------ | -------------------- | ------------------------------------------------------ | ------------------------------------------ |
-| Autenticación      | RN-AUT-001–009       | Base implementada; permisos en bootstrap propuestos    | AUT-001–AUT-016 (015–016 futuros)          |
-| Dashboard inicial  | RN-DASH-001–003      | `features/dashboard`                                   | DASH-001–004                               |
-| Usuarios           | RN-USR-001–011       | Base implementada; permisos granulares propuestos      | USR-001–USR-030 (020–030 futuros)          |
-| Layout privado     | RN-LAY-001–012       | Base implementada; navegación por capacidad propuesta  | LAY-001–LAY-025 (022–025 futuros)          |
-| Categorías         | RN-CAT-001–012       | Base implementada; autorización granular propuesta     | CAT-001–CAT-027 (025–027 futuros)          |
-| Fabricantes        | RN-FAB-001–012       | Base implementada; autorización granular propuesta     | FAB-001–FAB-023 (021–023 futuros)          |
-| Modelos de activos | RN-MOD-001–030       | Base implementada; autorización granular propuesta     | MOD-001–MOD-058 (054–058 futuros)          |
-| Permisos           | RN-PER-001–012       | ADR-007 y contratos propuestos; sin implementación     | Cubiertos por criterios futuros anteriores |
-| Campus             | RN-CAM-001–015       | `features/campuses`, cinco callables administrativas   | CAM-001–CAM-031                            |
-| Calidad local      | RN-DEV-001–003       | seed, emuladores, Playwright y verificador estructural | DEV-001–DEV-003                            |
-| Áreas              | Sin reglas aprobadas | Borrador documental; no existe implementación          | ARE-001–ARE-033 futuros                    |
+| Alcance            | Reglas               | Implementación o propuesta                                        | Pruebas                            |
+| ------------------ | -------------------- | ----------------------------------------------------------------- | ---------------------------------- |
+| Autenticación      | RN-AUT-001–009       | Base y permisos de tres catálogos implementados; Campus propuesto | AUT-001–AUT-017 (017 futuro)       |
+| Dashboard inicial  | RN-DASH-001–003      | `features/dashboard`                                              | DASH-001–004                       |
+| Usuarios           | RN-USR-001–011       | Base y matriz de tres módulos implementadas; Campus propuesto     | USR-001–USR-034 (031–034 futuros)  |
+| Layout privado     | RN-LAY-001–012       | Navegación granular implementada; Campus propuesto                | LAY-001–LAY-027 (026–027 futuros)  |
+| Categorías         | RN-CAT-001–012       | Base y autorización granular implementadas                        | CAT-001–CAT-027                    |
+| Fabricantes        | RN-FAB-001–012       | Base y autorización granular implementadas                        | FAB-001–FAB-023                    |
+| Modelos de activos | RN-MOD-001–030       | Base y autorización granular implementadas                        | MOD-001–MOD-058                    |
+| Permisos           | RN-PER-001–017       | RN-PER-001–012 implementadas; RN-PER-013–017 proponen Campus      | Cubiertos por criterios de módulos |
+| Campus             | RN-CAM-001–016       | Base administrativa implementada; permiso funcional propuesto     | CAM-001–CAM-038 (032–038 futuros)  |
+| Calidad local      | RN-DEV-001–003       | seed, emuladores, Playwright y verificador estructural            | DEV-001–DEV-003                    |
+| Áreas              | Sin reglas aprobadas | Borrador documental; no existe implementación                     | ARE-001–ARE-033 futuros            |
 
-Áreas y permisos granulares incrementan el inventario documental, pero sus criterios futuros no son obligatorios, no están en `trazabilidad.json` y no tienen evidencia de ejecución. Los documentos no crean rutas, colecciones, Functions, reglas, datos o despliegues.
+Áreas y la ampliación granular de Campus incrementan el inventario documental, pero sus criterios futuros no son obligatorios, no están en `trazabilidad.json` y no tienen evidencia de ejecución. Los documentos no crean rutas, colecciones, Functions, reglas, datos o despliegues.
 
 ## Significado de los estados
 

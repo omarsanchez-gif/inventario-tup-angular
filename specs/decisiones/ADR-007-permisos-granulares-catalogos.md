@@ -2,13 +2,13 @@
 
 ## Estado
 
-Aprobado para implementación, pruebas y despliegue exclusivo a staging el 11 de noviembre de 2026. La validación y el despliegue todavía deben documentarse antes de declararlo completado.
+El primer incremento para Categorías, Fabricantes y Modelos fue aprobado, implementado, validado y desplegado exclusivamente a staging el 11 de noviembre de 2026. La ampliación de este ADR para Campus queda propuesta y pendiente de validación expresa del responsable; todavía no autoriza código ni despliegue.
 
 ## Contexto
 
-Los módulos Categorías, Fabricantes y Modelos de activos están restringidos actualmente al rol `admin`. La operación futura necesita que usuarios seleccionados mantengan uno, varios o los tres catálogos sin convertirlos en administradores generales ni obligar al administrador del sistema a capturar cada registro.
+Los módulos Categorías, Fabricantes y Modelos de activos ya admiten permisos granulares para usuarios seleccionados sin convertirlos en administradores generales. Campus permanece restringido al rol `admin`, aunque su catálogo ya está implementado y presenta la misma necesidad operativa.
 
-Campus, Áreas, Coordinaciones y el alcance sobre Activos constituyen otra dimensión de autorización que todavía no está cerrada. Este incremento no debe inventar campos provisionales para esa cobertura.
+Campus ya existe como catálogo administrativo y puede incorporarse como cuarto módulo funcional. Áreas, Coordinaciones y el alcance sobre Activos constituyen otra dimensión de autorización que todavía no está cerrada; esta ampliación no debe inventar campos provisionales para esa cobertura.
 
 ## Decisión
 
@@ -17,21 +17,25 @@ Campus, Áreas, Coordinaciones y el alcance sobre Activos constituyen otra dimen
 - **Permiso funcional:** determina qué módulo y acción puede usar una persona.
 - **Alcance:** determinará en un incremento posterior sobre qué Campus, Coordinaciones, Áreas o Activos puede actuar.
 
-Este ADR define solo permisos funcionales para los tres catálogos globales vigentes.
+Este ADR define permisos funcionales para los catálogos globales implementados. Incorporar Campus permite administrar su catálogo, pero no limita ni concede por sí mismo acceso a activos de un Campus determinado.
 
 ### Fuente canónica
 
-`usuarios` continúa como fuente canónica. El rol `admin` concede acceso efectivo completo a los tres catálogos. El rol `usuario` recibe exclusivamente los permisos explícitos de su mapa canónico; la ausencia del campo, del módulo o de la acción equivale a denegación.
+`usuarios` continúa como fuente canónica. El rol `admin` concede acceso efectivo completo a todos los módulos funcionales incorporados al registro canónico. El rol `usuario` recibe exclusivamente los permisos explícitos de su mapa; la ausencia del campo, del módulo o de la acción equivale a denegación.
 
 Los Custom Claims conservan solamente `authorized` y `role`. No contienen la matriz de permisos: su tamaño y latencia de propagación no son adecuados para una autorización que crecerá por módulos. Cada callable revalida el documento canónico antes de leer, firmar o mutar datos.
 
 ### Vocabulario fijo
 
-Módulos autorizables en este incremento:
+Módulos autorizables en el incremento desplegado:
 
 - `categorias`
 - `fabricantes`
 - `modelosActivos`
+
+Ampliación propuesta:
+
+- `campus`
 
 Acciones autorizables:
 
@@ -59,6 +63,17 @@ Crear un usuario siempre lo deja sin permisos granulares. La tabla de Usuarios i
 
 En Modelos, `ver` también permite solicitar miniaturas y el catálogo sanitizado necesario para mostrar referencias. Esto no concede acceso administrativo a las pantallas de Categorías o Fabricantes.
 
+En Campus, `ver` habilitará ruta, submenú y `listCampuses`; las otras cuatro acciones se asociarán respectivamente con `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus`. Estos permisos serán globales para el catálogo y no representan alcance territorial sobre Activos, Áreas o Coordinaciones.
+
+### Evolución compatible del mapa
+
+- El mapa canónico propuesto contendrá cuatro módulos: Categorías, Fabricantes, Modelos y Campus.
+- Un documento histórico sin `permisos.campus` se interpreta con Campus denegado para `usuario`; no requiere migración destructiva.
+- `admin` conserva acceso total por rol aunque el mapa almacenado sea anterior.
+- `setAuthorizedUserPermissions` seguirá reemplazando el mapa completo y exigirá exactamente el vocabulario canónico vigente. Al activarse Campus, omitirlo o enviar un módulo desconocido responderá `user-permissions-invalid` sin escritura parcial.
+- La ampliación se desplegará primero en las Functions que entienden el contrato de cuatro módulos y después en Hosting. Una pestaña antigua que intente guardar tres módulos fallará de forma segura y deberá recargarse; nunca borrará un permiso de Campus ya concedido.
+- Los módulos futuros se incorporarán únicamente después de tener specs, backend y rutas aprobados; no se mostrarán controles de permisos anticipados.
+
 ### Vigencia y sesiones
 
 Una reducción se aplica inmediatamente en backend porque cada callable consulta `usuarios`. La interfaz obtiene el mapa mediante `bootstrapAuthorization`, lo actualiza al revalidar una ruta protegida o recuperar foco y descarta respuestas de generaciones de sesión anteriores. Un estado visual obsoleto nunca autoriza una operación.
@@ -69,10 +84,10 @@ Los permisos no se sincronizan a claims ni requieren revocar tokens por sí solo
 
 - El administrador administra autorizaciones; no es el único capturista de catálogos.
 - `Configuraciones` se muestra a `admin` o a un `usuario` con al menos un permiso `ver`, y contiene solo enlaces autorizados.
-- Campus y Usuarios permanecen exclusivos de `admin` en este incremento.
+- Usuarios permanece exclusivo de `admin`. Campus seguirá exclusivo de `admin` hasta aprobar, implementar y desplegar esta ampliación.
 - No se crean puestos, perfiles reutilizables, Jefe/Auxiliar, Coordinaciones, Áreas ni coberturas.
 - Firestore y Storage continúan cerrados a clientes.
-- Se requiere adaptar las callables existentes de los tres catálogos, no duplicarlas por rol.
+- Cada ampliación adapta las callables existentes del módulo incorporado; no duplica endpoints por rol.
 
 ## Alternativas descartadas
 

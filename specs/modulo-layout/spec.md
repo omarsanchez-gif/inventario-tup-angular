@@ -2,7 +2,7 @@
 
 ## Estado
 
-El layout base está implementado y desplegado. El filtrado de Configuraciones por capacidades de `usuario` pertenece a ADR-007, fue autorizado el 11 de noviembre de 2026 y está en implementación.
+El layout base y el filtrado de Categorías, Fabricantes y Modelos están implementados y desplegados. Mostrar Campus a usuarios con capacidad explícita es una ampliación propuesta pendiente de validación; hasta aprobarla permanece exclusivo de `admin`.
 
 ## Objetivo
 
@@ -50,7 +50,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 
 ## Autorización
 
-El layout solo presenta rutas ya autorizadas. `Usuarios` y Campus se mantienen exclusivos de `admin`. `Configuraciones` aparece completo para `admin`; para `usuario` aparece cuando existe al menos un permiso `ver` y contiene solo Categorías, Fabricantes o Modelos autorizados. Un grupo vacío no se renderiza. Guards y Functions conservan la autorización efectiva y el grupo no muestra enlaces de módulos todavía no implementados.
+El layout solo presenta rutas ya autorizadas. `Usuarios` se mantiene exclusivo de `admin`. En la versión vigente Campus también permanece exclusivo de `admin`; después de aprobar e implementar la ampliación, un `usuario` verá Campus únicamente con `campus.ver`. `Configuraciones` aparece completo para `admin`; para `usuario` aparece cuando existe al menos un permiso `ver` y contiene solo los módulos concedidos. Un grupo vacío no se renderiza. Guards y Functions conservan la autorización efectiva y el grupo no muestra enlaces de módulos todavía no implementados.
 
 Una revalidación de permisos actualiza menú y acciones solo si pertenece al UID y generación vigentes. Ocultar un enlace no sustituye la denegación backend.
 

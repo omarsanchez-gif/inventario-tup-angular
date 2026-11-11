@@ -2,7 +2,7 @@
 
 ## Estado
 
-El endurecimiento y las restricciones administrativas desplegadas se describen en `estado-actual.md`. SEC-045–048 y las referencias a acciones granulares en SEC-012/013, SEC-022/023 y SEC-027/028 pertenecen a ADR-007. Su implementación local está en validación; staging conserva la versión anterior hasta completar y documentar el despliegue explícito.
+El endurecimiento y las restricciones administrativas desplegadas se describen en `estado-actual.md`. SEC-045–048 y las referencias a acciones granulares en SEC-012/013, SEC-022/023 y SEC-027/028 pertenecen al incremento de ADR-007 ya publicado. SEC-049–052 son una propuesta para Campus y todavía no autorizan implementación ni despliegue.
 
 - SEC-001: Firestore aplica denegación por defecto.
 - SEC-002: `usuarios` es la fuente canónica de autorización; los claims son una proyección.
@@ -14,6 +14,10 @@ El endurecimiento y las restricciones administrativas desplegadas se describen e
 - SEC-046: Para `usuario`, todo permiso ausente o desconocido se deniega. `admin` conserva acceso total por rol a los catálogos vigentes.
 - SEC-047: `setAuthorizedUserPermissions` exige `admin` canónico, objetivo distinto con rol `usuario`, vocabulario cerrado y reemplazo completo; ningún cliente escribe el mapa directamente.
 - SEC-048: Cambiar rol limpia permisos, una reducción se aplica inmediatamente en backend y la interfaz descarta cualquier revalidación de sesión obsoleta.
+- SEC-049: La ampliación de Campus mantendrá denegación por defecto: un `usuario` sin `permisos.campus` no podrá listar ni mutar el catálogo y `admin` conservará acceso total por rol.
+- SEC-050: Las cinco callables de Campus revalidarán la acción exacta contra `usuarios`; el guard, menú y botones continuarán siendo defensas de presentación.
+- SEC-051: Al habilitar Campus, `setAuthorizedUserPermissions` aceptará únicamente el mapa completo de cuatro módulos. Un payload incompleto, anterior o desconocido se rechazará sin escritura parcial.
+- SEC-052: El despliegue del contrato se ordenará Functions antes de Hosting para que una pestaña antigua falle cerrada y nunca elimine silenciosamente permisos de Campus.
 - SEC-007: Los errores expuestos se sanitizan y nunca incluyen tokens, secretos o stack traces.
 - SEC-008: La configuración pública de Firebase no se considera autorización; Security Rules y Functions son obligatorias.
 - SEC-009: Storage permanece cerrado a clientes; toda ruta y consumidor requiere especificación y acceso backend autorizado.
@@ -56,8 +60,8 @@ El endurecimiento y las restricciones administrativas desplegadas se describen e
 ## Campus
 
 - SEC-036: `campus` y `campus_claves` permanecen cerradas a toda lectura y escritura directa desde clientes; el módulo consume exclusivamente callables.
-- SEC-037: Las cinco callables de Campus validan Authentication, claim administrativo y el documento canónico activo antes de acceder a Firestore.
-- SEC-038: `usuario`, perfiles inactivos y solicitudes anónimas no pueden listar ni mutar Campus.
+- SEC-037: En la versión vigente, las cinco callables de Campus validan Authentication, claim administrativo y el documento canónico activo antes de acceder a Firestore. Después de aprobar SEC-049–052 validarán `admin` o la acción granular correspondiente.
+- SEC-038: En la versión vigente, `usuario`, perfiles inactivos y solicitudes anónimas no pueden listar ni mutar Campus. La ampliación propuesta solo exceptuará al `usuario` activo con acción canónica explícita.
 - SEC-039: Ningún payload administrativo puede escribir campos normalizados, reservas, cantidades, estado inicial, identificadores o fechas.
 - SEC-040: `deleteCampus` falla de forma segura ante una referencia, error o resultado no determinable y se ampliará antes de habilitar cada consumidor.
 - SEC-041: Los futuros catálogos para consumidores expondrán únicamente identificador, código y nombre de Campus aplicables; no entregarán documentos administrativos completos.

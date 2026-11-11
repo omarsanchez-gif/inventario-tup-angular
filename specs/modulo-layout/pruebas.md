@@ -29,6 +29,11 @@
 - LAY-024: `/usuarios` conserva `adminGuard`; las rutas de Categorías, Fabricantes y Modelos se asocian exactamente con la capacidad `ver` de su propio módulo y revalidan el perfil canónico; una URL directa no confía en la visibilidad del sidebar. <!-- trace:required -->
 - LAY-025: revocar permisos y revalidar sesión retira enlaces y acciones sin aceptar respuestas de otra generación; backend deniega de inmediato aun si la vista estaba obsoleta. <!-- trace:required -->
 
+## Criterios propuestos para Campus
+
+- LAY-026: `usuario` ve Campus en Configuraciones únicamente con `campus.ver`; el resto de enlaces conserva su filtrado independiente y un grupo sin módulos no se renderiza.
+- LAY-027: `/configuraciones/campus` usa exactamente el guard de `campus.ver`; una URL directa sin esa capacidad redirige al Dashboard y `admin` conserva acceso total.
+
 ## Evidencia del incremento
 
 - 10 pruebas Angular aprobadas, incluidas iconografía, cierres del drawer, cambio de breakpoint, alternancia del menú y diálogos de Usuarios.

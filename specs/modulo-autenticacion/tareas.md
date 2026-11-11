@@ -16,5 +16,11 @@
 - [x] Invalidar respuestas tardías, cambios de usuario y estados administrativos al perder sesión.
 - [x] Agregar cobertura determinista y recorridos de navegador con Auth Emulator.
 - [x] Descartar errores tardíos de `bootstrap` y renovación de claims por UID y generación sin afectar una sesión posterior.
-- [ ] Ampliar `bootstrapAuthorization` con permisos sanitizados conforme a ADR-007 sin incorporarlos a claims.
-- [ ] Revalidar capacidades en guards y al recuperar foco, conservando deduplicación y generación de sesión.
+- [x] Ampliar `bootstrapAuthorization` con permisos sanitizados conforme a ADR-007 sin incorporarlos a claims.
+- [x] Revalidar capacidades en guards y al recuperar foco, conservando deduplicación y generación de sesión.
+
+## Ampliación propuesta: Campus
+
+- [x] Especificar `campus[]` con denegación compatible para documentos anteriores.
+- [ ] Obtener validación expresa del responsable.
+- [ ] Incorporar Campus al bootstrap y sus regresiones sin modificar Custom Claims.
