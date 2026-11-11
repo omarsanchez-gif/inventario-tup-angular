@@ -142,4 +142,6 @@ Modelos de activos reutiliza las mismas primitivas y fue publicado en Hosting de
 
 Campus reutiliza encabezado, tabla, búsqueda, `AppPagination`, `AppDialog`, badges e icon-buttons sin introducir variantes visuales. Fue publicado únicamente en Hosting de staging el 9 de noviembre de 2026; la regresión aprobó 11 suites con 30 pruebas Angular y la guardia visual. La sesión administrativa confirmó navegación, estado vacío y formulario modal en escritorio; la revisión visual móvil permanece pendiente.
 
+La matriz de permisos usa `disclosure-list` desde el 11 de noviembre de 2026. La implementación `77d84903f9ca5ad528014cd11518f74a8f1e29d2` aprobó 73 pruebas Angular y 5 recorridos Chromium y fue publicada únicamente en Hosting de staging. La ruta `/usuarios` y los bundles `main-G6DKMJDP.js` y `styles-YBUAO7AQ.css` respondieron HTTP 200; la aceptación visual autenticada permanece pendiente.
+
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

@@ -6,8 +6,9 @@
 - Rama inspeccionada: `codex/hardening-sesion-imagenes-trazabilidad`.
 - SHA publicado al iniciar la consolidación: `51e71dc599c55e63bed4ddf11ca0b1e91a9ed599`.
 - SHA de implementación de permisos, rutas y Campus con validación completa: `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`.
+- SHA del acordeón de permisos publicado en Hosting de staging: `77d84903f9ca5ad528014cd11518f74a8f1e29d2`.
 - `desarrollo` local y remoto: `179e79863e2a6c940c9a24165b219bfb8ce59cc1`.
-- Diferencia al iniciar: la rama de trabajo está 13 commits delante de `desarrollo` y no está integrada.
+- La rama de trabajo permanece por delante de `desarrollo` y todavía no está integrada.
 
 Este resumen describe el estado vigente. Las reglas completas permanecen en las [fuentes de verdad](../AGENTS.md#fuente-de-verdad) y la evidencia fechada en las specs de cada módulo, [integraciones](integraciones.md) y la [matriz](matriz-trazabilidad.md).
 
@@ -18,12 +19,12 @@ Este resumen describe el estado vigente. Las reglas completas permanecen en las 
 | Autenticación y sesión  | Google institucional, autorización previa, claims proyectados, permisos sanitizados y descarte por UID/generación | `/login`; todo usuario autorizado entra a `/dashboard`                | `bootstrapAuthorization`; `usuarios` es canónica                         | AUT-001–017                             | Implementado, validado y desplegado; popup real conserva aceptación manual separada  |
 | Layout privado          | Sidebar responsive, menú ocultable y submenús de Configuraciones filtrados por capacidad                          | Shell privado; Usuarios solo `admin`; catálogos según `ver`           | Guards defensivos y revalidación al recuperar foco; backend es autoridad | LAY-001–027                             | Implementado, validado y desplegado; revisión visual móvil autenticada pendiente     |
 | Dashboard inicial       | Bienvenida, identidad y estado de plataforma, sin métricas ficticias                                              | `/dashboard`; `admin` y `usuario` autorizados                         | No crea read model ni KPI operativos                                     | DASH-001–004                            | Implementado y desplegado; indicadores operativos son un incremento futuro           |
-| Usuarios                | Administra autorizaciones y asigna después del alta una matriz completa de cuatro módulos                         | `/usuarios`; solo `admin`                                             | Siete callables; cambio de rol limpia permisos                           | USR-001–034                             | Implementado, validado y desplegado; aceptación autenticada de la matriz pendiente   |
+| Usuarios                | Administra autorizaciones y asigna después del alta una matriz compacta de cuatro módulos                         | `/usuarios`; solo `admin`                                             | Siete callables; cambio de rol limpia permisos                           | USR-001–035                             | Implementado, validado y desplegado; aceptación autenticada de la matriz pendiente   |
 | Categorías              | Nombre, notas, estado y contador preparado de Activos; eliminación bloqueada por Modelos                          | `/configuraciones/categorias`; `admin` o `usuario` con capacidad      | Cinco callables; cada operación revalida su acción canónica              | CAT-001–027                             | Implementado, validado y desplegado; contador permanece en cero hasta Activos        |
 | Fabricantes             | Marca productora con Nombre y Notas; no representa comercio o plataforma de compra                                | `/configuraciones/fabricantes`; `admin` o `usuario` con capacidad     | Cinco callables; cada operación revalida su acción canónica              | FAB-001–023                             | Implementado, validado y desplegado; aceptación funcional/móvil pendiente            |
 | Modelos de activos      | Catálogo de Nombre, Categoría, Fabricante, Modelo No., Notas e imagen opcional                                    | `/configuraciones/modelos-activos`; `admin` o `usuario` con capacidad | Nueve callables; permisos exactos y recuperación de imagen               | MOD-001–058                             | Implementado, validado y desplegado; ciclo real completo y revisión móvil pendientes |
 | Campus                  | Raíz física con Código, Nombre, Notas y contadores preparados de Áreas/Activos                                    | `/configuraciones/campus`; `admin` o capacidad explícita              | Cinco callables; `campus` y `campus_claves`                              | CAM-001–038                             | Implementado, validado y desplegado sin crear FCS/TUP; aceptación parcial pendiente  |
-| Calidad y entorno local | Seed sintético idempotente, Emulator Suite, Playwright, guardia visual y verificador estructural de trazabilidad  | Scripts de `package.json` y CI                                        | Proyecto exclusivo `demo-inventario-tup`; no usa credenciales reales     | DEV-001–003 y 64 criterios obligatorios | Validado localmente; CI se comprobará en el PR                                       |
+| Calidad y entorno local | Seed sintético idempotente, Emulator Suite, Playwright, guardia visual y verificador estructural de trazabilidad  | Scripts de `package.json` y CI                                        | Proyecto exclusivo `demo-inventario-tup`; no usa credenciales reales     | DEV-001–003 y 65 criterios obligatorios | Validado localmente; CI se comprobará en el PR                                       |
 
 ## Contratos e invariantes relevantes
 
@@ -49,17 +50,17 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 
 ## Evidencia y estados de entrega
 
-| Etapa                     | Estado al corte                           | Evidencia o límite                                                                                                                                       |
-| ------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Especificado y aprobado   | Sí para los módulos de la tabla; Áreas no | Specs y tareas vigentes                                                                                                                                  |
-| Implementado              | Sí para el alcance vigente                | Código en la rama; permisos de Campus en `2883ff5`                                                                                                       |
-| Validado localmente       | Sí sobre `2883ff5`                        | 71 Angular, 47 Functions, 31 Emulator Suite, 5 Chromium, 7 casos del verificador; lint, guardia visual, formato, builds, diff y auditoría high aprobados |
-| Publicado en rama         | Sí                                        | La rama remota incluye la implementación `2883ff5` y su evidencia documental                                                                             |
-| Integrado en `desarrollo` | No                                        | `desarrollo` permanece en `179e798`; la rama está 13 commits delante                                                                                     |
-| Verificado por CI         | No para este incremento                   | No existe PR y no hay ejecución de `Validación continua / validate` asociada al SHA final                                                                |
-| Desplegado en staging     | Sí, dentro del alcance documentado        | 12 Functions de autorización/Usuarios/Campus y Hosting actualizados; Rules, datos y producción intactos                                                  |
-| Aceptado con sesión real  | Parcial                                   | Miniatura real y parte de Campus aceptadas; otras mutaciones, ciclo completo de imagen y revisión móvil siguen pendientes                                |
-| Producción                | No configurada ni autorizada              | Ningún despliegue productivo                                                                                                                             |
+| Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                                                                                   |
+| ------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Especificado y aprobado   | Sí para los módulos de la tabla; Áreas no       | Specs y tareas vigentes                                                                                                                                                              |
+| Implementado              | Sí para el alcance vigente                      | Backend de cuatro módulos en `2883ff5`; acordeón de permisos en `77d8490`                                                                                                            |
+| Validado localmente       | Sí; UI sobre `77d8490`, backend sobre `2883ff5` | 73 Angular y 5 Chromium para el acordeón; la evidencia backend previa conserva 47 Functions y 31 Emulator Suite. Trazabilidad, lint, guardia visual, formato, build y diff aprobados |
+| Publicado en rama         | Sí                                              | La rama remota incluye el backend `2883ff5`, el acordeón `77d8490` y su evidencia documental                                                                                         |
+| Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama está 13 commits delante                                                                                                                 |
+| Verificado por CI         | No para este incremento                         | No existe PR y no hay ejecución de `Validación continua / validate` asociada al SHA final                                                                                            |
+| Desplegado en staging     | Sí, dentro del alcance documentado              | 12 Functions de autorización/Usuarios/Campus y Hosting actualizados; Rules, datos y producción intactos                                                                              |
+| Aceptado con sesión real  | Parcial                                         | Miniatura real y parte de Campus aceptadas; otras mutaciones, ciclo completo de imagen y revisión móvil siguen pendientes                                                            |
+| Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                                                                                         |
 
 La evidencia histórica de `ef8ae66` permanece vigente para recuperación de imágenes. El incremento de Campus tiene evidencia propia en `2883ff5` y no traslada aceptación manual.
 
@@ -69,12 +70,12 @@ El 10 de noviembre de 2026 se aplicó la skill oficial `angular-developer` al es
 
 ## Incremento autorizado: permisos granulares
 
-El 10 de noviembre de 2026 se especificó un incremento que permite asignar después del alta permisos Ver, Crear, Editar, Cambiar estado y Eliminar sobre Categorías, Fabricantes y Modelos. El 11 de noviembre se amplió a Campus, se validó sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724` y se desplegó únicamente a staging. `admin` conserva acceso total; `usuario` inicia sin permisos y recibe solo acciones explícitas desde una acción separada de la tabla de Usuarios. No incluye Coordinaciones, Áreas ni alcance sobre Activos. La aceptación funcional autenticada permanece pendiente. Su decisión está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
+El 10 de noviembre de 2026 se especificó un incremento que permite asignar después del alta permisos Ver, Crear, Editar, Cambiar estado y Eliminar sobre Categorías, Fabricantes y Modelos. El 11 de noviembre se amplió a Campus, se validó el backend sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724` y se desplegó únicamente a staging. Ese mismo día la matriz se compactó en un acordeón accesible sobre `77d84903f9ca5ad528014cd11518f74a8f1e29d2` y se publicó solo en Hosting. `admin` conserva acceso total; `usuario` inicia sin permisos y recibe solo acciones explícitas desde una acción separada de la tabla de Usuarios. No incluye Coordinaciones, Áreas ni alcance sobre Activos. La aceptación funcional autenticada permanece pendiente. Su decisión está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
 
 ## Staging vigente
 
 - Proyecto exclusivo: `inventario-stg`; alias obligatorio `staging`.
-- Hosting responde HTTP 200 y el incremento de permisos de Campus sirve `main-AQFFZNH7.js` y `styles-CISTRGAV.css`.
+- Hosting responde HTTP 200 y el acordeón de permisos sirve `main-G6DKMJDP.js` y `styles-YBUAO7AQ.css`.
 - Las 30 callables usan Node.js 22 y `us-central1`; las verificaciones anónimas documentadas recibieron HTTP 401.
 - Firestore Rules niega acceso directo a las colecciones administrativas y Storage Rules conserva denegación total.
 - El último incremento de recuperación desplegó `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` en revisión `00004`, el ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting.
@@ -94,7 +95,7 @@ Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación té
 
 ## Exclusiones actuales
 
-- Validación, despliegue y aceptación del incremento de permisos granulares autorizado el 11 de noviembre de 2026.
+- Aceptación visual autenticada del acordeón de permisos en escritorio y 320 px.
 - Áreas, Coordinaciones, coberturas y alcance territorial de Usuarios.
 - Activos individuales, personas, responsables, asignaciones, movimientos y responsivas.
 - Indicadores operativos del Dashboard.

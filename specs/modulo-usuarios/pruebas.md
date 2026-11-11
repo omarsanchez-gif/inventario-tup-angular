@@ -77,6 +77,13 @@
 - Las seis Functions administrativas de Usuarios y `bootstrapAuthorization` se actualizaron antes de Hosting únicamente en staging; quedaron `ACTIVE` y `setAuthorizedUserPermissions` rechazó una solicitud anónima con HTTP 401.
 - La aceptación autenticada del diálogo con una cuenta institucional parcial permanece separada y pendiente.
 
+## Evidencia del acordeón de permisos — 11 de noviembre de 2026
+
+- USR-035 aprobó sobre `77d84903f9ca5ad528014cd11518f74a8f1e29d2`: apertura inicial, expansión exclusiva, atributos accesibles, resumen dinámico y conservación de selecciones se verificaron en componente y en Chromium con Emulator Suite.
+- La regresión aprobó 17 archivos y 73 pruebas Angular, 5 recorridos Chromium, trazabilidad estructural y sus 7 pruebas negativas, lint, guardia visual, formato, build de staging y `git diff --check`.
+- Se desplegó únicamente Hosting con `--only hosting --project staging`; `/usuarios`, `main-G6DKMJDP.js` y `styles-YBUAO7AQ.css` respondieron HTTP 200. Functions, Rules, Storage, índices, datos, secretos, IAM y producción permanecieron intactos.
+- La aceptación visual autenticada del acordeón en escritorio y 320 px permanece pendiente y no se presenta como aprobada por las pruebas automatizadas.
+
 ## Evidencia local — búsqueda y paginación
 
 - USR-014 aprobó la búsqueda automática, el campo compartido a todo el ancho y el reinicio a página 1.
