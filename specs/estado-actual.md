@@ -58,9 +58,9 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 | Especificado y aprobado   | Sí para los módulos de la tabla; Áreas no | Specs y tareas vigentes                                                                                                                             |
 | Implementado              | Sí para el alcance vigente                | Revocación selectiva y control de imagen en `4013c35`; backend canónico previo conservado                                                           |
 | Validado localmente       | Sí, sobre `4013c35`                       | 86 Angular, 47 Functions, 31 Emulator Suite, 7 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados |
-| Publicado en rama         | Pendiente del cierre documental           | La rama local contiene `4013c35`; su publicación se confirma por separado                                                                           |
-| Integrado en `desarrollo` | No                                        | `desarrollo` permanece en `179e798`; la rama está 13 commits delante                                                                                |
-| Verificado por CI         | No para este incremento                   | No existe PR y no hay ejecución de `Validación continua / validate` asociada al SHA final                                                           |
+| Publicado en rama         | Sí                                        | La rama remota contiene `4013c35` y el cierre documental `6c980ce`                                                                                  |
+| Integrado en `desarrollo` | No                                        | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                        |
+| Verificado por CI         | No para este incremento                   | GitHub reporta cero ejecuciones en la rama; sin PR no se disparó `Validación continua / validate`                                                   |
 | Desplegado en staging     | Sí, dentro del alcance documentado        | Este incremento actualizó solo Hosting; Functions, Rules, datos, secretos y producción permanecieron intactos                                       |
 | Aceptado con sesión real  | Parcial                                   | Miniatura real y parte de Campus aceptadas; otras mutaciones, ciclo completo de imagen y revisión móvil siguen pendientes                           |
 | Producción                | No configurada ni autorizada              | Ningún despliegue productivo                                                                                                                        |
@@ -88,7 +88,7 @@ Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación té
 
 ## Limitaciones conocidas y pendientes de entrega
 
-- La rama endurecida no está integrada en `desarrollo`; el PR, CI y posible requisito del check de rama permanecen sin confirmación por falta de permisos del conector.
+- La rama endurecida no está integrada en `desarrollo`. El único intento de abrir el PR en borrador respondió `must be a collaborator`; GitHub reporta cero ejecuciones de Actions para la rama y la integración no permite consultar la protección de `desarrollo` (HTTP 403).
 - Falta aceptación autenticada de sustitución, retirada y expiración de imágenes y de los flujos administrativos que no se ejercieron con datos reales.
 - Falta revisión visual autenticada integral desde escritorio y 320 px.
 - La recuperación de imagen conserva indefinidamente evidencia insuficiente cuando no existe acuse ni ambas variantes; requiere un reintento autorizado y puede seguir pendiente.

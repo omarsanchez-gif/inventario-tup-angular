@@ -5,7 +5,7 @@
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
-    "branchPublication": "pending-current-documentation",
+    "branchPublication": "complete",
     "stagingDeployment": "complete-hosting-only-current-increment",
     "continuousIntegration": "not-triggered-without-pull-request",
     "manualAcceptance": "pending"

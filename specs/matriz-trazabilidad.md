@@ -52,15 +52,17 @@ La regresión de revocación volvió a ejecutar todas las suites sobre `4013c35`
 
 | Estado          | Situación vigente                                                                                                                                    |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Rama publicada  | `codex/hardening-sesion-imagenes-trazabilidad` incluye `2883ff5` y su evidencia documental                                                           |
+| Rama publicada  | `codex/hardening-sesion-imagenes-trazabilidad` incluye `4013c35` y el cierre documental `6c980ce`                                                    |
 | `desarrollo`    | Permanece en `179e79863e2a6c940c9a24165b219bfb8ce59cc1`; el endurecimiento no está integrado                                                         |
-| PR              | No existe; el conector respondió previamente `must be a collaborator` y no se repiten escrituras sin cambio de permisos                              |
-| CI              | `Validación continua / validate` no se ejecutó para el SHA final; tampoco se puede afirmar si es obligatorio en `desarrollo`                         |
+| PR              | No existe; el intento actual de crearlo en borrador respondió `must be a collaborator` y no se repiten escrituras sin cambio de permisos             |
+| CI              | GitHub reporta cero ejecuciones para la rama; sin PR no se ejecutó `Validación continua / validate`                                                  |
 | Staging         | Doce Functions del contrato de cuatro módulos y Hosting publicados; Rules y las demás Functions no se modificaron                                    |
 | Aceptación real | Parcial: lectura autenticada de miniatura y parte de Campus aceptadas; ciclo completo de imagen, otras mutaciones y revisión móvil siguen pendientes |
 | Producción      | No configurada ni autorizada                                                                                                                         |
 
 El cierre de revocación selectiva actualizó únicamente Hosting en `inventario-stg`. La verificación remota respondió HTTP 200 con `main-BEAIWWJ4.js` y `styles-K7H52MHM.css`; Functions, Rules, índices, datos, secretos y producción no se modificaron.
+
+La protección de `desarrollo` no pudo comprobarse: el endpoint respondió HTTP 403 `Resource not accessible by integration`. Por ello no se afirma si `Validación continua / validate` es un requisito obligatorio.
 
 ## Evidencia histórica relevante
 
