@@ -31,6 +31,7 @@ export class UsersPage {
   protected readonly editingId = signal<string | null>(null);
   protected readonly pendingDeletion = signal<SystemUser | null>(null);
   protected readonly permissionsUser = signal<SystemUser | null>(null);
+  protected readonly openPermissionModule = signal<PermissionModule | null>(null);
   protected readonly permissionModules: readonly {
     readonly id: PermissionModule;
     readonly label: string;
@@ -177,6 +178,10 @@ export class UsersPage {
         eliminar: actions.includes('eliminar'),
       });
     }
+    this.openPermissionModule.set(
+      this.permissionModules.find(({ id }) => user.permisos[id].length > 0)?.id ??
+        this.permissionModules[0].id,
+    );
     this.permissionsUser.set(user);
   }
 
@@ -184,6 +189,24 @@ export class UsersPage {
     if (this.users.saving()) return;
     this.users.clearMessages();
     this.permissionsUser.set(null);
+    this.openPermissionModule.set(null);
+  }
+
+  protected togglePermissionModule(module: PermissionModule): void {
+    this.openPermissionModule.update((current) => (current === module ? null : module));
+  }
+
+  protected permissionPanelId(module: PermissionModule): string {
+    return `${module}-permissions-panel`;
+  }
+
+  protected permissionSelectionSummary(module: PermissionModule): string {
+    const controls = this.permissionsForm.controls[module].controls;
+    const selected = permissionActions.filter((action) => controls[action].value);
+    if (selected.length === 0) return 'Sin acceso';
+    if (selected.length === permissionActions.length) return 'Acceso completo';
+    if (selected.length === 1 && selected[0] === 'ver') return 'Solo ver';
+    return `${selected.length} permisos`;
   }
 
   protected permissionChanged(module: PermissionModule, action: PermissionAction): void {
@@ -208,7 +231,10 @@ export class UsersPage {
         permissionActions.filter((action) => raw[module][action]),
       ]),
     ) as unknown as PermissionMap;
-    if (await this.users.setPermissions(user, permissions)) this.permissionsUser.set(null);
+    if (await this.users.setPermissions(user, permissions)) {
+      this.permissionsUser.set(null);
+      this.openPermissionModule.set(null);
+    }
   }
 
   protected permissionSummary(user: SystemUser): string {

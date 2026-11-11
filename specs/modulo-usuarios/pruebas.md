@@ -40,6 +40,7 @@
 - USR-032: el diálogo presenta Campus como cuarto módulo, mantiene la dependencia de Ver y resume correctamente entre cero y cuatro módulos autorizados. <!-- trace:required -->
 - USR-033: `setAuthorizedUserPermissions` acepta el mapa completo de cuatro módulos y rechaza sin escritura parcial un mapa anterior de tres módulos, campos adicionales o acciones desconocidas. <!-- trace:required -->
 - USR-034: una pestaña anterior abierta durante el despliegue no puede borrar un permiso de Campus; recibe error recuperable y, tras recargar, muestra el mapa canónico vigente. <!-- trace:required -->
+- USR-035: el diálogo presenta los módulos en un acordeón accesible de apertura individual, abre el primer módulo con permisos o el primero disponible, actualiza el resumen textual y conserva selecciones al cambiar de panel desde escritorio y 320 px. <!-- trace:required -->
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 

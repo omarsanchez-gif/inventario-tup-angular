@@ -119,24 +119,46 @@
         @if (users.error(); as error) {
           <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
         }
-        <div class="permissions-grid">
+        <div class="disclosure-list">
           @for (module of permissionModules; track module.id) {
-            <fieldset class="permissions-group" [formGroupName]="module.id">
-              <legend>{{ module.label }}</legend>
-              <div class="permissions-group__actions">
-                @for (action of permissionOptions; track action.id) {
-                  <label class="checkbox-field" [for]="module.id + '-' + action.id">
-                    <input
-                      [id]="module.id + '-' + action.id"
-                      type="checkbox"
-                      [formControlName]="action.id"
-                      (change)="permissionChanged(module.id, action.id)"
-                    />
-                    {{ action.label }}
-                  </label>
-                }
-              </div>
-            </fieldset>
+            <section class="disclosure">
+              <h3 class="disclosure__heading">
+                <button
+                  class="disclosure__trigger"
+                  type="button"
+                  [attr.aria-expanded]="openPermissionModule() === module.id"
+                  [attr.aria-controls]="permissionPanelId(module.id)"
+                  (click)="togglePermissionModule(module.id)"
+                >
+                  <span class="disclosure__label">{{ module.label }}</span>
+                  <span class="disclosure__summary">
+                    {{ permissionSelectionSummary(module.id) }}
+                  </span>
+                  <app-icon class="disclosure__icon" name="next" />
+                </button>
+              </h3>
+              <fieldset
+                class="disclosure__panel permissions-group"
+                [id]="permissionPanelId(module.id)"
+                [formGroupName]="module.id"
+                [hidden]="openPermissionModule() !== module.id"
+              >
+                <legend class="sr-only">Permisos de {{ module.label }}</legend>
+                <div class="permissions-group__actions">
+                  @for (action of permissionOptions; track action.id) {
+                    <label class="checkbox-field" [for]="module.id + '-' + action.id">
+                      <input
+                        [id]="module.id + '-' + action.id"
+                        type="checkbox"
+                        [formControlName]="action.id"
+                        (change)="permissionChanged(module.id, action.id)"
+                      />
+                      {{ action.label }}
+                    </label>
+                  }
+                </div>
+              </fieldset>
+            </section>
           }
         </div>
         <div class="dialog__actions">

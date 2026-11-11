@@ -86,11 +86,20 @@
 
 - La asignación se abre desde una acción iconográfica de la tabla y usa `AppDialog`; no se agrega al formulario de alta o identidad.
 - El icono de permisos se incorpora al registro `AppIcon` antes de implementar la acción y conserva nombre accesible y tooltip `Asignar permisos a <nombre>`.
-- Cada módulo usa un `fieldset` con `legend` visible y controles nativos etiquetados para Ver, Crear, Editar, Cambiar estado y Eliminar.
+- La lista de módulos usa la primitiva global `disclosure-list`: cada encabezado es un botón de ancho completo con nombre, resumen textual, indicador compartido y atributos `aria-expanded`/`aria-controls`; solo un panel permanece expandido.
+- Cada panel conserva un `fieldset` con `legend` accesible y controles nativos etiquetados para Ver, Crear, Editar, Cambiar estado y Eliminar.
+- Al abrir se expande el primer módulo con permisos o, si no existe, el primero disponible. Cambiar de panel no reinicia controles ni persiste por sí mismo.
 - La dependencia de Ver se comunica por estado y texto; no se representa solo con color ni se dejan combinaciones inválidas.
 - En escritorio pueden alinearse acciones por columnas. Desde 320 px cada módulo se apila sin desplazamiento horizontal obligatorio y conserva objetivos de 44 × 44 px.
 - `Acceso total por rol`, `Sin permisos` y la cantidad de módulos se expresan como texto, no solo como badge de color.
 - Error y guardado permanecen dentro del diálogo; el foco retorna al botón de permisos que lo abrió.
+
+### Primitiva `disclosure-list`
+
+- `disclosure-list`, `disclosure`, `disclosure__trigger`, `disclosure__summary`, `disclosure__icon` y `disclosure__panel` se definen globalmente para listas compactas expandibles dentro de superficies administrativas.
+- El disparador conserva un objetivo mínimo de 44 px, foco visible, estado hover y una indicación textual independiente del giro del icono.
+- El panel usa el borde, radio, superficie, tipografía y espaciado globales; el SCSS encapsulado solo organiza el contenido particular del panel.
+- La animación del indicador respeta `prefers-reduced-motion` y no es necesaria para comprender el estado.
 
 ## Diálogos y formularios administrativos
 

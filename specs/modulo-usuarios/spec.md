@@ -70,12 +70,14 @@ permisos:
 
 - La tabla agrega una columna `Permisos` con `Acceso total`, `Sin permisos`, `1 módulo`, `2 módulos`, `3 módulos` o `4 módulos`.
 - Una acción iconográfica `Asignar permisos` abre un `AppDialog` independiente; no se incorpora al alta o edición de identidad.
-- El diálogo identifica al usuario y presenta un `fieldset` por módulo con las cinco acciones mediante controles nativos etiquetados.
+- El diálogo identifica al usuario y presenta los módulos como un acordeón de apertura individual: solo un módulo puede estar expandido y cada panel conserva su `fieldset` con las cinco acciones mediante controles nativos etiquetados.
+- Al abrir el diálogo se expande el primer módulo que ya tenga permisos; si ninguno los tiene, se expande el primero. Cada encabezado muestra el nombre, un resumen textual (`Sin acceso`, `Solo ver`, cantidad de permisos o `Acceso completo`) y un indicador de expansión.
+- Contraer o cambiar de módulo no descarta selecciones. Los encabezados son botones nativos con `aria-expanded` y `aria-controls`; el acordeón admite teclado y mantiene todos los paneles en el mismo formulario.
 - Seleccionar Crear, Editar, Cambiar estado o Eliminar selecciona también Ver. Retirar Ver limpia las demás acciones del módulo.
 - Guardar reemplaza el mapa completo mediante una sola callable; Cancelar, Escape, backdrop o cierre visible no persisten cambios.
 - Durante el guardado se bloquean cierre y acciones duplicadas. Un error se anuncia dentro del diálogo con `role="alert"` y permite reintentar.
 - En una fila `admin`, la tabla muestra `Acceso total por rol` y no ofrece una matriz editable.
-- La interfaz funciona desde 320 px: los módulos se apilan y cada control conserva etiqueta, foco y objetivo táctil.
+- La interfaz funciona desde 320 px: los encabezados y paneles ocupan todo el ancho, las acciones se apilan cuando sea necesario y cada control conserva etiqueta, foco y objetivo táctil.
 
 ## Contrato callable autorizado
 

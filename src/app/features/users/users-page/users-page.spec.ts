@@ -210,6 +210,67 @@ describe('UsersPage dialogs', () => {
     expect(element.querySelector('dialog[open]')).toBeNull();
   });
 
+  it('USR-035 keeps one accessible permission panel open and preserves its selections', () => {
+    actionButton('Asignar permisos a Usuario Prueba').click();
+    fixture.detectChanges();
+
+    const categoriesTrigger = element.querySelector<HTMLButtonElement>(
+      '[aria-controls="categorias-permissions-panel"]',
+    )!;
+    const manufacturersTrigger = element.querySelector<HTMLButtonElement>(
+      '[aria-controls="fabricantes-permissions-panel"]',
+    )!;
+    expect(categoriesTrigger.tagName).toBe('BUTTON');
+    expect(categoriesTrigger.getAttribute('aria-expanded')).toBe('true');
+    expect(manufacturersTrigger.getAttribute('aria-expanded')).toBe('false');
+    expect(element.querySelector<HTMLElement>('#categorias-permissions-panel')?.hidden).toBe(false);
+    expect(element.querySelector<HTMLElement>('#fabricantes-permissions-panel')?.hidden).toBe(true);
+
+    manufacturersTrigger.click();
+    fixture.detectChanges();
+    expect(categoriesTrigger.getAttribute('aria-expanded')).toBe('false');
+    expect(manufacturersTrigger.getAttribute('aria-expanded')).toBe('true');
+
+    element.querySelector<HTMLInputElement>('#fabricantes-editar')!.click();
+    fixture.detectChanges();
+    expect(manufacturersTrigger.querySelector('.disclosure__summary')?.textContent?.trim()).toBe(
+      '2 permisos',
+    );
+
+    categoriesTrigger.click();
+    fixture.detectChanges();
+    manufacturersTrigger.click();
+    fixture.detectChanges();
+    expect(element.querySelector<HTMLInputElement>('#fabricantes-ver')?.checked).toBe(true);
+    expect(element.querySelector<HTMLInputElement>('#fabricantes-editar')?.checked).toBe(true);
+  });
+
+  it('USR-035 initially opens the first module that already has permissions', () => {
+    const permittedUser: SystemUser = {
+      ...managedUser,
+      permisos: {
+        ...emptyPermissionMap(),
+        modelosActivos: ['ver'],
+      },
+    };
+    users.filteredUsers.set([permittedUser]);
+    fixture.detectChanges();
+
+    actionButton('Asignar permisos a Usuario Prueba').click();
+    fixture.detectChanges();
+
+    expect(
+      element
+        .querySelector('[aria-controls="modelosActivos-permissions-panel"]')
+        ?.getAttribute('aria-expanded'),
+    ).toBe('true');
+    expect(
+      element
+        .querySelector('[aria-controls="categorias-permissions-panel"]')
+        ?.getAttribute('aria-expanded'),
+    ).toBe('false');
+  });
+
   it('filters automatically and resets the paginated table to the first page', () => {
     const manyUsers = Array.from({ length: 12 }, (_, index): SystemUser => ({
       ...managedUser,

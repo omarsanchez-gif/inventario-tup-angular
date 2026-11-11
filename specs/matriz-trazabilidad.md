@@ -6,7 +6,7 @@
 | ------------------ | -------------------- | ------------------------------------------------------ | ---------------------------------- |
 | Autenticación      | RN-AUT-001–009       | Base y permisos de cuatro catálogos implementados      | AUT-001–AUT-017                    |
 | Dashboard inicial  | RN-DASH-001–003      | `features/dashboard`                                   | DASH-001–004                       |
-| Usuarios           | RN-USR-001–011       | Base y matriz de cuatro módulos implementadas          | USR-001–USR-034                    |
+| Usuarios           | RN-USR-001–011       | Base y matriz de cuatro módulos implementadas          | USR-001–USR-035                    |
 | Layout privado     | RN-LAY-001–012       | Navegación granular de cuatro módulos implementada     | LAY-001–LAY-027                    |
 | Categorías         | RN-CAT-001–012       | Base y autorización granular implementadas             | CAT-001–CAT-027                    |
 | Fabricantes        | RN-FAB-001–012       | Base y autorización granular implementadas             | FAB-001–FAB-023                    |

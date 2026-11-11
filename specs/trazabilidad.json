@@ -636,6 +636,13 @@
       "evidenceId": "campus-permissions-2883ff5"
     },
     {
+      "requirement": "RN-LAY-004",
+      "criterion": "USR-035",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
       "requirement": "RN-LAY-007",
       "criterion": "LAY-026",
       "verification": "automated",

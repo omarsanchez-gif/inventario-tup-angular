@@ -44,3 +44,11 @@
 - [x] Incorporar Campus al contrato canónico, al diálogo y a las regresiones.
 - [ ] Implementar contratos, backend, interfaz y regresiones únicamente después de la aprobación.
 - [ ] Desplegar Functions antes de Hosting y verificar que una pestaña anterior falle sin sobrescribir permisos.
+
+## Refinamiento visual: acordeón de permisos
+
+- [x] Definir un acordeón de apertura individual sin modificar el contrato canónico de permisos.
+- [x] Documentar resumen textual, estado inicial, teclado, accesibilidad y conservación de selecciones.
+- [x] Implementar la primitiva visual compartida y aplicarla al diálogo de Usuarios.
+- [x] Agregar regresión de expansión única, resumen dinámico y conservación de valores.
+- [ ] Validar y publicar únicamente Hosting en staging.

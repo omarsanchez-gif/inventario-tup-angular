@@ -102,7 +102,7 @@ test('MOD-041 recovers an image failure without creating the model twice', async
   await page.getByLabel('Nombre del modelo de activo').fill(`Modelo E2E ${Date.now()}`);
   await page.getByLabel('Nombre de la categoría').selectOption('synthetic-category');
   await page.getByLabel('Fabricante', { exact: true }).selectOption('synthetic-manufacturer');
-  await page.getByLabel('Imagen').setInputFiles({
+  await page.getByLabel('Imagen', { exact: true }).setInputFiles({
     name: 'fixture.png',
     mimeType: 'image/png',
     buffer: Buffer.from(
@@ -136,7 +136,9 @@ test('LAY-020 keeps mobile navigation and forms usable at 320 px', async ({ page
   expect(hasGlobalOverflow).toBe(false);
 });
 
-test('USR-022 assigns catalog permissions after user creation', async ({ page }) => {
+test('USR-022 USR-035 assigns permissions through the accessible module accordion', async ({
+  page,
+}) => {
   const reference = firestore.collection('usuarios').doc('permission-target-e2e');
   await reference.set({
     uid: null,
@@ -154,6 +156,13 @@ test('USR-022 assigns catalog permissions after user creation', async ({ page })
     await page.getByLabel('Buscar por nombre o correo').fill('Capturista E2E');
     await page.getByRole('button', { name: 'Asignar permisos a Capturista E2E' }).click();
     const dialog = page.getByRole('dialog');
+    const categoriesTrigger = dialog.locator('[aria-controls="categorias-permissions-panel"]');
+    const manufacturersTrigger = dialog.locator('[aria-controls="fabricantes-permissions-panel"]');
+    await expect(categoriesTrigger).toHaveAttribute('aria-expanded', 'true');
+    await manufacturersTrigger.click();
+    await expect(categoriesTrigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(manufacturersTrigger).toHaveAttribute('aria-expanded', 'true');
+    await categoriesTrigger.click();
     await dialog.getByLabel('Editar', { exact: true }).first().check();
     await expect(dialog.getByLabel('Ver', { exact: true }).first()).toBeChecked();
     await dialog.getByRole('button', { name: 'Guardar permisos' }).click();
