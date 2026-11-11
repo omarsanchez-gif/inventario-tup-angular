@@ -30,6 +30,6 @@
 - [x] Incorporar guards de capacidad y actualización segura de la sesión.
 - [x] Adaptar las callables de Categorías, Fabricantes y Modelos por acción.
 - [x] Agregar pruebas unitarias, Emulator Suite, Angular y Playwright.
-- [ ] Validar formato, lint, guardia visual, builds, trazabilidad y auditoría.
-- [ ] Desplegar exclusivamente los servicios afectados a staging después de validar y recibir autorización de implementación.
+- [x] Validar formato, lint, guardia visual, builds, trazabilidad y auditoría.
+- [x] Desplegar exclusivamente los servicios afectados a staging después de validar y recibir autorización de implementación.
 - [ ] Ejecutar aceptación autenticada sin usar datos reales ni producción.

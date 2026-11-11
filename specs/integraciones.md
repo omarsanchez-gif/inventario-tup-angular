@@ -98,9 +98,12 @@
 - Firestore rechazó con HTTP 403 la lectura anónima directa de `campus`. Hosting respondió HTTP 200 en `/configuraciones/campus` y sirve `main-HWJHCEZJ.js`, `styles-CISTRGAV.css` y `chunk-DMN2xbo-.js`.
 - La verificación administrativa autenticada confirmó el estado vacío y el modal aprobado sin crear documentos. No se desplegaron índices, Storage, secretos, migración ni producción.
 
-## Permisos granulares propuestos
+## Permisos granulares — publicados en staging el 11 de noviembre de 2026
 
-- ADR-007 y las specs asociadas definen un incremento futuro sobre `bootstrapAuthorization`, Usuarios, Layout y las callables existentes de Categorías, Fabricantes y Modelos.
+- ADR-007 y las specs asociadas gobiernan `bootstrapAuthorization`, Usuarios, Layout y las callables existentes de Categorías, Fabricantes y Modelos.
 - No se creará una integración externa ni un proveedor nuevo. `usuarios` seguirá siendo la fuente canónica y Custom Claims conservará solo `authorized` y `role`.
-- La implementación futura agregaría `setAuthorizedUserPermissions` y actualizaría únicamente las Functions existentes que deben resolver una capacidad por acción, además de Hosting y las Rules que resulten afectadas.
-- Esta especificación no ejecutó builds, emuladores o despliegues y no modificó `inventario-stg`, IAM, datos, secretos, Storage ni producción.
+- `setAuthorizedUserPermissions` reemplaza la matriz completa de otro registro `usuario`; cada callable de catálogo revalida la acción exacta contra el perfil canónico y el frontend solo presenta rutas y controles permitidos.
+- La regresión local sobre `f3a4ca208d550cb3ba4569e28efe0258f177b832` aprobó 63 pruebas Angular, 47 unitarias de Functions, 30 con Auth/Firestore/Functions/Storage Emulator, 5 recorridos Chromium y 7 pruebas negativas del verificador de trazabilidad.
+- Se desplegaron con `--only` y `--project staging` las 26 Functions afectadas y Hosting. Firebase confirmó la creación de `setAuthorizedUserPermissions` y 25 actualizaciones exitosas en Node.js 22 y `us-central1`.
+- Hosting publicó 14 archivos, respondió HTTP 200 y sirve `main-XLEMZUF4.js`; la nueva callable respondió HTTP 401 sin sesión.
+- No se desplegaron Firestore Rules, Storage Rules, índices, datos, secretos, IAM ni producción. La aceptación funcional autenticada y visual móvil permanece pendiente.
