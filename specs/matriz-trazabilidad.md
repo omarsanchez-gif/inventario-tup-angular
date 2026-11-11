@@ -4,19 +4,19 @@
 
 | Alcance            | Reglas               | Implementación o propuesta                             | Pruebas                            |
 | ------------------ | -------------------- | ------------------------------------------------------ | ---------------------------------- |
-| Autenticación      | RN-AUT-001–009       | Base y permisos de cuatro catálogos implementados      | AUT-001–AUT-017                    |
+| Autenticación      | RN-AUT-001–009       | Base, permisos y revocación selectiva implementados    | AUT-001–AUT-019                    |
 | Dashboard inicial  | RN-DASH-001–003      | `features/dashboard`                                   | DASH-001–004                       |
 | Usuarios           | RN-USR-001–011       | Base y matriz de cuatro módulos implementadas          | USR-001–USR-035                    |
-| Layout privado     | RN-LAY-001–012       | Navegación granular de cuatro módulos implementada     | LAY-001–LAY-027                    |
+| Layout privado     | RN-LAY-001–012       | Navegación y revocación granular implementadas         | LAY-001–LAY-028                    |
 | Categorías         | RN-CAT-001–012       | Base y autorización granular implementadas             | CAT-001–CAT-027                    |
 | Fabricantes        | RN-FAB-001–012       | Base y autorización granular implementadas             | FAB-001–FAB-023                    |
-| Modelos de activos | RN-MOD-001–030       | Base y autorización granular implementadas             | MOD-001–MOD-058                    |
-| Permisos           | RN-PER-001–017       | Autorización funcional de cuatro módulos implementada  | Cubiertos por criterios de módulos |
+| Modelos de activos | RN-MOD-001–030       | Base y autorización granular implementadas             | MOD-001–MOD-060                    |
+| Permisos           | RN-PER-001–022       | Autorización y revocación funcional implementadas      | Cubiertos por criterios de módulos |
 | Campus             | RN-CAM-001–016       | Base y permiso funcional implementados                 | CAM-001–CAM-038                    |
 | Calidad local      | RN-DEV-001–003       | seed, emuladores, Playwright y verificador estructural | DEV-001–DEV-003                    |
 | Áreas              | Sin reglas aprobadas | Borrador documental; no existe implementación          | ARE-001–ARE-033 futuros            |
 
-Áreas incrementa el inventario documental, pero sus criterios futuros no son obligatorios, no están en `trazabilidad.json` y no tienen evidencia de ejecución. La ampliación granular de Campus está implementada, validada localmente y desplegada en staging; sus 14 criterios obligatorios tienen evidencia sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`. La aceptación autenticada permanece separada.
+Áreas incrementa el inventario documental, pero sus criterios futuros no son obligatorios, no están en `trazabilidad.json` y no tienen evidencia de ejecución. La revocación selectiva para los cuatro catálogos está implementada y validada localmente sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`; la aceptación autenticada y el despliegue se registran por separado.
 
 ## Significado de los estados
 
@@ -34,19 +34,19 @@ El manifiesto [trazabilidad.json](trazabilidad.json) y `npm run traceability:che
 
 ## Corte validado de implementación
 
-- SHA: `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`.
-- 71 pruebas Angular aprobadas.
+- SHA: `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`.
+- 86 pruebas Angular aprobadas.
 - 47 pruebas unitarias de Functions aprobadas.
 - 31 pruebas con Emulator Suite aprobadas.
-- 5 recorridos Chromium aprobados.
-- 7 casos negativos/positivos del verificador de trazabilidad aprobados.
+- 7 recorridos Chromium aprobados.
+- 7 casos negativos/positivos del verificador de trazabilidad aprobados; el resumen vigente es 270 inventariados, 72 obligatorios, 72 trazados y 72 con ejecución verificada.
 - Lint Angular/Functions, guardia visual, formato, builds de Functions y staging, `git diff --check` y auditoría de runtime con umbral high aprobados.
 - La auditoría conserva cuatro alertas moderadas transitivas de `google-gax` y cero altas o críticas.
 - MOD-049 permaneció aprobado al atravesar Admin SDK, Firestore Emulator y Storage Emulator reales; no sustituyó el bucket por `FakeBucket`.
 - MOD-052 verificó que un acuse observado después de los borrados no cierre esa ronda.
 - MOD-053 verificó recuperación cuando ambos objetos existen sin acuse durable.
 
-La regresión de Campus volvió a ejecutar todas las suites sobre `2883ff5`; la aceptación manual y la integración en `desarrollo` continúan como estados independientes.
+La regresión de revocación volvió a ejecutar todas las suites sobre `4013c35`; la aceptación manual, el despliegue y la integración en `desarrollo` continúan como estados independientes.
 
 ## Publicación, integración, CI, staging y aceptación
 
@@ -59,6 +59,8 @@ La regresión de Campus volvió a ejecutar todas las suites sobre `2883ff5`; la 
 | Staging         | Doce Functions del contrato de cuatro módulos y Hosting publicados; Rules y las demás Functions no se modificaron                                    |
 | Aceptación real | Parcial: lectura autenticada de miniatura y parte de Campus aceptadas; ciclo completo de imagen, otras mutaciones y revisión móvil siguen pendientes |
 | Producción      | No configurada ni autorizada                                                                                                                         |
+
+El cierre de revocación selectiva actualizó únicamente Hosting en `inventario-stg`. La verificación remota respondió HTTP 200 con `main-BEAIWWJ4.js` y `styles-K7H52MHM.css`; Functions, Rules, índices, datos, secretos y producción no se modificaron.
 
 ## Evidencia histórica relevante
 

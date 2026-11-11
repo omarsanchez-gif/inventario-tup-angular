@@ -49,3 +49,7 @@ Estos escenarios definen la aceptación del módulo aprobado.
 - Hosting respondió HTTP 200 en raíz, ruta SPA y bundle; sirve `main-TOQX2LZJ.js`, conserva CSP, usa `no-store` para rutas y caché inmutable para assets con hash.
 - No se desplegaron índices, datos, secretos, migración ni producción.
 - La aceptación funcional y visual autenticada en escritorio y móvil permanece pendiente.
+
+## Evidencia de revocación en sesión — 11 de noviembre de 2026
+
+- FAB-022 aprobó en facade, página y Chromium sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: retirar una acción cierra solo el diálogo dependiente, conserva el listado y permite continuar en el módulo.

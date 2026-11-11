@@ -81,3 +81,7 @@ Los escenarios CAM-026 a CAM-030 se implementarán en los módulos consumidores 
 - Se desplegaron primero `bootstrapAuthorization`, las seis Functions administrativas de Usuarios y las cinco de Campus; las doce quedaron `ACTIVE` en Node.js 22 y `us-central1`. Después se desplegó únicamente Hosting.
 - `/configuraciones/campus` respondió HTTP 200 y sirvió `main-AQFFZNH7.js`; `listCampuses` y `setAuthorizedUserPermissions` rechazaron solicitudes anónimas con HTTP 401.
 - No se desplegaron Rules, Storage Rules, índices, datos, secretos ni producción. La aceptación autenticada con un usuario parcial y otro sin Campus permanece pendiente.
+
+## Evidencia de revocación en sesión — 11 de noviembre de 2026
+
+- CAM-038 aprobó en facade, página y Chromium sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: retirar Ver limpia únicamente Campus, cierra sus diálogos y abandona su ruta sin cerrar sesión ni vaciar Categorías.

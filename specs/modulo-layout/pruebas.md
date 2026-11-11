@@ -57,3 +57,7 @@
 - LAY-026 y LAY-027 aprobaron sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`: el shell muestra Campus de forma independiente y la ruta usa exactamente `campus.ver`.
 - Hosting se desplegó después de las Functions del contrato y `/configuraciones/campus` respondió HTTP 200 con `main-AQFFZNH7.js`.
 - La aceptación visual autenticada con permisos parciales en escritorio y móvil permanece pendiente.
+
+## Evidencia de revocación en sesión — 11 de noviembre de 2026
+
+- LAY-028 aprobó en pruebas de shell y en Chromium sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: retirar `campus.ver` elimina su enlace y navega a Dashboard, mientras Categorías y la sesión permanecen vigentes.

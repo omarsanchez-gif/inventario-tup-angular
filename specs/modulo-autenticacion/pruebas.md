@@ -44,3 +44,8 @@
 - Las 38 pruebas Angular y las 42 pruebas unitarias de Functions comprobaron la invalidación por generación, el descarte de respuestas tardías y la revalidación transaccional del correo autenticado.
 - Las 17 pruebas integrales con emuladores comprobaron primer acceso, inactividad, UID conflictivo y autorización canónica sin utilizar proyectos reales.
 - Playwright aprobó cuatro recorridos en Chromium, incluido cierre entre pestañas y rechazo de un perfil inactivo con datos sintéticos.
+
+## Evidencia de revocación selectiva — 11 de noviembre de 2026
+
+- AUT-018 y AUT-019 aprobaron sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: la generación cambia solo para el módulo y la acción reducidos, y las negativas concurrentes comparten una única revalidación canónica.
+- La regresión acumulada aprobó 86 pruebas Angular y no cerró la sesión ni alteró módulos ajenos al permiso retirado.

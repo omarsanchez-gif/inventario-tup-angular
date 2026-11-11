@@ -48,3 +48,7 @@
 - Las cinco callables están `ACTIVE` en `us-central1`, usan Node.js 22 y rechazaron solicitudes anónimas con HTTP 401.
 - Firestore remoto rechazó con HTTP 403 la lectura anónima directa de `categorias` y Hosting respondió HTTP 200 con `main-XXPSXP7R.js` y `styles-CISTRGAV.css`.
 - La aceptación funcional y visual autenticada en escritorio y móvil permanece pendiente.
+
+## Evidencia de revocación en sesión — 11 de noviembre de 2026
+
+- CAT-026 aprobó en facade y página sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: una edición pendiente se descarta y su diálogo se cierra sin vaciar el listado ni invalidar otro módulo.

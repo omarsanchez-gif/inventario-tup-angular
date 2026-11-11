@@ -1,12 +1,12 @@
 {
   "version": 2,
   "baseReviewSha": "4a3407b14acd7a069ec62f39d1e6ee5a3b04ac1f",
-  "implementationSha": "6f112780370f9f890efc773e21288efc4f4f9497",
+  "implementationSha": "4013c35ae9e8d6eb95bbcefe9321706a876ce5af",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
-    "branchPublication": "complete",
-    "stagingDeployment": "complete-12-functions-hosting",
+    "branchPublication": "pending-current-documentation",
+    "stagingDeployment": "complete-hosting-only-current-increment",
     "continuousIntegration": "not-triggered-without-pull-request",
     "manualAcceptance": "pending"
   },
@@ -14,6 +14,8 @@
     { "prefix": "AUT", "label": "Autenticación" },
     { "prefix": "USR", "label": "Usuarios" },
     { "prefix": "LAY", "label": "Layout privado" },
+    { "prefix": "CAT", "label": "Categorías" },
+    { "prefix": "FAB", "label": "Fabricantes" },
     { "prefix": "CAM", "label": "Campus" },
     { "prefix": "MOD", "label": "Modelos de activos" },
     { "prefix": "DEV", "label": "Calidad local" }
@@ -210,6 +212,24 @@
       "command": "npm test; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run build:staging; git diff --check; Firebase Hosting staging verification",
       "result": "73 pruebas Angular y 5 recorridos Chromium aprobados; el navegador verificó expansión exclusiva, panel contraído invisible, aria-hidden e inert; trazabilidad, lint, guardia visual, formato, build y diff aprobaron; Hosting HTTP 200 con main-JZFE42HR.js y styles-K7H52MHM.css",
       "criteria": ["USR-035"]
+    },
+    {
+      "id": "permissions-revocation-4013c35",
+      "sha": "4013c35ae9e8d6eb95bbcefe9321706a876ce5af",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check; Firebase Hosting staging verification",
+      "result": "86 pruebas Angular, 47 unitarias de Functions, 31 con Emulator Suite, 7 recorridos Chromium y 7 controles de trazabilidad aprobados; lint, guardia visual, formato, builds, auditoría sin altas o críticas y diff aprobaron; Hosting HTTP 200 con main-BEAIWWJ4.js y styles-K7H52MHM.css",
+      "criteria": [
+        "AUT-018",
+        "AUT-019",
+        "LAY-028",
+        "CAT-026",
+        "FAB-022",
+        "CAM-038",
+        "MOD-055",
+        "MOD-059",
+        "MOD-060"
+      ]
     }
   ],
   "entries": [
@@ -604,12 +624,27 @@
       "evidenceId": "full-regression-f3a4ca2"
     },
     {
-      "requirement": "RN-PER-003",
+      "requirement": "RN-PER-018",
       "criterion": "CAT-026",
-      "verification": "emulator",
-      "tests": ["functions/src/users-emulator.spec.ts"],
-      "state": "verified-local",
-      "evidenceId": "full-regression-f3a4ca2"
+      "verification": "automated",
+      "tests": [
+        "src/app/features/categories/state/categories.facade.spec.ts",
+        "src/app/features/categories/categories-page/categories-page.spec.ts"
+      ],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-018",
+      "criterion": "FAB-022",
+      "verification": "browser",
+      "tests": [
+        "src/app/features/manufacturers/state/manufacturers.facade.spec.ts",
+        "src/app/features/manufacturers/manufacturers-page/manufacturers-page.spec.ts",
+        "e2e/inventory.spec.ts"
+      ],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
     },
     {
       "requirement": "RN-PER-009",
@@ -734,10 +769,65 @@
     {
       "requirement": "RN-PER-010",
       "criterion": "CAM-038",
-      "verification": "automated",
-      "tests": ["src/app/features/campuses/state/campuses.facade.spec.ts"],
+      "verification": "browser",
+      "tests": [
+        "src/app/features/campuses/state/campuses.facade.spec.ts",
+        "src/app/features/campuses/campuses-page/campuses-page.spec.ts",
+        "e2e/inventory.spec.ts"
+      ],
       "state": "deployed-staging",
-      "evidenceId": "campus-permissions-2883ff5"
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-018",
+      "criterion": "AUT-018",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/session-scope.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-020",
+      "criterion": "AUT-019",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-019",
+      "criterion": "LAY-028",
+      "verification": "browser",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts", "e2e/inventory.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-018",
+      "criterion": "MOD-055",
+      "verification": "automated",
+      "tests": [
+        "src/app/features/asset-models/state/asset-models.facade.spec.ts",
+        "functions/src/admin-asset-models.spec.ts"
+      ],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-021",
+      "criterion": "MOD-059",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-022",
+      "criterion": "MOD-060",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
     }
   ]
 }
