@@ -26,7 +26,7 @@
 
 - LAY-022: `admin` ve todos los submenús vigentes; `usuario` ve Configuraciones solo con al menos un permiso Ver y exclusivamente los enlaces concedidos. <!-- trace:required -->
 - LAY-023: un `usuario` con uno, dos o tres módulos conserva alternancia, ruta activa, cierre móvil, teclado y ancho completo de submenús; sin módulos no se renderiza el grupo. <!-- trace:required -->
-- LAY-024: cada ruta exige el guard de su capacidad y revalida el perfil canónico; una URL directa no confía en visibilidad del sidebar. <!-- trace:required -->
+- LAY-024: `/usuarios` conserva `adminGuard`; las rutas de Categorías, Fabricantes y Modelos se asocian exactamente con la capacidad `ver` de su propio módulo y revalidan el perfil canónico; una URL directa no confía en la visibilidad del sidebar. <!-- trace:required -->
 - LAY-025: revocar permisos y revalidar sesión retira enlaces y acciones sin aceptar respuestas de otra generación; backend deniega de inmediato aun si la vista estaba obsoleta. <!-- trace:required -->
 
 ## Evidencia del incremento

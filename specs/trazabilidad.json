@@ -527,7 +527,7 @@
       "requirement": "RN-PER-009",
       "criterion": "LAY-024",
       "verification": "automated",
-      "tests": ["src/app/core/guards/capability.guard.spec.ts"],
+      "tests": ["src/app/core/guards/capability.guard.spec.ts", "src/app/app.routes.spec.ts"],
       "state": "verified-local",
       "evidenceId": "full-regression-f3a4ca2"
     },
