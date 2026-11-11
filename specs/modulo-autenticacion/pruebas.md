@@ -32,6 +32,11 @@
 - `bootstrapAuthorization` quedó `ACTIVE` en Node.js 22, `us-central1`, con máximo 20 instancias y rechazo anónimo HTTP 401.
 - Hosting conserva HTTP 200 y COOP `same-origin-allow-popups`; la aceptación manual del popup institucional es el control pendiente para cerrar el flujo real.
 
+## Evidencia del cuarto módulo — 11 de noviembre de 2026
+
+- AUT-017 aprobó con Emulator Suite sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`: el bootstrap devolvió `campus[]` sin ampliar Custom Claims y la ausencia histórica permaneció denegada.
+- `bootstrapAuthorization` se actualizó únicamente en staging, quedó `ACTIVE` en Node.js 22 y rechazó la solicitud anónima con HTTP 401.
+
 ## Evidencia local de ciclo de sesión — 9 de noviembre de 2026
 
 - Las 38 pruebas Angular y las 42 pruebas unitarias de Functions comprobaron la invalidación por generación, el descarte de respuestas tardías y la revalidación transaccional del correo autenticado.

@@ -46,5 +46,5 @@
 - [x] Documentar escenarios de regresión y orden seguro de despliegue.
 - [x] Obtener validación expresa del responsable sobre esta ampliación.
 - [x] Implementar backend, frontend y pruebas después de la aprobación.
-- [ ] Desplegar Functions afectadas antes de Hosting, únicamente a staging.
+- [x] Desplegar Functions afectadas antes de Hosting, únicamente a staging.
 - [ ] Completar aceptación autenticada con `admin`, usuario parcial y usuario sin Campus.

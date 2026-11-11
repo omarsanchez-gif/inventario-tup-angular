@@ -50,3 +50,9 @@
 - LAY-018 aprobó en la regresión de 8 suites y 18 pruebas Angular; Hosting se actualizó de forma aislada y sirve `main-3IK73UUE.js` y `styles-CISTRGAV.css` con HTTP 200.
 - LAY-019 aprobó en la regresión de 8 suites y 19 pruebas Angular; Hosting sirve `main-IQTLWJGB.js` y `styles-CISTRGAV.css` con HTTP 200.
 - La aceptación visual autenticada permanece pendiente.
+
+## Evidencia de navegación granular de Campus — 11 de noviembre de 2026
+
+- LAY-026 y LAY-027 aprobaron sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`: el shell muestra Campus de forma independiente y la ruta usa exactamente `campus.ver`.
+- Hosting se desplegó después de las Functions del contrato y `/configuraciones/campus` respondió HTTP 200 con `main-AQFFZNH7.js`.
+- La aceptación visual autenticada con permisos parciales en escritorio y móvil permanece pendiente.

@@ -16,7 +16,7 @@
 | Calidad local      | RN-DEV-001–003       | seed, emuladores, Playwright y verificador estructural | DEV-001–DEV-003                    |
 | Áreas              | Sin reglas aprobadas | Borrador documental; no existe implementación          | ARE-001–ARE-033 futuros            |
 
-Áreas incrementa el inventario documental, pero sus criterios futuros no son obligatorios, no están en `trazabilidad.json` y no tienen evidencia de ejecución. La ampliación granular de Campus está implementada y sus 14 criterios obligatorios permanecen como implementación pendiente de verificación hasta registrar la regresión sobre el commit final.
+Áreas incrementa el inventario documental, pero sus criterios futuros no son obligatorios, no están en `trazabilidad.json` y no tienen evidencia de ejecución. La ampliación granular de Campus está implementada, validada localmente y desplegada en staging; sus 14 criterios obligatorios tienen evidencia sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`. La aceptación autenticada permanece separada.
 
 ## Significado de los estados
 
@@ -34,29 +34,29 @@ El manifiesto [trazabilidad.json](trazabilidad.json) y `npm run traceability:che
 
 ## Corte validado de implementación
 
-- SHA: `ef8ae667cb3d30104edc1cc4ebd4fc2f8d5ddd04`.
-- 55 pruebas Angular aprobadas.
-- 42 pruebas unitarias de Functions aprobadas.
-- 29 pruebas con Emulator Suite aprobadas.
-- 4 recorridos Chromium aprobados.
+- SHA: `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`.
+- 71 pruebas Angular aprobadas.
+- 47 pruebas unitarias de Functions aprobadas.
+- 31 pruebas con Emulator Suite aprobadas.
+- 5 recorridos Chromium aprobados.
 - 7 casos negativos/positivos del verificador de trazabilidad aprobados.
 - Lint Angular/Functions, guardia visual, formato, builds de Functions y staging, `git diff --check` y auditoría de runtime con umbral high aprobados.
 - La auditoría conserva cuatro alertas moderadas transitivas de `google-gax` y cero altas o críticas.
-- MOD-049 atravesó Admin SDK, Firestore Emulator y Storage Emulator reales; no sustituyó el bucket por `FakeBucket`.
+- MOD-049 permaneció aprobado al atravesar Admin SDK, Firestore Emulator y Storage Emulator reales; no sustituyó el bucket por `FakeBucket`.
 - MOD-052 verificó que un acuse observado después de los borrados no cierre esa ronda.
 - MOD-053 verificó recuperación cuando ambos objetos existen sin acuse durable.
 
-Esta consolidación documental no vuelve a ejecutar esas suites y no traslada su evidencia a otro SHA.
+La regresión de Campus volvió a ejecutar todas las suites sobre `2883ff5`; la aceptación manual y la integración en `desarrollo` continúan como estados independientes.
 
 ## Publicación, integración, CI, staging y aceptación
 
 | Estado          | Situación vigente                                                                                                                                    |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Rama publicada  | `codex/hardening-sesion-imagenes-trazabilidad` estaba publicada en `51e71dc599c55e63bed4ddf11ca0b1e91a9ed599` al iniciar esta consolidación          |
+| Rama publicada  | `codex/hardening-sesion-imagenes-trazabilidad` incluye `2883ff5` y su evidencia documental                                                           |
 | `desarrollo`    | Permanece en `179e79863e2a6c940c9a24165b219bfb8ce59cc1`; el endurecimiento no está integrado                                                         |
 | PR              | No existe; el conector respondió previamente `must be a collaborator` y no se repiten escrituras sin cambio de permisos                              |
 | CI              | `Validación continua / validate` no se ejecutó para el SHA final; tampoco se puede afirmar si es obligatorio en `desarrollo`                         |
-| Staging         | Alcance vigente publicado en `inventario-stg`; 30 callables, Rules cerradas y Hosting documentados                                                   |
+| Staging         | Doce Functions del contrato de cuatro módulos y Hosting publicados; Rules y las demás Functions no se modificaron                                    |
 | Aceptación real | Parcial: lectura autenticada de miniatura y parte de Campus aceptadas; ciclo completo de imagen, otras mutaciones y revisión móvil siguen pendientes |
 | Producción      | No configurada ni autorizada                                                                                                                         |
 

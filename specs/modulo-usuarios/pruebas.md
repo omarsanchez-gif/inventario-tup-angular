@@ -70,6 +70,12 @@
 - El incremento fue desplegado únicamente en Hosting de `inventario-stg`; la comprobación remota confirmó HTTP 200 y los bundles esperados.
 - Queda pendiente su aceptación visual autenticada en escritorio y móvil.
 
+## Evidencia del mapa de cuatro módulos — 11 de noviembre de 2026
+
+- USR-031–034 aprobaron sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`: Campus aparece como cuarto bloque, el resumen admite hasta cuatro módulos y el contrato anterior se rechaza sin perder el permiso almacenado.
+- Las seis Functions administrativas de Usuarios y `bootstrapAuthorization` se actualizaron antes de Hosting únicamente en staging; quedaron `ACTIVE` y `setAuthorizedUserPermissions` rechazó una solicitud anónima con HTTP 401.
+- La aceptación autenticada del diálogo con una cuenta institucional parcial permanece separada y pendiente.
+
 ## Evidencia local — búsqueda y paginación
 
 - USR-014 aprobó la búsqueda automática, el campo compartido a todo el ancho y el reinicio a página 1.
