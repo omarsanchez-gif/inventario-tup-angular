@@ -40,7 +40,7 @@
 - USR-032: el diálogo presenta Campus como cuarto módulo, mantiene la dependencia de Ver y resume correctamente entre cero y cuatro módulos autorizados. <!-- trace:required -->
 - USR-033: `setAuthorizedUserPermissions` acepta el mapa completo de cuatro módulos y rechaza sin escritura parcial un mapa anterior de tres módulos, campos adicionales o acciones desconocidas. <!-- trace:required -->
 - USR-034: una pestaña anterior abierta durante el despliegue no puede borrar un permiso de Campus; recibe error recuperable y, tras recargar, muestra el mapa canónico vigente. <!-- trace:required -->
-- USR-035: el diálogo presenta los módulos en un acordeón accesible de apertura individual, abre el primer módulo con permisos o el primero disponible, anima altura y opacidad sin exponer el panel saliente, actualiza el resumen textual y conserva selecciones al cambiar de panel desde escritorio y 320 px. <!-- trace:required -->
+- USR-035: el diálogo presenta los módulos en un acordeón accesible de apertura individual, abre el primer módulo con permisos o el primero disponible, anima altura y opacidad sin exponer el panel contraído, actualiza el resumen textual y conserva selecciones al cambiar de panel desde escritorio y 320 px. <!-- trace:required -->
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 
@@ -84,6 +84,8 @@
 - La regresión nueva verifica presencia y ausencia reales de cada panel, expansión exclusiva y conservación de selecciones. Aprobaron 17 archivos y 73 pruebas Angular, 5 recorridos Chromium, lint, guardia visual, formato, build de staging y `git diff --check`.
 - Se desplegó únicamente Hosting con `--only hosting --project staging`; `/usuarios`, `main-2AWLN5BY.js` y `styles-6O34NL67.css` respondieron HTTP 200. Functions, Rules, Storage, índices, datos, secretos, IAM y producción permanecieron intactos.
 - Queda pendiente confirmar visualmente la corrección con la sesión institucional; la evidencia automatizada sí comprueba ahora el estado visible real en Chromium.
+- El refinamiento `6f112780370f9f890efc773e21288efc4f4f9497` agregó una transición de altura y opacidad de 180 ms. Los paneles contraídos conservan el formulario, pero quedan a altura cero, `aria-hidden` e inertes. La regresión volvió a aprobar 73 pruebas Angular y 5 recorridos Chromium.
+- Se redesplegó únicamente Hosting; `/usuarios`, `main-JZFE42HR.js` y `styles-K7H52MHM.css` respondieron HTTP 200. La preferencia global de movimiento reducido acorta la transición al mínimo.
 
 ## Evidencia local — búsqueda y paginación
 

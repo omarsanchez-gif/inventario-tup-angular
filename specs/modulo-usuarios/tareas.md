@@ -51,4 +51,5 @@
 - [x] Documentar resumen textual, estado inicial, teclado, accesibilidad y conservación de selecciones.
 - [x] Implementar la primitiva visual compartida y aplicarla al diálogo de Usuarios.
 - [x] Agregar regresión de expansión única, resumen dinámico y conservación de valores.
+- [x] Suavizar apertura y cierre mediante altura/opacidad, respetando `prefers-reduced-motion`, `aria-hidden` e `inert`.
 - [x] Validar y publicar únicamente Hosting en staging.
