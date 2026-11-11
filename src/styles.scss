@@ -483,6 +483,25 @@ a {
   transform: rotate(90deg);
 }
 
+.disclosure__panel-motion {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 180ms ease,
+    opacity 140ms ease;
+}
+
+.disclosure__panel-motion--expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.disclosure__panel-clip {
+  min-height: 0;
+  overflow: hidden;
+}
+
 .disclosure__panel {
   margin: 0;
   border: 0;

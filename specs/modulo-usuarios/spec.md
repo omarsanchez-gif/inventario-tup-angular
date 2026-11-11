@@ -73,6 +73,7 @@ permisos:
 - El diálogo identifica al usuario y presenta los módulos como un acordeón de apertura individual: solo un módulo puede estar expandido y cada panel conserva su `fieldset` con las cinco acciones mediante controles nativos etiquetados.
 - Al abrir el diálogo se expande el primer módulo que ya tenga permisos; si ninguno los tiene, se expande el primero. Cada encabezado muestra el nombre, un resumen textual (`Sin acceso`, `Solo ver`, cantidad de permisos o `Acceso completo`) y un indicador de expansión.
 - Contraer o cambiar de módulo no descarta selecciones. Los encabezados son botones nativos con `aria-expanded` y `aria-controls`; el acordeón admite teclado y mantiene todos los paneles en el mismo formulario.
+- La apertura y el cierre interpolan altura y opacidad durante un intervalo breve, sin desplazar bruscamente el contenido. Todo panel contraído queda a altura cero, oculto para tecnologías de asistencia e inerte; `prefers-reduced-motion` reduce la transición al mínimo.
 - Seleccionar Crear, Editar, Cambiar estado o Eliminar selecciona también Ver. Retirar Ver limpia las demás acciones del módulo.
 - Guardar reemplaza el mapa completo mediante una sola callable; Cancelar, Escape, backdrop o cierre visible no persisten cambios.
 - Durante el guardado se bloquean cierre y acciones duplicadas. Un error se anuncia dentro del diálogo con `role="alert"` y permite reintentar.

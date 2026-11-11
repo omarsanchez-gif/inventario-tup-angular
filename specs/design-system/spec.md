@@ -99,7 +99,8 @@
 - `disclosure-list`, `disclosure`, `disclosure__trigger`, `disclosure__summary`, `disclosure__icon` y `disclosure__panel` se definen globalmente para listas compactas expandibles dentro de superficies administrativas.
 - El disparador conserva un objetivo mínimo de 44 px, foco visible, estado hover y una indicación textual independiente del giro del icono.
 - El panel usa el borde, radio, superficie, tipografía y espaciado globales; el SCSS encapsulado solo organiza el contenido particular del panel.
-- La animación del indicador respeta `prefers-reduced-motion` y no es necesaria para comprender el estado.
+- El panel entra y sale con una transición global de altura y opacidad de aproximadamente 180 ms. Los paneles contraídos permanecen a altura cero, `aria-hidden` e inertes para conservar el estado del formulario sin exponer controles.
+- La animación del panel y del indicador respeta `prefers-reduced-motion`, se reduce al mínimo y nunca es necesaria para comprender el estado.
 
 ## Diálogos y formularios administrativos
 

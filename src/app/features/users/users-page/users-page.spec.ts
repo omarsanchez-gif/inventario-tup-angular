@@ -223,15 +223,27 @@ describe('UsersPage dialogs', () => {
     expect(categoriesTrigger.tagName).toBe('BUTTON');
     expect(categoriesTrigger.getAttribute('aria-expanded')).toBe('true');
     expect(manufacturersTrigger.getAttribute('aria-expanded')).toBe('false');
-    expect(element.querySelector('#categorias-permissions-panel')).not.toBeNull();
-    expect(element.querySelector('#fabricantes-permissions-panel')).toBeNull();
+    const categoriesPanel = element.querySelector<HTMLElement>('#categorias-permissions-panel')!;
+    const manufacturersPanel = element.querySelector<HTMLElement>(
+      '#fabricantes-permissions-panel',
+    )!;
+    expect(categoriesPanel.classList).toContain('disclosure__panel-motion--expanded');
+    expect(categoriesPanel.hasAttribute('aria-hidden')).toBe(false);
+    expect(categoriesPanel.hasAttribute('inert')).toBe(false);
+    expect(manufacturersPanel.classList).not.toContain('disclosure__panel-motion--expanded');
+    expect(manufacturersPanel.getAttribute('aria-hidden')).toBe('true');
+    expect(manufacturersPanel.hasAttribute('inert')).toBe(true);
 
     manufacturersTrigger.click();
     await fixture.whenStable();
     expect(categoriesTrigger.getAttribute('aria-expanded')).toBe('false');
     expect(manufacturersTrigger.getAttribute('aria-expanded')).toBe('true');
-    expect(element.querySelector('#categorias-permissions-panel')).toBeNull();
-    expect(element.querySelector('#fabricantes-permissions-panel')).not.toBeNull();
+    expect(categoriesPanel.classList).not.toContain('disclosure__panel-motion--expanded');
+    expect(categoriesPanel.getAttribute('aria-hidden')).toBe('true');
+    expect(categoriesPanel.hasAttribute('inert')).toBe(true);
+    expect(manufacturersPanel.classList).toContain('disclosure__panel-motion--expanded');
+    expect(manufacturersPanel.hasAttribute('aria-hidden')).toBe(false);
+    expect(manufacturersPanel.hasAttribute('inert')).toBe(false);
 
     element.querySelector<HTMLInputElement>('#fabricantes-editar')!.click();
     await fixture.whenStable();

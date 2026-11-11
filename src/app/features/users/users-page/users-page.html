@@ -137,28 +137,32 @@
                   <app-icon class="disclosure__icon" name="next" />
                 </button>
               </h3>
-              @if (openPermissionModule() === module.id) {
-                <fieldset
-                  class="disclosure__panel permissions-group"
-                  [id]="permissionPanelId(module.id)"
-                  [formGroupName]="module.id"
-                >
-                  <legend class="sr-only">Permisos de {{ module.label }}</legend>
-                  <div class="permissions-group__actions">
-                    @for (action of permissionOptions; track action.id) {
-                      <label class="checkbox-field" [for]="module.id + '-' + action.id">
-                        <input
-                          [id]="module.id + '-' + action.id"
-                          type="checkbox"
-                          [formControlName]="action.id"
-                          (change)="permissionChanged(module.id, action.id)"
-                        />
-                        {{ action.label }}
-                      </label>
-                    }
-                  </div>
-                </fieldset>
-              }
+              <div
+                class="disclosure__panel-motion"
+                [class.disclosure__panel-motion--expanded]="openPermissionModule() === module.id"
+                [id]="permissionPanelId(module.id)"
+                [attr.aria-hidden]="openPermissionModule() === module.id ? null : 'true'"
+                [attr.inert]="openPermissionModule() === module.id ? null : ''"
+              >
+                <div class="disclosure__panel-clip">
+                  <fieldset class="disclosure__panel permissions-group" [formGroupName]="module.id">
+                    <legend class="sr-only">Permisos de {{ module.label }}</legend>
+                    <div class="permissions-group__actions">
+                      @for (action of permissionOptions; track action.id) {
+                        <label class="checkbox-field" [for]="module.id + '-' + action.id">
+                          <input
+                            [id]="module.id + '-' + action.id"
+                            type="checkbox"
+                            [formControlName]="action.id"
+                            (change)="permissionChanged(module.id, action.id)"
+                          />
+                          {{ action.label }}
+                        </label>
+                      }
+                    </div>
+                  </fieldset>
+                </div>
+              </div>
             </section>
           }
         </div>
