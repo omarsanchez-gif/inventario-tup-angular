@@ -106,4 +106,6 @@
 - La regresión local sobre `f3a4ca208d550cb3ba4569e28efe0258f177b832` aprobó 63 pruebas Angular, 47 unitarias de Functions, 30 con Auth/Firestore/Functions/Storage Emulator, 5 recorridos Chromium y 7 pruebas negativas del verificador de trazabilidad.
 - Se desplegaron con `--only` y `--project staging` las 26 Functions afectadas y Hosting. Firebase confirmó la creación de `setAuthorizedUserPermissions` y 25 actualizaciones exitosas en Node.js 22 y `us-central1`.
 - Hosting publicó 14 archivos, respondió HTTP 200 y sirve `main-XLEMZUF4.js`; la nueva callable respondió HTTP 401 sin sesión.
+- La verificación posterior detectó y corrigió un desplazamiento de guards: Usuarios había recibido la capacidad de Categorías, Categorías la de Fabricantes, Fabricantes la de Modelos y Modelos conservaba `adminGuard`. La regresión sobre rutas reales aprobó 67 pruebas Angular en `d1d5b7bec7fe827bd79654ab0f25f93175c915ea`.
+- El 11 de noviembre de 2026 se desplegó únicamente Hosting con esa corrección. La ruta `/configuraciones/modelos-activos` respondió HTTP 200 y sirvió `main-33DNKVBQ.js`; Functions, Rules, Storage, datos, secretos, IAM y producción permanecieron intactos.
 - No se desplegaron Firestore Rules, Storage Rules, índices, datos, secretos, IAM ni producción. La aceptación funcional autenticada y visual móvil permanece pendiente.

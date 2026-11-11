@@ -5,7 +5,7 @@
 - Fecha del corte: 11 de noviembre de 2026.
 - Rama inspeccionada: `codex/hardening-sesion-imagenes-trazabilidad`.
 - SHA publicado al iniciar la consolidación: `51e71dc599c55e63bed4ddf11ca0b1e91a9ed599`.
-- SHA de implementación de permisos con validación completa: `f3a4ca208d550cb3ba4569e28efe0258f177b832`.
+- SHA de implementación de permisos y rutas con validación completa: `d1d5b7bec7fe827bd79654ab0f25f93175c915ea`.
 - `desarrollo` local y remoto: `179e79863e2a6c940c9a24165b219bfb8ce59cc1`.
 - Diferencia al iniciar: la rama de trabajo está 13 commits delante de `desarrollo` y no está integrada.
 
@@ -74,7 +74,7 @@ El 10 de noviembre de 2026 se especificó un incremento que permite asignar desp
 ## Staging vigente
 
 - Proyecto exclusivo: `inventario-stg`; alias obligatorio `staging`.
-- Hosting responde HTTP 200 y el incremento de permisos sirve `main-XLEMZUF4.js` y `styles-CISTRGAV.css`.
+- Hosting responde HTTP 200 y la corrección de rutas del incremento de permisos sirve `main-33DNKVBQ.js` y `styles-CISTRGAV.css`.
 - Las 30 callables usan Node.js 22 y `us-central1`; las verificaciones anónimas documentadas recibieron HTTP 401.
 - Firestore Rules niega acceso directo a las colecciones administrativas y Storage Rules conserva denegación total.
 - El último incremento de recuperación desplegó `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` en revisión `00004`, el ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting.

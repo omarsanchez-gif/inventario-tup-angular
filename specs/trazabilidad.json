@@ -1,7 +1,7 @@
 {
   "version": 2,
   "baseReviewSha": "4a3407b14acd7a069ec62f39d1e6ee5a3b04ac1f",
-  "implementationSha": "f3a4ca208d550cb3ba4569e28efe0258f177b832",
+  "implementationSha": "d1d5b7bec7fe827bd79654ab0f25f93175c915ea",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
@@ -154,6 +154,14 @@
         "CAT-026",
         "CAT-027"
       ]
+    },
+    {
+      "id": "angular-routes-d1d5b7b",
+      "sha": "d1d5b7bec7fe827bd79654ab0f25f93175c915ea",
+      "status": "passed",
+      "command": "npm test; npm run lint; npm run format:check; npm run traceability:check; npm run build:staging; git diff --check",
+      "result": "16 archivos y 67 pruebas Angular aprobadas; mapeo real de cuatro rutas, lint, guardia visual, formato, trazabilidad, build de staging y diff aprobados",
+      "criteria": ["LAY-024"]
     }
   ],
   "entries": [
@@ -529,7 +537,7 @@
       "verification": "automated",
       "tests": ["src/app/core/guards/capability.guard.spec.ts", "src/app/app.routes.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "full-regression-f3a4ca2"
+      "evidenceId": "angular-routes-d1d5b7b"
     },
     {
       "requirement": "RN-PER-010",
