@@ -1,7 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope, type CapabilityChange } from '../../../core/auth/session-scope';
 import type { InventoryCampus } from '../../../shared/models/inventory-campus';
 import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { AppIcon } from '../../../shared/ui/icon/app-icon';
@@ -17,11 +25,14 @@ import { CampusesFacade } from '../state/campuses.facade';
 })
 export class CampusesPage {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly sessionScope = inject(SessionScope);
   protected readonly auth = inject(AuthFacade);
   protected readonly campuses = inject(CampusesFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly pendingDeletion = signal<InventoryCampus | null>(null);
+  protected readonly authorizationNotice = signal<string | null>(null);
   protected readonly pageSize = 10;
   protected readonly currentPage = signal(1);
   protected readonly totalPages = computed(() =>
@@ -42,6 +53,10 @@ export class CampusesPage {
   });
 
   constructor() {
+    const unregister = this.sessionScope.registerCapabilityListener('campus', (change) =>
+      this.handleCapabilityChange(change),
+    );
+    this.destroyRef.onDestroy(unregister);
     void this.campuses.load();
   }
 
@@ -117,5 +132,22 @@ export class CampusesPage {
     const campus = this.pendingDeletion();
     if (!campus || this.campuses.saving()) return;
     if (await this.campuses.delete(campus)) this.pendingDeletion.set(null);
+  }
+
+  private handleCapabilityChange(change: CapabilityChange): void {
+    if (change.allowed) return;
+    const closesForm =
+      (change.action === 'crear' && this.formVisible() && this.editingId() === null) ||
+      (change.action === 'editar' && this.formVisible() && this.editingId() !== null);
+    const closesDeletion = change.action === 'eliminar' && this.pendingDeletion() !== null;
+    if (change.action === 'ver' || closesForm || closesDeletion) {
+      this.formVisible.set(false);
+      this.editingId.set(null);
+      this.pendingDeletion.set(null);
+      this.campuses.clearMessages();
+    }
+    this.authorizationNotice.set(
+      'Sus permisos de Campus cambiaron. Las acciones disponibles se actualizaron sin presentar resultados obsoletos.',
+    );
   }
 }

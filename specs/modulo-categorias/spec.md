@@ -2,7 +2,7 @@
 
 ## Estado
 
-Especificación base aprobada, implementada y desplegada exclusivamente a `inventario-stg`. Producción y migración permanecen fuera de alcance. Modelos de activos ya consume este catálogo; Activos continúa fuera de alcance. La autorización granular de ADR-007 fue autorizada el 11 de noviembre de 2026 y está en implementación.
+Especificación base y autorización granular aprobadas, implementadas y desplegadas exclusivamente a `inventario-stg`. Producción y migración permanecen fuera de alcance. Modelos de activos ya consume este catálogo; Activos continúa fuera de alcance.
 
 ## Objetivo
 
@@ -150,7 +150,7 @@ La interfaz traduce estos códigos a mensajes institucionales y no expone stack 
 - Usa el icono compartido `settings` y no representa una ruta.
 - `Categorías` es una opción secundaria de texto y navega a `/configuraciones/categorias`.
 - El grupo se abre automáticamente cuando Categorías está activa.
-- Fabricantes y Modelos de activos no aparecen hasta contar con implementación propia.
+- Fabricantes, Modelos de activos y Campus aparecen únicamente para quien posea su propio permiso `ver`; su acceso no se deriva de Categorías.
 - `Usuarios` permanece como opción principal independiente.
 
 ### Página

@@ -1,7 +1,8 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
-import { SessionScope } from '../../../core/auth/session-scope';
+import { isPermissionDenied } from '../../../core/auth/permission-denied';
+import { SessionScope, type CapabilityContext } from '../../../core/auth/session-scope';
 import type { InventoryCampus } from '../../../shared/models/inventory-campus';
 import { CAMPUSES_GATEWAY, type CampusDraft, type CampusUpdate } from '../data/campuses.gateway';
 
@@ -41,10 +42,6 @@ function campusErrorMessage(error: unknown): string {
   }
 }
 
-function permissionDenied(error: unknown): boolean {
-  return (error as FunctionalError)?.details?.functionalCode === 'permission-denied';
-}
-
 function searchable(value: string): string {
   return value
     .normalize('NFKD')
@@ -81,6 +78,13 @@ export class CampusesFacade {
 
   constructor() {
     this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+    this.sessionScope.registerCapabilityListener('campus', (change) => {
+      if (change.action === 'ver' && !change.allowed) this.resetPrivateState();
+      else if (!change.allowed) {
+        this.savingState.set(false);
+        this.clearMessages();
+      }
+    });
   }
 
   setQuery(query: string): void {
@@ -88,35 +92,38 @@ export class CampusesFacade {
   }
 
   async load(): Promise<void> {
-    const generation = this.sessionScope.generation();
+    const context = this.sessionScope.captureCapability('campus', 'ver');
+    if (!this.auth.can('campus', 'ver')) return;
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
       const result = await this.gateway.list();
-      if (this.sessionScope.isCurrent(generation)) this.campusesState.set(result.items);
+      if (this.isCurrent(context)) this.campusesState.set(result.items);
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) {
-        if (permissionDenied(error)) {
-          this.campusesState.set([]);
-          void this.auth.refreshAuthorization();
-        }
+      await this.revalidateDenial(error);
+      if (this.isCurrent(context)) {
         this.errorState.set(campusErrorMessage(error));
       }
     } finally {
-      if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
+      if (this.isCurrent(context)) this.loadingState.set(false);
     }
   }
 
   async create(input: CampusDraft): Promise<boolean> {
-    return this.mutate(() => this.gateway.create(input), 'Campus creado correctamente.');
+    return this.mutate('crear', () => this.gateway.create(input), 'Campus creado correctamente.');
   }
 
   async update(input: CampusUpdate): Promise<boolean> {
-    return this.mutate(() => this.gateway.update(input), 'Campus actualizado correctamente.');
+    return this.mutate(
+      'editar',
+      () => this.gateway.update(input),
+      'Campus actualizado correctamente.',
+    );
   }
 
   async setStatus(campus: InventoryCampus): Promise<boolean> {
     return this.mutate(
+      'cambiarEstado',
       () => this.gateway.setStatus(campus.documentId, !campus.activo),
       campus.activo ? 'Campus desactivado.' : 'Campus activado.',
     );
@@ -124,6 +131,7 @@ export class CampusesFacade {
 
   async delete(campus: InventoryCampus): Promise<boolean> {
     return this.mutate(
+      'eliminar',
       () => this.gateway.delete(campus.documentId),
       'Campus eliminado correctamente.',
     );
@@ -134,29 +142,42 @@ export class CampusesFacade {
     this.successState.set(null);
   }
 
-  private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
-    const generation = this.sessionScope.generation();
+  private async mutate(
+    action: 'crear' | 'editar' | 'cambiarEstado' | 'eliminar',
+    operation: () => Promise<void>,
+    successMessage: string,
+  ): Promise<boolean> {
+    const context = this.sessionScope.captureCapability('campus', action);
+    if (!this.auth.can('campus', action)) return false;
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
-      if (!this.sessionScope.isCurrent(generation)) return false;
-      await this.load();
-      if (!this.sessionScope.isCurrent(generation)) return false;
+      if (!this.isCurrent(context)) return false;
+      const result = await this.gateway.list();
+      if (!this.isCurrent(context)) return false;
+      this.campusesState.set(result.items);
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) {
-        if (permissionDenied(error)) {
-          this.campusesState.set([]);
-          void this.auth.refreshAuthorization();
-        }
+      await this.revalidateDenial(error);
+      if (this.isCurrent(context)) {
         this.errorState.set(campusErrorMessage(error));
       }
       return false;
     } finally {
-      if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
+      if (this.isCurrent(context)) this.savingState.set(false);
     }
+  }
+
+  private isCurrent(context: CapabilityContext): boolean {
+    return (
+      this.sessionScope.isCapabilityCurrent(context) && this.auth.can('campus', context.action)
+    );
+  }
+
+  private async revalidateDenial(error: unknown): Promise<void> {
+    if (isPermissionDenied(error)) await this.auth.revalidatePermissionDenial(error);
   }
 
   private resetPrivateState(): void {

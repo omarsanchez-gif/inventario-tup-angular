@@ -12,6 +12,10 @@
     }
   </header>
 
+  @if (authorizationNotice(); as notice) {
+    <div class="alert alert--info" role="status" aria-live="polite">{{ notice }}</div>
+  }
+
   @if (!formVisible() && !pendingDeletion() && manufacturers.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }

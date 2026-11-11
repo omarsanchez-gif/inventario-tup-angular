@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import type { InventoryCategory } from '../../../shared/models/inventory-category';
@@ -7,6 +14,7 @@ import { AppIcon } from '../../../shared/ui/icon/app-icon';
 import { AppPagination } from '../../../shared/ui/pagination/app-pagination';
 import { CategoriesFacade } from '../state/categories.facade';
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope, type CapabilityChange } from '../../../core/auth/session-scope';
 
 @Component({
   selector: 'app-categories-page',
@@ -17,11 +25,14 @@ import { AuthFacade } from '../../../core/auth/auth.facade';
 })
 export class CategoriesPage {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly sessionScope = inject(SessionScope);
   protected readonly categories = inject(CategoriesFacade);
   protected readonly auth = inject(AuthFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly pendingDeletion = signal<InventoryCategory | null>(null);
+  protected readonly authorizationNotice = signal<string | null>(null);
   protected readonly pageSize = 10;
   protected readonly currentPage = signal(1);
   protected readonly totalPages = computed(() =>
@@ -38,6 +49,10 @@ export class CategoriesPage {
   });
 
   constructor() {
+    const unregister = this.sessionScope.registerCapabilityListener('categorias', (change) =>
+      this.handleCapabilityChange(change),
+    );
+    this.destroyRef.onDestroy(unregister);
     void this.categories.load();
   }
 
@@ -109,5 +124,22 @@ export class CategoriesPage {
     const category = this.pendingDeletion();
     if (!category || this.categories.saving()) return;
     if (await this.categories.delete(category)) this.pendingDeletion.set(null);
+  }
+
+  private handleCapabilityChange(change: CapabilityChange): void {
+    if (change.allowed) return;
+    const closesForm =
+      (change.action === 'crear' && this.formVisible() && this.editingId() === null) ||
+      (change.action === 'editar' && this.formVisible() && this.editingId() !== null);
+    const closesDeletion = change.action === 'eliminar' && this.pendingDeletion() !== null;
+    if (change.action === 'ver' || closesForm || closesDeletion) {
+      this.formVisible.set(false);
+      this.editingId.set(null);
+      this.pendingDeletion.set(null);
+      this.categories.clearMessages();
+    }
+    this.authorizationNotice.set(
+      'Sus permisos de Categorías cambiaron. Las acciones disponibles se actualizaron sin presentar resultados obsoletos.',
+    );
   }
 }

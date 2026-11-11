@@ -10,6 +10,10 @@
     }
   </header>
 
+  @if (authorizationNotice(); as notice) {
+    <div class="alert alert--info" role="status" aria-live="polite">{{ notice }}</div>
+  }
+
   @if (!formVisible() && !pendingDeletion() && assetModels.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
@@ -79,47 +83,53 @@
               <small role="alert">Las notas admiten máximo 1,000 caracteres.</small>
             }
           </div>
-          <div class="field image-field">
-            <label for="asset-model-image">Imagen</label>
-            <input
-              id="asset-model-image"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/avif"
-              [disabled]="busy()"
-              (change)="selectImage($event)"
-            />
-            <small>JPEG, PNG, WebP o AVIF. Máximo 2 MiB.</small>
-            @if (imagePreview(); as preview) {
-              <img
-                class="image-preview"
-                [src]="preview"
-                alt="Vista previa de la imagen seleccionada"
+          @if (auth.can('modelosActivos', 'editar')) {
+            <div class="field image-field">
+              <label for="asset-model-image">Imagen</label>
+              <input
+                id="asset-model-image"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/avif"
+                [disabled]="busy()"
+                (change)="selectImage($event)"
               />
-              <p>{{ selectedImage()?.name }} · {{ selectedImage()?.size }} bytes</p>
-              <div class="image-actions">
-                <button
-                  class="button button--secondary"
-                  type="button"
-                  (click)="clearSelectedImage()"
-                >
-                  Retirar selección
-                </button>
-              </div>
-            } @else if (currentImageUrl() && !removeCurrentImage()) {
-              <img
-                class="image-preview"
-                [src]="currentImageUrl()"
-                alt="Imagen vigente del modelo"
-              />
-              <div class="image-actions">
-                <button class="button button--danger" type="button" (click)="requestImageRemoval()">
-                  Eliminar imagen
-                </button>
-              </div>
-            } @else if (removeCurrentImage()) {
-              <p role="status">La imagen vigente se eliminará al guardar.</p>
-            }
-          </div>
+              <small>JPEG, PNG, WebP o AVIF. Máximo 2 MiB.</small>
+              @if (imagePreview(); as preview) {
+                <img
+                  class="image-preview"
+                  [src]="preview"
+                  alt="Vista previa de la imagen seleccionada"
+                />
+                <p>{{ selectedImage()?.name }} · {{ selectedImage()?.size }} bytes</p>
+                <div class="image-actions">
+                  <button
+                    class="button button--secondary"
+                    type="button"
+                    (click)="clearSelectedImage()"
+                  >
+                    Retirar selección
+                  </button>
+                </div>
+              } @else if (currentImageUrl() && !removeCurrentImage()) {
+                <img
+                  class="image-preview"
+                  [src]="currentImageUrl()"
+                  alt="Imagen vigente del modelo"
+                />
+                <div class="image-actions">
+                  <button
+                    class="button button--danger"
+                    type="button"
+                    (click)="requestImageRemoval()"
+                  >
+                    Eliminar imagen
+                  </button>
+                </div>
+              } @else if (removeCurrentImage()) {
+                <p role="status">La imagen vigente se eliminará al guardar.</p>
+              }
+            </div>
+          }
         </div>
         <div class="dialog__actions">
           <button

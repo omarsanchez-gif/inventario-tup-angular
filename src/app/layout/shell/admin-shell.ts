@@ -12,6 +12,8 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter } from 'rxjs';
 
 import { AuthFacade } from '../../core/auth/auth.facade';
+import { SessionScope } from '../../core/auth/session-scope';
+import type { PermissionModule } from '../../shared/models/catalog-permissions';
 import { AppIcon } from '../../shared/ui/icon/app-icon';
 
 @Component({
@@ -24,6 +26,7 @@ import { AppIcon } from '../../shared/ui/icon/app-icon';
 export class AdminShell implements OnDestroy {
   protected readonly auth = inject(AuthFacade);
   private readonly router = inject(Router);
+  private readonly sessionScope = inject(SessionScope);
   private readonly currentUrl = signal(this.router.url);
   private readonly desktopMedia =
     typeof window === 'undefined' ? null : window.matchMedia('(min-width: 64rem)');
@@ -57,6 +60,7 @@ export class AdminShell implements OnDestroy {
         .toUpperCase() || 'TU'
     );
   });
+  private readonly unregisterCapabilityListeners: (() => void)[] = [];
 
   private readonly handleViewportChange = (event: MediaQueryListEvent): void => {
     this.desktop.set(event.matches);
@@ -74,10 +78,20 @@ export class AdminShell implements OnDestroy {
         this.currentUrl.set(event.urlAfterRedirects);
         if (event.urlAfterRedirects.startsWith('/configuraciones/')) this.settingsOpen.set(true);
       });
+    for (const module of ['categorias', 'fabricantes', 'modelosActivos', 'campus'] as const) {
+      this.unregisterCapabilityListeners.push(
+        this.sessionScope.registerCapabilityListener(module, (change) => {
+          if (change.action === 'ver' && !change.allowed && this.routeUsesModule(module)) {
+            void this.router.navigateByUrl('/dashboard', { replaceUrl: true });
+          }
+        }),
+      );
+    }
   }
 
   ngOnDestroy(): void {
     this.desktopMedia?.removeEventListener('change', this.handleViewportChange);
+    for (const unregister of this.unregisterCapabilityListeners) unregister();
   }
 
   @HostListener('document:keydown.escape')
@@ -105,5 +119,15 @@ export class AdminShell implements OnDestroy {
   protected logout(): void {
     this.closeNavigationOnMobile();
     void this.auth.logout();
+  }
+
+  private routeUsesModule(module: PermissionModule): boolean {
+    const paths: Record<PermissionModule, string> = {
+      categorias: '/configuraciones/categorias',
+      fabricantes: '/configuraciones/fabricantes',
+      modelosActivos: '/configuraciones/modelos-activos',
+      campus: '/configuraciones/campus',
+    };
+    return this.router.url.startsWith(paths[module]);
   }
 }

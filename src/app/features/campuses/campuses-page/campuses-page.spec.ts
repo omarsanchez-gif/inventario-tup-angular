@@ -2,6 +2,8 @@ import { signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope } from '../../../core/auth/session-scope';
+import { emptyPermissionMap } from '../../../shared/models/catalog-permissions';
 import type { InventoryCampus } from '../../../shared/models/inventory-campus';
 import { CampusesFacade } from '../state/campuses.facade';
 import { CampusesPage } from './campuses-page';
@@ -202,5 +204,24 @@ describe('CampusesPage', () => {
     expect(
       element.querySelector<HTMLButtonElement>('[aria-label="Página anterior"]')!.disabled,
     ).toBe(true);
+  });
+
+  it('CAM-038 closes the open Campus dialog when Ver is revoked', () => {
+    action('Editar FCS').click();
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeTruthy();
+    can.mockReturnValue(false);
+    const previous = { ...emptyPermissionMap(), campus: ['ver', 'editar'] as const };
+
+    TestBed.inject(SessionScope).reconcileCapabilities(
+      'usuario',
+      previous,
+      'usuario',
+      emptyPermissionMap(),
+    );
+    fixture.detectChanges();
+
+    expect(element.querySelector('dialog[open]')).toBeNull();
+    expect(element.querySelector('[role="status"]')?.textContent).toContain('permisos');
   });
 });

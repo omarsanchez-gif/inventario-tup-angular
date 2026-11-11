@@ -34,3 +34,4 @@
 - [x] Sustituir la restricción exclusiva de `admin` por la capacidad canónica, conservando acceso total administrativo.
 - [x] Adaptar guard, submenú y acciones visibles sin confiar en ellos como autoridad.
 - [x] Probar cada concesión y denegación con rol `usuario`, además de la regresión de `admin` y anónimo.
+- [x] Invalidar respuestas pendientes y cerrar el diálogo exacto ante reducción del mismo UID sin limpiar otros módulos.

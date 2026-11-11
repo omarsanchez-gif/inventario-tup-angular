@@ -42,8 +42,8 @@
 - [x] Definir el cuarto bloque del diálogo y el resumen de hasta cuatro módulos.
 - [x] Obtener validación expresa del responsable sobre esta ampliación.
 - [x] Incorporar Campus al contrato canónico, al diálogo y a las regresiones.
-- [ ] Implementar contratos, backend, interfaz y regresiones únicamente después de la aprobación.
-- [ ] Desplegar Functions antes de Hosting y verificar que una pestaña anterior falle sin sobrescribir permisos.
+- [x] Implementar contratos, backend, interfaz y regresiones después de la aprobación.
+- [x] Desplegar Functions antes de Hosting y verificar que una pestaña anterior falle sin sobrescribir permisos.
 
 ## Refinamiento visual: acordeón de permisos
 
@@ -53,3 +53,10 @@
 - [x] Agregar regresión de expansión única, resumen dinámico y conservación de valores.
 - [x] Suavizar apertura y cierre mediante altura/opacidad, respetando `prefers-reduced-motion`, `aria-hidden` e `inert`.
 - [x] Validar y publicar únicamente Hosting en staging.
+
+## Endurecimiento de revocación modular
+
+- [x] Documentar el patrón común de revisiones por módulo y acción.
+- [x] Mantener separado el alcance funcional del futuro alcance territorial.
+- [x] Reforzar USR-034 con rechazo atómico real del payload anterior y conservación del mapa de cuatro módulos.
+- [ ] Completar aceptación autenticada de una reducción mientras la pestaña del usuario afectado permanece abierta.

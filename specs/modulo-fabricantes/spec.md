@@ -2,7 +2,7 @@
 
 ## Estado
 
-Especificación base aprobada, implementada y desplegada exclusivamente a `inventario-stg`. Producción, migración y Proveedores permanecen fuera de alcance. Modelos de activos ya consume este catálogo. La autorización granular de ADR-007 fue autorizada el 11 de noviembre de 2026 y está en implementación.
+Especificación base y autorización granular aprobadas, implementadas y desplegadas exclusivamente a `inventario-stg`. Producción, migración y Proveedores permanecen fuera de alcance. Modelos de activos ya consume este catálogo.
 
 ## Objetivo
 
@@ -142,7 +142,7 @@ La interfaz traduce estos códigos a mensajes institucionales y no expone stack 
 - `Configuraciones` permanece como grupo desplegable de primer nivel; `admin` ve todos los enlaces y `usuario` solo Fabricantes cuando posee `fabricantes.ver`.
 - `Fabricantes` es una opción secundaria de texto y navega a `/configuraciones/fabricantes`.
 - `Categorías` permanece como opción secundaria independiente dentro del mismo grupo.
-- Modelos de activos no aparece hasta contar con implementación propia.
+- Modelos de activos y Campus aparecen únicamente para quien posea su propio permiso `ver`; su acceso no se deriva de Fabricantes.
 
 ### Página
 

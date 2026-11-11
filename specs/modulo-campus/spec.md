@@ -93,14 +93,12 @@ Ambos valores son read models. Las entidades futuras serán la fuente canónica 
 
 ## Autorización
 
-- En la versión vigente solo `admin` autenticado, autorizado y activo puede acceder a la ruta o invocar sus callables.
+- En la versión vigente `admin` conserva acceso total y `usuario` autenticado, autorizado y activo requiere la capacidad exacta de Campus.
 - Un `usuario` sin la acción canónica exacta, perfiles inactivos y solicitudes anónimas no pueden listar ni mutar Campus.
 - Angular no accederá directamente a `campus` ni a `campus_claves`.
 - Cada callable verificará Authentication, claim administrativo y el documento canónico `usuarios`.
 - El guard y la visibilidad del menú serán defensas de presentación, no autorización efectiva.
 - Esta spec no define alcance sobre inventario; la reestructuración de accesos a Activos se realizará después de definir Áreas y coberturas de Coordinaciones.
-
-### Autorización granular vigente
 
 - Campus es el cuarto módulo del mapa canónico con `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`.
 - `campus.ver` habilita ruta, submenú y `listCampuses`.
@@ -109,6 +107,7 @@ Ambos valores son read models. Las entidades futuras serán la fuente canónica 
 - Un documento anterior sin `permisos.campus` equivaldrá a lista vacía para `usuario`. `admin` conservará acceso total por rol.
 - Los permisos serán globales para administrar el catálogo. No indican qué Campus, Áreas, Coordinaciones o Activos puede consultar operativamente el usuario.
 - Reducir el permiso se aplicará inmediatamente en backend; menú, botones y guard se actualizarán al revalidar la sesión, pero no serán autoridad.
+- La revocación en sesión, el descarte selectivo de respuestas tardías y la navegación segura siguen `../patrones/permisos-modulares.md`.
 
 ## Contratos callable
 

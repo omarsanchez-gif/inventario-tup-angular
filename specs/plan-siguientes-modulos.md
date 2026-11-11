@@ -14,19 +14,19 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 ## Secuencia propuesta
 
-### 1. Permisos granulares de catálogos
+### 1. Permisos granulares de catálogos — completado en staging
 
-**Objetivo:** permitir que un `usuario` seleccionado consulte o mantenga Categorías, Fabricantes y Modelos sin convertirlo en `admin` ni incorporar todavía alcance territorial.
+**Objetivo:** permitir que un `usuario` seleccionado consulte o mantenga Categorías, Fabricantes, Modelos y Campus sin convertirlo en `admin` ni incorporar todavía alcance territorial.
 
-**Dependencias:** Usuarios, Layout y los tres catálogos ya implementados; ADR-007 y validación final de sus criterios.
+**Dependencias:** Usuarios, Layout y los cuatro catálogos implementados; ADR-007 y `patrones/permisos-modulares.md`.
 
 **Reutilización:** `usuarios` como fuente canónica, callables existentes, generación de sesión, `AppDialog`, icon-buttons y guards funcionales.
 
 **Decisiones principales:** alta sin permisos, asignación posterior, mapa completo por módulo/acción, `admin` con acceso total, `usuario` con denegación por defecto y permisos fuera de claims.
 
-**Límite:** no incluye perfiles reutilizables, puestos Jefe/Auxiliar, Campus, Coordinaciones, Áreas o alcance sobre Activos.
+**Límite:** no incluye perfiles reutilizables, puestos Jefe/Auxiliar, Coordinaciones, Áreas o alcance sobre Activos.
 
-**Estado:** especificación propuesta para validación; implementación no autorizada todavía.
+**Estado:** implementado, validado y publicado únicamente en staging; aceptación autenticada integral pendiente.
 
 ### 2. Áreas
 

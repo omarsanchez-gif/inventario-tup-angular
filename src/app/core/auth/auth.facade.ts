@@ -10,6 +10,7 @@ import type {
 import { mapAuthError } from './auth-error.mapper';
 import { AUTH_GATEWAY, AUTHORIZATION_GATEWAY } from './gateways';
 import { SessionScope } from './session-scope';
+import { isPermissionDenied } from './permission-denied';
 import {
   hasPermission,
   type PermissionAction,
@@ -45,6 +46,12 @@ export class AuthFacade {
   can(module: PermissionModule, action: PermissionAction): boolean {
     const user = this.userState();
     return hasPermission(user?.rol ?? null, user?.permisos, module, action);
+  }
+
+  async revalidatePermissionDenial(error: unknown): Promise<boolean> {
+    if (!isPermissionDenied(error)) return false;
+    await this.refreshAuthorization();
+    return true;
   }
 
   async refreshAuthorization(): Promise<boolean> {
@@ -191,7 +198,14 @@ export class AuthFacade {
     if (token.claims['authorized'] !== true || token.claims['role'] !== profile.rol) {
       throw { details: { functionalCode: 'service-unavailable' } };
     }
+    const previous = this.userState();
     this.userState.set(profile);
+    this.sessionScope.reconcileCapabilities(
+      previous?.rol ?? null,
+      previous?.permisos,
+      profile.rol,
+      profile.permisos,
+    );
     this.errorState.set(null);
     return profile;
   }

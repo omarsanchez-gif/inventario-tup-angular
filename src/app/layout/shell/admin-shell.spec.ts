@@ -3,8 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 
 import { AuthFacade } from '../../core/auth/auth.facade';
+import { SessionScope } from '../../core/auth/session-scope';
 import type { AuthorizedUser } from '../../shared/models/authorized-user';
-import { fullPermissionMap } from '../../shared/models/catalog-permissions';
+import { emptyPermissionMap, fullPermissionMap } from '../../shared/models/catalog-permissions';
 import { AdminShell } from './admin-shell';
 
 @Component({ template: '' })
@@ -245,5 +246,23 @@ describe('AdminShell', () => {
       [...element.querySelectorAll('.navigation__sublink')].map((link) => link.textContent?.trim()),
     ).toEqual(['Campus']);
     expect(element.textContent).not.toContain('Usuarios');
+  });
+
+  it('LAY-028 leaves a module route when Ver is revoked without ending the session', async () => {
+    createShell();
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/configuraciones/campus');
+    const previous = { ...emptyPermissionMap(), campus: ['ver'] as const };
+
+    TestBed.inject(SessionScope).reconcileCapabilities(
+      'usuario',
+      previous,
+      'usuario',
+      emptyPermissionMap(),
+    );
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/dashboard');
+    expect(logout).not.toHaveBeenCalled();
   });
 });

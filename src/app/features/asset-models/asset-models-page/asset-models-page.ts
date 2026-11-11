@@ -10,7 +10,11 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
-import { SessionScope } from '../../../core/auth/session-scope';
+import {
+  SessionScope,
+  type CapabilityChange,
+  type CapabilityContext,
+} from '../../../core/auth/session-scope';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
 import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { AppIcon } from '../../../shared/ui/icon/app-icon';
@@ -51,6 +55,7 @@ export class AssetModelsPage implements OnDestroy {
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly pendingDeletion = signal<InventoryAssetModel | null>(null);
+  protected readonly authorizationNotice = signal<string | null>(null);
   protected readonly selectedImage = signal<File | null>(null);
   protected readonly imagePreview = signal<string | null>(null);
   protected readonly currentImageUrl = signal<string | null>(null);
@@ -68,6 +73,7 @@ export class AssetModelsPage implements OnDestroy {
   private thumbnailCycleStopped = false;
   private destroyed = false;
   private dialogGeneration = 0;
+  private readonly unregisterCapabilityListener: () => void;
   private readonly authorizationWatcher = effect(() => {
     if (!this.auth.authorized()) this.stopThumbnailRefreshCycle();
   });
@@ -109,11 +115,16 @@ export class AssetModelsPage implements OnDestroy {
   });
 
   constructor() {
+    this.unregisterCapabilityListener = this.sessionScope.registerCapabilityListener(
+      'modelosActivos',
+      (change) => this.handleCapabilityChange(change),
+    );
     void this.initialize();
   }
 
   ngOnDestroy(): void {
     this.destroyed = true;
+    this.unregisterCapabilityListener();
     this.dialogGeneration += 1;
     this.stopThumbnailRefreshCycle();
     this.revokePreview();
@@ -125,6 +136,7 @@ export class AssetModelsPage implements OnDestroy {
   }
 
   protected openNew(): void {
+    if (!this.auth.can('modelosActivos', 'crear')) return;
     this.dialogGeneration += 1;
     this.resetImageState();
     this.assetModels.clearMessages();
@@ -134,6 +146,7 @@ export class AssetModelsPage implements OnDestroy {
   }
 
   protected edit(model: InventoryAssetModel): void {
+    if (!this.auth.can('modelosActivos', 'editar')) return;
     const generation = ++this.dialogGeneration;
     this.resetImageState();
     this.assetModels.clearMessages();
@@ -158,6 +171,7 @@ export class AssetModelsPage implements OnDestroy {
   }
 
   protected selectImage(event: Event): void {
+    if (!this.auth.can('modelosActivos', 'editar')) return;
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
     this.fileError.set(null);
@@ -186,6 +200,7 @@ export class AssetModelsPage implements OnDestroy {
   }
 
   protected requestImageRemoval(): void {
+    if (!this.auth.can('modelosActivos', 'editar')) return;
     this.clearSelectedImage();
     this.removeCurrentImage.set(true);
   }
@@ -197,8 +212,17 @@ export class AssetModelsPage implements OnDestroy {
     }
     this.formOperationError.set(null);
     this.operationPending.set(true);
-    const sessionGeneration = this.sessionScope.generation();
-    const selected = this.selectedImage();
+    const editingId = this.editingId();
+    const saveAction = editingId ? 'editar' : 'crear';
+    const saveContext = this.sessionScope.captureCapability('modelosActivos', saveAction);
+    if (!this.isOperationCurrent(saveContext)) {
+      this.operationPending.set(false);
+      return;
+    }
+    const imageContext = this.auth.can('modelosActivos', 'editar')
+      ? this.sessionScope.captureCapability('modelosActivos', 'editar')
+      : null;
+    const selected = imageContext ? this.selectedImage() : null;
     let base64: string | null = null;
     if (selected) {
       try {
@@ -209,7 +233,7 @@ export class AssetModelsPage implements OnDestroy {
         return;
       }
     }
-    if (!this.sessionScope.isCurrent(sessionGeneration) || !this.auth.authorized()) {
+    if (!this.isOperationCurrent(saveContext)) {
       this.operationPending.set(false);
       return;
     }
@@ -221,7 +245,6 @@ export class AssetModelsPage implements OnDestroy {
       modeloNo: raw.modeloNo.trim() || null,
       notas: raw.notas.trim() || null,
     };
-    const editingId = this.editingId();
     const saveResult = await this.assetModels.save(
       editingId ? { documentId: editingId, ...input } : input,
     );
@@ -229,12 +252,24 @@ export class AssetModelsPage implements OnDestroy {
       this.operationPending.set(false);
       return;
     }
-    if (!this.sessionScope.isCurrent(sessionGeneration) || !this.auth.authorized()) {
+    if (!this.isOperationCurrent(saveContext)) {
       this.operationPending.set(false);
       return;
     }
     const documentId = saveResult.documentId;
     this.editingId.set(documentId);
+
+    const requestedImageChange =
+      (selected !== null && base64 !== null) || this.removeCurrentImage();
+    if (requestedImageChange && (!imageContext || !this.isOperationCurrent(imageContext))) {
+      this.operationPending.set(false);
+      this.formVisible.set(false);
+      this.resetImageState();
+      this.authorizationNotice.set(
+        'El Modelo quedó guardado, pero el permiso de edición cambió antes de procesar la imagen. No se inició una carga ni eliminación de imagen.',
+      );
+      return;
+    }
 
     let imageCompleted = true;
     if (selected && base64) {
@@ -243,7 +278,7 @@ export class AssetModelsPage implements OnDestroy {
       imageCompleted = await this.assetModels.removeImage(documentId);
     }
 
-    if (!this.sessionScope.isCurrent(sessionGeneration) || !this.auth.authorized()) {
+    if (!this.isOperationCurrent(saveContext)) {
       this.operationPending.set(false);
       return;
     }
@@ -439,6 +474,49 @@ export class AssetModelsPage implements OnDestroy {
     this.removeCurrentImage.set(false);
     this.fileError.set(null);
     this.formOperationError.set(null);
+  }
+
+  private isOperationCurrent(context: CapabilityContext): boolean {
+    return (
+      this.sessionScope.isCapabilityCurrent(context) &&
+      this.auth.can('modelosActivos', context.action)
+    );
+  }
+
+  private handleCapabilityChange(change: CapabilityChange): void {
+    if (change.allowed) return;
+    if (change.action === 'ver') {
+      this.forceCloseDialogs();
+      this.stopThumbnailRefreshCycle();
+      this.thumbnailUrls.set({});
+      this.thumbnailVersions.clear();
+      this.thumbnailExpirations.clear();
+      this.authorizationNotice.set(
+        'Su permiso para consultar Modelos de activos fue retirado. Los datos temporales de este módulo se descartaron.',
+      );
+      return;
+    }
+    if (change.action === 'crear' && this.formVisible() && this.editingId() === null) {
+      this.forceCloseDialogs();
+    } else if (change.action === 'editar' && this.formVisible()) {
+      if (this.editingId() !== null) this.forceCloseDialogs();
+      else this.resetImageState();
+    } else if (change.action === 'eliminar' && this.pendingDeletion() !== null) {
+      this.forceCloseDialogs();
+    }
+    this.authorizationNotice.set(
+      'Sus permisos de Modelos de activos cambiaron. Las acciones disponibles se actualizaron sin presentar resultados obsoletos.',
+    );
+  }
+
+  private forceCloseDialogs(): void {
+    this.dialogGeneration += 1;
+    this.formVisible.set(false);
+    this.editingId.set(null);
+    this.pendingDeletion.set(null);
+    this.operationPending.set(false);
+    this.assetModels.clearMessages();
+    this.resetImageState();
   }
 
   private revokePreview(): void {

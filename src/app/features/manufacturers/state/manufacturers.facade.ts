@@ -1,7 +1,8 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
-import { SessionScope } from '../../../core/auth/session-scope';
+import { SessionScope, type CapabilityContext } from '../../../core/auth/session-scope';
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { isPermissionDenied } from '../../../core/auth/permission-denied';
 import type { InventoryManufacturer } from '../../../shared/models/inventory-manufacturer';
 import {
   MANUFACTURERS_GATEWAY,
@@ -35,10 +36,6 @@ function manufacturerErrorMessage(error: unknown): string {
     default:
       return 'No fue posible completar la operación.';
   }
-}
-
-function permissionDenied(error: unknown): boolean {
-  return (error as FunctionalError)?.details?.functionalCode === 'permission-denied';
 }
 
 function searchable(value: string): string {
@@ -77,6 +74,13 @@ export class ManufacturersFacade {
 
   constructor() {
     this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+    this.sessionScope.registerCapabilityListener('fabricantes', (change) => {
+      if (change.action === 'ver' && !change.allowed) this.resetPrivateState();
+      else if (!change.allowed) {
+        this.savingState.set(false);
+        this.clearMessages();
+      }
+    });
   }
 
   setQuery(query: string): void {
@@ -84,35 +88,42 @@ export class ManufacturersFacade {
   }
 
   async load(): Promise<void> {
-    const generation = this.sessionScope.generation();
+    const context = this.sessionScope.captureCapability('fabricantes', 'ver');
+    if (!this.auth.can('fabricantes', 'ver')) return;
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
       const result = await this.gateway.list();
-      if (this.sessionScope.isCurrent(generation)) this.manufacturersState.set(result.items);
+      if (this.isCurrent(context)) this.manufacturersState.set(result.items);
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) {
-        if (permissionDenied(error)) {
-          this.manufacturersState.set([]);
-          void this.auth.refreshAuthorization();
-        }
+      await this.revalidateDenial(error);
+      if (this.isCurrent(context)) {
         this.errorState.set(manufacturerErrorMessage(error));
       }
     } finally {
-      if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
+      if (this.isCurrent(context)) this.loadingState.set(false);
     }
   }
 
   async create(input: ManufacturerDraft): Promise<boolean> {
-    return this.mutate(() => this.gateway.create(input), 'Fabricante creado correctamente.');
+    return this.mutate(
+      'crear',
+      () => this.gateway.create(input),
+      'Fabricante creado correctamente.',
+    );
   }
 
   async update(input: ManufacturerUpdate): Promise<boolean> {
-    return this.mutate(() => this.gateway.update(input), 'Fabricante actualizado correctamente.');
+    return this.mutate(
+      'editar',
+      () => this.gateway.update(input),
+      'Fabricante actualizado correctamente.',
+    );
   }
 
   async setStatus(manufacturer: InventoryManufacturer): Promise<boolean> {
     return this.mutate(
+      'cambiarEstado',
       () => this.gateway.setStatus(manufacturer.documentId, !manufacturer.activo),
       manufacturer.activo ? 'Fabricante desactivado.' : 'Fabricante activado.',
     );
@@ -120,6 +131,7 @@ export class ManufacturersFacade {
 
   async delete(manufacturer: InventoryManufacturer): Promise<boolean> {
     return this.mutate(
+      'eliminar',
       () => this.gateway.delete(manufacturer.documentId),
       'Fabricante eliminado correctamente.',
     );
@@ -130,29 +142,42 @@ export class ManufacturersFacade {
     this.successState.set(null);
   }
 
-  private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
-    const generation = this.sessionScope.generation();
+  private async mutate(
+    action: 'crear' | 'editar' | 'cambiarEstado' | 'eliminar',
+    operation: () => Promise<void>,
+    successMessage: string,
+  ): Promise<boolean> {
+    const context = this.sessionScope.captureCapability('fabricantes', action);
+    if (!this.auth.can('fabricantes', action)) return false;
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
-      if (!this.sessionScope.isCurrent(generation)) return false;
-      await this.load();
-      if (!this.sessionScope.isCurrent(generation)) return false;
+      if (!this.isCurrent(context)) return false;
+      const result = await this.gateway.list();
+      if (!this.isCurrent(context)) return false;
+      this.manufacturersState.set(result.items);
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) {
-        if (permissionDenied(error)) {
-          this.manufacturersState.set([]);
-          void this.auth.refreshAuthorization();
-        }
+      await this.revalidateDenial(error);
+      if (this.isCurrent(context)) {
         this.errorState.set(manufacturerErrorMessage(error));
       }
       return false;
     } finally {
-      if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
+      if (this.isCurrent(context)) this.savingState.set(false);
     }
+  }
+
+  private isCurrent(context: CapabilityContext): boolean {
+    return (
+      this.sessionScope.isCapabilityCurrent(context) && this.auth.can('fabricantes', context.action)
+    );
+  }
+
+  private async revalidateDenial(error: unknown): Promise<void> {
+    if (isPermissionDenied(error)) await this.auth.revalidatePermissionDenial(error);
   }
 
   private resetPrivateState(): void {

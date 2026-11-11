@@ -42,6 +42,7 @@ permisos:
   categorias: ("ver" | "crear" | "editar" | "cambiarEstado" | "eliminar")[]
   fabricantes: ("ver" | "crear" | "editar" | "cambiarEstado" | "eliminar")[]
   modelosActivos: ("ver" | "crear" | "editar" | "cambiarEstado" | "eliminar")[]
+  campus: ("ver" | "crear" | "editar" | "cambiarEstado" | "eliminar")[]
 ```
 
 - Las listas no contienen duplicados y se persisten en el orden canónico mostrado.
@@ -51,9 +52,9 @@ permisos:
 - Los permisos son institucionales y globales para estos catálogos; no contienen alcance por Campus, Coordinaciones o Áreas.
 - Los Custom Claims no incluyen este mapa. `usuarios` permanece como autoridad y `bootstrapAuthorization` devuelve una copia sanitizada para presentación y guards.
 
-### Ampliación autorizada para Campus
+### Campus dentro del mapa vigente
 
-El mapa completo añade:
+El cuarto módulo vigente es:
 
 ```text
 permisos:
@@ -92,6 +93,7 @@ permisos:
   categorias: string[]
   fabricantes: string[]
   modelosActivos: string[]
+  campus: string[]
 ```
 
 Comportamiento:
@@ -116,7 +118,7 @@ Códigos funcionales nuevos:
 - `bootstrapAuthorization` amplía su salida con el mapa efectivo sanitizado.
 - El frontend conserva permisos en estado de sesión de solo lectura y descarta respuestas de UID o generación anteriores.
 - Guards de capacidad revalidan la autorización canónica antes de entrar a una ruta de Configuraciones; el shell vuelve a comprobarla al recuperar foco.
-- Una denegación backend refresca el perfil y elimina inmediatamente enlaces o acciones que ya no correspondan.
+- Una denegación backend refresca el perfil de forma deduplicada y elimina inmediatamente enlaces o acciones que ya no correspondan. La revocación selectiva del mismo UID sigue `../patrones/permisos-modulares.md`.
 - La seguridad no depende del menú, guard o estado local.
 
 ## Presentación

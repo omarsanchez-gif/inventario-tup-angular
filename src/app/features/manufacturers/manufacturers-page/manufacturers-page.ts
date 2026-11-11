@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import type { InventoryManufacturer } from '../../../shared/models/inventory-manufacturer';
@@ -7,6 +14,7 @@ import { AppIcon } from '../../../shared/ui/icon/app-icon';
 import { AppPagination } from '../../../shared/ui/pagination/app-pagination';
 import { ManufacturersFacade } from '../state/manufacturers.facade';
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope, type CapabilityChange } from '../../../core/auth/session-scope';
 
 @Component({
   selector: 'app-manufacturers-page',
@@ -17,11 +25,14 @@ import { AuthFacade } from '../../../core/auth/auth.facade';
 })
 export class ManufacturersPage {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly sessionScope = inject(SessionScope);
   protected readonly manufacturers = inject(ManufacturersFacade);
   protected readonly auth = inject(AuthFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly pendingDeletion = signal<InventoryManufacturer | null>(null);
+  protected readonly authorizationNotice = signal<string | null>(null);
   protected readonly pageSize = 10;
   protected readonly currentPage = signal(1);
   protected readonly totalPages = computed(() =>
@@ -38,6 +49,10 @@ export class ManufacturersPage {
   });
 
   constructor() {
+    const unregister = this.sessionScope.registerCapabilityListener('fabricantes', (change) =>
+      this.handleCapabilityChange(change),
+    );
+    this.destroyRef.onDestroy(unregister);
     void this.manufacturers.load();
   }
 
@@ -109,5 +124,22 @@ export class ManufacturersPage {
     const manufacturer = this.pendingDeletion();
     if (!manufacturer || this.manufacturers.saving()) return;
     if (await this.manufacturers.delete(manufacturer)) this.pendingDeletion.set(null);
+  }
+
+  private handleCapabilityChange(change: CapabilityChange): void {
+    if (change.allowed) return;
+    const closesForm =
+      (change.action === 'crear' && this.formVisible() && this.editingId() === null) ||
+      (change.action === 'editar' && this.formVisible() && this.editingId() !== null);
+    const closesDeletion = change.action === 'eliminar' && this.pendingDeletion() !== null;
+    if (change.action === 'ver' || closesForm || closesDeletion) {
+      this.formVisible.set(false);
+      this.editingId.set(null);
+      this.pendingDeletion.set(null);
+      this.manufacturers.clearMessages();
+    }
+    this.authorizationNotice.set(
+      'Sus permisos de Fabricantes cambiaron. Las acciones disponibles se actualizaron sin presentar resultados obsoletos.',
+    );
   }
 }

@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
 import { SessionScope } from '../../../core/auth/session-scope';
+import { emptyPermissionMap } from '../../../shared/models/catalog-permissions';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
 import type { AssetModelCatalogs } from '../data/asset-models.gateway';
 import { AssetModelsFacade } from '../state/asset-models.facade';
@@ -170,6 +171,75 @@ describe('AssetModelsPage', () => {
     expect(element.textContent).not.toContain('Amortización');
     expect(element.textContent).not.toContain('Cantidad mínima');
     expect(element.textContent).not.toContain('Fin de soporte');
+  });
+
+  it('MOD-059 creates data without exposing or invoking image operations for Ver plus Crear', async () => {
+    authCan.mockImplementation(
+      (_module: string, actionName: string) => actionName === 'ver' || actionName === 'crear',
+    );
+    fixture.destroy();
+    fixture = TestBed.createComponent(AssetModelsPage);
+    fixture.detectChanges();
+    element = fixture.nativeElement as HTMLElement;
+    textButton('Nuevo modelo').click();
+    fixture.detectChanges();
+    expect(element.querySelector('#asset-model-image')).toBeNull();
+    const component = fixture.componentInstance as unknown as {
+      form: { setValue(value: Record<string, string>): void };
+      submit(): Promise<void>;
+    };
+    component.form.setValue({
+      nombre: 'Modelo sin imagen',
+      categoriaId: 'category-1',
+      fabricanteId: 'manufacturer-1',
+      modeloNo: '',
+      notas: '',
+    });
+
+    await component.submit();
+
+    expect(assetModels.save).toHaveBeenCalledOnce();
+    expect(assetModels.setImage).not.toHaveBeenCalled();
+    expect(assetModels.removeImage).not.toHaveBeenCalled();
+  });
+
+  it('MOD-060 does not start image processing when Editar is revoked after create', async () => {
+    const saved = deferred<{ documentId: string; dataSaved: true; listRefreshed: true }>();
+    const allowed = new Set(['ver', 'crear', 'editar']);
+    authCan.mockImplementation((_module: string, actionName: string) => allowed.has(actionName));
+    assetModels.save.mockReturnValueOnce(saved.promise);
+    textButton('Nuevo modelo').click();
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      form: { setValue(value: Record<string, string>): void };
+      selectedImage: WritableSignal<File | null>;
+      submit(): Promise<void>;
+    };
+    component.form.setValue({
+      nombre: 'Modelo con permiso cambiante',
+      categoriaId: 'category-1',
+      fabricanteId: 'manufacturer-1',
+      modeloNo: '',
+      notas: '',
+    });
+    component.selectedImage.set(
+      new File([new Uint8Array([1])], 'model.png', { type: 'image/png' }),
+    );
+    const submit = component.submit();
+    await vi.waitFor(() => expect(assetModels.save).toHaveBeenCalledOnce());
+    const previous = {
+      ...emptyPermissionMap(),
+      modelosActivos: ['ver', 'crear', 'editar'] as const,
+    };
+    const next = { ...emptyPermissionMap(), modelosActivos: ['ver', 'crear'] as const };
+    allowed.delete('editar');
+    TestBed.inject(SessionScope).reconcileCapabilities('usuario', previous, 'usuario', next);
+    saved.resolve({ documentId: 'model-1', dataSaved: true, listRefreshed: true });
+    await submit;
+    fixture.detectChanges();
+
+    expect(assetModels.setImage).not.toHaveBeenCalled();
+    expect(element.querySelector('[role="status"]')?.textContent).toContain('permiso');
   });
 
   it('opens edit and deletion dialogs and delegates the destructive confirmation', async () => {

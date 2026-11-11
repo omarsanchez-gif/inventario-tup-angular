@@ -45,7 +45,13 @@ describe('AssetModelsFacade save recovery', () => {
       providers: [
         AssetModelsFacade,
         { provide: ASSET_MODELS_GATEWAY, useValue: gateway },
-        { provide: AuthFacade, useValue: { refreshAuthorization: vi.fn() } },
+        {
+          provide: AuthFacade,
+          useValue: {
+            can: vi.fn().mockReturnValue(true),
+            revalidatePermissionDenial: vi.fn().mockResolvedValue(false),
+          },
+        },
       ],
     });
     const facade = TestBed.inject(AssetModelsFacade);
@@ -84,7 +90,13 @@ describe('AssetModelsFacade save recovery', () => {
       providers: [
         AssetModelsFacade,
         { provide: ASSET_MODELS_GATEWAY, useValue: gateway },
-        { provide: AuthFacade, useValue: { refreshAuthorization: vi.fn() } },
+        {
+          provide: AuthFacade,
+          useValue: {
+            can: vi.fn().mockReturnValue(true),
+            revalidatePermissionDenial: vi.fn().mockResolvedValue(false),
+          },
+        },
       ],
     });
     const facade = TestBed.inject(AssetModelsFacade);
@@ -123,7 +135,13 @@ describe('AssetModelsFacade save recovery', () => {
       providers: [
         AssetModelsFacade,
         { provide: ASSET_MODELS_GATEWAY, useValue: gateway },
-        { provide: AuthFacade, useValue: { refreshAuthorization: vi.fn() } },
+        {
+          provide: AuthFacade,
+          useValue: {
+            can: vi.fn().mockReturnValue(true),
+            revalidatePermissionDenial: vi.fn().mockResolvedValue(false),
+          },
+        },
       ],
     });
     const facade = TestBed.inject(AssetModelsFacade);
@@ -156,7 +174,13 @@ describe('AssetModelsFacade save recovery', () => {
       providers: [
         AssetModelsFacade,
         { provide: ASSET_MODELS_GATEWAY, useValue: gateway },
-        { provide: AuthFacade, useValue: { refreshAuthorization: vi.fn() } },
+        {
+          provide: AuthFacade,
+          useValue: {
+            can: vi.fn().mockReturnValue(true),
+            revalidatePermissionDenial: vi.fn().mockResolvedValue(false),
+          },
+        },
       ],
     });
     const facade = TestBed.inject(AssetModelsFacade);
@@ -176,5 +200,43 @@ describe('AssetModelsFacade save recovery', () => {
 
     await expect(save).resolves.toBeNull();
     expect(facade.models()).toEqual([]);
+  });
+
+  it('MOD-055 revalidates a permission denial raised by the post-save listing', async () => {
+    const denial = { code: 'functions/permission-denied' };
+    const revalidatePermissionDenial = vi.fn().mockResolvedValue(true);
+    const gateway = {
+      list: vi.fn().mockRejectedValue(denial),
+      catalogs: vi.fn(),
+      create: vi.fn().mockResolvedValue('created-model'),
+      update: vi.fn(),
+      setStatus: vi.fn(),
+      delete: vi.fn(),
+      setImage: vi.fn(),
+      removeImage: vi.fn(),
+      imageAccess: vi.fn(),
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        AssetModelsFacade,
+        { provide: ASSET_MODELS_GATEWAY, useValue: gateway },
+        {
+          provide: AuthFacade,
+          useValue: { can: vi.fn().mockReturnValue(true), revalidatePermissionDenial },
+        },
+      ],
+    });
+    const facade = TestBed.inject(AssetModelsFacade);
+
+    await expect(
+      facade.save({
+        nombre: 'Modelo confirmado',
+        categoriaId: 'category',
+        fabricanteId: 'manufacturer',
+        modeloNo: null,
+        notas: null,
+      }),
+    ).resolves.toMatchObject({ documentId: 'created-model', listRefreshed: false });
+    expect(revalidatePermissionDenial).toHaveBeenCalledWith(denial);
   });
 });

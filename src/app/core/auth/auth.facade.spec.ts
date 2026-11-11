@@ -7,6 +7,7 @@ import { fullPermissionMap } from '../../shared/models/catalog-permissions';
 import { emptyPermissionMap } from '../../shared/models/catalog-permissions';
 import { AuthFacade } from './auth.facade';
 import { AUTH_GATEWAY, AUTHORIZATION_GATEWAY, type AuthGateway } from './gateways';
+import { SessionScope } from './session-scope';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -193,10 +194,36 @@ describe('AuthFacade session lifecycle', () => {
     const initialization = facade.initialize();
     emitSession({ uid: 'catalog-user' } as User);
     await initialization;
+    const sessionScope = TestBed.inject(SessionScope);
+    const editContext = sessionScope.captureCapability('categorias', 'editar');
+    const manufacturerContext = sessionScope.captureCapability('fabricantes', 'ver');
 
     expect(facade.can('categorias', 'editar')).toBe(true);
     await expect(facade.refreshAuthorization()).resolves.toBe(true);
     expect(facade.can('categorias', 'ver')).toBe(false);
     expect(facade.can('fabricantes', 'ver')).toBe(false);
+    expect(sessionScope.isCapabilityCurrent(editContext)).toBe(false);
+    expect(sessionScope.isCapabilityCurrent(manufacturerContext)).toBe(true);
+  });
+
+  it('AUT-019 deduplicates concurrent revalidation after permission-denied', async () => {
+    const current = profile('catalog-admin', 'Administración');
+    const pending = deferred<BootstrapAuthorizationResult>();
+    bootstrap.mockResolvedValueOnce(current).mockReturnValueOnce(pending.promise);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+    emitSession({ uid: current.uid } as User);
+    await initialization;
+
+    const first = facade.revalidatePermissionDenial({ code: 'functions/permission-denied' });
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledTimes(2));
+    const second = facade.revalidatePermissionDenial({
+      details: { functionalCode: 'permission-denied' },
+    });
+    expect(bootstrap).toHaveBeenCalledTimes(2);
+    pending.resolve(current);
+
+    await expect(Promise.all([first, second])).resolves.toEqual([true, true]);
+    expect(bootstrap).toHaveBeenCalledTimes(2);
   });
 });

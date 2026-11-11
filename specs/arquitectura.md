@@ -56,7 +56,7 @@ Callable → caso de uso → repositorio → Admin SDK
 - `/configuraciones/fabricantes` requiere `admin` o `fabricantes.ver`.
 - `/configuraciones/modelos-activos` requiere `admin` o `modelosActivos.ver`.
 - Otros catálogos no aparecen hasta contar con especificación e implementación propias.
-- Campus usa `/configuraciones/campus`, protegida por guard administrativo y visible como cuarta opción secundaria.
+- Campus usa `/configuraciones/campus`, protegida por el guard de capacidad `campus.ver` y visible como cuarta opción secundaria para quien tenga acceso.
 - Áreas conserva únicamente un borrador documental; no tiene ruta, opción de menú, código ni backend.
 - La activación visual del grupo no sustituye guards, callables ni reglas de seguridad.
 
@@ -72,7 +72,8 @@ Callable → Authentication + claim base + usuarios canónico + permiso de acci�
 - `admin` satisface todas las capacidades vigentes. `usuario` requiere una acción explícita y activa.
 - El shell filtra enlaces y las páginas filtran acciones para claridad, pero cada callable vuelve a resolver la capacidad.
 - `bootstrapAuthorization` entrega permisos sanitizados y toda revalidación conserva UID y generación de sesión.
-- Permisos y alcance son capas independientes. Esta arquitectura no contiene todavía Campus, Coordinaciones o Áreas en la autorización granular.
+- Permisos y alcance son capas independientes. La autorización granular vigente contiene Categorías, Fabricantes, Modelos de activos y Campus; no contiene todavía Coordinaciones, Áreas ni alcance operativo de Activos.
+- La revalidación, las revisiones por módulo/acción, el descarte de respuestas tardías y la incorporación de módulos futuros siguen `specs/patrones/permisos-modulares.md`.
 - La decisión completa está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
 
 ## Backend de Categorías

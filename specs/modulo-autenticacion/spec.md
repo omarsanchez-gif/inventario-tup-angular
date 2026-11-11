@@ -25,7 +25,7 @@ Permitir acceso únicamente a cuentas institucionales previamente autorizadas y 
 ```text
 bootstrapAuthorization({}) →
   uid, nombre, correo, rol, activo: true, claimsUpdated,
-  permisos: { categorias[], fabricantes[], modelosActivos[] }
+  permisos: { categorias[], fabricantes[], modelosActivos[], campus[] }
 ```
 
 Errores: `unauthenticated`, `domain-not-allowed`, `user-not-authorized`, `user-inactive`, `uid-conflict`, `invalid-role`, `service-unavailable`.
@@ -36,7 +36,9 @@ Angular mantiene una generación por identidad. Bootstrap, renovación de claims
 
 ADR-007 amplía `bootstrapAuthorization` para devolver el mapa granular sanitizado desde `usuarios`; no lo copia a Custom Claims. `admin` recibe acceso efectivo total y `usuario` solo sus acciones explícitas. La misma operación revalida capacidades al entrar a una ruta protegida o recuperar foco, sin aceptar resultados de otra generación de sesión.
 
-La respuesta incluye `campus[]`. Un documento anterior se sanitiza con esa lista vacía para `usuario`; la ausencia del campo nunca concede acceso y no exige migración.
+Un documento anterior se sanitiza con `campus[]` vacío para `usuario`; la ausencia del campo nunca concede acceso y no exige migración.
+
+Para el mismo UID, Angular conserva además revisiones independientes por módulo y acción. La revalidación compara el mapa anterior con el nuevo: retirar `ver` invalida todo el módulo y retirar otra acción invalida solo las operaciones iniciadas con ella. Las negativas `permission-denied` concurrentes comparten la revalidación vigente. El patrón completo está en `../patrones/permisos-modulares.md`.
 
 ## Fuera de alcance
 

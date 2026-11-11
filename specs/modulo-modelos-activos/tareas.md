@@ -61,3 +61,5 @@
 - [x] Sustituir la restricción exclusiva de `admin` por la capacidad canónica, conservando acceso total administrativo.
 - [x] Adaptar guard, submenú, acciones e imagen visible sin confiar en frontend como autoridad.
 - [x] Probar cada concesión y denegación con rol `usuario`, Storage privado y regresión completa del protocolo de imagen.
+- [x] Separar Crear de Editar para que un alta sin Editar no exponga ni inicie operaciones de imagen.
+- [x] Invalidar respuestas, URLs y temporizadores del módulo ante revocación y revalidar negativas de imagen de forma deduplicada.

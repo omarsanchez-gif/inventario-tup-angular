@@ -2,7 +2,7 @@
 
 ## Estado
 
-El primer incremento para Categorías, Fabricantes y Modelos fue aprobado, implementado, validado y desplegado exclusivamente a staging el 11 de noviembre de 2026. La ampliación para Campus fue aprobada expresamente ese mismo día y autoriza implementación, pruebas y despliegue exclusivo a staging.
+El incremento para Categorías, Fabricantes, Modelos y Campus fue aprobado, implementado, validado y desplegado exclusivamente a staging el 11 de noviembre de 2026. El endurecimiento de revocación selectiva del mismo UID se documenta en `../patrones/permisos-modulares.md` y no amplía el alcance territorial.
 
 ## Contexto
 
@@ -27,14 +27,11 @@ Los Custom Claims conservan solamente `authorized` y `role`. No contienen la mat
 
 ### Vocabulario fijo
 
-Módulos autorizables en el incremento desplegado:
+Módulos autorizables vigentes:
 
 - `categorias`
 - `fabricantes`
 - `modelosActivos`
-
-Ampliación autorizada:
-
 - `campus`
 
 Acciones autorizables:
@@ -63,20 +60,24 @@ Crear un usuario siempre lo deja sin permisos granulares. La tabla de Usuarios i
 
 En Modelos, `ver` también permite solicitar miniaturas y el catálogo sanitizado necesario para mostrar referencias. Esto no concede acceso administrativo a las pantallas de Categorías o Fabricantes.
 
-En Campus, `ver` habilitará ruta, submenú y `listCampuses`; las otras cuatro acciones se asociarán respectivamente con `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus`. Estos permisos serán globales para el catálogo y no representan alcance territorial sobre Activos, Áreas o Coordinaciones.
+En Campus, `ver` habilita ruta, submenú y `listCampuses`; las otras cuatro acciones se asocian respectivamente con `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus`. Estos permisos son globales para el catálogo y no representan alcance territorial sobre Activos, Áreas o Coordinaciones.
 
 ### Evolución compatible del mapa
 
 - El mapa canónico contiene cuatro módulos: Categorías, Fabricantes, Modelos y Campus.
 - Un documento histórico sin `permisos.campus` se interpreta con Campus denegado para `usuario`; no requiere migración destructiva.
 - `admin` conserva acceso total por rol aunque el mapa almacenado sea anterior.
-- `setAuthorizedUserPermissions` seguirá reemplazando el mapa completo y exigirá exactamente el vocabulario canónico vigente. Al activarse Campus, omitirlo o enviar un módulo desconocido responderá `user-permissions-invalid` sin escritura parcial.
-- La ampliación se desplegará primero en las Functions que entienden el contrato de cuatro módulos y después en Hosting. Una pestaña antigua que intente guardar tres módulos fallará de forma segura y deberá recargarse; nunca borrará un permiso de Campus ya concedido.
+- `setAuthorizedUserPermissions` reemplaza el mapa completo y exige exactamente el vocabulario canónico vigente. Omitir Campus o enviar un módulo desconocido responde `user-permissions-invalid` sin escritura parcial.
+- El contrato se desplegó primero en las Functions que entienden cuatro módulos y después en Hosting. Una pestaña antigua que intente guardar tres módulos falla de forma segura y debe recargarse; nunca borra un permiso de Campus ya concedido.
 - Los módulos futuros se incorporarán únicamente después de tener specs, backend y rutas aprobados; no se mostrarán controles de permisos anticipados.
 
 ### Vigencia y sesiones
 
-Una reducción se aplica inmediatamente en backend porque cada callable consulta `usuarios`. La interfaz obtiene el mapa mediante `bootstrapAuthorization`, lo actualiza al revalidar una ruta protegida o recuperar foco y descarta respuestas de generaciones de sesión anteriores. Un estado visual obsoleto nunca autoriza una operación.
+Una reducción se aplica inmediatamente en backend porque cada callable consulta `usuarios`. La interfaz obtiene el mapa mediante `bootstrapAuthorization`, lo actualiza al revalidar una ruta protegida, recuperar foco o recibir `permission-denied` y descarta respuestas de generaciones de sesión anteriores.
+
+Para una reducción del mismo UID, la generación global no cambia. Se incrementa únicamente la revisión del módulo y de la acción modificados. Retirar `ver` limpia el estado privado del módulo, cierra sus diálogos, elimina su navegación y abandona su ruta; retirar otra acción conserva el listado y cierra solo la operación dependiente. Las respuestas tardías no publican éxito ni restauran datos. Las negativas concurrentes de imágenes comparten la revalidación vigente y no crean ciclos de reintento.
+
+Crear un Modelo requiere `crear`, pero procesar su imagen requiere `editar`. Con `ver+crear` la interfaz omite los controles de imagen; una revocación de Editar posterior a la creación conserva el registro confirmado y evita iniciar el segundo paso.
 
 Los permisos no se sincronizan a claims ni requieren revocar tokens por sí solos. Cambios de rol o estado conservan el flujo vigente de claims y revocación.
 

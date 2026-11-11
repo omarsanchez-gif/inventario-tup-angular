@@ -18,6 +18,8 @@ El endurecimiento y las restricciones administrativas desplegadas se describen e
 - SEC-050: Las cinco callables de Campus revalidan la acción exacta contra `usuarios`; el guard, menú y botones continúan siendo defensas de presentación.
 - SEC-051: `setAuthorizedUserPermissions` acepta únicamente el mapa completo de cuatro módulos. Un payload incompleto, anterior o desconocido se rechaza sin escritura parcial.
 - SEC-052: El despliegue del contrato se ordena Functions antes de Hosting para que una pestaña antigua falle cerrada y nunca elimine silenciosamente permisos de Campus.
+- SEC-053: La revalidación del mismo UID aplica revisiones independientes por módulo y acción; un rechazo canónico no permite que respuestas pendientes restauren datos, mensajes, URLs temporales o acciones revocadas.
+- SEC-054: Las negativas concurrentes de acceso a imágenes comparten una sola revalidación de autorización por ronda; Storage permanece cerrado y no existe reintento infinito de URLs firmadas.
 - SEC-007: Los errores expuestos se sanitizan y nunca incluyen tokens, secretos o stack traces.
 - SEC-008: La configuración pública de Firebase no se considera autorización; Security Rules y Functions son obligatorias.
 - SEC-009: Storage permanece cerrado a clientes; toda ruta y consumidor requiere especificación y acceso backend autorizado.

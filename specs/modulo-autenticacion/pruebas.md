@@ -20,6 +20,8 @@
 ## Criterio obligatorio para Campus
 
 - AUT-017: `bootstrapAuthorization` incorpora `campus[]`, interpreta su ausencia histórica como denegación para `usuario` y conserva acceso total efectivo de `admin` sin ampliar Custom Claims. <!-- trace:required -->
+- AUT-018: una reducción para el mismo UID invalida únicamente el módulo y la acción modificados; operaciones y estado de otros módulos permanecen vigentes. <!-- trace:required -->
+- AUT-019: varias respuestas `permission-denied` concurrentes comparten una sola revalidación canónica y no generan cierre de sesión ni bucles de navegación. <!-- trace:required -->
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 

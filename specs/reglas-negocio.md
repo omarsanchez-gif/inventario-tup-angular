@@ -20,7 +20,7 @@
 
 ## Permisos granulares de catálogos — incremento autorizado
 
-RN-PER-001–017 y las ampliaciones granulares de Layout, Categorías, Fabricantes, Modelos y Campus describen el incremento autorizado e implementado conforme a ADR-007. Su despliegue se limita a staging.
+RN-PER-001–022 y las ampliaciones granulares de Layout, Categorías, Fabricantes, Modelos y Campus describen el incremento autorizado e implementado conforme a ADR-007. Su despliegue se limita a staging.
 
 - RN-PER-001: `usuarios` es la fuente canónica de permisos; Custom Claims conserva solo autorización y rol.
 - RN-PER-002: En este incremento solo son autorizables `categorias`, `fabricantes`, `modelosActivos` y `campus`.
@@ -42,6 +42,11 @@ RN-PER-001–017 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-PER-015: Para `usuario`, la ausencia de `permisos.campus` equivaldrá a denegación. `admin` conservará acceso total por rol sin migrar documentos anteriores.
 - RN-PER-016: La callable de asignación exige el mapa completo de los cuatro módulos. Un cliente anterior que omita Campus es rechazado sin modificar permisos almacenados.
 - RN-PER-017: Los permisos de Campus administrarán el catálogo institucional completo; no representan alcance sobre Activos, Áreas, Coordinaciones o sedes asignadas al usuario.
+- RN-PER-018: Una reducción del mismo UID invalida por módulo y acción las operaciones pendientes; no invalida la sesión completa ni limpia estados de módulos no afectados.
+- RN-PER-019: Retirar `ver` descarta estado privado, URLs y temporizadores del módulo, cierra sus diálogos y abandona su ruta. Retirar otra acción conserva el listado y cierra únicamente la operación dependiente con un anuncio accesible.
+- RN-PER-020: Un `permission-denied` de listado, mutación, catálogo o imagen provoca revalidación deduplicada de autorización y nunca un bucle de reintentos automáticos.
+- RN-PER-021: Un Modelo creado con `ver+crear` no expone ni ejecuta operaciones de imagen; cargar, sustituir o retirar imagen exige `editar` vigente antes y después de cada espera relevante.
+- RN-PER-022: Una escritura ya confirmada no se presenta como cancelada por una revocación posterior. La interfaz descarta resultados obsoletos y reconcilia el estado mediante una lectura autorizada posterior.
 
 ## Usuarios
 

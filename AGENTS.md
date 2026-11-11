@@ -72,7 +72,7 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - `modulo-campus`: aprobado el 9 de noviembre de 2026 como raíz física para Áreas, coberturas de Coordinaciones, asignaciones y Activos; implementación, pruebas y despliegue exclusivo a staging están autorizados conforme a sus specs. No incluye crear FCS, TUP ni otros datos.
 - Campus fue desplegado únicamente a `inventario-stg` el 9 de noviembre de 2026: Firestore Rules, cinco Functions y Hosting. Las Functions están `ACTIVE`, la ruta administrativa fue verificada vacía y no se crearon datos de negocio; producción permaneció intacta.
 - Endurecimiento transversal previo a Fabricantes, autorizado el 7 de noviembre de 2026: cierre de lectura directa de Usuarios, revocación defensiva, encabezados y caché de Hosting, CI y reconciliación documental conforme a ADR-004.
-- Permisos granulares para Categorías, Fabricantes y Modelos de activos, autorizados expresamente el 11 de noviembre de 2026: asignación posterior desde Usuarios, denegación por defecto para `usuario`, autorización canónica en backend y filtrado defensivo de navegación y acciones conforme a ADR-007. No incluye Campus, Áreas, Coordinaciones ni alcance territorial de Activos.
+- Permisos granulares para Categorías, Fabricantes, Modelos de activos y Campus, autorizados expresamente el 11 de noviembre de 2026: asignación posterior desde Usuarios, denegación por defecto para `usuario`, autorización canónica en backend y filtrado defensivo de navegación y acciones conforme a ADR-007 y `specs/patrones/permisos-modulares.md`. No incluye Áreas, Coordinaciones ni alcance territorial de Activos.
 
 ## Fuera de alcance actual
 

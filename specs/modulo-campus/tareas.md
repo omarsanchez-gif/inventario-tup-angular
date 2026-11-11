@@ -47,4 +47,5 @@
 - [x] Obtener validación expresa del responsable sobre esta ampliación.
 - [x] Implementar backend, frontend y pruebas después de la aprobación.
 - [x] Desplegar Functions afectadas antes de Hosting, únicamente a staging.
+- [x] Invalidar respuestas pendientes, limpiar solo Campus, cerrar diálogos y abandonar la ruta cuando se retire Ver.
 - [ ] Completar aceptación autenticada con `admin`, usuario parcial y usuario sin Campus.

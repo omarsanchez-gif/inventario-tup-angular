@@ -33,6 +33,7 @@
 
 - LAY-026: `usuario` ve Campus en Configuraciones únicamente con `campus.ver`; el resto de enlaces conserva su filtrado independiente y un grupo sin módulos no se renderiza. <!-- trace:required -->
 - LAY-027: `/configuraciones/campus` usa exactamente el guard de `campus.ver`; una URL directa sin esa capacidad redirige al Dashboard y `admin` conserva acceso total. <!-- trace:required -->
+- LAY-028: retirar `ver` durante una sesión elimina el enlace y abandona la ruta activa hacia Dashboard sin cerrar la sesión ni alterar módulos no afectados. <!-- trace:required -->
 
 ## Evidencia del incremento
 

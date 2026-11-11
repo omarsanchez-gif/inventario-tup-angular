@@ -5,6 +5,8 @@ import type { InventoryManufacturer } from '../../../shared/models/inventory-man
 import { ManufacturersFacade } from '../state/manufacturers.facade';
 import { ManufacturersPage } from './manufacturers-page';
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope } from '../../../core/auth/session-scope';
+import { emptyPermissionMap } from '../../../shared/models/catalog-permissions';
 
 describe('ManufacturersPage', () => {
   const manufacturer: InventoryManufacturer = {
@@ -181,5 +183,21 @@ describe('ManufacturersPage', () => {
     expect(
       element.querySelector<HTMLButtonElement>('[aria-label="Página anterior"]')!.disabled,
     ).toBe(true);
+  });
+
+  it('FAB-022 closes a delete dialog when only Eliminar is revoked', () => {
+    action('Eliminar Dell').click();
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeTruthy();
+    authCan.mockImplementation((_module: string, actionName: string) => actionName !== 'eliminar');
+    const previous = { ...emptyPermissionMap(), fabricantes: ['ver', 'eliminar'] as const };
+    const next = { ...emptyPermissionMap(), fabricantes: ['ver'] as const };
+
+    TestBed.inject(SessionScope).reconcileCapabilities('usuario', previous, 'usuario', next);
+    fixture.detectChanges();
+
+    expect(element.querySelector('dialog[open]')).toBeNull();
+    expect(element.querySelector('[role="status"]')?.textContent).toContain('permisos');
+    expect(element.querySelector('tbody tr')).toBeTruthy();
   });
 });

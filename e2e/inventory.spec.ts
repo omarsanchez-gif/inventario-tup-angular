@@ -1,12 +1,31 @@
 import { expect, test, type Page } from '@playwright/test';
 import { getApps, initializeApp } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
 process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8085';
+process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
 const adminApp =
   getApps().find((candidate) => candidate.name === 'playwright-admin') ??
   initializeApp({ projectId: 'demo-inventario-tup' }, 'playwright-admin');
 const firestore = getFirestore(adminApp);
+const auth = getAuth(adminApp);
+
+const emptyPermissions = { categorias: [], fabricantes: [], modelosActivos: [], campus: [] };
+
+async function setSyntheticAccess(
+  role: 'admin' | 'usuario',
+  permisos = emptyPermissions,
+): Promise<void> {
+  await Promise.all([
+    auth.setCustomUserClaims('synthetic-admin-e2e', { authorized: true, role }),
+    firestore.collection('usuarios').doc('synthetic-admin-e2e').update({
+      activo: true,
+      rol: role,
+      permisos,
+    }),
+  ]);
+}
 
 async function setAdminActive(active: boolean): Promise<void> {
   await firestore.collection('usuarios').doc('synthetic-admin-e2e').update({ activo: active });
@@ -20,7 +39,7 @@ async function login(page: Page): Promise<void> {
 }
 
 test.afterEach(async () => {
-  await setAdminActive(true);
+  await setSyntheticAccess('admin');
 });
 
 test('AUT-002 AUT-003 authorizes the synthetic admin and rejects an inactive canonical profile', async ({
@@ -184,4 +203,53 @@ test('USR-022 USR-035 assigns permissions through the accessible module accordio
   } finally {
     await reference.delete();
   }
+});
+
+test('CAM-038 LAY-028 revokes Ver in the same session without clearing another module', async ({
+  page,
+}) => {
+  await setSyntheticAccess('usuario', {
+    ...emptyPermissions,
+    categorias: ['ver'],
+    campus: ['ver', 'editar'],
+  });
+  await login(page);
+  await page.goto('/configuraciones/campus');
+  await expect(page.getByRole('heading', { name: 'Campus' })).toBeVisible();
+
+  await firestore.collection('usuarios').doc('synthetic-admin-e2e').update({
+    'permisos.campus': [],
+  });
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+
+  await expect(page).toHaveURL(/\/dashboard$/u);
+  await expect(page.getByRole('link', { name: 'Categorías' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Campus' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible();
+});
+
+test('FAB-022 closes only the dependent dialog when Editar is revoked', async ({ page }) => {
+  await setSyntheticAccess('usuario', {
+    ...emptyPermissions,
+    fabricantes: ['ver', 'editar'],
+  });
+  await login(page);
+  await page.goto('/configuraciones/fabricantes');
+  const edit = page.getByRole('button', { name: 'Editar Fabricante E2E' });
+  await edit.click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+
+  await firestore
+    .collection('usuarios')
+    .doc('synthetic-admin-e2e')
+    .update({
+      'permisos.fabricantes': ['ver'],
+    });
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page.getByRole('status')).toContainText('permisos de Fabricantes cambiaron');
+  await expect(page).toHaveURL(/\/configuraciones\/fabricantes$/u);
+  await expect(page.getByText('Fabricante E2E', { exact: true })).toBeVisible();
+  await expect(edit).toHaveCount(0);
 });

@@ -31,7 +31,7 @@ Estos escenarios definen la aceptación del módulo aprobado.
 ## Criterios del incremento de permisos
 
 - FAB-021: `admin` conserva acceso total; `usuario` con `fabricantes.ver` lista y navega, mientras otro `usuario` y anónimo son rechazados.
-- FAB-022: crear, editar, cambiar estado y eliminar exigen exactamente su acción canónica además de Ver; poseer otra acción no eleva acceso.
+- FAB-022: crear, editar, cambiar estado y eliminar exigen exactamente su acción canónica además de Ver; revocar una acción invalida su respuesta pendiente y cierra su diálogo sin vaciar el listado ni afectar otro módulo. <!-- trace:required -->
 - FAB-023: la interfaz muestra solo acciones permitidas, pero una invocación directa sin capacidad también es rechazada por backend sin modificar fabricante o reserva.
 
 ## Evidencia local — 7 de noviembre de 2026

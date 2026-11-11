@@ -92,7 +92,9 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 ## Criterios del incremento de permisos
 
 - MOD-054: `admin` conserva acceso total; `usuario` con `modelosActivos.ver` lista, navega y obtiene miniaturas, mientras otro `usuario` y anónimo son rechazados.
-- MOD-055: Crear, Editar, Cambiar estado y Eliminar exigen exactamente su acción canónica además de Ver; poseer otra acción no eleva acceso.
+- MOD-055: Crear, Editar, Cambiar estado y Eliminar exigen exactamente su acción canónica además de Ver; revocar una acción invalida su resultado pendiente y cierra solo la operación dependiente. <!-- trace:required -->
 - MOD-056: carga, sustitución y retirada de imagen requieren Editar; acceso temporal a original o miniatura requiere Ver y Storage directo permanece cerrado.
 - MOD-057: `getAssetModelCatalogs` entrega referencias sanitizadas a quien puede Ver Modelos sin conceder rutas o callables administrativas de Categorías o Fabricantes.
 - MOD-058: la interfaz muestra solo acciones permitidas, pero toda invocación directa sin capacidad es rechazada sin alterar metadata, objetos, operaciones o trabajos de limpieza.
+- MOD-059: un usuario con `modelosActivos.ver+crear`, sin Editar, crea los datos del Modelo sin ver controles de imagen y sin invocar carga, sustitución o retirada. <!-- trace:required -->
+- MOD-060: si Editar se revoca después de confirmar la creación y antes de procesar la imagen, se conserva el Modelo, no se inicia la operación de imagen y la interfaz informa el estado confirmado sin presentarlo como cancelación. <!-- trace:required -->

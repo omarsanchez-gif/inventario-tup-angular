@@ -19,6 +19,7 @@ usuarios/{documentId}
     categorias: string[]
     fabricantes: string[]
     modelosActivos: string[]
+    campus: string[]
   fechaCreacion: Timestamp
   ultimoAcceso: Timestamp | null
 ```
@@ -30,15 +31,15 @@ Restricciones:
 - `fechaCreacion` y `ultimoAcceso` usan tiempo de servidor.
 - Cada lista de `permisos` usa exclusivamente `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`, sin duplicados y en ese orden canónico.
 - Toda acción distinta de `ver` requiere que la misma lista incluya `ver`.
-- Nuevos documentos con rol `usuario` se crean con las tres listas vacías. `admin` obtiene acceso total por rol y no depende del contenido del mapa.
+- Nuevos documentos con rol `usuario` se crean con las cuatro listas vacías. `admin` obtiene acceso total por rol y no depende del contenido del mapa.
 - La ausencia del campo en documentos anteriores se interpreta como mapa vacío para `usuario`; la implementación no requiere reescribirlos para denegar acceso.
-- Cambiar el rol reemplaza `permisos` por las tres listas vacías. Desactivar conserva el mapa, pero lo vuelve inefectivo.
+- Cambiar el rol reemplaza `permisos` por las cuatro listas vacías. Desactivar conserva el mapa, pero lo vuelve inefectivo.
 - `permisos` no incluye Coordinaciones, Áreas, Activos, puestos o perfiles reutilizables.
 - No se agregan entidades de Snipe-IT hasta aprobar su mapeo.
 
-### Mapa canónico con Campus
+### Mapa canónico vigente con Campus
 
-Después de su aprobación, el mapa completo pasará a ser:
+El mapa completo vigente es:
 
 ```text
 permisos:
@@ -48,9 +49,9 @@ permisos:
   campus: string[]
 ```
 
-- `campus` utilizará el mismo vocabulario ordenado: `ver`, `crear`, `editar`, `cambiarEstado`, `eliminar`.
+- `campus` utiliza el mismo vocabulario ordenado: `ver`, `crear`, `editar`, `cambiarEstado`, `eliminar`.
 - Los documentos existentes que omitan `campus` se leerán como lista vacía para `usuario`; no se ejecutará una migración masiva.
-- Crear un `usuario` después del incremento persistirá las cuatro listas vacías y cambiar rol limpiará las cuatro.
+- Crear un `usuario` persiste las cuatro listas vacías y cambiar rol limpia las cuatro.
 - La escritura administrativa exigirá exactamente los cuatro módulos vigentes. Un payload anterior de tres módulos fallará de forma atómica y conservará el mapa previo.
 - Este cambio no agrega Campus, Coordinación o Área como alcance dentro del permiso ni crea colecciones nuevas.
 
