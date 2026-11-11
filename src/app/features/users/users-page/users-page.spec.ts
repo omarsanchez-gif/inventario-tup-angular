@@ -183,7 +183,7 @@ describe('UsersPage dialogs', () => {
     expect(element.querySelector('.dialog__title')?.textContent).toContain(
       'Asignar permisos a Usuario Prueba',
     );
-    expect(element.querySelector('#campus-ver')).toBeTruthy();
+    expect(element.querySelector('[aria-controls="campus-permissions-panel"]')).toBeTruthy();
 
     const edit = element.querySelector<HTMLInputElement>('#categorias-editar')!;
     edit.click();
@@ -210,9 +210,9 @@ describe('UsersPage dialogs', () => {
     expect(element.querySelector('dialog[open]')).toBeNull();
   });
 
-  it('USR-035 keeps one accessible permission panel open and preserves its selections', () => {
+  it('USR-035 keeps one accessible permission panel open and preserves its selections', async () => {
     actionButton('Asignar permisos a Usuario Prueba').click();
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     const categoriesTrigger = element.querySelector<HTMLButtonElement>(
       '[aria-controls="categorias-permissions-panel"]',
@@ -223,29 +223,31 @@ describe('UsersPage dialogs', () => {
     expect(categoriesTrigger.tagName).toBe('BUTTON');
     expect(categoriesTrigger.getAttribute('aria-expanded')).toBe('true');
     expect(manufacturersTrigger.getAttribute('aria-expanded')).toBe('false');
-    expect(element.querySelector<HTMLElement>('#categorias-permissions-panel')?.hidden).toBe(false);
-    expect(element.querySelector<HTMLElement>('#fabricantes-permissions-panel')?.hidden).toBe(true);
+    expect(element.querySelector('#categorias-permissions-panel')).not.toBeNull();
+    expect(element.querySelector('#fabricantes-permissions-panel')).toBeNull();
 
     manufacturersTrigger.click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(categoriesTrigger.getAttribute('aria-expanded')).toBe('false');
     expect(manufacturersTrigger.getAttribute('aria-expanded')).toBe('true');
+    expect(element.querySelector('#categorias-permissions-panel')).toBeNull();
+    expect(element.querySelector('#fabricantes-permissions-panel')).not.toBeNull();
 
     element.querySelector<HTMLInputElement>('#fabricantes-editar')!.click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(manufacturersTrigger.querySelector('.disclosure__summary')?.textContent?.trim()).toBe(
       '2 permisos',
     );
 
     categoriesTrigger.click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     manufacturersTrigger.click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(element.querySelector<HTMLInputElement>('#fabricantes-ver')?.checked).toBe(true);
     expect(element.querySelector<HTMLInputElement>('#fabricantes-editar')?.checked).toBe(true);
   });
 
-  it('USR-035 initially opens the first module that already has permissions', () => {
+  it('USR-035 initially opens the first module that already has permissions', async () => {
     const permittedUser: SystemUser = {
       ...managedUser,
       permisos: {
@@ -254,10 +256,10 @@ describe('UsersPage dialogs', () => {
       },
     };
     users.filteredUsers.set([permittedUser]);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     actionButton('Asignar permisos a Usuario Prueba').click();
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(
       element

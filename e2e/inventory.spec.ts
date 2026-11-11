@@ -159,9 +159,13 @@ test('USR-022 USR-035 assigns permissions through the accessible module accordio
     const categoriesTrigger = dialog.locator('[aria-controls="categorias-permissions-panel"]');
     const manufacturersTrigger = dialog.locator('[aria-controls="fabricantes-permissions-panel"]');
     await expect(categoriesTrigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(dialog.locator('#categorias-permissions-panel')).toBeVisible();
+    await expect(dialog.locator('#fabricantes-permissions-panel')).toHaveCount(0);
     await manufacturersTrigger.click();
     await expect(categoriesTrigger).toHaveAttribute('aria-expanded', 'false');
     await expect(manufacturersTrigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(dialog.locator('#categorias-permissions-panel')).toHaveCount(0);
+    await expect(dialog.locator('#fabricantes-permissions-panel')).toBeVisible();
     await categoriesTrigger.click();
     await dialog.getByLabel('Editar', { exact: true }).first().check();
     await expect(dialog.getByLabel('Ver', { exact: true }).first()).toBeChecked();

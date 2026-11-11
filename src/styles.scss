@@ -490,10 +490,6 @@ a {
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
-.disclosure__panel[hidden] {
-  display: none;
-}
-
 .sr-only {
   position: absolute;
   width: 1px;
