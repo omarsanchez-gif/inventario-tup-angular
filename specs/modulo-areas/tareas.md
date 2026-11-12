@@ -15,13 +15,13 @@
 
 - [x] Agregar pruebas unitarias de contratos, validación, sesión y alta confirmada.
 - [x] Agregar integración de Firestore Emulator para unicidad, contadores, transferencia, referencias, Campus y reconciliación.
-- [ ] Completar regresión Angular, Functions, Emulator Suite, Playwright, lint, formato y builds.
-- [ ] Vincular evidencia al SHA exacto y publicar commits.
+- [x] Completar regresión Angular, Functions, Emulator Suite, Playwright, lint, formato y builds.
+- [x] Vincular evidencia al SHA exacto y publicar commits.
 
 ## Staging y aceptación
 
-- [ ] Desplegar únicamente Rules, siete Functions de Áreas, `deleteCampus` y Hosting con `--project staging` y `--only` explícito.
-- [ ] Verificar Functions, rechazo anónimo, Rules, Hosting y bundles sin crear datos.
+- [x] Desplegar únicamente Rules, siete Functions de Áreas, `deleteCampus` y Hosting con `--project staging` y `--only` explícito.
+- [x] Verificar Functions, rechazo anónimo, Rules, Hosting y bundles sin crear datos.
 - [ ] Completar aceptación administrativa real y revisión visual en escritorio y móvil.
 - [x] Mantener producción, datos reales, IAM, secretos y migración fuera de alcance.
 

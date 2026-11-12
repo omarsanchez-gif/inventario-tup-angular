@@ -122,3 +122,4 @@
 - `deleteCampus` se vuelve a publicar porque ahora consulta canónicamente `areas` activas e inactivas.
 - Firestore Rules mantiene `areas` y `areas_claves` cerradas. No se agregan índices compuestos, Storage, secretos, IAM, cron, datos o integraciones externas.
 - El despliegue autorizado se limita a estas Functions, Rules y Hosting de `inventario-stg`; producción queda intacta.
+- Publicación del 12 de noviembre de 2026: las siete Functions nuevas y `deleteCampus` quedaron activas en `us-central1`, Node 22. Las siete callables nuevas respondieron `401` sin sesión, Firestore respondió `403` para `areas` y `areas_claves`, y Hosting respondió `200` con `main-2WSN4PTD.js` y `styles-K7H52MHM.css`. No se crearon documentos.

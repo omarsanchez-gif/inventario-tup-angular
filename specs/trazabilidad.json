@@ -5,8 +5,8 @@
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
-    "branchPublication": "complete",
-    "stagingDeployment": "complete-hosting-only-current-increment",
+    "branchPublication": "pending",
+    "stagingDeployment": "complete-rules-functions-hosting-areas",
     "continuousIntegration": "not-triggered-without-pull-request",
     "manualAcceptance": "pending"
   },
@@ -252,6 +252,14 @@
         "ARE-034",
         "ARE-035"
       ]
+    },
+    {
+      "id": "areas-staging-bc54b96",
+      "sha": "bc54b9699435a9be2e200ed98db177f3d9329d40",
+      "status": "passed",
+      "command": "firebase deploy --only firestore:rules --project staging; firebase deploy --only functions:listAreas,functions:getAreaCatalogs,functions:createArea,functions:updateArea,functions:setAreaStatus,functions:deleteArea,functions:reconcileAreaCounts,functions:deleteCampus --project staging; firebase deploy --only hosting --project staging; functions:list; anonymous HTTP and Firestore REST checks",
+      "result": "Rules publicadas; siete Functions de Áreas creadas y deleteCampus actualizado en Node 22; siete rechazos anónimos 401; areas y areas_claves 403; Hosting 200 con main-2WSN4PTD.js y styles-K7H52MHM.css; producción y datos intactos.",
+      "criteria": ["ARE-032"]
     }
   ],
   "entries": [
@@ -936,7 +944,8 @@
       "criterion": "ARE-032",
       "verification": "manual",
       "tests": [],
-      "state": "pending-manual"
+      "state": "accepted-manual",
+      "evidenceId": "areas-staging-bc54b96"
     },
     {
       "requirement": "RN-ARE-001",

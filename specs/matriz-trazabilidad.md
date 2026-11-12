@@ -18,6 +18,8 @@
 
 Áreas incorpora criterios obligatorios estructurales y manuales. La evidencia automatizada debe vincularse al SHA final validado; ARE-033 permanece como aceptación real separada y no se considera aprobada por emuladores o HTTP 200.
 
+El incremento se validó sobre `306826f1b0c9b27429a8109c81748f1d17c267b9` y se desplegó desde `bc54b9699435a9be2e200ed98db177f3d9329d40`. ARE-032 tiene evidencia técnica remota; ARE-033 continúa pendiente de aceptación autenticada real.
+
 ## Significado de los estados
 
 - **Inventariado:** identificador único encontrado en un documento `pruebas.md`; incluye criterios futuros.

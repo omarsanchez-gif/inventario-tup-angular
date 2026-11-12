@@ -25,7 +25,7 @@ Este resumen describe el estado vigente. Las reglas completas permanecen en las 
 | Fabricantes             | Marca productora con Nombre y Notas; no representa comercio o plataforma de compra                               | `/configuraciones/fabricantes`; `admin` o `usuario` con capacidad     | Cinco callables; cada operación revalida su acción canónica          | FAB-001–023                             | Implementado, validado y desplegado; aceptación funcional/móvil pendiente            |
 | Modelos de activos      | Catálogo de Nombre, Categoría, Fabricante, Modelo No., Notas e imagen opcional                                   | `/configuraciones/modelos-activos`; `admin` o `usuario` con capacidad | Nueve callables; Editar controla imágenes y Crear conserva datos     | MOD-001–060                             | Implementado, validado y desplegado; ciclo real completo y revisión móvil pendientes |
 | Campus                  | Raíz física con Código, Nombre, Notas y contadores preparados de Áreas/Activos                                   | `/configuraciones/campus`; `admin` o capacidad explícita              | Cinco callables; `campus` y `campus_claves`                          | CAM-001–038                             | Implementado, validado y desplegado sin crear FCS/TUP; aceptación parcial pendiente  |
-| Áreas                   | Catálogo físico por Campus con Nombre, Notas, estado, transferencia y reconciliación                             | `/configuraciones/areas`; solo `admin`                                | Siete callables; `areas` y `areas_claves`                            | ARE-001–035                             | Implementado; validación, staging y aceptación se registran por separado             |
+| Áreas                   | Catálogo físico por Campus con Nombre, Notas, estado, transferencia y reconciliación                             | `/configuraciones/areas`; solo `admin`                                | Siete callables; `areas` y `areas_claves`                            | ARE-001–035                             | Implementado, validado y desplegado a staging; aceptación real pendiente             |
 | Calidad y entorno local | Seed sintético idempotente, Emulator Suite, Playwright, guardia visual y verificador estructural de trazabilidad | Scripts de `package.json` y CI                                        | Proyecto exclusivo `demo-inventario-tup`; no usa credenciales reales | DEV-001–003 y 72 criterios obligatorios | Validado localmente; CI se comprobará en el PR                                       |
 
 ## Contratos e invariantes relevantes
@@ -106,7 +106,7 @@ Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación té
 - Migración o sincronización con Snipe-IT y datos reales.
 - Producción y recursos productivos.
 
-Áreas cuenta con contrato aprobado, código y pruebas del incremento del 12 de noviembre; staging y aceptación real se conservan como estados separados hasta su evidencia.
+Áreas quedó implementado y desplegado exclusivamente a staging el 12 de noviembre. Rules, siete Functions nuevas, `deleteCampus` y Hosting aprobaron la verificación técnica; no se crearon datos y la aceptación administrativa real permanece pendiente.
 
 ## Discrepancias conciliadas
 
@@ -116,7 +116,7 @@ Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación té
 | Documentación desactualizada | Arquitectura y specs describían Configuraciones, rutas y controles de seguridad implementados en tiempo futuro | Se cambia a estado presente sin modificar sus reglas                                                    |
 | Historia mezclada con estado | La matriz destacaba SHAs intermedios y obligaba a reconstruir el corte actual                                  | Se agrega estado vigente y se mantienen hitos históricos como evidencia fechada                         |
 | Evidencia insuficiente       | HTTP 200, Function `ACTIVE` y pruebas locales podían leerse como aceptación total                              | Se separan validación, publicación, integración, CI, despliegue y aceptación autenticada                |
-| Decisión no resuelta         | Áreas necesitaba campos, unicidad, transferencias y ciclo de vida                                              | Se crea un borrador no autorizado con recomendaciones y decisiones bloqueantes                          |
+| Decisión resuelta            | Áreas requería unicidad, transferencia, referencias y reconciliación                                           | ADR-008 aprueba unicidad por Campus, transacciones y reconciliación administrativa                      |
 | Límite técnico               | Una carga sin acuse y con cero o una variante no demuestra finalización                                        | Se conserva explícitamente reconciliación pendiente; no se promete cierre automático                    |
 
 No se observó durante esta conciliación una implementación que contradijera una regla vigente y exigiera alterar código. Las diferencias pendientes son de aceptación, integración o decisión funcional, no se legitimaron reescribiendo reglas.
