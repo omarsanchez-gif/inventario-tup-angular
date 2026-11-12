@@ -1,14 +1,14 @@
 {
   "version": 2,
   "baseReviewSha": "4a3407b14acd7a069ec62f39d1e6ee5a3b04ac1f",
-  "implementationSha": "88ea3afaa568bcc46a4aed45951e50049c2703fe",
+  "implementationSha": "5e645debf1df4239c6c5f73fc56ca9263ac65ae4",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
     "branchPublication": "complete",
-    "stagingDeployment": "complete-create-update-area-and-hosting-corrections",
+    "stagingDeployment": "complete-create-update-area-and-layout-hosting-corrections",
     "continuousIntegration": "not-triggered-without-pull-request",
-    "manualAcceptance": "partial-areas-delete-and-cleanup-pending"
+    "manualAcceptance": "partial-visual-complete-area-delete-images-permissions-pending"
   },
   "matrixScopes": [
     { "prefix": "AUT", "label": "Autenticación" },
@@ -325,6 +325,22 @@
       "command": "firebase deploy --only functions:createArea --project staging; firebase deploy --only functions:updateArea --project staging; firebase deploy --only hosting --project staging; firebase functions:list --project staging; anonymous HTTP and Hosting checks",
       "result": "createArea y updateArea v2 Node 22 actualizadas por separado y con rechazo anónimo HTTP 401; Hosting HTTP 200 sirve main-HZGOJ7WY.js y styles-K7H52MHM.css; Rules, demás Functions, índices, datos, secretos, IAM y producción intactos.",
       "criteria": []
+    },
+    {
+      "id": "layout-mobile-5e645de",
+      "sha": "5e645debf1df4239c6c5f73fc56ca9263ac65ae4",
+      "status": "passed",
+      "command": "npm run test:e2e; npm run lint; npm run format; npm run format:check; npm run build:staging; npm run traceability:check; git diff --check",
+      "result": "8 recorridos Chromium aprobaron, incluido LAY-020 reforzado contra documentElement.clientWidth; lint, guardia visual, formato, build de staging, trazabilidad y diff aprobaron. La aceptación autenticada posterior confirmó ausencia de desplazamiento global en 320 px y escritorio.",
+      "criteria": ["LAY-020"]
+    },
+    {
+      "id": "layout-staging-5e645de",
+      "sha": "5e645debf1df4239c6c5f73fc56ca9263ac65ae4",
+      "status": "passed",
+      "command": "firebase deploy --only hosting --project staging; authenticated desktop and 320 px verification",
+      "result": "Hosting publicó 15 archivos únicamente en inventario-stg; la aplicación conservó main-HZGOJ7WY.js, actualizó styles-TYZCJRJC.css y la sesión administrativa observó scrollWidth igual a clientWidth en 320 px y escritorio.",
+      "criteria": []
     }
   ],
   "entries": [
@@ -390,7 +406,7 @@
       "verification": "browser",
       "tests": ["e2e/inventory.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "browser-1706695"
+      "evidenceId": "layout-mobile-5e645de"
     },
     {
       "requirement": "RN-LAY-012",

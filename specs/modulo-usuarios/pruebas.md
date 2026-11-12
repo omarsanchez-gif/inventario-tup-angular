@@ -87,6 +87,13 @@
 - El refinamiento `6f112780370f9f890efc773e21288efc4f4f9497` agregó una transición de altura y opacidad de 180 ms. Los paneles contraídos conservan el formulario, pero quedan a altura cero, `aria-hidden` e inertes. La regresión volvió a aprobar 73 pruebas Angular y 5 recorridos Chromium.
 - Se redesplegó únicamente Hosting; `/usuarios`, `main-JZFE42HR.js` y `styles-K7H52MHM.css` respondieron HTTP 200. La preferencia global de movimiento reducido acorta la transición al mínimo.
 
+## Aceptación visual de cierre — 12 de noviembre de 2026
+
+- Una sesión real `Omar Sánchez / Administrador` abrió el diálogo de `Eventos` en escritorio y 320 px sobre `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css`.
+- El acordeón presentó una sola sección expandida, permitió contraer Categorías y abrir Fabricantes, conservó los resúmenes y cerró con Escape devolviendo el foco a `Asignar permisos a Eventos`.
+- La matriz se inspeccionó sin modificarla: Categorías y Fabricantes conservan `Ver`, Modelos no tiene acceso y Campus conserva `Ver`.
+- La presentación visual de USR-035 queda aceptada. La aceptación funcional de permisos continúa pendiente porque no se inició sesión como la cuenta `usuario` ni se ejecutó una reducción con su pestaña abierta.
+
 ## Evidencia local — búsqueda y paginación
 
 - USR-014 aprobó la búsqueda automática, el campo compartido a todo el ancho y el reinicio a página 1.

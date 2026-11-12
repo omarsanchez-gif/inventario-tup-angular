@@ -20,7 +20,7 @@ Este resumen describe el estado vigente. Las reglas completas permanecen en las 
 | Módulo                  | Propósito y comportamiento vigente                                                                               | Acceso y entrada                                                      | Backend y datos                                                      | Criterios                                | Estado real                                                                          |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------ |
 | Autenticación y sesión  | Google institucional, autorización previa, permisos sanitizados y generación selectiva por módulo/acción         | `/login`; todo usuario autorizado entra a `/dashboard`                | `bootstrapAuthorization`; `usuarios` es canónica                     | AUT-001–020                              | Implementado, validado y desplegado; popup real conserva aceptación manual separada  |
-| Layout privado          | Sidebar responsive y Configuraciones filtrado; retirar Ver abandona solo la ruta afectada                        | Shell privado; Usuarios solo `admin`; catálogos según `ver`           | Guards defensivos y revalidación deduplicada; backend es autoridad   | LAY-001–028                              | Implementado, validado y desplegado; revisión visual móvil autenticada pendiente     |
+| Layout privado          | Sidebar responsive y Configuraciones filtrado; retirar Ver abandona solo la ruta afectada                        | Shell privado; Usuarios solo `admin`; catálogos según `ver`           | Guards defensivos y revalidación deduplicada; backend es autoridad   | LAY-001–028                              | Implementado, validado, desplegado y aceptado visualmente en escritorio y 320 px     |
 | Dashboard inicial       | Bienvenida, identidad y estado de plataforma, sin métricas ficticias                                             | `/dashboard`; `admin` y `usuario` autorizados                         | No crea read model ni KPI operativos                                 | DASH-001–004                             | Implementado y desplegado; indicadores operativos son un incremento futuro           |
 | Usuarios                | Administra autorizaciones y asigna después del alta una matriz compacta de cuatro módulos                        | `/usuarios`; solo `admin`                                             | Siete callables; cambio de rol limpia permisos                       | USR-001–035                              | Implementado, validado y desplegado; aceptación autenticada de la matriz pendiente   |
 | Categorías              | Nombre, notas, estado y contador preparado de Activos; eliminación bloqueada por Modelos                         | `/configuraciones/categorias`; `admin` o `usuario` con capacidad      | Cinco callables; cada operación revalida su acción canónica          | CAT-001–028                              | Implementado, validado y desplegado; contador permanece en cero hasta Activos        |
@@ -56,17 +56,17 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 
 ## Evidencia y estados de entrega
 
-| Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                                                   |
-| ------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                                                              |
-| Implementado              | Sí para el alcance vigente                      | Correcciones de autorización, carga, identidad e integridad transaccional en `88ea3af`; garantías previas conservadas                                |
-| Validado localmente       | Sí, sobre `88ea3af`                             | 112 Angular, 52 Functions, 42 Emulator Suite, 8 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados |
-| Publicado en rama         | Sí                                              | `codex/modulo-areas` contiene `88ea3af`; publicación sin force push                                                                                  |
-| Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                         |
-| Verificado por CI         | No para este incremento                         | GitHub reporta cero runs y cero statuses para `88ea3af`; sin PR no se disparó `Validación continua / validate`                                       |
-| Desplegado en staging     | Sí, dentro del diff real                        | `createArea`, `updateArea` y Hosting; Rules, demás Functions, datos, secretos y producción intactos                                                  |
-| Aceptado con sesión real  | Parcial                                         | Áreas aprobó alta, edición, transferencia, estado y rechazos; eliminación, limpieza, ciclo completo de imagen y revisión móvil siguen pendientes     |
-| Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                                                         |
+| Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                                                            |
+| ------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                                                                       |
+| Implementado              | Sí para el alcance vigente                      | Correcciones de autorización, carga, identidad e integridad transaccional en `88ea3af`; garantías previas conservadas                                         |
+| Validado localmente       | Sí, sobre `88ea3af` y `5e645de`                 | Evidencia funcional completa en `88ea3af`; corrección responsive en `5e645de` con 8 Chromium y controles proporcionales aprobados                             |
+| Publicado en rama         | Sí                                              | `codex/modulo-areas` contiene `5e645de`; publicación sin force push                                                                                           |
+| Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                                  |
+| Verificado por CI         | No para este incremento                         | GitHub reporta cero runs y cero statuses para `88ea3af`; sin PR no se disparó `Validación continua / validate`                                                |
+| Desplegado en staging     | Sí, dentro del diff real                        | `createArea`, `updateArea` y Hosting; Rules, demás Functions, datos, secretos y producción intactos                                                           |
+| Aceptado con sesión real  | Parcial                                         | La revisión visual autenticada aprobó escritorio y 320 px; Áreas no ejecutó eliminación y el ciclo completo de imagen y la matriz funcional siguen pendientes |
+| Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                                                                  |
 
 La evidencia histórica de `ef8ae66` permanece vigente para recuperación de imágenes. El incremento de Campus tiene evidencia propia en `2883ff5` y no traslada aceptación manual.
 
@@ -81,7 +81,7 @@ El 10 de noviembre de 2026 se especificó un incremento que permite asignar desp
 ## Staging vigente
 
 - Proyecto exclusivo: `inventario-stg`; alias obligatorio `staging`.
-- Hosting responde HTTP 200 y sirve `main-HZGOJ7WY.js` y `styles-K7H52MHM.css` con `no-store` para el documento.
+- Hosting responde HTTP 200 y sirve `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css` con `no-store` para el documento.
 - Las callables conservan Node.js 22 y `us-central1`; este cierre actualizó por separado únicamente `createArea` y `updateArea`.
 - Firestore Rules niega acceso directo a las colecciones administrativas y Storage Rules conserva denegación total.
 - El último incremento de recuperación desplegó `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` en revisión `00004`, el ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting.
@@ -94,12 +94,22 @@ Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación té
 
 El 12 de noviembre de 2026 una sesión real `Omar Sánchez / Administrador` ejercitó `main-HZGOJ7WY.js` en `inventario-stg`. Se comprobaron alta, edición, transferencia aprobada, desactivación, reactivación, rechazo de duplicado y validación de nombre obligatorio. Los Campus sintéticos `QAARE33A-121126` y `QAARE33B-121126` y el Área activa `Área ARE-033 editada 20261112`, asociada al segundo Campus, se conservaron por instrucción expresa del responsable. No se ejecutaron la eliminación ni la limpieza; por ello ARE-033 continúa pendiente y el total verificado permanece en 99 de 100 obligatorios.
 
+La comprobación adicional de eliminación preparó `Área temporal eliminación ARE-033 20261112-1525` en `QAARE33A-121126`. El responsable indicó expresamente conservarla; no se abrió ni confirmó su eliminación. Al corte, ambos Campus permanecen activos con una Área cada uno y `Área ARE-033 editada 20261112` continúa activa en `QAARE33B-121126`. Esta decisión no satisface ARE-033 y se registra como excepción autorizada al protocolo de limpieza.
+
+### Revisión visual autenticada de cierre
+
+El 12 de noviembre de 2026 la sesión administrativa reprodujo en 320 px un desplazamiento horizontal global: `body { min-width: 320px; }` excedía los `305 px` útiles cuando la barra vertical consumía 15 px. `5e645debf1df4239c6c5f73fc56ca9263ac65ae4` retiró ese mínimo fijo y reforzó LAY-020 contra `documentElement.clientWidth`. Ocho recorridos Chromium, lint, guardia visual, formato, build de staging, trazabilidad y `git diff --check` aprobaron. Se desplegó únicamente Hosting; `main-HZGOJ7WY.js` se conservó y el CSS pasó a `styles-TYZCJRJC.css`. La repetición autenticada observó `scrollWidth = clientWidth = 305` a 320 px y `1440` en escritorio; navegación, tabla, alta de Usuario, diálogo de permisos, acordeón, Escape y retorno de foco permanecieron utilizables.
+
+La matriz visible de `Eventos` se inspeccionó sin modificarla: Categorías y Fabricantes conservan `Ver`, Modelos no tiene acceso y Campus conserva `Ver`. No se ejecutó el comportamiento bajo sesión `usuario` ni una reducción con pestaña afectada abierta porque no estaba disponible una sesión de la cuenta de prueba y no se alteraron permisos reales.
+
+La aceptación de imágenes preparó la Categoría `QA Imagen cierre 121126` y el Fabricante `QA Fabricante imágenes 121126`; no se creó Modelo ni objeto de Storage. Brave bloqueó el selector local porque la extensión de Codex no tiene habilitado acceso a URLs de archivo. Sustitución, retirada y expiración permanecen no ejecutadas; los dos catálogos sintéticos se conservan y no se presenta este intento como aceptación.
+
 ## Limitaciones conocidas y pendientes de entrega
 
 - La rama endurecida no está integrada en `desarrollo`. No existe un PR abierto para `codex/modulo-areas`; la conexión GitHub vigente identifica a `victoryama-wq` con permiso de solo lectura (`pull: true`, `push: false`), por lo que no se repitió una escritura equivalente. GitHub reporta cero runs y cero statuses para `88ea3af`. El endpoint clásico de protección de `desarrollo` respondió 403 para la integración y el repositorio devolvió una lista vacía de rulesets; no fue posible comprobar si `Validación continua / validate` es obligatorio.
-- Falta aceptación autenticada de sustitución, retirada y expiración de imágenes y de los flujos administrativos que no se ejercieron con datos reales.
-- ARE-033 tiene aceptación parcial real; falta ejecutar la eliminación y, si se exige cerrar bajo las condiciones originales, retirar los tres registros sintéticos conservados por decisión del responsable.
-- Falta revisión visual autenticada integral desde escritorio y 320 px.
+- Falta aceptación autenticada de sustitución, retirada y expiración de imágenes; el intento quedó bloqueado antes de cargar por el permiso local de archivos de la extensión de Brave.
+- ARE-033 tiene aceptación parcial real; la eliminación quedó expresamente suspendida y se conservan los tres registros originales más el Área temporal adicional por decisión del responsable.
+- La matriz de permisos quedó revisada visualmente como `admin`, pero falta ejercitarla con una sesión `usuario` de prueba y una reducción mientras su pestaña permanece abierta.
 - La recuperación de imagen conserva indefinidamente evidencia insuficiente cuando no existe acuse ni ambas variantes; requiere un reintento autorizado y puede seguir pendiente.
 - App Check, PITR y bitácora administrativa requieren decisiones separadas.
 - Los cuatro avisos moderados transitivos de `google-gax` permanecen aceptados y documentados; no hay vulnerabilidades altas o críticas de runtime en el corte validado.
@@ -107,7 +117,6 @@ El 12 de noviembre de 2026 una sesión real `Omar Sánchez / Administrador` ejer
 
 ## Exclusiones actuales
 
-- Aceptación visual autenticada del acordeón de permisos en escritorio y 320 px.
 - Coordinaciones, coberturas y alcance territorial de Usuarios.
 - Activos individuales, personas, responsables, asignaciones, movimientos y responsivas.
 - Indicadores operativos del Dashboard.

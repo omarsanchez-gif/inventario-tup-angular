@@ -8,6 +8,8 @@ La verificación remota posterior al despliegue confirmó las nueve callables `A
 
 La primera comprobación autenticada de un Modelo con imagen expuso `SigningError` en `getAssetModelImageAccess` y la interfaz mostró el placeholder seguro. Tras conceder a la cuenta runtime el vínculo propio mínimo para `iam.serviceAccounts.signBlob` y actualizar únicamente esa callable, una recarga autenticada confirmó que la alerta desapareció y la miniatura del Modelo `MSI` cargó. MOD-029 queda aceptada para emisión y consumo real de la variante `thumbnail`; las variantes restantes y su expiración conservan cobertura automatizada y aceptación manual pendiente.
 
+El 12 de noviembre de 2026 se prepararon la Categoría `QA Imagen cierre 121126`, el Fabricante `QA Fabricante imágenes 121126` y dos PNG sintéticos menores de 2 MiB. Brave impidió adjuntar el primer archivo porque la extensión de Codex no tenía habilitado acceso a URLs de archivo. El formulario no se guardó: no existe Modelo ni objeto de Storage de esta prueba. Sustitución, retirada y expiración se clasifican `no ejecutado por impedimento de carga`; no se modifica la aceptación previa de MOD-029 ni se presenta este intento como evidencia positiva.
+
 ## Evidencia local de escrituras tardías — 10 de noviembre de 2026
 
 - El SHA `58a0ab3f4e7452d349cf5bf93632258f0068aeac` aprobó la secuencia retener escrituras → vencer lease → recuperar sin objetos → materializar ambas variantes → recuperar de nuevo. La primera recuperación dejó `estado: cancelada` y `cargaFinalizada: false`; después el escritor registró `cargaFinalizada: true`, el reintento eliminó ambos objetos y la operación desapareció.

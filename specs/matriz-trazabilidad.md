@@ -24,7 +24,7 @@
 - CAT-028, FAB-024, CAM-039 y MOD-061 vinculan `saving` con la operación y acción exactas.
 - MOD-062 aísla cada diálogo de Modelos frente a respuestas tardías de creación e imagen.
 - ARE-022, ARE-023, ARE-035, ARE-036, ARE-040 y ARE-042 cubren referencia canónica con contador cero, carreras coordinadas, recuperación sin alta duplicada, propiedad terminal de `loading` e identidad normalizada visible.
-- La evidencia local está asociada a `88ea3afaa568bcc46a4aed45951e50049c2703fe`: 112 pruebas Angular, 52 unitarias de Functions, 42 con Emulator Suite y 8 recorridos Chromium. El manifiesto registra 286 criterios inventariados, 100 obligatorios, 100 trazados y 99 verificados; ARE-033 es el único obligatorio pendiente por aceptación real.
+- La evidencia funcional acumulada está asociada a `88ea3afaa568bcc46a4aed45951e50049c2703fe`: 112 pruebas Angular, 52 unitarias de Functions, 42 con Emulator Suite y 8 recorridos Chromium. `5e645debf1df4239c6c5f73fc56ca9263ac65ae4` volvió a ejecutar 8 recorridos Chromium con LAY-020 reforzado, además de lint, guardia visual, formato, build, trazabilidad y diff. El manifiesto conserva 286 criterios inventariados, 100 obligatorios, 100 trazados y 99 verificados; ARE-033 sigue siendo el único obligatorio pendiente por aceptación real.
 
 ## Aceptación autenticada parcial — 12 de noviembre de 2026
 
@@ -32,7 +32,8 @@
 - Aprobaron alta, edición, transferencia entre dos Campus sintéticos, desactivación, reactivación, rechazo de nombre duplicado y rechazo de nombre obligatorio.
 - Se conservaron por instrucción expresa del responsable `QAARE33A-121126`, `QAARE33B-121126` y `Área ARE-033 editada 20261112`; la eliminación y la limpieza no se ejecutaron.
 - ARE-033 permanece `pending-manual`: el criterio exige eliminación además de los casos ya observados y las condiciones de esta ejecución exigían limpieza acotada.
-- La aceptación de la matriz de permisos, el ciclo completo de imágenes y la revisión visual autenticada desde 320 px conservan su estado pendiente; esta ejecución no los cubrió.
+- La segunda Área `Área temporal eliminación ARE-033 20261112-1525` permanece activa en `QAARE33A-121126` por la instrucción posterior de conservarla; no se ejecutó una eliminación.
+- La revisión visual autenticada aprobó escritorio y 320 px después de publicar `5e645de`; el ciclo completo de imágenes y la aceptación funcional de la matriz con sesión `usuario` continúan pendientes.
 
 ## Significado de los estados
 
@@ -50,17 +51,17 @@ El manifiesto [trazabilidad.json](trazabilidad.json) y `npm run traceability:che
 
 ## Corte vigente de implementación y entrega
 
-| Estado                    | Situación vigente                                                                                                                                                |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SHA probado               | `88ea3afaa568bcc46a4aed45951e50049c2703fe`                                                                                                                       |
-| Validación local          | 112 Angular, 52 Functions, 42 Emulator Suite, 8 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados             |
-| Rama publicada            | `codex/modulo-areas` contiene `88ea3af` sin force push                                                                                                           |
-| Staging                   | `createArea`, `updateArea` y Hosting; ambas callables v2 Node 22 rechazan anónimo con 401 y Hosting sirve `main-HZGOJ7WY.js`; Rules y demás servicios intactos   |
-| Integración en desarrollo | Pendiente; publicar la rama no equivale a fusionarla                                                                                                             |
-| PR y CI                   | No existe PR; la conexión GitHub tiene solo lectura (`pull: true`, `push: false`) y `88ea3af` no registra runs ni statuses. No se atribuye CI sin ejecución real |
-| Protección de rama        | El endpoint clásico de `desarrollo` responde 403 para la integración y el repositorio no expone rulesets; el check obligatorio no pudo verificarse               |
-| Aceptación autenticada    | ARE-033 parcial: alta, edición, transferencia, estado y rechazos aprobaron; eliminación y limpieza no se ejecutaron                                              |
-| Producción                | No configurada ni autorizada                                                                                                                                     |
+| Estado                    | Situación vigente                                                                                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SHA probado               | `88ea3afaa568bcc46a4aed45951e50049c2703fe` para el cierre funcional; `5e645debf1df4239c6c5f73fc56ca9263ac65ae4` para la corrección responsive                                            |
+| Validación local          | Evidencia funcional histórica: 112 Angular, 52 Functions y 42 Emulator Suite; sobre `5e645de`: 8 Chromium, lint, guardia visual, formato, build, trazabilidad y diff aprobados           |
+| Rama publicada            | `codex/modulo-areas` contiene `5e645de` sin force push                                                                                                                                   |
+| Staging                   | `createArea`, `updateArea` y Hosting históricos; la corrección responsive actualizó solo Hosting, que sirve `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css`; Rules y demás servicios intactos |
+| Integración en desarrollo | Pendiente; publicar la rama no equivale a fusionarla                                                                                                                                     |
+| PR y CI                   | No existe PR; la conexión GitHub tiene solo lectura (`pull: true`, `push: false`) y `88ea3af` no registra runs ni statuses. No se atribuye CI sin ejecución real                         |
+| Protección de rama        | El endpoint clásico de `desarrollo` responde 403 para la integración y el repositorio no expone rulesets; el check obligatorio no pudo verificarse                                       |
+| Aceptación autenticada    | Visual escritorio/320 px aprobada; ARE-033 parcial sin eliminación; imágenes y matriz funcional bajo sesión `usuario` pendientes                                                         |
+| Producción                | No configurada ni autorizada                                                                                                                                                             |
 
 ## Evidencia histórica relevante
 
