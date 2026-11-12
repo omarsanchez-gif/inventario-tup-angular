@@ -95,6 +95,7 @@ Estos recursos son canónicos y permanecen cerrados a clientes mediante Firestor
 - Se recorta y colapsan espacios internos.
 - Máximo propuesto de 120 caracteres.
 - Debe contener al menos un carácter visible.
+- Espacios Unicode, controles y caracteres de formato como U+200B no cuentan como contenido visible; un nombre compuesto solo por ellos se rechaza antes de invocar el repositorio.
 - `nombreNormalizado` aplicaría Unicode NFKD, eliminación de diacríticos, minúsculas, colapso de espacios y recorte.
 - La recomendación es unicidad por Campus, no global.
 
@@ -126,12 +127,15 @@ Estos recursos son canónicos y permanecen cerrados a clientes mediante Firestor
 - Activar, desactivar o renombrar no cambia el contador.
 - Altas concurrentes no pueden perder incrementos ni crear nombres equivalentes dentro del mismo Campus.
 - Debe existir una operación administrativa autorizada de reconciliación antes de depender operativamente del contador; su forma concreta se definirá antes de implementar y no implica una nueva infraestructura en este borrador.
+- La reconciliación usa las Áreas canónicas aunque el valor derivado anterior esté ausente, sea `null`, negativo o no entero. El diagnóstico representa ese estado como inválido con su causa y nunca lo sustituye por un cero ficticio.
 
 ## Autorización
 
 - Solo un `admin` autenticado, autorizado y activo administra Áreas.
 - `usuario`, perfiles inactivos y solicitudes anónimas no listan ni mutan el catálogo administrativo.
 - Cada callable revalida Authentication, claim administrativo y documento canónico `usuarios`.
+- La interfaz captura una generación de acceso administrativo además de la sesión. Perder el rol invalida permanentemente listados, catálogos, mutaciones y diálogos iniciados antes, incluso si el mismo UID recupera el rol.
+- Listado y catálogo usan secuencias independientes; una respuesta anterior nunca reemplaza una consulta más nueva ni el catálogo histórico solicitado para una edición.
 - La futura visibilidad de Áreas para `usuario` depende del incremento de Coordinaciones, coberturas y alcance de Usuarios; no se anticipa aquí.
 - Firestore Rules mantendría denegación total para las colecciones propuestas.
 
@@ -221,11 +225,13 @@ La interfaz traduciría los códigos a mensajes institucionales y no expondría 
 - Recuenta Áreas activas e inactivas para todos los Campus y corrige solo diferencias.
 - Es administrativa, idempotente y transaccional. Una alta, transferencia o eliminación concurrente que escriba el Campus obliga a reintentar la transacción.
 - Informa Campus revisados, corregidos y cada valor anterior y esperado; no crea tareas periódicas ni datos institucionales.
+- Para un valor anterior inválido informa `{ state: "invalid", reason }`, con causa `missing`, `null`, `negative`, `non-integer` o `invalid-type`; no expone valores técnicos innecesarios.
 
 ## Consumidores y referencias
 
 - En este incremento no existe un consumidor aprobado de `areaId`.
 - El repositorio usa un inspector de referencias fail-safe; cada consumidor futuro debe incorporarse al inspector y sus pruebas antes de habilitarse.
+- El único resultado que autoriza eliminación o transferencia es `false` explícito. `true`, excepción y ausencia de resultado bloquean sin escrituras parciales.
 - Una referencia bloquea eliminación o transferencia. Un error o resultado indeterminable responde `area-reconciliation-required`.
 - `cantidadAreas` nunca sustituye la consulta canónica al decidir si un Campus puede eliminarse.
 

@@ -2,11 +2,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   signal,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  type AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  type ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import type { InventoryArea } from '../../../shared/models/inventory-area';
 import { AuthFacade } from '../../../core/auth/auth.facade';
@@ -14,6 +21,14 @@ import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { AppIcon } from '../../../shared/ui/icon/app-icon';
 import { AppPagination } from '../../../shared/ui/pagination/app-pagination';
 import { AreasFacade } from '../state/areas.facade';
+
+function visibleContent(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  if (typeof value !== 'string') return { visibleContent: true };
+  return value.replace(/[\p{White_Space}\p{Cf}\p{Cc}\p{Cs}]/gu, '')
+    ? null
+    : { visibleContent: true };
+}
 
 @Component({
   selector: 'app-areas-page',
@@ -25,6 +40,7 @@ import { AreasFacade } from '../state/areas.facade';
 export class AreasPage {
   private readonly builder = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly auth = inject(AuthFacade);
   protected readonly areas = inject(AreasFacade);
   protected readonly formVisible = signal(false);
@@ -32,6 +48,7 @@ export class AreasPage {
   protected readonly pendingDeletion = signal<InventoryArea | null>(null);
   protected readonly pageSize = 10;
   protected readonly currentPage = signal(1);
+  private openingGeneration = 0;
   protected readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.areas.filteredAreas().length / this.pageSize)),
   );
@@ -42,10 +59,14 @@ export class AreasPage {
   });
   protected readonly form = this.builder.nonNullable.group({
     campusId: ['', Validators.required],
-    nombre: ['', [Validators.required, Validators.maxLength(120)]],
+    nombre: ['', [Validators.required, visibleContent, Validators.maxLength(120)]],
     notas: ['', Validators.maxLength(1_000)],
   });
   constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.openingGeneration += 1;
+      this.areas.invalidateView();
+    });
     effect(() => {
       if (this.auth.role() !== 'admin') {
         this.closePrivateUi();
@@ -57,20 +78,26 @@ export class AreasPage {
     void this.areas.loadCatalogs();
   }
   protected async openNew(): Promise<void> {
+    const generation = ++this.openingGeneration;
     this.areas.clearMessages();
     this.editingId.set(null);
     this.form.reset({ campusId: '', nombre: '', notas: '' });
-    if (await this.areas.loadCatalogs()) this.formVisible.set(true);
+    if ((await this.areas.loadCatalogs()) && generation === this.openingGeneration) {
+      this.formVisible.set(true);
+    }
   }
   protected async edit(area: InventoryArea): Promise<void> {
+    const generation = ++this.openingGeneration;
     this.areas.clearMessages();
-    if (!(await this.areas.loadCatalogs(area.campusId))) return;
+    if (!(await this.areas.loadCatalogs(area.campusId)) || generation !== this.openingGeneration)
+      return;
     this.editingId.set(area.documentId);
     this.form.reset({ campusId: area.campusId, nombre: area.nombre, notas: area.notas ?? '' });
     this.formVisible.set(true);
   }
   protected closeForm(): void {
     if (this.areas.saving()) return;
+    this.openingGeneration += 1;
     this.formVisible.set(false);
     this.editingId.set(null);
   }
@@ -82,11 +109,16 @@ export class AreasPage {
     const raw = this.form.getRawValue();
     const input = { campusId: raw.campusId, nombre: raw.nombre, notas: raw.notas.trim() || null };
     const editingId = this.editingId();
+    const generation = this.openingGeneration;
     if (editingId) {
-      if (await this.areas.update({ documentId: editingId, ...input })) this.closeForm();
+      if (
+        (await this.areas.update({ documentId: editingId, ...input })) &&
+        generation === this.openingGeneration
+      )
+        this.closeForm();
     } else {
       const createdId = await this.areas.create(input);
-      if (createdId) {
+      if (createdId && generation === this.openingGeneration) {
         this.editingId.set(createdId);
         this.formVisible.set(false);
         this.editingId.set(null);
@@ -119,6 +151,7 @@ export class AreasPage {
     if (area && (await this.areas.delete(area))) this.pendingDeletion.set(null);
   }
   private closePrivateUi(): void {
+    this.openingGeneration += 1;
     this.formVisible.set(false);
     this.editingId.set(null);
     this.pendingDeletion.set(null);

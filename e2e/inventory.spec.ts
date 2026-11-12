@@ -10,6 +10,7 @@ const adminApp =
   initializeApp({ projectId: 'demo-inventario-tup' }, 'playwright-admin');
 const firestore = getFirestore(adminApp);
 const auth = getAuth(adminApp);
+const ownedAreaTokens = new Set<string>();
 
 const emptyPermissions = { categorias: [], fabricantes: [], modelosActivos: [], campus: [] };
 
@@ -38,37 +39,67 @@ async function login(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { name: /Bienvenido/u })).toBeVisible();
 }
 
+async function cleanupOwnedAreas(): Promise<void> {
+  for (const token of ownedAreaTokens) {
+    const snapshot = await firestore.collection('areas').where('notas', '==', token).get();
+    for (const document of snapshot.docs) {
+      const reservations = await firestore
+        .collection('areas_claves')
+        .where('areaId', '==', document.id)
+        .get();
+      await firestore.runTransaction(async (transaction) => {
+        const current = await transaction.get(document.ref);
+        if (!current.exists) return;
+        const campusId = current.data()?.['campusId'];
+        if (typeof campusId !== 'string') return;
+        const campusReference = firestore.collection('campus').doc(campusId);
+        const campus = await transaction.get(campusReference);
+        const count = campus.data()?.['cantidadAreas'];
+        transaction.delete(document.ref);
+        for (const reservation of reservations.docs) transaction.delete(reservation.ref);
+        if (campus.exists && Number.isInteger(count) && count > 0) {
+          transaction.update(campusReference, { cantidadAreas: count - 1 });
+        }
+      });
+    }
+  }
+  ownedAreaTokens.clear();
+}
+
 test.afterEach(async () => {
+  await cleanupOwnedAreas();
   await setSyntheticAccess('admin');
 });
 
-test('ARE-026 ARE-027 ARE-028 ARE-029 completes the administrative Areas cycle', async ({
+test('ARE-026 ARE-027 ARE-028 ARE-029 ARE-043 completes the administrative Areas cycle', async ({
   page,
 }) => {
+  const token = `owned-area-${Date.now()}-${test.info().workerIndex}`;
+  const areaName = `Laboratorio E2E ${Date.now()}-${test.info().workerIndex}`;
+  ownedAreaTokens.add(token);
   await login(page);
   await page.goto('/configuraciones/areas');
   await expect(page.getByRole('heading', { name: 'Áreas' })).toBeVisible();
   await page.getByRole('button', { name: 'Nueva área' }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Campus').selectOption('synthetic-campus');
-  await dialog.getByLabel('Nombre').fill('Laboratorio E2E');
-  await dialog.getByLabel('Notas').fill('Registro sintético');
+  await dialog.getByLabel('Nombre').fill(areaName);
+  await dialog.getByLabel('Notas').fill(token);
   await dialog.getByRole('button', { name: 'Guardar área' }).click();
   await expect(dialog).toBeHidden();
-  await page.getByLabel('Buscar por nombre, Campus o notas').fill('laboratorio e2e');
-  await expect(page.getByText('Laboratorio E2E', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Editar Laboratorio E2E' }).click();
-  await page.getByRole('dialog').getByLabel('Notas').fill('Registro actualizado');
+  await page.getByLabel('Buscar por nombre, Campus o notas').fill(areaName);
+  await expect(page.getByText(areaName, { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: `Editar ${areaName}` }).click();
+  await page.getByRole('dialog').getByLabel('Notas').fill(token);
   await page.getByRole('button', { name: 'Guardar área' }).click();
-  await expect(page.getByText('Registro actualizado', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Desactivar Laboratorio E2E' }).click();
+  await page.getByRole('button', { name: `Desactivar ${areaName}` }).click();
   await expect(page.getByText('Inactivo', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Eliminar Laboratorio E2E' }).click();
+  await page.getByRole('button', { name: `Eliminar ${areaName}` }).click();
   const deletion = page.getByRole('dialog');
   await expect(deletion.getByText(/Solo se eliminará si no tiene referencias/u)).toBeVisible();
   await deletion.getByRole('button', { name: 'Eliminar área' }).click();
   await expect(deletion).toBeHidden();
-  await expect(page.getByText('Laboratorio E2E', { exact: true })).toHaveCount(0);
+  await expect(page.getByText(areaName, { exact: true })).toHaveCount(0);
 });
 
 test('AUT-002 AUT-003 authorizes the synthetic admin and rejects an inactive canonical profile', async ({

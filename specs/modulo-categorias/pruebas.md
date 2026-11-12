@@ -35,6 +35,7 @@
 - CAT-025: `admin` conserva acceso total; `usuario` con `categorias.ver` lista y navega, mientras otro `usuario` y anónimo son rechazados. <!-- trace:required -->
 - CAT-026: crear, editar, cambiar estado y eliminar exigen exactamente su acción canónica además de Ver; revocar una acción invalida su respuesta pendiente y cierra su diálogo sin vaciar el listado ni afectar otro módulo. <!-- trace:required -->
 - CAT-027: la interfaz muestra solo acciones permitidas, pero una invocación directa sin capacidad también es rechazada por backend sin modificar categoría o reserva. <!-- trace:required -->
+- CAT-028: revocar una acción distinta de la mutación activa no apaga su indicador; un cierre anterior tampoco altera una operación posterior. <!-- trace:required -->
 
 ## Evidencia local — 7 de noviembre de 2026
 

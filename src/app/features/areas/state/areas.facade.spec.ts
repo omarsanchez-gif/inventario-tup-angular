@@ -40,6 +40,16 @@ function setup() {
     role,
   };
 }
+const area = (documentId: string, nombre: string) => ({
+  documentId,
+  campusId: 'c',
+  campus: { documentId: 'c', codigo: 'TUP', nombre: 'TUP' },
+  nombre,
+  notas: null,
+  activo: true,
+  fechaCreacion: '',
+  fechaActualizacion: '',
+});
 describe('AreasFacade', () => {
   it('ARE-028 filters automatically by text and Campus', async () => {
     const { facade, gateway } = setup();
@@ -95,5 +105,72 @@ describe('AreasFacade', () => {
     expect(await facade.create({ campusId: 'c', nombre: 'Lab', notas: null })).toBe('area-1');
     expect(gateway.create).toHaveBeenCalledTimes(1);
     expect(facade.error()).toContain('fue creada');
+  });
+  it('ARE-036 keeps the newest list when an older request resolves last', async () => {
+    const { facade, gateway } = setup();
+    const oldList = deferred<{
+      items: readonly ReturnType<typeof area>[];
+      total: number;
+      maxSupported: number;
+    }>();
+    const newList = deferred<{
+      items: readonly ReturnType<typeof area>[];
+      total: number;
+      maxSupported: number;
+    }>();
+    vi.mocked(gateway.list)
+      .mockReturnValueOnce(oldList.promise)
+      .mockReturnValueOnce(newList.promise);
+
+    const first = facade.load();
+    const second = facade.load();
+    newList.resolve({ items: [area('new', 'Nueva')], total: 1, maxSupported: 500 });
+    await second;
+    oldList.resolve({ items: [area('old', 'Anterior')], total: 1, maxSupported: 500 });
+    await first;
+
+    expect(facade.areas().map((item) => item.documentId)).toEqual(['new']);
+  });
+  it('ARE-037 keeps the historical edit catalog over a late initial catalog', async () => {
+    const { facade, gateway } = setup();
+    const initial = deferred<{ campuses: readonly [] }>();
+    const historical = deferred<{
+      campuses: readonly {
+        documentId: string;
+        codigo: string;
+        nombre: string;
+        activo?: boolean;
+      }[];
+    }>();
+    vi.mocked(gateway.catalogs)
+      .mockReturnValueOnce(initial.promise)
+      .mockReturnValueOnce(historical.promise);
+    const first = facade.loadCatalogs();
+    const second = facade.loadCatalogs('historic');
+    historical.resolve({
+      campuses: [{ documentId: 'historic', codigo: 'FCS', nombre: 'Histórico', activo: false }],
+    });
+    await second;
+    initial.resolve({ campuses: [] });
+    await first;
+    expect(facade.campuses().map((campus) => campus.documentId)).toEqual(['historic']);
+  });
+  it('ARE-038 never revives an operation after admin loss and recovery', async () => {
+    const { facade, gateway, role, scope } = setup();
+    scope.reconcileAdminAccess(null, 'admin');
+    const pending = deferred<{
+      items: readonly ReturnType<typeof area>[];
+      total: number;
+      maxSupported: number;
+    }>();
+    vi.mocked(gateway.list).mockReturnValueOnce(pending.promise);
+    const load = facade.load();
+    role.set('usuario');
+    scope.reconcileAdminAccess('admin', 'usuario');
+    role.set('admin');
+    scope.reconcileAdminAccess('usuario', 'admin');
+    pending.resolve({ items: [area('old', 'Anterior')], total: 1, maxSupported: 500 });
+    await load;
+    expect(facade.areas()).toEqual([]);
   });
 });

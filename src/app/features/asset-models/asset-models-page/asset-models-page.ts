@@ -212,11 +212,12 @@ export class AssetModelsPage implements OnDestroy {
     }
     this.formOperationError.set(null);
     this.operationPending.set(true);
+    const dialog = this.dialogGeneration;
     const editingId = this.editingId();
     const saveAction = editingId ? 'editar' : 'crear';
     const saveContext = this.sessionScope.captureCapability('modelosActivos', saveAction);
-    if (!this.isOperationCurrent(saveContext)) {
-      this.operationPending.set(false);
+    if (!this.isDialogOperationCurrent(saveContext, dialog)) {
+      this.finishDialogOperation(dialog);
       return;
     }
     const imageContext = this.auth.can('modelosActivos', 'editar')
@@ -228,13 +229,15 @@ export class AssetModelsPage implements OnDestroy {
       try {
         base64 = await fileBase64(selected);
       } catch {
-        this.fileError.set('No fue posible leer la imagen seleccionada.');
-        this.operationPending.set(false);
+        if (this.isDialogCurrent(dialog)) {
+          this.fileError.set('No fue posible leer la imagen seleccionada.');
+        }
+        this.finishDialogOperation(dialog);
         return;
       }
     }
-    if (!this.isOperationCurrent(saveContext)) {
-      this.operationPending.set(false);
+    if (!this.isDialogOperationCurrent(saveContext, dialog)) {
+      this.finishDialogOperation(dialog);
       return;
     }
     const raw = this.form.getRawValue();
@@ -249,11 +252,11 @@ export class AssetModelsPage implements OnDestroy {
       editingId ? { documentId: editingId, ...input } : input,
     );
     if (!saveResult) {
-      this.operationPending.set(false);
+      this.finishDialogOperation(dialog);
       return;
     }
-    if (!this.isOperationCurrent(saveContext)) {
-      this.operationPending.set(false);
+    if (!this.isDialogOperationCurrent(saveContext, dialog)) {
+      this.finishDialogOperation(dialog);
       return;
     }
     const documentId = saveResult.documentId;
@@ -262,6 +265,7 @@ export class AssetModelsPage implements OnDestroy {
     const requestedImageChange =
       (selected !== null && base64 !== null) || this.removeCurrentImage();
     if (requestedImageChange && (!imageContext || !this.isOperationCurrent(imageContext))) {
+      if (!this.isDialogCurrent(dialog)) return;
       this.operationPending.set(false);
       this.formVisible.set(false);
       this.resetImageState();
@@ -278,12 +282,13 @@ export class AssetModelsPage implements OnDestroy {
       imageCompleted = await this.assetModels.removeImage(documentId);
     }
 
-    if (!this.isOperationCurrent(saveContext)) {
-      this.operationPending.set(false);
+    if (!this.isDialogOperationCurrent(saveContext, dialog)) {
+      this.finishDialogOperation(dialog);
       return;
     }
 
     if (imageCompleted) {
+      if (!this.isDialogCurrent(dialog)) return;
       this.operationPending.set(false);
       this.closeForm();
       this.thumbnailUrls.set({});
@@ -291,6 +296,7 @@ export class AssetModelsPage implements OnDestroy {
       this.thumbnailExpirations.clear();
       await this.refreshVisibleThumbnails();
     } else {
+      if (!this.isDialogCurrent(dialog)) return;
       this.formOperationError.set(
         'El Modelo ya existe y sus datos están guardados. Reintente la imagen sin crear otro registro.',
       );
@@ -483,6 +489,18 @@ export class AssetModelsPage implements OnDestroy {
     );
   }
 
+  private isDialogCurrent(generation: number): boolean {
+    return !this.destroyed && this.formVisible() && this.dialogGeneration === generation;
+  }
+
+  private isDialogOperationCurrent(context: CapabilityContext, generation: number): boolean {
+    return this.isDialogCurrent(generation) && this.isOperationCurrent(context);
+  }
+
+  private finishDialogOperation(generation: number): void {
+    if (this.dialogGeneration === generation) this.operationPending.set(false);
+  }
+
   private handleCapabilityChange(change: CapabilityChange): void {
     if (change.allowed) return;
     if (change.action === 'ver') {
@@ -499,7 +517,7 @@ export class AssetModelsPage implements OnDestroy {
     if (change.action === 'crear' && this.formVisible() && this.editingId() === null) {
       this.forceCloseDialogs();
     } else if (change.action === 'editar' && this.formVisible()) {
-      if (this.editingId() !== null) this.forceCloseDialogs();
+      if (this.editingId() !== null || this.operationPending()) this.forceCloseDialogs();
       else this.resetImageState();
     } else if (change.action === 'eliminar' && this.pendingDeletion() !== null) {
       this.forceCloseDialogs();

@@ -10,6 +10,7 @@ Patrón vigente para Categorías, Fabricantes, Modelos de activos y Campus. Defi
 - `admin` tiene todas las acciones por rol. `usuario` requiere la acción exacta y `ver` para cualquier mutación.
 - Menú, botones y guards son defensa de presentación. Cada callable y cada transacción sensible revalida el documento canónico.
 - Un `permission-denied` en listado, mutación, catálogo o acceso temporal a imagen provoca una única revalidación deduplicada de autorización. No se reintenta automáticamente la operación rechazada.
+- Esa revalidación es una ronda nueva iniciada después del rechazo. Nunca reutiliza un `bootstrap` anterior todavía pendiente; varios rechazos que llegan durante la ronda nueva comparten esa ronda.
 
 ## Generaciones y respuestas tardías
 
@@ -18,6 +19,8 @@ Patrón vigente para Categorías, Fabricantes, Modelos de activos y Campus. Defi
 - Una reducción en un módulo no limpia estado, diálogos ni operaciones de otro módulo.
 - Después de cada espera relevante, la facade comprueba generación de sesión, revisión del módulo, revisión de la acción y capacidad vigente antes de escribir listados, catálogos, mensajes o éxitos.
 - Si backend ya confirmó una escritura y después cambia el permiso, la interfaz no la presenta como cancelada. Descarta respuestas obsoletas y comunica únicamente el estado que puede sostener; una recarga posterior reconcilia el listado.
+- El estado `saving` pertenece al identificador y acción de la operación activa. Una revocación ajena no lo modifica y el `finally` de una operación anterior no puede apagar una operación posterior.
+- Cada diálogo conserva una generación propia. Cerrar, destruir o perder su capacidad la invalida antes de limpiar la interfaz; cualquier `await`, error o `finally` comprueba esa generación antes de modificar el diálogo.
 
 ## Interfaz ante revocación
 

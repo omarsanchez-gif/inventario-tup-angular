@@ -31,9 +31,11 @@ export class AuthFacade {
   private readonly errorState = signal<string | null>(null);
   private initializationPromise: Promise<void> | null = null;
   private authorizationPromise: Promise<BootstrapAuthorizationResult> | null = null;
+  private denialAuthorizationPromise: Promise<boolean> | null = null;
   private authorizationUid: string | null = null;
   private sessionUid: string | null = null;
   private authorizationGeneration = 0;
+  private authorizationAttempt = 0;
   private firebaseUser: User | null = null;
 
   readonly user = this.userState.asReadonly();
@@ -50,17 +52,23 @@ export class AuthFacade {
 
   async revalidatePermissionDenial(error: unknown): Promise<boolean> {
     if (!isPermissionDenied(error)) return false;
-    await this.refreshAuthorization();
-    return true;
+    if (this.denialAuthorizationPromise) return this.denialAuthorizationPromise;
+    const operation = this.refreshAuthorization(true);
+    this.denialAuthorizationPromise = operation;
+    const cleanup = (): void => {
+      if (this.denialAuthorizationPromise === operation) this.denialAuthorizationPromise = null;
+    };
+    void operation.then(cleanup, cleanup);
+    return operation;
   }
 
-  async refreshAuthorization(): Promise<boolean> {
+  async refreshAuthorization(forceNewRound = false): Promise<boolean> {
     await this.initialize();
     const user = this.firebaseUser;
     if (!user) return false;
     const generation = this.authorizationGeneration;
     try {
-      await this.authorize(user, generation);
+      await this.authorize(user, generation, forceNewRound);
       this.requireCurrentSession(user.uid, generation);
       return true;
     } catch (error) {
@@ -167,8 +175,13 @@ export class AuthFacade {
     }
   }
 
-  private authorize(user: User, generation: number): Promise<BootstrapAuthorizationResult> {
+  private authorize(
+    user: User,
+    generation: number,
+    forceNewRound = false,
+  ): Promise<BootstrapAuthorizationResult> {
     if (
+      !forceNewRound &&
       this.authorizationPromise &&
       this.authorizationUid === user.uid &&
       this.authorizationGeneration === generation
@@ -176,7 +189,8 @@ export class AuthFacade {
       return this.authorizationPromise;
     }
     this.authorizationUid = user.uid;
-    const operation = this.performAuthorization(user, generation);
+    const attempt = ++this.authorizationAttempt;
+    const operation = this.performAuthorization(user, generation, attempt);
     this.authorizationPromise = operation;
     const cleanup = (): void => {
       if (this.authorizationPromise !== operation) return;
@@ -190,15 +204,17 @@ export class AuthFacade {
   private async performAuthorization(
     user: User,
     generation: number,
+    attempt: number,
   ): Promise<BootstrapAuthorizationResult> {
     const profile = await this.authorizationGateway.bootstrap();
-    this.requireCurrentSession(user.uid, generation);
+    this.requireCurrentAuthorization(user.uid, generation, attempt);
     const token = await this.authGateway.refreshClaims(user);
-    this.requireCurrentSession(user.uid, generation);
+    this.requireCurrentAuthorization(user.uid, generation, attempt);
     if (token.claims['authorized'] !== true || token.claims['role'] !== profile.rol) {
       throw { details: { functionalCode: 'service-unavailable' } };
     }
     const previous = this.userState();
+    this.sessionScope.reconcileAdminAccess(previous?.rol ?? null, profile.rol);
     this.userState.set(profile);
     this.sessionScope.reconcileCapabilities(
       previous?.rol ?? null,
@@ -241,9 +257,19 @@ export class AuthFacade {
   }
 
   private clearState(): void {
+    const previous = this.userState();
+    this.sessionScope.reconcileAdminAccess(previous?.rol ?? null, null);
     this.userState.set(null);
     this.authorizationPromise = null;
     this.authorizationUid = null;
+    this.denialAuthorizationPromise = null;
+  }
+
+  private requireCurrentAuthorization(uid: string, generation: number, attempt: number): void {
+    this.requireCurrentSession(uid, generation);
+    if (this.authorizationAttempt !== attempt) {
+      throw new StaleSessionError('La respuesta pertenece a una autorización anterior.');
+    }
   }
 
   private async safeSignOut(): Promise<void> {

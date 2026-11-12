@@ -17,6 +17,10 @@
 - [x] Agregar integración de Firestore Emulator para unicidad, contadores, transferencia, referencias, Campus y reconciliación.
 - [x] Completar regresión Angular, Functions, Emulator Suite, Playwright, lint, formato y builds.
 - [x] Vincular evidencia al SHA exacto y publicar commits.
+- [x] Aislar listados, catálogos, operaciones y aperturas mediante generaciones de solicitud y acceso administrativo.
+- [x] Reparar contadores derivados inválidos con diagnóstico explícito y mantener estrictas las mutaciones ordinarias.
+- [x] Rechazar nombres invisibles y exigir respuesta explícita del inspector de referencias.
+- [x] Hacer única e idempotente la identidad sintética del recorrido E2E con limpieza limitada por propiedad.
 
 ## Staging y aceptación
 
@@ -25,10 +29,7 @@
 - [ ] Completar aceptación administrativa real y revisión visual en escritorio y móvil.
 - [x] Mantener producción, datos reales, IAM, secretos y migración fuera de alcance.
 
-## Pendientes para revisión general de la base
+## Pendientes externos
 
-- La revalidación de autorización puede reutilizar una consulta iniciada antes de un rechazo posterior; impacto: ventana de datos obsoletos si se generaliza; siguiente revisión: ciclo transversal de sesión.
-- Indicadores de guardado granulares pueden reaccionar a revocaciones no relacionadas; impacto: experiencia inconsistente; siguiente revisión: estado por operación.
-- Respuestas tardías de imágenes de Modelos podrían alcanzar un diálogo posterior; impacto: presentación obsoleta; siguiente revisión: tokens de diálogo.
-- Persisten diferencias históricas entre algunos documentos y la evidencia ejecutada; impacto: interpretación de trazabilidad; siguiente revisión: auditoría documental completa.
-- PR, CI obligatorio y aceptación manual son estados independientes; no se infieren de pruebas locales o despliegue técnico.
+- PR, CI obligatorio, protección de rama y aceptación manual son estados independientes; no se infieren de pruebas locales o despliegue técnico.
+- La aceptación administrativa real de ARE-033 y la revisión visual móvil permanecen pendientes hasta contar con sesión institucional disponible.

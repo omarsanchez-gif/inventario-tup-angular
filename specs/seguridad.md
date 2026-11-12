@@ -71,6 +71,8 @@ El endurecimiento y las restricciones administrativas desplegadas se describen e
 # Incremento Áreas
 
 - SEC-056: `areas` y `areas_claves` deniegan toda lectura y escritura directa desde clientes.
+- SEC-057: transferir o eliminar un Área exige que el inspector canónico responda explícitamente que no hay referencias. Un resultado verdadero, indeterminado o una excepción bloquean la transacción con reconciliación requerida.
+- SEC-058: perder rol administrativo invalida de forma irreversible el contexto asíncrono anterior, aunque el mismo UID recupere después el rol; ninguna respuesta de ese contexto vuelve a publicar datos privados.
 - SEC-057: las siete callables de Áreas exigen Authentication, claim `authorized`, rol `admin` y un único perfil canónico activo con rol administrativo.
 - SEC-058: la interfaz, el guard y el menú no conceden autoridad; cada lectura, mutación y reconciliación revalida en backend.
 - SEC-059: Áreas no se agrega al mapa de permisos granulares. Una futura lectura de `usuario` requiere un contrato sanitizado y reglas aprobadas con Coordinaciones.

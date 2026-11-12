@@ -1,5 +1,5 @@
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { normalizeAreaName } from './admin-areas.js';
 import { normalizeCampusCode, normalizeCampusName } from './admin-campuses.js';
@@ -112,6 +112,22 @@ suite('areas firestore repository', () => {
     expect((await areas.list(10))[0]).toMatchObject({ documentId: areaId, campusId: source });
   });
 
+  it('ARE-041 treats an indeterminate reference result as reconciliation-required', async () => {
+    const source = await campuses.create(uid, campus('TUP', 'Tecnológico'));
+    const target = await campuses.create(uid, campus('FCS', 'Salud'));
+    const areaId = await areas.create(uid, area(source, 'Laboratorio'));
+    const indeterminate = createAdminAreasRepository(firestore, {
+      hasReferences: vi.fn().mockResolvedValue(undefined),
+    });
+    await expect(indeterminate.delete(uid, areaId)).rejects.toMatchObject({
+      functionalCode: 'area-reconciliation-required',
+    });
+    await expect(
+      indeterminate.update(uid, { documentId: areaId, ...area(target, 'Laboratorio') }),
+    ).rejects.toMatchObject({ functionalCode: 'area-reconciliation-required' });
+    expect((await areas.list(10))[0]).toMatchObject({ documentId: areaId, campusId: source });
+  });
+
   it('ARE-022 blocks Campus deletion for active and inactive Areas', async () => {
     const campusId = await campuses.create(uid, campus('TUP', 'Tecnológico'));
     const areaId = await areas.create(uid, area(campusId, 'Laboratorio'));
@@ -135,6 +151,32 @@ suite('areas firestore repository', () => {
     });
     expect(await areas.reconcile(uid)).toMatchObject({ campusesCorrected: 0, corrections: [] });
   });
+
+  it('ARE-039 repairs negative, null and missing derived counters with explicit diagnostics', async () => {
+    const campusId = await campuses.create(uid, campus('TUP', 'Tecnológico'));
+    await areas.create(uid, area(campusId, 'Uno'));
+    const variants: readonly [unknown, string][] = [
+      [-1, 'negative'],
+      [null, 'null'],
+      [FieldValue.delete(), 'missing'],
+    ];
+    for (const [value, reason] of variants) {
+      await firestore.collection('campus').doc(campusId).update({ cantidadAreas: value });
+      expect(await areas.reconcile(uid)).toMatchObject({
+        campusesCorrected: 1,
+        corrections: [{ campusId, previous: { state: 'invalid', reason }, expected: 1 }],
+      });
+      expect((await campuses.list(10))[0]?.cantidadAreas).toBe(1);
+      expect(await areas.reconcile(uid)).toMatchObject({ campusesCorrected: 0, corrections: [] });
+    }
+  });
+
+  it('ARE-042 converges when reconciliation and a canonical mutation overlap', async () => {
+    const campusId = await campuses.create(uid, campus('TUP', 'Tecnológico'));
+    await Promise.all([areas.create(uid, area(campusId, 'Concurrente')), areas.reconcile(uid)]);
+    expect((await campuses.list(10))[0]?.cantidadAreas).toBe(1);
+    expect(await areas.reconcile(uid)).toMatchObject({ campusesCorrected: 0 });
+  }, 20_000);
 
   it('ARE-002 denies direct client access to Areas and reservations', async () => {
     const base = `http://${host}/v1/projects/${projectId}/databases/(default)/documents`;

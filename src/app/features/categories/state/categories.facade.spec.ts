@@ -76,4 +76,45 @@ describe('CategoriesFacade granular authorization', () => {
     expect(list).toHaveBeenCalledOnce();
     expect(scope.isCapabilityCurrent(otherModule)).toBe(true);
   });
+  it('CAT-028 keeps a pending edit saving when an unrelated delete grant is revoked', async () => {
+    const update = deferred<void>();
+    const allowed = new Set<PermissionAction>(['ver', 'editar', 'eliminar']);
+    TestBed.configureTestingModule({
+      providers: [
+        CategoriesFacade,
+        {
+          provide: CATEGORIES_GATEWAY,
+          useValue: {
+            list: vi.fn().mockResolvedValue({ items: [], total: 0, maxSupported: 500 }),
+            create: vi.fn(),
+            update: vi.fn(() => update.promise),
+            setStatus: vi.fn(),
+            delete: vi.fn(),
+          } satisfies CategoriesGateway,
+        },
+        {
+          provide: AuthFacade,
+          useValue: {
+            can: vi.fn((_module: string, action: PermissionAction) => allowed.has(action)),
+            revalidatePermissionDenial: vi.fn(),
+          },
+        },
+      ],
+    });
+    const facade = TestBed.inject(CategoriesFacade);
+    const scope = TestBed.inject(SessionScope);
+    const mutation = facade.update({ documentId: 'category', nombre: 'Nombre', notas: null });
+    await Promise.resolve();
+    allowed.delete('eliminar');
+    scope.reconcileCapabilities(
+      'usuario',
+      { ...emptyPermissionMap(), categorias: ['ver', 'editar', 'eliminar'] },
+      'usuario',
+      { ...emptyPermissionMap(), categorias: ['ver', 'editar'] },
+    );
+    expect(facade.saving()).toBe(true);
+    update.resolve();
+    await expect(mutation).resolves.toBe(true);
+    expect(facade.saving()).toBe(false);
+  });
 });

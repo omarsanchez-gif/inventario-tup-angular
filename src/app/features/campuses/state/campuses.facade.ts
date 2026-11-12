@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
 import { isPermissionDenied } from '../../../core/auth/permission-denied';
+import type { PermissionAction } from '../../../shared/models/catalog-permissions';
 import { SessionScope, type CapabilityContext } from '../../../core/auth/session-scope';
 import type { InventoryCampus } from '../../../shared/models/inventory-campus';
 import { CAMPUSES_GATEWAY, type CampusDraft, type CampusUpdate } from '../data/campuses.gateway';
@@ -60,6 +61,8 @@ export class CampusesFacade {
   private readonly savingState = signal(false);
   private readonly errorState = signal<string | null>(null);
   private readonly successState = signal<string | null>(null);
+  private operationGeneration = 0;
+  private activeAction: PermissionAction | null = null;
 
   readonly campuses = this.campusesState.asReadonly();
   readonly query = this.queryState.asReadonly();
@@ -80,7 +83,9 @@ export class CampusesFacade {
     this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
     this.sessionScope.registerCapabilityListener('campus', (change) => {
       if (change.action === 'ver' && !change.allowed) this.resetPrivateState();
-      else if (!change.allowed) {
+      else if (!change.allowed && this.activeAction === change.action) {
+        this.operationGeneration += 1;
+        this.activeAction = null;
         this.savingState.set(false);
         this.clearMessages();
       }
@@ -149,24 +154,29 @@ export class CampusesFacade {
   ): Promise<boolean> {
     const context = this.sessionScope.captureCapability('campus', action);
     if (!this.auth.can('campus', action)) return false;
+    const operationId = ++this.operationGeneration;
+    this.activeAction = action;
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
-      if (!this.isCurrent(context)) return false;
+      if (!this.isOperationCurrent(context, operationId)) return false;
       const result = await this.gateway.list();
-      if (!this.isCurrent(context)) return false;
+      if (!this.isOperationCurrent(context, operationId)) return false;
       this.campusesState.set(result.items);
       this.successState.set(successMessage);
       return true;
     } catch (error) {
       await this.revalidateDenial(error);
-      if (this.isCurrent(context)) {
+      if (this.isOperationCurrent(context, operationId)) {
         this.errorState.set(campusErrorMessage(error));
       }
       return false;
     } finally {
-      if (this.isCurrent(context)) this.savingState.set(false);
+      if (this.isOperationCurrent(context, operationId)) {
+        this.savingState.set(false);
+        this.activeAction = null;
+      }
     }
   }
 
@@ -176,11 +186,17 @@ export class CampusesFacade {
     );
   }
 
+  private isOperationCurrent(context: CapabilityContext, operation: number): boolean {
+    return this.operationGeneration === operation && this.isCurrent(context);
+  }
+
   private async revalidateDenial(error: unknown): Promise<void> {
     if (isPermissionDenied(error)) await this.auth.revalidatePermissionDenial(error);
   }
 
   private resetPrivateState(): void {
+    this.operationGeneration += 1;
+    this.activeAction = null;
     this.campusesState.set([]);
     this.queryState.set('');
     this.loadingState.set(false);

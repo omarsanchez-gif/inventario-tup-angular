@@ -24,6 +24,13 @@ export interface CapabilityChange {
   readonly allowed: boolean;
 }
 
+export interface AdminAccessContext {
+  readonly sessionGeneration: number;
+  readonly adminGeneration: number;
+}
+
+type AdminAccessListener = (allowed: boolean) => void;
+
 type CapabilityListener = (change: CapabilityChange) => void;
 
 function initialModuleGenerations(): Record<PermissionModule, number> {
@@ -49,6 +56,8 @@ export class SessionScope {
   private readonly moduleGenerations = initialModuleGenerations();
   private readonly actionGenerations = initialActionGenerations();
   private readonly capabilityListeners = new Map<PermissionModule, Set<CapabilityListener>>();
+  private adminGeneration = 0;
+  private readonly adminAccessListeners = new Set<AdminAccessListener>();
 
   readonly generation = this.generationState.asReadonly();
 
@@ -68,6 +77,32 @@ export class SessionScope {
     listeners.add(listener);
     this.capabilityListeners.set(module, listeners);
     return () => listeners.delete(listener);
+  }
+
+  registerAdminAccessListener(listener: AdminAccessListener): () => void {
+    this.adminAccessListeners.add(listener);
+    return () => this.adminAccessListeners.delete(listener);
+  }
+
+  reconcileAdminAccess(previousRole: UserRole | null, nextRole: UserRole | null): void {
+    const wasAllowed = previousRole === 'admin';
+    const allowed = nextRole === 'admin';
+    if (wasAllowed === allowed) return;
+    this.adminGeneration += 1;
+    for (const listener of this.adminAccessListeners) listener(allowed);
+  }
+
+  captureAdminAccess(): AdminAccessContext {
+    return {
+      sessionGeneration: this.generationState(),
+      adminGeneration: this.adminGeneration,
+    };
+  }
+
+  isAdminAccessCurrent(context: AdminAccessContext): boolean {
+    return (
+      this.isCurrent(context.sessionGeneration) && this.adminGeneration === context.adminGeneration
+    );
   }
 
   reconcileCapabilities(

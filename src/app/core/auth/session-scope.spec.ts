@@ -42,4 +42,16 @@ describe('SessionScope capability revisions', () => {
     expect(scope.isCapabilityCurrent(campusCreate)).toBe(false);
     expect(scope.isCapabilityCurrent(categoryRead)).toBe(true);
   });
+
+  it('AUT-020 permanently invalidates an admin context after loss and recovery', () => {
+    const scope = TestBed.inject(SessionScope);
+    scope.reconcileAdminAccess(null, 'admin');
+    const context = scope.captureAdminAccess();
+
+    scope.reconcileAdminAccess('admin', 'usuario');
+    scope.reconcileAdminAccess('usuario', 'admin');
+
+    expect(scope.isAdminAccessCurrent(context)).toBe(false);
+    expect(scope.isAdminAccessCurrent(scope.captureAdminAccess())).toBe(true);
+  });
 });

@@ -108,4 +108,52 @@ describe('CampusesFacade', () => {
     expect(facade.success()).toBeNull();
     expect(list).toHaveBeenCalledOnce();
   });
+
+  it('CAM-039 keeps a pending edit saving when an unrelated delete grant is revoked', async () => {
+    let resolveUpdate!: () => void;
+    const update = new Promise<void>((resolve) => (resolveUpdate = resolve));
+    const allowed = new Set(['ver', 'editar', 'eliminar']);
+    TestBed.configureTestingModule({
+      providers: [
+        CampusesFacade,
+        {
+          provide: CAMPUSES_GATEWAY,
+          useValue: {
+            list: vi.fn().mockResolvedValue({ items: [], total: 0, maxSupported: 100 }),
+            create: vi.fn(),
+            update: vi.fn(() => update),
+            setStatus: vi.fn(),
+            delete: vi.fn(),
+          } satisfies CampusesGateway,
+        },
+        {
+          provide: AuthFacade,
+          useValue: {
+            can: vi.fn((_module: string, action: string) => allowed.has(action)),
+            revalidatePermissionDenial: vi.fn(),
+          },
+        },
+      ],
+    });
+    const facade = TestBed.inject(CampusesFacade);
+    const session = TestBed.inject(SessionScope);
+    const mutation = facade.update({
+      documentId: campus.documentId,
+      codigo: campus.codigo,
+      nombre: campus.nombre,
+      notas: null,
+    });
+    await Promise.resolve();
+    allowed.delete('eliminar');
+    session.reconcileCapabilities(
+      'usuario',
+      { ...emptyPermissionMap(), campus: ['ver', 'editar', 'eliminar'] },
+      'usuario',
+      { ...emptyPermissionMap(), campus: ['ver', 'editar'] },
+    );
+    expect(facade.saving()).toBe(true);
+    resolveUpdate();
+    await expect(mutation).resolves.toBe(true);
+    expect(facade.saving()).toBe(false);
+  });
 });

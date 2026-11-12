@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { AuthFacade } from '../../../core/auth/auth.facade';
 import { isPermissionDenied } from '../../../core/auth/permission-denied';
-import { SessionScope } from '../../../core/auth/session-scope';
+import { SessionScope, type AdminAccessContext } from '../../../core/auth/session-scope';
 import type { AreaCampus, InventoryArea } from '../../../shared/models/inventory-area';
 import { AREAS_GATEWAY, type AreaDraft, type AreaUpdate } from '../data/areas.gateway';
 
@@ -50,6 +50,9 @@ export class AreasFacade {
   private readonly savingState = signal(false);
   private readonly errorState = signal<string | null>(null);
   private readonly successState = signal<string | null>(null);
+  private listRequest = 0;
+  private catalogRequest = 0;
+  private operationRequest = 0;
   readonly areas = this.areasState.asReadonly();
   readonly campuses = this.campusesState.asReadonly();
   readonly query = this.queryState.asReadonly();
@@ -81,6 +84,9 @@ export class AreasFacade {
   });
   constructor() {
     this.session.registerInvalidationListener(() => this.reset());
+    this.session.registerAdminAccessListener((allowed) => {
+      if (!allowed) this.reset();
+    });
   }
   setQuery(value: string): void {
     this.queryState.set(value);
@@ -93,59 +99,61 @@ export class AreasFacade {
     this.successState.set(null);
   }
   async load(): Promise<void> {
-    const generation = this.session.generation();
+    const context = this.session.captureAdminAccess();
     if (this.auth.role() !== 'admin') return;
+    const request = ++this.listRequest;
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
       const result = await this.gateway.list();
-      if (this.current(generation)) this.areasState.set(result.items);
+      if (this.currentList(context, request)) this.areasState.set(result.items);
     } catch (error) {
       await this.revalidate(error);
-      if (this.current(generation)) this.errorState.set(message(error));
+      if (this.currentList(context, request)) this.errorState.set(message(error));
     } finally {
-      if (this.current(generation)) this.loadingState.set(false);
+      if (this.currentList(context, request)) this.loadingState.set(false);
     }
   }
   async loadCatalogs(currentCampusId?: string): Promise<boolean> {
-    const generation = this.session.generation();
+    const context = this.session.captureAdminAccess();
     if (this.auth.role() !== 'admin') return false;
+    const request = ++this.catalogRequest;
     try {
       const result = await this.gateway.catalogs(currentCampusId);
-      if (!this.current(generation)) return false;
+      if (!this.currentCatalog(context, request)) return false;
       this.campusesState.set(result.campuses);
       return true;
     } catch (error) {
       await this.revalidate(error);
-      if (this.current(generation)) this.errorState.set(message(error));
+      if (this.currentCatalog(context, request)) this.errorState.set(message(error));
       return false;
     }
   }
   async create(input: AreaDraft): Promise<string | null> {
-    const generation = this.session.generation();
+    const context = this.session.captureAdminAccess();
     if (this.auth.role() !== 'admin') return null;
+    const operation = this.beginOperation();
     this.savingState.set(true);
     this.clearMessages();
     try {
       const created = await this.gateway.create(input);
-      if (!this.current(generation)) return null;
+      if (!this.currentOperation(context, operation)) return null;
       try {
-        const list = await this.gateway.list();
-        if (this.current(generation)) this.areasState.set(list.items);
+        await this.reload(context, operation);
       } catch (error) {
         await this.revalidate(error);
-        if (this.current(generation))
+        if (this.currentOperation(context, operation))
           this.errorState.set('El Área fue creada, pero no fue posible actualizar el listado.');
       }
-      if (!this.current(generation)) return null;
+      if (!this.currentOperation(context, operation)) return null;
       this.successState.set('Área creada correctamente.');
       return created.documentId;
     } catch (error) {
       await this.revalidate(error);
-      if (this.current(generation)) this.errorState.set(message(error));
+      if (this.currentOperation(context, operation)) this.errorState.set(message(error));
       return null;
     } finally {
-      if (this.current(generation)) this.savingState.set(false);
+      if (this.currentOperation(context, operation)) this.savingState.set(false);
     }
   }
   async update(input: AreaUpdate): Promise<boolean> {
@@ -161,58 +169,79 @@ export class AreasFacade {
     return this.mutate(() => this.gateway.delete(area.documentId), 'Área eliminada correctamente.');
   }
   async reconcile(): Promise<boolean> {
-    const generation = this.session.generation();
+    const context = this.session.captureAdminAccess();
     if (this.auth.role() !== 'admin') return false;
+    const operation = this.beginOperation();
     this.savingState.set(true);
     this.clearMessages();
     try {
       const result = await this.gateway.reconcile();
-      if (!this.current(generation)) return false;
-      await this.reload(generation);
-      if (!this.current(generation)) return false;
+      if (!this.currentOperation(context, operation)) return false;
+      await this.reload(context, operation);
+      if (!this.currentOperation(context, operation)) return false;
       this.successState.set(
         `Reconciliación completada: ${result.campusesCorrected} de ${result.campusesChecked} Campus corregidos.`,
       );
       return true;
     } catch (error) {
       await this.revalidate(error);
-      if (this.current(generation)) this.errorState.set(message(error));
+      if (this.currentOperation(context, operation)) this.errorState.set(message(error));
       return false;
     } finally {
-      if (this.current(generation)) this.savingState.set(false);
+      if (this.currentOperation(context, operation)) this.savingState.set(false);
     }
   }
   private async mutate(operation: () => Promise<void>, success: string): Promise<boolean> {
-    const generation = this.session.generation();
+    const context = this.session.captureAdminAccess();
     if (this.auth.role() !== 'admin') return false;
+    const operationRequest = this.beginOperation();
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
-      if (!this.current(generation)) return false;
-      await this.reload(generation);
-      if (!this.current(generation)) return false;
+      if (!this.currentOperation(context, operationRequest)) return false;
+      await this.reload(context, operationRequest);
+      if (!this.currentOperation(context, operationRequest)) return false;
       this.successState.set(success);
       return true;
     } catch (error) {
       await this.revalidate(error);
-      if (this.current(generation)) this.errorState.set(message(error));
+      if (this.currentOperation(context, operationRequest)) this.errorState.set(message(error));
       return false;
     } finally {
-      if (this.current(generation)) this.savingState.set(false);
+      if (this.currentOperation(context, operationRequest)) this.savingState.set(false);
     }
   }
-  private async reload(generation: number): Promise<void> {
+  private async reload(context: AdminAccessContext, operation: number): Promise<void> {
+    const request = ++this.listRequest;
     const result = await this.gateway.list();
-    if (this.current(generation)) this.areasState.set(result.items);
+    if (this.currentOperation(context, operation) && this.listRequest === request) {
+      this.areasState.set(result.items);
+    }
   }
-  private current(generation: number): boolean {
-    return this.session.isCurrent(generation) && this.auth.role() === 'admin';
+  private beginOperation(): number {
+    this.listRequest += 1;
+    return ++this.operationRequest;
+  }
+  private currentAccess(context: AdminAccessContext): boolean {
+    return this.session.isAdminAccessCurrent(context) && this.auth.role() === 'admin';
+  }
+  private currentList(context: AdminAccessContext, request: number): boolean {
+    return this.currentAccess(context) && this.listRequest === request;
+  }
+  private currentCatalog(context: AdminAccessContext, request: number): boolean {
+    return this.currentAccess(context) && this.catalogRequest === request;
+  }
+  private currentOperation(context: AdminAccessContext, operation: number): boolean {
+    return this.currentAccess(context) && this.operationRequest === operation;
   }
   private async revalidate(error: unknown): Promise<void> {
     if (isPermissionDenied(error)) await this.auth.revalidatePermissionDenial(error);
   }
   reset(): void {
+    this.listRequest += 1;
+    this.catalogRequest += 1;
+    this.operationRequest += 1;
     this.areasState.set([]);
     this.campusesState.set([]);
     this.queryState.set('');
@@ -220,5 +249,9 @@ export class AreasFacade {
     this.loadingState.set(false);
     this.savingState.set(false);
     this.clearMessages();
+  }
+
+  invalidateView(): void {
+    this.reset();
   }
 }

@@ -39,7 +39,12 @@ export interface AreaReconciliationResult {
   readonly campusesCorrected: number;
   readonly corrections: readonly {
     readonly campusId: string;
-    readonly previous: number;
+    readonly previous:
+      | number
+      | {
+          readonly state: 'invalid';
+          readonly reason: 'missing' | 'null' | 'negative' | 'non-integer' | 'invalid-type';
+        };
     readonly expected: number;
   }[];
 }
@@ -105,6 +110,10 @@ function collapse(value: string): string {
   return value.trim().replace(/\s+/gu, ' ');
 }
 
+export function hasVisibleAreaName(value: string): boolean {
+  return value.replace(/[\p{White_Space}\p{Cf}\p{Cc}\p{Cs}]/gu, '').length > 0;
+}
+
 export function normalizeAreaName(value: string): string {
   return collapse(value)
     .normalize('NFKD')
@@ -114,7 +123,11 @@ export function normalizeAreaName(value: string): string {
 
 function draft(request: Readonly<Record<string, unknown>>): AreaDraft {
   const campusId = id(request['campusId'], 'area-campus-required');
-  if (typeof request['nombre'] !== 'string' || !collapse(request['nombre'])) {
+  if (
+    typeof request['nombre'] !== 'string' ||
+    !collapse(request['nombre']) ||
+    !hasVisibleAreaName(request['nombre'])
+  ) {
     throw new AdminAreasError(
       'area-name-required',
       'invalid-argument',

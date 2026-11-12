@@ -4,21 +4,29 @@
 
 | Alcance            | Reglas          | Implementación o propuesta                             | Pruebas                            |
 | ------------------ | --------------- | ------------------------------------------------------ | ---------------------------------- |
-| Autenticación      | RN-AUT-001–009  | Base, permisos y revocación selectiva implementados    | AUT-001–AUT-019                    |
+| Autenticación      | RN-AUT-001–009  | Base, permisos y revocación selectiva implementados    | AUT-001–AUT-020                    |
 | Dashboard inicial  | RN-DASH-001–003 | `features/dashboard`                                   | DASH-001–004                       |
 | Usuarios           | RN-USR-001–011  | Base y matriz de cuatro módulos implementadas          | USR-001–USR-035                    |
 | Layout privado     | RN-LAY-001–012  | Navegación y revocación granular implementadas         | LAY-001–LAY-028                    |
-| Categorías         | RN-CAT-001–012  | Base y autorización granular implementadas             | CAT-001–CAT-027                    |
-| Fabricantes        | RN-FAB-001–012  | Base y autorización granular implementadas             | FAB-001–FAB-023                    |
-| Modelos de activos | RN-MOD-001–030  | Base y autorización granular implementadas             | MOD-001–MOD-060                    |
-| Permisos           | RN-PER-001–022  | Autorización y revocación funcional implementadas      | Cubiertos por criterios de módulos |
-| Campus             | RN-CAM-001–016  | Base y permiso funcional implementados                 | CAM-001–CAM-038                    |
+| Categorías         | RN-CAT-001–012  | Base y autorización granular implementadas             | CAT-001–CAT-028                    |
+| Fabricantes        | RN-FAB-001–012  | Base y autorización granular implementadas             | FAB-001–FAB-024                    |
+| Modelos de activos | RN-MOD-001–030  | Base y autorización granular implementadas             | MOD-001–MOD-062                    |
+| Permisos           | RN-PER-001–025  | Autorización y revocación funcional implementadas      | Cubiertos por criterios de módulos |
+| Campus             | RN-CAM-001–016  | Base y permiso funcional implementados                 | CAM-001–CAM-039                    |
 | Calidad local      | RN-DEV-001–003  | seed, emuladores, Playwright y verificador estructural | DEV-001–DEV-003                    |
-| Áreas              | RN-ARE-001–012  | Catálogo por Campus, transacciones y reconciliación    | ARE-001–ARE-035                    |
+| Áreas              | RN-ARE-001–018  | Catálogo por Campus, transacciones y reconciliación    | ARE-001–ARE-043                    |
 
 Áreas incorpora criterios obligatorios estructurales y manuales. La evidencia automatizada debe vincularse al SHA final validado; ARE-033 permanece como aceptación real separada y no se considera aprobada por emuladores o HTTP 200.
 
 El incremento se validó sobre `306826f1b0c9b27429a8109c81748f1d17c267b9` y se desplegó desde `bc54b9699435a9be2e200ed98db177f3d9329d40`. ARE-032 tiene evidencia técnica remota; ARE-033 continúa pendiente de aceptación autenticada real.
+
+## Endurecimiento de cierre — 12 de noviembre de 2026
+
+- AUT-020 exige una ronda de autorización posterior al rechazo y evita reutilizar una consulta anterior pendiente.
+- CAT-028, FAB-024, CAM-039 y MOD-061 vinculan `saving` con la operación y acción exactas.
+- MOD-062 aísla cada diálogo de Modelos frente a respuestas tardías de creación e imagen.
+- ARE-036–043 cubren orden de listados y catálogos, pérdida y recuperación administrativa, contadores derivados inválidos, nombres invisibles, inspector indeterminado, concurrencia y datos E2E con propiedad explícita.
+- La evidencia de ejecución se asociará al SHA que contenga estas correcciones; hasta entonces el manifiesto las distingue como implementadas pendientes de verificación. ARE-033 continúa como aceptación real separada.
 
 El ajuste final `7d7854e89c9fab4ee29ca2451fffb66a7c878798` conserva Campus históricos inactivos en el filtro, aprobó 91 pruebas Angular, lint, build y publicación exclusiva de Hosting; no modifica Rules ni Functions.
 

@@ -53,6 +53,7 @@ Los escenarios CAM-026 a CAM-030 se implementarán en los módulos consumidores 
 - CAM-036: el diálogo de Usuarios incorpora Campus como cuarto módulo, conserva dependencia de Ver, cancelación sin persistencia, accesibilidad y resumen de cero a cuatro módulos. <!-- trace:required -->
 - CAM-037: después de habilitar el contrato de cuatro módulos, un payload anterior de tres módulos responde `user-permissions-invalid` y conserva íntegro el mapa previo. <!-- trace:required -->
 - CAM-038: retirar `campus.ver` entra en vigor inmediatamente en backend y, tras revalidar, invalida lecturas o mutaciones pendientes, limpia solo Campus, cierra sus diálogos, elimina ruta y submenú y navega a Dashboard sin cerrar la sesión ni afectar otros módulos. <!-- trace:required -->
+- CAM-039: revocar una acción distinta de la mutación activa no apaga su indicador; un cierre anterior tampoco altera una operación posterior. <!-- trace:required -->
 
 ## Evidencia local — 9 de noviembre de 2026
 

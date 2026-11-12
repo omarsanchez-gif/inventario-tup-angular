@@ -4,6 +4,7 @@ import { SessionScope, type CapabilityContext } from '../../../core/auth/session
 import { AuthFacade } from '../../../core/auth/auth.facade';
 import { isPermissionDenied } from '../../../core/auth/permission-denied';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
+import type { PermissionAction } from '../../../shared/models/catalog-permissions';
 import {
   ASSET_MODELS_GATEWAY,
   type AssetModelCatalogs,
@@ -62,6 +63,8 @@ export class AssetModelsFacade {
   private readonly savingState = signal(false);
   private readonly errorState = signal<string | null>(null);
   private readonly successState = signal<string | null>(null);
+  private operationGeneration = 0;
+  private activeAction: PermissionAction | null = null;
 
   readonly models = this.modelsState.asReadonly();
   readonly catalogs = this.catalogsState.asReadonly();
@@ -85,7 +88,9 @@ export class AssetModelsFacade {
     this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
     this.sessionScope.registerCapabilityListener('modelosActivos', (change) => {
       if (change.action === 'ver' && !change.allowed) this.resetPrivateState();
-      else if (!change.allowed) {
+      else if (!change.allowed && this.activeAction === change.action) {
+        this.operationGeneration += 1;
+        this.activeAction = null;
         this.savingState.set(false);
         this.clearMessages();
       }
@@ -119,6 +124,8 @@ export class AssetModelsFacade {
     const action = 'documentId' in input ? 'editar' : 'crear';
     const context = this.sessionScope.captureCapability('modelosActivos', action);
     if (!this.auth.can('modelosActivos', action)) return null;
+    const operation = ++this.operationGeneration;
+    this.activeAction = action;
     this.savingState.set(true);
     this.clearMessages();
     let documentId: string;
@@ -127,25 +134,31 @@ export class AssetModelsFacade {
       if ('documentId' in input) await this.gateway.update(input);
     } catch (error) {
       await this.revalidateDenial(error);
-      if (this.isCurrent(context)) this.errorState.set(errorMessage(error));
-      if (this.isCurrent(context)) this.savingState.set(false);
+      if (this.isOperationCurrent(context, operation)) this.errorState.set(errorMessage(error));
+      if (this.isOperationCurrent(context, operation)) {
+        this.savingState.set(false);
+        this.activeAction = null;
+      }
       return null;
     }
-    if (!this.isCurrent(context)) return null;
+    if (!this.isOperationCurrent(context, operation)) return null;
     try {
-      if (!(await this.reloadModels(context))) return null;
-      if (!this.isCurrent(context)) return null;
+      if (!(await this.reloadModels(context, operation))) return null;
+      if (!this.isOperationCurrent(context, operation)) return null;
       this.successState.set('Modelo guardado correctamente.');
       return { documentId, dataSaved: true, listRefreshed: true };
     } catch (error) {
       await this.revalidateDenial(error);
-      if (!this.isCurrent(context)) return null;
+      if (!this.isOperationCurrent(context, operation)) return null;
       this.errorState.set(
         'El Modelo quedó guardado, pero el listado no pudo actualizarse. Puede continuar con la imagen.',
       );
       return { documentId, dataSaved: true, listRefreshed: false };
     } finally {
-      if (this.isCurrent(context)) this.savingState.set(false);
+      if (this.isOperationCurrent(context, operation)) {
+        this.savingState.set(false);
+        this.activeAction = null;
+      }
     }
   }
 
@@ -208,9 +221,9 @@ export class AssetModelsFacade {
     this.errorState.set('No fue posible cargar una imagen temporal.');
   }
 
-  private async reloadModels(context: CapabilityContext): Promise<boolean> {
+  private async reloadModels(context: CapabilityContext, operation: number): Promise<boolean> {
     const result = await this.gateway.list();
-    if (!this.isCurrent(context)) return false;
+    if (!this.isOperationCurrent(context, operation)) return false;
     this.modelsState.set(result.items);
     return true;
   }
@@ -222,24 +235,32 @@ export class AssetModelsFacade {
   ): Promise<boolean> {
     const context = this.sessionScope.captureCapability('modelosActivos', action);
     if (!this.auth.can('modelosActivos', action)) return false;
+    const operationGeneration = ++this.operationGeneration;
+    this.activeAction = action;
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
-      if (!this.isCurrent(context)) return false;
-      if (!(await this.reloadModels(context))) return false;
+      if (!this.isOperationCurrent(context, operationGeneration)) return false;
+      if (!(await this.reloadModels(context, operationGeneration))) return false;
       this.successState.set(successMessage);
       return true;
     } catch (error) {
       await this.revalidateDenial(error);
-      if (this.isCurrent(context)) this.errorState.set(errorMessage(error));
+      if (this.isOperationCurrent(context, operationGeneration))
+        this.errorState.set(errorMessage(error));
       return false;
     } finally {
-      if (this.isCurrent(context)) this.savingState.set(false);
+      if (this.isOperationCurrent(context, operationGeneration)) {
+        this.savingState.set(false);
+        this.activeAction = null;
+      }
     }
   }
 
   private resetPrivateState(): void {
+    this.operationGeneration += 1;
+    this.activeAction = null;
     this.modelsState.set([]);
     this.catalogsState.set({ categorias: [], fabricantes: [] });
     this.queryState.set('');
@@ -253,6 +274,10 @@ export class AssetModelsFacade {
       this.sessionScope.isCapabilityCurrent(context) &&
       this.auth.can('modelosActivos', context.action)
     );
+  }
+
+  private isOperationCurrent(context: CapabilityContext, operation: number): boolean {
+    return this.operationGeneration === operation && this.isCurrent(context);
   }
 
   private async revalidateDenial(error: unknown): Promise<void> {

@@ -84,6 +84,22 @@ describe('admin areas', () => {
       ),
     ).rejects.toMatchObject({ functionalCode: 'invalid-argument' });
   });
+  it('ARE-040 rejects whitespace and invisible-only names before repository writes', async () => {
+    const dependencies = deps();
+    for (const nombre of ['   ', '\u200B', '\u200B \t\u200B']) {
+      await expect(
+        createArea(admin, { campusId: 'campus-1', nombre, notas: null }, dependencies),
+      ).rejects.toMatchObject({ functionalCode: 'area-name-required' });
+    }
+    expect(dependencies.repository.create).not.toHaveBeenCalled();
+    await expect(
+      createArea(
+        admin,
+        { campusId: 'campus-1', nombre: 'Quirófano Norte', notas: null },
+        dependencies,
+      ),
+    ).resolves.toMatchObject({ documentId: 'new-area' });
+  });
   it('ARE-013 fails without partial data above the 500 limit and sanitizes list', async () => {
     await expect(
       listAreas(admin, deps(Array.from({ length: MAX_SUPPORTED_AREAS + 1 }, (_, i) => item(i)))),

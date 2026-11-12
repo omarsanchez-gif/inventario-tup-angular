@@ -320,6 +320,7 @@ areas/{areaId}
 - `notas` admite 1,000 caracteres, se recorta y una cadena vacía se almacena como `null`.
 - Todo registro inicia activo. Estado, normalización y fechas no son editables por clientes.
 - El contador `campus.cantidadAreas` incluye todos los documentos existentes, activos e inactivos.
+- Las mutaciones ordinarias exigen que `cantidadAreas` sea un entero no negativo. La reconciliación es la única operación que puede reparar un valor derivado ausente, nulo, negativo, no entero o de tipo inválido a partir de las relaciones canónicas; el diagnóstico no inventa un valor anterior numérico.
 
 ## Índice técnico `areas_claves`
 

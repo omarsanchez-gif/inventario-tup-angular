@@ -226,4 +226,35 @@ describe('AuthFacade session lifecycle', () => {
     await expect(Promise.all([first, second])).resolves.toEqual([true, true]);
     expect(bootstrap).toHaveBeenCalledTimes(2);
   });
+
+  it('AUT-020 starts one fresh rejection round and ignores the older pending refresh', async () => {
+    const current = profile('catalog-admin', 'Administración');
+    const stale = deferred<BootstrapAuthorizationResult>();
+    const fresh = deferred<BootstrapAuthorizationResult>();
+    bootstrap
+      .mockResolvedValueOnce(current)
+      .mockReturnValueOnce(stale.promise)
+      .mockReturnValueOnce(fresh.promise);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+    emitSession({ uid: current.uid } as User);
+    await initialization;
+
+    const oldRefresh = facade.refreshAuthorization();
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledTimes(2));
+    const firstDenial = facade.revalidatePermissionDenial({ code: 'functions/permission-denied' });
+    const secondDenial = facade.revalidatePermissionDenial({
+      details: { functionalCode: 'permission-denied' },
+    });
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledTimes(3));
+    fresh.resolve(profile(current.uid, 'Autorización vigente'));
+
+    await expect(Promise.all([firstDenial, secondDenial])).resolves.toEqual([true, true]);
+    stale.resolve(profile(current.uid, 'Perfil obsoleto'));
+    await expect(oldRefresh).resolves.toBe(false);
+
+    expect(facade.user()?.nombre).toBe('Autorización vigente');
+    expect(bootstrap).toHaveBeenCalledTimes(3);
+    expect(authGateway.signOut).not.toHaveBeenCalled();
+  });
 });

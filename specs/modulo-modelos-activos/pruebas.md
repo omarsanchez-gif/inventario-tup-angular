@@ -98,6 +98,8 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 - MOD-058: la interfaz muestra solo acciones permitidas, pero toda invocación directa sin capacidad es rechazada sin alterar metadata, objetos, operaciones o trabajos de limpieza.
 - MOD-059: un usuario con `modelosActivos.ver+crear`, sin Editar, crea los datos del Modelo sin ver controles de imagen y sin invocar carga, sustitución o retirada. <!-- trace:required -->
 - MOD-060: si Editar se revoca después de confirmar la creación y antes de procesar la imagen, se conserva el Modelo, no se inicia la operación de imagen y la interfaz informa el estado confirmado sin presentarlo como cancelación. <!-- trace:required -->
+- MOD-061: revocar una acción distinta de la mutación activa no apaga su indicador; una finalización anterior tampoco altera una operación posterior. <!-- trace:required -->
+- MOD-062: una creación con imagen invalidada por revocación no cambia campos, errores, cierre o indicador de un diálogo nuevo, aunque su promesa se resuelva después. <!-- trace:required -->
 
 ## Evidencia de revocación e imagen — 11 de noviembre de 2026
 

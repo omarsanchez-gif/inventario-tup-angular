@@ -242,6 +242,60 @@ describe('AssetModelsPage', () => {
     expect(element.querySelector('[role="status"]')?.textContent).toContain('permiso');
   });
 
+  it('MOD-062 prevents an old create-image flow from changing a later dialog', async () => {
+    const saved = deferred<{ documentId: string; dataSaved: true; listRefreshed: true }>();
+    const allowed = new Set(['ver', 'crear', 'editar']);
+    authCan.mockImplementation((_module: string, actionName: string) => allowed.has(actionName));
+    assetModels.save.mockReturnValueOnce(saved.promise);
+    textButton('Nuevo modelo').click();
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      form: {
+        setValue(value: Record<string, string>): void;
+        controls: { nombre: { value: string } };
+      };
+      selectedImage: WritableSignal<File | null>;
+      submit(): Promise<void>;
+    };
+    component.form.setValue({
+      nombre: 'Operación A',
+      categoriaId: 'category-1',
+      fabricanteId: 'manufacturer-1',
+      modeloNo: '',
+      notas: '',
+    });
+    component.selectedImage.set(
+      new File([new Uint8Array([1])], 'model.png', { type: 'image/png' }),
+    );
+    const firstSubmit = component.submit();
+    await vi.waitFor(() => expect(assetModels.save).toHaveBeenCalledOnce());
+    allowed.delete('editar');
+    TestBed.inject(SessionScope).reconcileCapabilities(
+      'usuario',
+      { ...emptyPermissionMap(), modelosActivos: ['ver', 'crear', 'editar'] },
+      'usuario',
+      { ...emptyPermissionMap(), modelosActivos: ['ver', 'crear'] },
+    );
+    fixture.detectChanges();
+    textButton('Nuevo modelo').click();
+    fixture.detectChanges();
+    component.form.setValue({
+      nombre: 'Operación B',
+      categoriaId: 'category-1',
+      fabricanteId: 'manufacturer-1',
+      modeloNo: '',
+      notas: '',
+    });
+
+    saved.resolve({ documentId: 'model-a', dataSaved: true, listRefreshed: true });
+    await firstSubmit;
+    fixture.detectChanges();
+
+    expect(component.form.controls.nombre.value).toBe('Operación B');
+    expect(element.querySelector('dialog[open]')).toBeTruthy();
+    expect(assetModels.setImage).not.toHaveBeenCalled();
+  });
+
   it('opens edit and deletion dialogs and delegates the destructive confirmation', async () => {
     action('Editar Latitude 5500').click();
     fixture.detectChanges();

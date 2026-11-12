@@ -18,7 +18,7 @@ import {
 } from './admin-areas.js';
 
 export interface AreaReferenceInspector {
-  hasReferences(transaction: Transaction, areaId: string): Promise<boolean>;
+  hasReferences(transaction: Transaction, areaId: string): Promise<boolean | undefined>;
 }
 
 const noCurrentConsumers: AreaReferenceInspector = {
@@ -80,6 +80,25 @@ function area(id: string, data: DocumentData, campus: AreaCampusSummary): Manage
 function count(data: DocumentData): number {
   const value = data['cantidadAreas'];
   if (!Number.isInteger(value) || value < 0) throw fail();
+  return value;
+}
+
+type AreaCountDiagnostic =
+  | number
+  | {
+      readonly state: 'invalid';
+      readonly reason: 'missing' | 'null' | 'negative' | 'non-integer' | 'invalid-type';
+    };
+
+function diagnosticCount(data: DocumentData): AreaCountDiagnostic {
+  if (!Object.prototype.hasOwnProperty.call(data, 'cantidadAreas')) {
+    return { state: 'invalid', reason: 'missing' };
+  }
+  const value = data['cantidadAreas'];
+  if (value === null) return { state: 'invalid', reason: 'null' };
+  if (typeof value !== 'number') return { state: 'invalid', reason: 'invalid-type' };
+  if (!Number.isInteger(value)) return { state: 'invalid', reason: 'non-integer' };
+  if (value < 0) return { state: 'invalid', reason: 'negative' };
   return value;
 }
 
@@ -238,18 +257,20 @@ export function createAdminAreasRepository(
             'El Área ya existe en el Campus.',
           );
         if (sourceId !== input.campusId) {
-          let referenced: boolean;
+          let referenced: boolean | undefined;
           try {
             referenced = await references.hasReferences(transaction, input.documentId);
           } catch {
             throw fail();
           }
-          if (referenced)
+          if (referenced !== false) {
+            if (referenced === undefined) throw fail();
             throw new AdminAreasError(
               'area-transfer-not-allowed',
               'failed-precondition',
               'El Área tiene referencias y no puede transferirse.',
             );
+          }
           const sourceCount = count(sourceSnapshot.data() ?? {});
           if (sourceCount < 1) throw fail();
           transaction.update(sourceReference, {
@@ -302,14 +323,16 @@ export function createAdminAreasRepository(
         const data = snapshot.data() ?? {};
         if (typeof data['campusId'] !== 'string' || typeof data['nombreNormalizado'] !== 'string')
           throw fail();
-        let referenced: boolean;
+        let referenced: boolean | undefined;
         try {
           referenced = await references.hasReferences(transaction, documentId);
         } catch {
           throw fail();
         }
-        if (referenced)
+        if (referenced !== false) {
+          if (referenced === undefined) throw fail();
           throw new AdminAreasError('area-in-use', 'failed-precondition', 'El Área está en uso.');
+        }
         const campusReference = campuses.doc(data['campusId']);
         const campusSnapshot = await transaction.get(campusReference);
         const keyReference = keys.doc(areaKey(data['campusId'], data['nombreNormalizado']));
@@ -347,11 +370,15 @@ export function createAdminAreasRepository(
         }
         const known = new Set(campusSnapshot.docs.map((document) => document.id));
         if ([...counts.keys()].some((campusId) => !known.has(campusId))) throw fail();
-        const corrections: { campusId: string; previous: number; expected: number }[] = [];
+        const corrections: {
+          campusId: string;
+          previous: AreaCountDiagnostic;
+          expected: number;
+        }[] = [];
         for (const document of campusSnapshot.docs) {
-          const previous = count(document.data());
+          const previous = diagnosticCount(document.data());
           const expected = counts.get(document.id) ?? 0;
-          if (previous !== expected) {
+          if (typeof previous !== 'number' || previous !== expected) {
             corrections.push({ campusId: document.id, previous, expected });
             transaction.update(document.ref, {
               cantidadAreas: expected,

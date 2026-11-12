@@ -20,6 +20,16 @@ export interface AreaCatalogsResult {
 export interface AreaReconciliationResult {
   readonly campusesChecked: number;
   readonly campusesCorrected: number;
+  readonly corrections?: readonly {
+    readonly campusId: string;
+    readonly previous:
+      | number
+      | {
+          readonly state: 'invalid';
+          readonly reason: 'missing' | 'null' | 'negative' | 'non-integer' | 'invalid-type';
+        };
+    readonly expected: number;
+  }[];
 }
 
 export interface AreasGateway {

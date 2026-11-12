@@ -56,3 +56,11 @@ Los criterios siguientes son obligatorios. Su presencia en una prueba no acredit
 - ARE-033: una sesión administrativa real acepta alta, edición, estado, transferencia aprobada, eliminación y causas de rechazo; esta aceptación se registra separada de HTTP 200, Function `ACTIVE` y pruebas locales. <!-- trace:required -->
 - ARE-034: si el mismo UID pierde el rol administrativo durante una espera, la respuesta se descarta, se cierran diálogos, se limpia el estado y la ruta vuelve a Dashboard. <!-- trace:required -->
 - ARE-035: si el alta queda confirmada pero falla la recarga, la interfaz conserva el identificador retornado y no repite la creación. <!-- trace:required -->
+- ARE-036: dos listados fuera de orden conservan exclusivamente la respuesta de la solicitud más reciente, incluso tras salir y volver a la ruta. <!-- trace:required -->
+- ARE-037: el catálogo inicial tardío no reemplaza el catálogo posterior de una edición que conserva un Campus histórico inactivo. <!-- trace:required -->
+- ARE-038: perder y recuperar rol `admin` con el mismo UID no revive operaciones anteriores ni restaura estado, mensajes o diálogos. <!-- trace:required -->
+- ARE-039: reconciliar repara contadores negativos, nulos o ausentes con diagnóstico explícito, conserva relaciones canónicas e idempotencia. <!-- trace:required -->
+- ARE-040: nombres compuestos solo por espacios o caracteres invisibles se rechazan sin Área, reserva o cambio de contador; Unicode visible legítimo permanece permitido. <!-- trace:required -->
+- ARE-041: el inspector de referencias permite únicamente un `false` explícito; `true`, excepción o resultado indeterminado bloquean eliminación y transferencia sin cambios parciales. <!-- trace:required -->
+- ARE-042: reconciliación concurrente con alta, transferencia o eliminación converge al contador y reservas exactos mediante reintento transaccional. <!-- trace:required -->
+- ARE-043: el recorrido E2E usa identidad sintética única y limpieza limitada a sus propios registros, de modo que una ejecución fallida no colisiona ni provoca borrados globales. <!-- trace:required -->

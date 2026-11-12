@@ -69,4 +69,45 @@ describe('ManufacturersFacade granular authorization', () => {
     expect(facade.success()).toBeNull();
     expect(list).toHaveBeenCalledOnce();
   });
+  it('FAB-024 keeps a pending edit saving when an unrelated status grant is revoked', async () => {
+    const update = deferred<void>();
+    const allowed = new Set<PermissionAction>(['ver', 'editar', 'cambiarEstado']);
+    TestBed.configureTestingModule({
+      providers: [
+        ManufacturersFacade,
+        {
+          provide: MANUFACTURERS_GATEWAY,
+          useValue: {
+            list: vi.fn().mockResolvedValue({ items: [], total: 0, maxSupported: 500 }),
+            create: vi.fn(),
+            update: vi.fn(() => update.promise),
+            setStatus: vi.fn(),
+            delete: vi.fn(),
+          } satisfies ManufacturersGateway,
+        },
+        {
+          provide: AuthFacade,
+          useValue: {
+            can: vi.fn((_module: string, action: PermissionAction) => allowed.has(action)),
+            revalidatePermissionDenial: vi.fn(),
+          },
+        },
+      ],
+    });
+    const facade = TestBed.inject(ManufacturersFacade);
+    const scope = TestBed.inject(SessionScope);
+    const mutation = facade.update({ documentId: 'manufacturer', nombre: 'Dell', notas: null });
+    await Promise.resolve();
+    allowed.delete('cambiarEstado');
+    scope.reconcileCapabilities(
+      'usuario',
+      { ...emptyPermissionMap(), fabricantes: ['ver', 'editar', 'cambiarEstado'] },
+      'usuario',
+      { ...emptyPermissionMap(), fabricantes: ['ver', 'editar'] },
+    );
+    expect(facade.saving()).toBe(true);
+    update.resolve();
+    await expect(mutation).resolves.toBe(true);
+    expect(facade.saving()).toBe(false);
+  });
 });

@@ -20,7 +20,7 @@
 
 ## Permisos granulares de catálogos — incremento autorizado
 
-RN-PER-001–022 y las ampliaciones granulares de Layout, Categorías, Fabricantes, Modelos y Campus describen el incremento autorizado e implementado conforme a ADR-007. Su despliegue se limita a staging.
+RN-PER-001–025 y las ampliaciones granulares de Layout, Categorías, Fabricantes, Modelos y Campus describen el incremento autorizado e implementado conforme a ADR-007. Su despliegue se limita a staging.
 
 - RN-PER-001: `usuarios` es la fuente canónica de permisos; Custom Claims conserva solo autorización y rol.
 - RN-PER-002: En este incremento solo son autorizables `categorias`, `fabricantes`, `modelosActivos` y `campus`.
@@ -47,6 +47,9 @@ RN-PER-001–022 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-PER-020: Un `permission-denied` de listado, mutación, catálogo o imagen provoca revalidación deduplicada de autorización y nunca un bucle de reintentos automáticos.
 - RN-PER-021: Un Modelo creado con `ver+crear` no expone ni ejecuta operaciones de imagen; cargar, sustituir o retirar imagen exige `editar` vigente antes y después de cada espera relevante.
 - RN-PER-022: Una escritura ya confirmada no se presenta como cancelada por una revocación posterior. La interfaz descarta resultados obsoletos y reconcilia el estado mediante una lectura autorizada posterior.
+- RN-PER-023: Una revalidación originada por `permission-denied` siempre empieza después del rechazo que la solicita; no reutiliza una consulta anterior pendiente. Rechazos relacionados comparten esa única ronda nueva y la mutación original no se reintenta.
+- RN-PER-024: El indicador de guardado pertenece a una operación y acción concretas. Revocar otra acción no lo apaga; una finalización anterior no altera una operación posterior.
+- RN-PER-025: Cada apertura de diálogo posee una identidad invalidada al cerrar, destruir o perder la capacidad necesaria. Ninguna espera anterior modifica campos, errores, cierre o indicador de un diálogo posterior.
 
 ## Usuarios
 
@@ -188,3 +191,9 @@ RN-PER-001–022 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-ARE-010: La reconciliación es administrativa, idempotente, calculada en backend y transaccional; el cliente no envía cantidades.
 - RN-ARE-011: Firestore permanece cerrado a clientes y toda operación usa callables que revalidan rol, claim y perfil canónico.
 - RN-ARE-012: Áreas no forma parte del mapa granular vigente; su futura lectura por `usuario` se especificará con Coordinaciones y alcance.
+- RN-ARE-013: Listados, catálogos y aperturas de Áreas usan generaciones independientes; solo la solicitud más reciente del contexto administrativo vigente puede escribir estado o mensajes.
+- RN-ARE-014: Perder acceso administrativo invalida permanentemente toda operación anterior aunque el mismo UID recupere después el rol sin cerrar sesión.
+- RN-ARE-015: La reconciliación puede reparar un `cantidadAreas` derivado ausente, nulo, negativo o no entero cuando las relaciones canónicas son consistentes; informa el estado previo como inválido sin inventar un cero.
+- RN-ARE-016: El nombre de Área debe contener al menos un carácter visible; espacios, controles y caracteres de formato invisibles por sí solos se rechazan antes de escribir.
+- RN-ARE-017: El inspector de referencias solo permite transferir o eliminar cuando responde explícitamente `false`; `true`, excepción o resultado indeterminado bloquean de forma segura.
+- RN-ARE-018: Los recorridos sintéticos generan identidad propia y limpian solo los documentos que poseen; una falla previa no puede colisionar con la siguiente ejecución ni autoriza un borrado global.

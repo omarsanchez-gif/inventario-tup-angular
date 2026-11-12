@@ -977,6 +977,104 @@
       "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
       "state": "verified-local",
       "evidenceId": "areas-306826f"
+    },
+    {
+      "requirement": "RN-PER-023",
+      "criterion": "AUT-020",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts", "src/app/core/auth/session-scope.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-024",
+      "criterion": "CAT-028",
+      "verification": "automated",
+      "tests": ["src/app/features/categories/state/categories.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-024",
+      "criterion": "FAB-024",
+      "verification": "automated",
+      "tests": ["src/app/features/manufacturers/state/manufacturers.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-024",
+      "criterion": "CAM-039",
+      "verification": "automated",
+      "tests": ["src/app/features/campuses/state/campuses.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-024",
+      "criterion": "MOD-061",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/state/asset-models.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-025",
+      "criterion": "MOD-062",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-013",
+      "criterion": "ARE-036",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-013",
+      "criterion": "ARE-037",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "ARE-038",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-015",
+      "criterion": "ARE-039",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-016",
+      "criterion": "ARE-040",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-017",
+      "criterion": "ARE-041",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-015",
+      "criterion": "ARE-042",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-018",
+      "criterion": "ARE-043",
+      "verification": "browser",
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "implemented-pending-verification"
     }
   ]
 }

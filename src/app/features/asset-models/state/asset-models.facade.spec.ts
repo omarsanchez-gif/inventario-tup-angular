@@ -3,6 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { SessionScope } from '../../../core/auth/session-scope';
 import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
+import {
+  emptyPermissionMap,
+  type PermissionAction,
+} from '../../../shared/models/catalog-permissions';
 import { ASSET_MODELS_GATEWAY } from '../data/asset-models.gateway';
 import { AssetModelsFacade } from './asset-models.facade';
 
@@ -29,6 +33,56 @@ const model: InventoryAssetModel = {
 };
 
 describe('AssetModelsFacade save recovery', () => {
+  it('MOD-061 keeps a pending edit saving when an unrelated delete grant is revoked', async () => {
+    const update = deferred<void>();
+    const allowed = new Set<PermissionAction>(['ver', 'editar', 'eliminar']);
+    const gateway = {
+      list: vi.fn().mockResolvedValue({ items: [model] }),
+      catalogs: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(() => update.promise),
+      setStatus: vi.fn(),
+      delete: vi.fn(),
+      setImage: vi.fn(),
+      removeImage: vi.fn(),
+      imageAccess: vi.fn(),
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        AssetModelsFacade,
+        { provide: ASSET_MODELS_GATEWAY, useValue: gateway },
+        {
+          provide: AuthFacade,
+          useValue: {
+            can: vi.fn((_module: string, action: PermissionAction) => allowed.has(action)),
+            revalidatePermissionDenial: vi.fn(),
+          },
+        },
+      ],
+    });
+    const facade = TestBed.inject(AssetModelsFacade);
+    const session = TestBed.inject(SessionScope);
+    const mutation = facade.save({
+      documentId: model.documentId,
+      nombre: model.nombre,
+      categoriaId: model.categoria.documentId,
+      fabricanteId: model.fabricante.documentId,
+      modeloNo: null,
+      notas: null,
+    });
+    await Promise.resolve();
+    allowed.delete('eliminar');
+    session.reconcileCapabilities(
+      'usuario',
+      { ...emptyPermissionMap(), modelosActivos: ['ver', 'editar', 'eliminar'] },
+      'usuario',
+      { ...emptyPermissionMap(), modelosActivos: ['ver', 'editar'] },
+    );
+    expect(facade.saving()).toBe(true);
+    update.resolve();
+    await expect(mutation).resolves.toMatchObject({ documentId: model.documentId });
+    expect(facade.saving()).toBe(false);
+  });
   it('MOD-041 preserves the confirmed document id when refreshing the list fails', async () => {
     const gateway = {
       list: vi.fn().mockRejectedValue(new Error('injected read failure')),
