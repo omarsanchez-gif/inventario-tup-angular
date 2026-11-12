@@ -19,7 +19,7 @@
 - LAY-017: en móvil, expandir el grupo conserva el drawer y seleccionar `Categorías` navega y lo cierra.
 - LAY-018: con Categorías activa, el usuario puede contraer y volver a expandir `Configuraciones`; el padre conserva su estado activo y el submenú usa todo el ancho disponible.
 - LAY-019: Dashboard, Usuarios y Configuraciones exponen el mismo tamaño y peso tipográfico como opciones principales.
-- LAY-020: Chromium comprueba Escape, retorno de foco, navegación móvil, formulario a 320 px y ausencia de desbordamiento global que impida acciones. <!-- trace:required -->
+- LAY-020: Chromium comprueba Escape, retorno de foco, navegación móvil, formulario a 320 px y ausencia de desbordamiento global contra `documentElement.clientWidth`, incluida una barra vertical que reduzca el ancho útil; las tablas pueden desplazarse únicamente dentro de su contenedor. <!-- trace:required -->
 - LAY-021: los rechazos de eliminación de Usuarios, Categorías, Fabricantes, Modelos y Campus permanecen dentro del `dialog[open]` con `role="alert"`, sin duplicado de fondo y con cierre o reintento accesibles. <!-- trace:required -->
 
 ## Criterios del incremento de permisos

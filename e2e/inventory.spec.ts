@@ -210,7 +210,7 @@ test('LAY-020 keeps mobile navigation and forms usable at 320 px', async ({ page
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Guardar usuario' })).toBeVisible();
   const hasGlobalOverflow = await page.evaluate(
-    () => document.documentElement.scrollWidth > window.innerWidth,
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
   expect(hasGlobalOverflow).toBe(false);
 });

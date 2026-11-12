@@ -30,6 +30,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 ## Comportamiento móvil
 
 - Aplica por debajo de `64rem` y funciona desde `320 px`.
+- El documento no impone un ancho mínimo fijo: el ancho desplazable global coincide con el ancho útil del viewport incluso cuando una barra vertical consume espacio; las tablas conservan su desplazamiento horizontal dentro del contenedor propio.
 - El sidebar inicia cerrado y no desplaza el contenido.
 - El botón de menú abre un drawer fijo con backdrop.
 - El drawer se cierra al activar nuevamente el botón, seleccionar una ruta, pulsar el backdrop o presionar Escape.

@@ -22,6 +22,7 @@
 - [x] Extender los enlaces secundarios a todo el ancho disponible conservando su sangría interna.
 - [x] Igualar la tipografía del botón `Configuraciones` con los enlaces principales del sidebar.
 - [x] Incorporar recorridos Playwright de teclado, foco, navegación móvil y viewport de 320 px con Emulator Suite.
+- [x] Evitar el ancho mínimo global que provoca desplazamiento horizontal en navegadores con barra vertical y reforzar LAY-020 contra el ancho útil real.
 - [x] Mantener los rechazos de eliminación dentro de los cinco diálogos administrativos, sin alerta duplicada en el fondo.
 
 ## Incremento implementado: permisos granulares
