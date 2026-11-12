@@ -99,6 +99,7 @@ function verifyIndex(
 export function createAdminCampusesRepository(firestore: Firestore): AdminCampusesRepository {
   const campuses = firestore.collection('campus');
   const keys = firestore.collection('campus_claves');
+  const areas = firestore.collection('areas');
   const users = firestore.collection('usuarios');
 
   async function requireCanonicalPermission(
@@ -299,6 +300,16 @@ export function createAdminCampusesRepository(firestore: Firestore): AdminCampus
           throw new AdminCampusesError('campus-not-found', 'not-found', 'El Campus no existe.');
         }
         const campus = campusFromData(snapshot.id, snapshot.data() ?? {});
+        const areaSnapshot = await transaction.get(
+          areas.where('campusId', '==', documentId).limit(1),
+        );
+        if (!areaSnapshot.empty) {
+          throw new AdminCampusesError(
+            'campus-in-use',
+            'failed-precondition',
+            'El Campus contiene Áreas y no puede eliminarse.',
+          );
+        }
         const codeReference = indexReference('codigo', campus.codigoNormalizado);
         const nameReference = indexReference('nombre', campus.nombreNormalizado);
         const [codeSnapshot, nameSnapshot] = await Promise.all([

@@ -67,3 +67,11 @@ El endurecimiento y las restricciones administrativas desplegadas se describen e
 - SEC-039: Ningún payload administrativo puede escribir campos normalizados, reservas, cantidades, estado inicial, identificadores o fechas.
 - SEC-040: `deleteCampus` falla de forma segura ante una referencia, error o resultado no determinable y se ampliará antes de habilitar cada consumidor.
 - SEC-041: Los futuros catálogos para consumidores expondrán únicamente identificador, código y nombre de Campus aplicables; no entregarán documentos administrativos completos.
+
+# Incremento Áreas
+
+- SEC-056: `areas` y `areas_claves` deniegan toda lectura y escritura directa desde clientes.
+- SEC-057: las siete callables de Áreas exigen Authentication, claim `authorized`, rol `admin` y un único perfil canónico activo con rol administrativo.
+- SEC-058: la interfaz, el guard y el menú no conceden autoridad; cada lectura, mutación y reconciliación revalida en backend.
+- SEC-059: Áreas no se agrega al mapa de permisos granulares. Una futura lectura de `usuario` requiere un contrato sanitizado y reglas aprobadas con Coordinaciones.
+- SEC-060: errores no exponen reservas, hashes, stack traces, rutas internas ni datos administrativos de Campus fuera del resumen permitido.

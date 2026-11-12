@@ -139,3 +139,11 @@ Callable → caso de uso de Campus → repositorio → Admin SDK
 ```
 
 `listCampuses`, `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus` usan `us-central1`. Código y nombre usan reservas transaccionales en `campus_claves`; los consumidores futuros mantendrán contadores y ampliarán la eliminación fail-safe antes de activarse.
+
+# Incremento Áreas
+
+- `/configuraciones/areas` es una ruta diferida protegida por `adminGuard`; su enlace se muestra solo al rol administrativo.
+- Angular conserva `AreasGateway` → `AreasFacade` → `AreasPage`; ningún componente consulta Firebase directamente.
+- Backend conserva callable → caso de uso `admin-areas` → `firestore-areas.repository` → Admin SDK.
+- La integridad Área/reserva/contadores se resuelve transaccionalmente. El inspector de referencias es el punto de extensión fail-safe para consumidores futuros.
+- `reconcileAreaCounts` reutiliza Firestore y no incorpora cron, cola ni infraestructura adicional.

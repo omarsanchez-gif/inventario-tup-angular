@@ -173,3 +173,18 @@ RN-PER-001–022 y las ampliaciones granulares de Layout, Categorías, Fabricant
 ### Autorización funcional
 
 - RN-CAM-016: Cada callable de Campus revalida el permiso exacto contra `usuarios`; el menú, guard y botones no son autoridad.
+
+## Áreas
+
+- RN-ARE-001: Cada Área pertenece exactamente a un Campus mediante `campusId`; solo un `admin` autenticado, activo y canónico administra el catálogo inicial.
+- RN-ARE-002: Los únicos campos capturados son Campus, nombre y notas; identidad, normalización, estado, reservas, contadores y fechas son de backend.
+- RN-ARE-003: El nombre es único por Campus después de normalizar Unicode, diacríticos, mayúsculas y espacios; puede repetirse en Campus distintos.
+- RN-ARE-004: Un alta exige Campus activo; una edición histórica puede conservar su Campus inactivo, pero una transferencia solo admite destino activo.
+- RN-ARE-005: Crear, eliminar y transferir mantienen `cantidadAreas` en la misma transacción; estado y renombre no modifican el contador.
+- RN-ARE-006: `cantidadAreas` incluye Áreas activas e inactivas y excluye eliminadas; nunca reemplaza la consulta canónica de referencias.
+- RN-ARE-007: Un Área solo se transfiere o elimina sin referencias; una referencia o error de comprobación bloquea de forma segura y permite desactivar.
+- RN-ARE-008: `deleteCampus` consulta `areas` y rechaza cualquier Área activa o inactiva, aunque el contador difiera.
+- RN-ARE-009: El listado completo admite hasta 500 Áreas y falla sin respuesta parcial al exceder el límite.
+- RN-ARE-010: La reconciliación es administrativa, idempotente, calculada en backend y transaccional; el cliente no envía cantidades.
+- RN-ARE-011: Firestore permanece cerrado a clientes y toda operación usa callables que revalidan rol, claim y perfil canónico.
+- RN-ARE-012: Áreas no forma parte del mapa granular vigente; su futura lectura por `usuario` se especificará con Coordinaciones y alcance.

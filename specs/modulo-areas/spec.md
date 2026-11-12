@@ -1,10 +1,10 @@
 # Spec: Áreas
 
-> Borrador propuesto — pendiente de aprobación para implementación
+> Contrato aprobado e implementado — 12 de noviembre de 2026
 
 ## Estado
 
-Este documento prepara el siguiente incremento y no autoriza código, rutas, colecciones, Functions, reglas, datos ni despliegues. Los nombres técnicos y contratos siguientes son propuestas sujetas a las decisiones de [decisiones-pendientes.md](decisiones-pendientes.md).
+Este documento es la fuente funcional del catálogo administrativo de Áreas. Autoriza su implementación y validación en staging, sin crear datos institucionales ni habilitar producción.
 
 ## Objetivo
 
@@ -18,9 +18,9 @@ Permitir que un `admin` administre las divisiones físicas operativas de cada Ca
 - Los clientes no acceden directamente a datos administrativos; guards y visibilidad del menú no sustituyen la autorización canónica de backend.
 - Las altas, ediciones y confirmaciones reutilizan `AppDialog`, las tablas usan búsqueda automática, paginación e icon-buttons compartidos y la interfaz debe funcionar desde 320 px.
 
-## Alcance propuesto
+## Alcance aprobado
 
-- Ruta privada propuesta `/configuraciones/areas`, visible únicamente a `admin` después de aprobar, implementar y validar el módulo.
+- Ruta privada `/configuraciones/areas`, visible únicamente a `admin`.
 - Listado administrativo completo, ordenado por Campus y nombre, con límite inicial propuesto de 500 registros.
 - Búsqueda automática por nombre, Campus o notas y filtro opcional por Campus.
 - Alta, edición, activación, desactivación y eliminación condicionada.
@@ -49,9 +49,9 @@ Permitir que un `admin` administre las divisiones físicas operativas de cada Ca
 - `deleteCampus` debe consultar la fuente canónica de Áreas y responder de forma fail-safe antes de borrar.
 - `cantidadAreas` cuenta Áreas existentes activas e inactivas y excluye las eliminadas; no sustituye la consulta de referencias al eliminar Campus.
 
-## Modelo de datos propuesto
+## Modelo de datos
 
-### Colección propuesta `areas`
+### Colección `areas`
 
 ```text
 areas/{areaId}
@@ -64,7 +64,7 @@ areas/{areaId}
   fechaActualizacion: Timestamp
 ```
 
-### Reserva propuesta `areas_claves`
+### Reserva `areas_claves`
 
 ```text
 areas_claves/{claveKey}
@@ -79,7 +79,7 @@ areas_claves/{claveKey}
 - Área, reserva y contador del Campus se crearían, transferirían o eliminarían dentro de una transacción.
 - Ningún cliente podría leer o escribir la colección ni su índice técnico directamente.
 
-Estos recursos no existen todavía y no se incorporarán a las specs transversales como contratos aprobados hasta resolver las decisiones bloqueantes.
+Estos recursos son canónicos y permanecen cerrados a clientes mediante Firestore Rules.
 
 ## Campos y validaciones propuestos
 
@@ -127,7 +127,7 @@ Estos recursos no existen todavía y no se incorporarán a las specs transversal
 - Altas concurrentes no pueden perder incrementos ni crear nombres equivalentes dentro del mismo Campus.
 - Debe existir una operación administrativa autorizada de reconciliación antes de depender operativamente del contador; su forma concreta se definirá antes de implementar y no implica una nueva infraestructura en este borrador.
 
-## Autorización propuesta
+## Autorización
 
 - Solo un `admin` autenticado, autorizado y activo administra Áreas.
 - `usuario`, perfiles inactivos y solicitudes anónimas no listan ni mutan el catálogo administrativo.
@@ -135,7 +135,7 @@ Estos recursos no existen todavía y no se incorporarán a las specs transversal
 - La futura visibilidad de Áreas para `usuario` depende del incremento de Coordinaciones, coberturas y alcance de Usuarios; no se anticipa aquí.
 - Firestore Rules mantendría denegación total para las colecciones propuestas.
 
-## Contratos callable propuestos
+## Contratos callable
 
 ### `listAreas`
 
@@ -215,7 +215,21 @@ La interfaz traduciría los códigos a mensajes institucionales y no expondría 
 - La tabla permite desplazamiento horizontal y conserva objetivos táctiles de al menos 44 × 44 px desde 320 px.
 - Foco, Escape, backdrop, retorno de foco, estados de carga y movimiento reducido siguen el sistema de diseño vigente.
 
-## Condiciones para pasar a implementación
+## Reconciliación administrativa
+
+- `reconcileAreaCounts` no acepta cantidades del cliente.
+- Recuenta Áreas activas e inactivas para todos los Campus y corrige solo diferencias.
+- Es administrativa, idempotente y transaccional. Una alta, transferencia o eliminación concurrente que escriba el Campus obliga a reintentar la transacción.
+- Informa Campus revisados, corregidos y cada valor anterior y esperado; no crea tareas periódicas ni datos institucionales.
+
+## Consumidores y referencias
+
+- En este incremento no existe un consumidor aprobado de `areaId`.
+- El repositorio usa un inspector de referencias fail-safe; cada consumidor futuro debe incorporarse al inspector y sus pruebas antes de habilitarse.
+- Una referencia bloquea eliminación o transferencia. Un error o resultado indeterminable responde `area-reconciliation-required`.
+- `cantidadAreas` nunca sustituye la consulta canónica al decidir si un Campus puede eliminarse.
+
+## Condiciones de cierre
 
 1. El responsable aprueba el alcance funcional.
 2. Se resuelven unicidad, transferencia, eliminación y reconciliación del contador.
@@ -224,4 +238,4 @@ La interfaz traduciría los códigos a mensajes institucionales y no expondría 
 5. La rama base y la integración del endurecimiento en `desarrollo` quedan identificadas.
 6. Se conoce el estado de CI y la aceptación pendiente de la base.
 
-Ninguna de estas condiciones se considera satisfecha por la existencia de este borrador.
+Las decisiones funcionales quedaron resueltas en [decisiones-pendientes.md](decisiones-pendientes.md). La aceptación manual real de staging se registra separada de la compilación, HTTP 200 y emuladores.

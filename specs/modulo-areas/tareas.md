@@ -1,68 +1,34 @@
 # Tareas: Áreas
 
-> Borrador propuesto — pendiente de aprobación para implementación
+> Incremento autorizado — 12 de noviembre de 2026
 
-## Preparación documental
+## Especificación e implementación
 
-- [x] Identificar Campus como raíz física y `cantidadAreas` como read model preparado.
-- [x] Proponer alcance, exclusiones, modelo, contratos, interfaz y criterios futuros.
-- [x] Registrar decisiones pendientes con recomendación e impacto.
-- [ ] Obtener aprobación funcional del responsable.
+- [x] Aprobar unicidad por Campus, transferencia solo sin referencias, eliminación fail-safe y reconciliación.
+- [x] Actualizar reglas, modelo, seguridad, arquitectura, Campus y ADR-008.
+- [x] Implementar `areas`, `areas_claves`, contador transaccional y protección de `deleteCampus`.
+- [x] Implementar las siete callables administrativas y denegación directa por Rules.
+- [x] Implementar ruta, navegación, gateway, facade, búsqueda, filtro, paginación, modales y reconciliación.
+- [x] Conservar Áreas fuera del mapa granular; el acceso inicial es exclusivamente para `admin` canónico.
 
-## Decisiones y aprobación
+## Validación
 
-- [ ] Aprobar unicidad del nombre por Campus.
-- [ ] Aprobar reglas para cambiar un Área de Campus.
-- [ ] Aprobar desactivación y eliminación frente a referencias futuras.
-- [ ] Aprobar semántica y mecanismo de reconciliación de `cantidadAreas`.
-- [ ] Confirmar que el primer incremento es exclusivamente administrativo para `admin`.
-- [ ] Autorizar expresamente implementación, pruebas y, por separado, despliegue a staging.
-
-## Especificaciones transversales
-
-- [ ] Incorporar reglas RN-ARE aprobadas en `reglas-negocio.md`.
-- [ ] Incorporar colecciones, campos, reservas e invariantes aprobados en `modelo-datos.md`.
-- [ ] Incorporar denegación directa y autorización callable en `seguridad.md`.
-- [ ] Actualizar arquitectura, integraciones, Campus, sistema de diseño y matriz.
-- [ ] Registrar una ADR solo si la decisión aprobada no queda cubierta por patrones vigentes.
-
-## Modelo y contratos
-
-- [ ] Cerrar payloads, respuestas, límite, orden y códigos funcionales.
-- [ ] Cerrar normalización y generación de la reserva de unicidad.
-- [ ] Definir las transacciones de alta, transferencia y eliminación con contadores.
-- [ ] Definir comprobaciones fail-safe de referencias y reconciliación.
-- [ ] Ampliar el contrato aprobado de Campus antes de crear la primera Área.
-
-## Backend
-
-- [ ] Implementar casos de uso y repositorio sin acceso directo desde Angular.
-- [ ] Implementar callables aprobadas con revalidación canónica y límite de instancias.
-- [ ] Mantener `cantidadAreas` atómicamente y proteger `deleteCampus`.
-- [ ] Incorporar Firestore Rules de denegación por defecto.
-- [ ] Sanitizar errores y registros.
-
-## Interfaz
-
-- [ ] Crear gateway, facade, ruta diferida y guard administrativo.
-- [ ] Incorporar `Áreas` a `Configuraciones` únicamente después de autorizar el módulo.
-- [ ] Reutilizar encabezado, búsqueda, paginación, tabla, badges, icon-buttons y `AppDialog`.
-- [ ] Implementar estados de carga, vacío, error, éxito y reconciliación.
-- [ ] Validar teclado, foco, anuncios, movimiento reducido y 320 px.
-
-## Pruebas y trazabilidad
-
-- [ ] Incorporar los criterios ARE aprobados al manifiesto sin reutilizar evidencia ajena.
-- [ ] Agregar pruebas unitarias de validación, contratos y errores.
-- [ ] Agregar integración con Auth/Functions/Firestore Emulator y concurrencia real.
-- [ ] Agregar pruebas Angular de navegación, formulario, tabla, diálogos y sesión.
-- [ ] Ejecutar verificador de trazabilidad, lint, guardia visual, formato y builds.
-- [ ] Vincular la evidencia al SHA exacto que la produjo.
+- [x] Agregar pruebas unitarias de contratos, validación, sesión y alta confirmada.
+- [x] Agregar integración de Firestore Emulator para unicidad, contadores, transferencia, referencias, Campus y reconciliación.
+- [ ] Completar regresión Angular, Functions, Emulator Suite, Playwright, lint, formato y builds.
+- [ ] Vincular evidencia al SHA exacto y publicar commits.
 
 ## Staging y aceptación
 
-- [ ] Desplegar por separado solo Rules, Functions y Hosting afectados, con `--project staging` y `--only` explícito, después de autorización.
-- [ ] Verificar estado remoto, rechazo anónimo, denegación directa, Hosting y bundles.
-- [ ] Completar aceptación autenticada de alta, edición, estado, transferencia aprobada, eliminación y errores.
-- [ ] Completar revisión visual autenticada en escritorio y móvil.
-- [ ] Mantener producción, datos reales y migración fuera del incremento.
+- [ ] Desplegar únicamente Rules, siete Functions de Áreas, `deleteCampus` y Hosting con `--project staging` y `--only` explícito.
+- [ ] Verificar Functions, rechazo anónimo, Rules, Hosting y bundles sin crear datos.
+- [ ] Completar aceptación administrativa real y revisión visual en escritorio y móvil.
+- [x] Mantener producción, datos reales, IAM, secretos y migración fuera de alcance.
+
+## Pendientes para revisión general de la base
+
+- La revalidación de autorización puede reutilizar una consulta iniciada antes de un rechazo posterior; impacto: ventana de datos obsoletos si se generaliza; siguiente revisión: ciclo transversal de sesión.
+- Indicadores de guardado granulares pueden reaccionar a revocaciones no relacionadas; impacto: experiencia inconsistente; siguiente revisión: estado por operación.
+- Respuestas tardías de imágenes de Modelos podrían alcanzar un diálogo posterior; impacto: presentación obsoleta; siguiente revisión: tokens de diálogo.
+- Persisten diferencias históricas entre algunos documentos y la evidencia ejecutada; impacto: interpretación de trazabilidad; siguiente revisión: auditoría documental completa.
+- PR, CI obligatorio y aceptación manual son estados independientes; no se infieren de pruebas locales o despliegue técnico.

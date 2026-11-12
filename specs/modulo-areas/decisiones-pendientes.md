@@ -1,6 +1,6 @@
-# Decisiones pendientes: Áreas
+# Decisiones resueltas: Áreas
 
-> Borrador propuesto — pendiente de aprobación para implementación
+> Aprobadas por el responsable para el incremento del 12 de noviembre de 2026
 
 ## D-ARE-001 — Alcance de la unicidad
 
@@ -14,7 +14,7 @@
 
 **Efecto:** define la reserva técnica, los mensajes del formulario, las pruebas de concurrencia y el comportamiento de una transferencia.
 
-**Bloqueo:** sí; debe resolverse antes de cerrar modelo y contratos.
+**Decisión:** unicidad por Campus mediante `campusId + nombreNormalizado`.
 
 ## D-ARE-002 — Cambio de Campus
 
@@ -28,7 +28,7 @@
 
 **Efecto:** la operación sustituye la reserva y ajusta los contadores de ambos Campus de forma atómica; la interfaz explica por qué una referencia bloquea el cambio.
 
-**Bloqueo:** sí; afecta `updateArea`, errores y pruebas.
+**Decisión:** se permite transferir únicamente Áreas sin referencias y hacia un Campus activo.
 
 ## D-ARE-003 — Eliminación frente a referencias
 
@@ -42,7 +42,7 @@
 
 **Efecto:** obliga a ampliar `deleteArea` al incorporar cada consumidor y protege historia, contadores y permisos futuros.
 
-**Bloqueo:** sí; define el ciclo de vida y la integridad referencial.
+**Decisión:** eliminación solo sin referencias, sin cascada; desactivación como alternativa.
 
 ## D-ARE-004 — Reconciliación de `cantidadAreas`
 
@@ -56,7 +56,7 @@
 
 **Efecto:** agrega criterios de concurrencia y reparación, pero mantiene listados eficientes y una fuente canónica auditable.
 
-**Bloqueo:** bloquea la aceptación del módulo, aunque la forma exacta de operación puede cerrarse durante el diseño técnico previo al código.
+**Decisión:** mantenimiento transaccional y operación manual `reconcileAreaCounts`, calculada solo en backend e idempotente.
 
 ## D-ARE-005 — Acceso del rol `usuario`
 
@@ -70,7 +70,7 @@
 
 **Efecto:** evita exponer estructura o inventario fuera de ámbito y no inventa permisos temporales que luego deban migrarse.
 
-**Bloqueo:** no bloquea el catálogo administrativo; sí bloquea cualquier acceso no administrativo.
+**Decisión:** primer incremento exclusivamente administrativo; Áreas no se agrega al mapa granular de permisos.
 
 ## D-ARE-006 — Datos iniciales
 
@@ -84,4 +84,4 @@
 
 **Efecto:** evita mezclar infraestructura con decisiones de datos y mantiene la migración de Snipe-IT como proyecto independiente.
 
-**Bloqueo:** no bloquea la implementación; debe resolverse antes de una carga real o aceptación con datos institucionales.
+**Decisión:** despliegue y build no crean datos; una carga real requiere un proceso separado y autorizado.

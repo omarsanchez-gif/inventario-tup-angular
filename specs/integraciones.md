@@ -115,3 +115,10 @@
 - El refinamiento visual `6f112780370f9f890efc773e21288efc4f4f9497` añadió una transición de altura y opacidad de 180 ms sin reabrir controles cerrados. Se desplegó únicamente Hosting: Firebase cargó 14 archivos y `/usuarios`, `main-JZFE42HR.js` y `styles-K7H52MHM.css` respondieron HTTP 200. Functions, Rules, Storage, índices, datos, secretos, IAM y producción permanecieron intactos.
 - El cierre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af` implementó revocación selectiva por módulo y acción, revalidación deduplicada y separación entre Crear Modelo y Editar imagen. Tras aprobar 86 pruebas Angular, 47 unitarias de Functions, 31 de Emulator Suite, 7 recorridos Chromium y los controles de calidad, se desplegó únicamente Hosting con `--project staging --only hosting`. Firebase publicó 14 archivos; la raíz respondió HTTP 200 con `main-BEAIWWJ4.js`, `styles-K7H52MHM.css` y `no-store`. No se desplegaron Functions, Rules, Storage Rules, índices, datos, secretos, IAM ni producción.
 - No se desplegaron Firestore Rules, Storage Rules, índices, datos, secretos, IAM ni producción. La aceptación funcional autenticada y visual móvil permanece pendiente.
+
+# Áreas
+
+- Las callables `listAreas`, `getAreaCatalogs`, `createArea`, `updateArea`, `setAreaStatus`, `deleteArea` y `reconcileAreaCounts` operan en `us-central1` mediante Admin SDK.
+- `deleteCampus` se vuelve a publicar porque ahora consulta canónicamente `areas` activas e inactivas.
+- Firestore Rules mantiene `areas` y `areas_claves` cerradas. No se agregan índices compuestos, Storage, secretos, IAM, cron, datos o integraciones externas.
+- El despliegue autorizado se limita a estas Functions, Rules y Hosting de `inventario-stg`; producción queda intacta.

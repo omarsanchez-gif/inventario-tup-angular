@@ -2,21 +2,21 @@
 
 ## Estado vigente — 11 de noviembre de 2026
 
-| Alcance            | Reglas               | Implementación o propuesta                             | Pruebas                            |
-| ------------------ | -------------------- | ------------------------------------------------------ | ---------------------------------- |
-| Autenticación      | RN-AUT-001–009       | Base, permisos y revocación selectiva implementados    | AUT-001–AUT-019                    |
-| Dashboard inicial  | RN-DASH-001–003      | `features/dashboard`                                   | DASH-001–004                       |
-| Usuarios           | RN-USR-001–011       | Base y matriz de cuatro módulos implementadas          | USR-001–USR-035                    |
-| Layout privado     | RN-LAY-001–012       | Navegación y revocación granular implementadas         | LAY-001–LAY-028                    |
-| Categorías         | RN-CAT-001–012       | Base y autorización granular implementadas             | CAT-001–CAT-027                    |
-| Fabricantes        | RN-FAB-001–012       | Base y autorización granular implementadas             | FAB-001–FAB-023                    |
-| Modelos de activos | RN-MOD-001–030       | Base y autorización granular implementadas             | MOD-001–MOD-060                    |
-| Permisos           | RN-PER-001–022       | Autorización y revocación funcional implementadas      | Cubiertos por criterios de módulos |
-| Campus             | RN-CAM-001–016       | Base y permiso funcional implementados                 | CAM-001–CAM-038                    |
-| Calidad local      | RN-DEV-001–003       | seed, emuladores, Playwright y verificador estructural | DEV-001–DEV-003                    |
-| Áreas              | Sin reglas aprobadas | Borrador documental; no existe implementación          | ARE-001–ARE-033 futuros            |
+| Alcance            | Reglas          | Implementación o propuesta                             | Pruebas                            |
+| ------------------ | --------------- | ------------------------------------------------------ | ---------------------------------- |
+| Autenticación      | RN-AUT-001–009  | Base, permisos y revocación selectiva implementados    | AUT-001–AUT-019                    |
+| Dashboard inicial  | RN-DASH-001–003 | `features/dashboard`                                   | DASH-001–004                       |
+| Usuarios           | RN-USR-001–011  | Base y matriz de cuatro módulos implementadas          | USR-001–USR-035                    |
+| Layout privado     | RN-LAY-001–012  | Navegación y revocación granular implementadas         | LAY-001–LAY-028                    |
+| Categorías         | RN-CAT-001–012  | Base y autorización granular implementadas             | CAT-001–CAT-027                    |
+| Fabricantes        | RN-FAB-001–012  | Base y autorización granular implementadas             | FAB-001–FAB-023                    |
+| Modelos de activos | RN-MOD-001–030  | Base y autorización granular implementadas             | MOD-001–MOD-060                    |
+| Permisos           | RN-PER-001–022  | Autorización y revocación funcional implementadas      | Cubiertos por criterios de módulos |
+| Campus             | RN-CAM-001–016  | Base y permiso funcional implementados                 | CAM-001–CAM-038                    |
+| Calidad local      | RN-DEV-001–003  | seed, emuladores, Playwright y verificador estructural | DEV-001–DEV-003                    |
+| Áreas              | RN-ARE-001–012  | Catálogo por Campus, transacciones y reconciliación    | ARE-001–ARE-035                    |
 
-Áreas incrementa el inventario documental, pero sus criterios futuros no son obligatorios, no están en `trazabilidad.json` y no tienen evidencia de ejecución. La revocación selectiva para los cuatro catálogos está implementada y validada localmente sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`; la aceptación autenticada y el despliegue se registran por separado.
+Áreas incorpora criterios obligatorios estructurales y manuales. La evidencia automatizada debe vincularse al SHA final validado; ARE-033 permanece como aceptación real separada y no se considera aprobada por emuladores o HTTP 200.
 
 ## Significado de los estados
 

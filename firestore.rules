@@ -46,6 +46,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    match /areas/{areaId} {
+      allow read, write: if false;
+    }
+
+    match /areas_claves/{keyId} {
+      allow read, write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

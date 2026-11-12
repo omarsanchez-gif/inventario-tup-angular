@@ -1,0 +1,224 @@
+<section aria-labelledby="areas-title">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Configuraciones</p>
+      <h1 class="page-title" id="areas-title">Áreas</h1>
+      <p>Administre las áreas físicas asociadas a cada Campus.</p>
+    </div>
+    <div class="page-actions">
+      <button
+        class="button button--secondary"
+        type="button"
+        [disabled]="areas.saving()"
+        (click)="areas.reconcile()"
+      >
+        Reconciliar cantidades</button
+      ><button class="button button--primary" type="button" (click)="openNew()">Nueva área</button>
+    </div>
+  </header>
+  @if (!formVisible() && !pendingDeletion() && areas.error(); as error) {
+    <div class="alert alert--error" role="alert">{{ error }}</div>
+  }
+  @if (areas.success(); as success) {
+    <div class="alert alert--success" role="status">{{ success }}</div>
+  }
+  @if (formVisible()) {
+    <app-dialog
+      [title]="editingId() ? 'Editar área' : 'Nueva área'"
+      [dismissible]="!areas.saving()"
+      (dismissed)="closeForm()"
+    >
+      <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        @if (areas.error(); as error) {
+          <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
+        <div class="form-grid form-grid--single">
+          <div class="field">
+            <label for="area-campus">Campus</label
+            ><select id="area-campus" formControlName="campusId">
+              <option value="">Seleccione un Campus</option>
+              @for (campus of areas.campuses(); track campus.documentId) {
+                <option [value]="campus.documentId">
+                  {{ campus.codigo }} — {{ campus.nombre
+                  }}{{ campus.activo === false ? ' (inactivo)' : '' }}
+                </option>
+              }
+            </select>
+            @if (form.controls.campusId.touched && form.controls.campusId.invalid) {
+              <small role="alert">Seleccione un Campus.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="area-name">Nombre</label
+            ><input id="area-name" formControlName="nombre" maxlength="120" />
+            @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+              <small role="alert">Capture un nombre de máximo 120 caracteres.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="area-notes">Notas</label
+            ><textarea id="area-notes" formControlName="notas" maxlength="1000"></textarea>
+            @if (form.controls.notas.touched && form.controls.notas.invalid) {
+              <small role="alert">Las notas admiten máximo 1,000 caracteres.</small>
+            }
+          </div>
+        </div>
+        <div class="dialog__actions">
+          <button
+            class="button button--secondary"
+            type="button"
+            [disabled]="areas.saving()"
+            (click)="closeForm()"
+          >
+            Cancelar</button
+          ><button class="button button--primary" type="submit" [disabled]="areas.saving()">
+            {{ areas.saving() ? 'Guardando…' : 'Guardar área' }}
+          </button>
+        </div>
+      </form>
+    </app-dialog>
+  }
+  @if (pendingDeletion(); as area) {
+    <app-dialog
+      title="Eliminar área"
+      [dismissible]="!areas.saving()"
+      (dismissed)="cancelDeletion()"
+    >
+      <p class="dialog__message">
+        ¿Eliminar {{ area.nombre }} de {{ area.campus.codigo }} — {{ area.campus.nombre }}?
+      </p>
+      <p class="dialog__help">
+        Solo se eliminará si no tiene referencias. Si está en uso deberá desactivarla.
+      </p>
+      @if (areas.error(); as error) {
+        <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+      }
+      <div class="dialog__actions">
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="areas.saving()"
+          (click)="cancelDeletion()"
+        >
+          Cancelar</button
+        ><button
+          class="button button--danger"
+          type="button"
+          [disabled]="areas.saving()"
+          (click)="confirmDeletion()"
+        >
+          {{ areas.saving() ? 'Eliminando…' : 'Eliminar área' }}
+        </button>
+      </div>
+    </app-dialog>
+  }
+  <div class="table-toolbar area-toolbar">
+    <div class="field table-search">
+      <label for="area-search">Buscar por nombre, Campus o notas</label
+      ><input
+        id="area-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Escriba para filtrar automáticamente"
+        [value]="areas.query()"
+        (input)="setQuery($event)"
+      />
+    </div>
+    <div class="field campus-filter">
+      <label for="area-campus-filter">Filtrar por Campus</label
+      ><select id="area-campus-filter" [value]="areas.campusFilter()" (change)="setFilter($event)">
+        <option value="">Todos los Campus</option>
+        @for (campus of areas.campuses(); track campus.documentId) {
+          <option [value]="campus.documentId">{{ campus.codigo }} — {{ campus.nombre }}</option>
+        }
+      </select>
+    </div>
+  </div>
+  @if (areas.loading()) {
+    <p role="status">Cargando áreas…</p>
+  } @else if (areas.filteredAreas().length === 0) {
+    <div class="card empty-state">
+      <h2>
+        {{
+          areas.query() || areas.campusFilter()
+            ? 'No se encontraron áreas'
+            : 'No hay áreas registradas'
+        }}
+      </h2>
+    </div>
+  } @else {
+    <div class="card data-table-region">
+      <table class="data-table">
+        <caption class="sr-only">
+          Áreas del Sistema de Inventario TUP
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Campus</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Notas</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (area of paginatedAreas(); track area.documentId) {
+            <tr>
+              <td>{{ area.campus.codigo }} — {{ area.campus.nombre }}</td>
+              <td>{{ area.nombre }}</td>
+              <td>{{ area.notas || '—' }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.badge--active]="area.activo"
+                  [class.badge--inactive]="!area.activo"
+                  >{{ area.activo ? 'Activo' : 'Inactivo' }}</span
+                >
+              </td>
+              <td>
+                <div class="record-actions">
+                  <button
+                    class="icon-button icon-button--secondary"
+                    type="button"
+                    [disabled]="areas.saving()"
+                    [attr.aria-label]="'Editar ' + area.nombre"
+                    [attr.title]="'Editar ' + area.nombre"
+                    (click)="edit(area)"
+                  >
+                    <app-icon name="edit" />
+                  </button>
+                  <button
+                    class="icon-button icon-button--secondary"
+                    type="button"
+                    [disabled]="areas.saving()"
+                    [attr.aria-label]="(area.activo ? 'Desactivar ' : 'Activar ') + area.nombre"
+                    [attr.title]="(area.activo ? 'Desactivar ' : 'Activar ') + area.nombre"
+                    (click)="areas.setStatus(area)"
+                  >
+                    <app-icon [name]="area.activo ? 'deactivate' : 'activate'" />
+                  </button>
+                  <button
+                    class="icon-button icon-button--danger"
+                    type="button"
+                    [disabled]="areas.saving()"
+                    [attr.aria-label]="'Eliminar ' + area.nombre"
+                    [attr.title]="'Eliminar ' + area.nombre"
+                    (click)="requestDeletion(area)"
+                  >
+                    <app-icon name="delete" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination
+      [totalItems]="areas.filteredAreas().length"
+      [page]="activePage()"
+      [pageSize]="pageSize"
+      (pageChange)="setPage($event)"
+    />
+  }
+</section>

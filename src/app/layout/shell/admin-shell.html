@@ -106,6 +106,17 @@
                   Campus
                 </a>
               }
+              @if (auth.role() === 'admin') {
+                <a
+                  class="navigation__sublink"
+                  routerLink="/configuraciones/areas"
+                  routerLinkActive="navigation__sublink--active"
+                  ariaCurrentWhenActive="page"
+                  (click)="closeNavigationOnMobile()"
+                >
+                  Áreas
+                </a>
+              }
             </div>
           }
         </div>

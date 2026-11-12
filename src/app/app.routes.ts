@@ -70,6 +70,13 @@ export const routes: Routes = [
           ),
         title: 'Campus | Sistema de Inventario TUP',
       },
+      {
+        path: 'configuraciones/areas',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/areas/areas-page/areas-page').then((component) => component.AreasPage),
+        title: 'Áreas | Sistema de Inventario TUP',
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

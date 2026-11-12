@@ -42,6 +42,35 @@ test.afterEach(async () => {
   await setSyntheticAccess('admin');
 });
 
+test('ARE-026 ARE-027 ARE-028 ARE-029 completes the administrative Areas cycle', async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto('/configuraciones/areas');
+  await expect(page.getByRole('heading', { name: 'Áreas' })).toBeVisible();
+  await page.getByRole('button', { name: 'Nueva área' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Campus').selectOption('synthetic-campus');
+  await dialog.getByLabel('Nombre').fill('Laboratorio E2E');
+  await dialog.getByLabel('Notas').fill('Registro sintético');
+  await dialog.getByRole('button', { name: 'Guardar área' }).click();
+  await expect(dialog).toBeHidden();
+  await page.getByLabel('Buscar por nombre, Campus o notas').fill('laboratorio e2e');
+  await expect(page.getByText('Laboratorio E2E', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Editar Laboratorio E2E' }).click();
+  await page.getByRole('dialog').getByLabel('Notas').fill('Registro actualizado');
+  await page.getByRole('button', { name: 'Guardar área' }).click();
+  await expect(page.getByText('Registro actualizado', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Desactivar Laboratorio E2E' }).click();
+  await expect(page.getByText('Inactivo', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Eliminar Laboratorio E2E' }).click();
+  const deletion = page.getByRole('dialog');
+  await expect(deletion.getByText(/Solo se eliminará si no tiene referencias/u)).toBeVisible();
+  await deletion.getByRole('button', { name: 'Eliminar área' }).click();
+  await expect(deletion).toBeHidden();
+  await expect(page.getByText('Laboratorio E2E', { exact: true })).toHaveCount(0);
+});
+
 test('AUT-002 AUT-003 authorizes the synthetic admin and rejects an inactive canonical profile', async ({
   browser,
 }) => {

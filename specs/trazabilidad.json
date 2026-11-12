@@ -17,6 +17,7 @@
     { "prefix": "CAT", "label": "Categorías" },
     { "prefix": "FAB", "label": "Fabricantes" },
     { "prefix": "CAM", "label": "Campus" },
+    { "prefix": "ARE", "label": "Áreas" },
     { "prefix": "MOD", "label": "Modelos de activos" },
     { "prefix": "DEV", "label": "Calidad local" }
   ],
@@ -828,6 +829,104 @@
       "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
       "state": "deployed-staging",
       "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "ARE-001",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-011",
+      "criterion": "ARE-002",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-005",
+      "criterion": "ARE-005",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-003",
+      "criterion": "ARE-008",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-005",
+      "criterion": "ARE-016",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-007",
+      "criterion": "ARE-019",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-008",
+      "criterion": "ARE-022",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-005",
+      "criterion": "ARE-023",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-010",
+      "criterion": "ARE-025",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "ARE-030",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-011",
+      "criterion": "ARE-032",
+      "verification": "manual",
+      "tests": [],
+      "state": "pending-manual"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "ARE-033",
+      "verification": "manual",
+      "tests": [],
+      "state": "pending-manual"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "ARE-034",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-005",
+      "criterion": "ARE-035",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "implemented-pending-verification"
     }
   ]
 }

@@ -6,7 +6,7 @@ El módulo base fue aprobado, implementado y desplegado exclusivamente a `invent
 
 ## Objetivo
 
-Permitir que un `admin` y, después de aprobar la ampliación, un `usuario` expresamente autorizado gestionen los campus institucionales que servirán como raíz física para las futuras Áreas, coberturas de Coordinaciones, asignaciones de Usuarios y Activos, sin introducir todavía esas entidades dependientes.
+Permitir administrar los campus institucionales que sirven como raíz física para Áreas y, en incrementos futuros, coberturas de Coordinaciones, asignaciones de Usuarios y Activos.
 
 ## Modelo organizacional
 
@@ -25,7 +25,7 @@ Permitir que un `admin` y, después de aprobar la ampliación, un `usuario` expr
 - Alta, edición, activación, desactivación y eliminación condicionada.
 - Reserva transaccional de código y nombre normalizados.
 - Estados de carga, vacío, error y éxito.
-- Presentación de cantidades derivadas de Áreas y Activos; ambas permanecerán en cero hasta que existan fuentes canónicas aprobadas.
+- Presentación de `cantidadAreas`, mantenida y reconciliada por el módulo Áreas; `cantidadActivos` permanece en cero hasta su fuente canónica.
 
 ## Campos capturados
 
@@ -196,7 +196,7 @@ La interfaz traducirá estos códigos a mensajes institucionales y no expondrá 
 - `Configuraciones` permanece completo para `admin`; para `usuario` solo contiene módulos con `ver` explícito.
 - `Campus` es visible para `admin` y para `usuario` únicamente con `campus.ver`; navega a `/configuraciones/campus`.
 - No tendrá icono individual porque las opciones secundarias usan el icono compartido del grupo.
-- Áreas y Coordinaciones no aparecerán hasta contar con specs e implementación propias.
+- Áreas aparece como módulo administrativo propio; Coordinaciones permanece fuera hasta contar con specs e implementación.
 
 ### Página
 
@@ -234,7 +234,7 @@ La interfaz traducirá estos códigos a mensajes institucionales y no expondrá 
 2. Código, Nombre y Notas son los únicos campos capturados.
 3. Código y Nombre son únicos y editables sin cambiar el identificador estable.
 4. El formulario no asigna Áreas ni Coordinaciones.
-5. Las cantidades de Áreas y Activos son read models no editables que permanecen en cero hasta contar con fuentes aprobadas.
+5. Las cantidades son read models no editables; Áreas mantiene `cantidadAreas` y Activos mantendrá su contador cuando se apruebe.
 6. FCS y TUP son registros administrativos, no constantes ni datos creados por el despliegue.
 7. La ampliación autorizada concede permisos funcionales sobre el catálogo Campus y no define alcance territorial sobre inventario.
 

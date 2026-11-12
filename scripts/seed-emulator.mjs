@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 
 import { normalizeCategoryName } from '../functions/lib/admin-categories.js';
 import { normalizeManufacturerName } from '../functions/lib/admin-manufacturers.js';
+import { normalizeCampusCode, normalizeCampusName } from '../functions/lib/admin-campuses.js';
 
 const projectArgumentIndex = process.argv.indexOf('--project');
 const projectId = projectArgumentIndex >= 0 ? process.argv[projectArgumentIndex + 1] : '';
@@ -168,4 +169,41 @@ await upsertCanonicalCatalog({
   normalizeName: normalizeManufacturerName,
 });
 
-console.log('Identidad, catálogos y reservas sintéticas preparados en demo-inventario-tup.');
+const campusId = 'synthetic-campus';
+const campusCode = normalizeCampusCode('TUP-E2E');
+const campusName = 'Campus TUP E2E';
+const campusNormalizedName = normalizeCampusName(campusName);
+const campusReference = firestore.collection('campus').doc(campusId);
+const campusKeys = firestore.collection('campus_claves');
+const campusKey = (type, value) =>
+  createHash('sha256').update(`${type}\u001f${value}`, 'utf8').digest('hex');
+await firestore.runTransaction(async (transaction) => {
+  const snapshot = await transaction.get(campusReference);
+  const timestamp = Timestamp.now();
+  transaction.set(campusReference, {
+    codigo: campusCode,
+    codigoNormalizado: campusCode,
+    nombre: campusName,
+    nombreNormalizado: campusNormalizedName,
+    notas: null,
+    activo: true,
+    cantidadAreas: snapshot.data()?.['cantidadAreas'] ?? 0,
+    cantidadActivos: snapshot.data()?.['cantidadActivos'] ?? 0,
+    fechaCreacion: snapshot.data()?.['fechaCreacion'] ?? timestamp,
+    fechaActualizacion: timestamp,
+  });
+  transaction.set(campusKeys.doc(campusKey('codigo', campusCode)), {
+    campusId,
+    tipo: 'codigo',
+    valorNormalizado: campusCode,
+  });
+  transaction.set(campusKeys.doc(campusKey('nombre', campusNormalizedName)), {
+    campusId,
+    tipo: 'nombre',
+    valorNormalizado: campusNormalizedName,
+  });
+});
+
+console.log(
+  'Identidad, catálogos, Campus y reservas sintéticas preparados en demo-inventario-tup.',
+);

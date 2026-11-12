@@ -53,4 +53,13 @@ describe('application route permissions', () => {
     await expect(activate('usuarios')).resolves.toEqual({ commands: ['/dashboard'] });
     expect(auth.can).not.toHaveBeenCalled();
   });
+
+  it('ARE-026 keeps Areas restricted to the admin role and outside granular permissions', async () => {
+    await expect(activate('configuraciones/areas')).resolves.toEqual({
+      commands: ['/dashboard'],
+    });
+    auth.role.mockReturnValue('admin');
+    await expect(activate('configuraciones/areas')).resolves.toBe(true);
+    expect(auth.can).not.toHaveBeenCalledWith('areas', 'ver');
+  });
 });

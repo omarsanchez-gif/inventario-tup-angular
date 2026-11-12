@@ -63,6 +63,7 @@ describe('AdminShell', () => {
           { path: 'configuraciones/fabricantes', component: RouteStub },
           { path: 'configuraciones/modelos-activos', component: RouteStub },
           { path: 'configuraciones/campus', component: RouteStub },
+          { path: 'configuraciones/areas', component: RouteStub },
         ]),
         {
           provide: AuthFacade,
@@ -168,7 +169,7 @@ describe('AdminShell', () => {
     expect(settings.getAttribute('aria-expanded')).toBe('true');
     expect(
       [...element.querySelectorAll('.navigation__sublink')].map((link) => link.textContent?.trim()),
-    ).toEqual(['Categorías', 'Fabricantes', 'Modelos de activos', 'Campus']);
+    ).toEqual(['Categorías', 'Fabricantes', 'Modelos de activos', 'Campus', 'Áreas']);
 
     await TestBed.inject(Router).navigateByUrl('/configuraciones/categorias');
     fixture.detectChanges();
@@ -232,6 +233,7 @@ describe('AdminShell', () => {
     ).toEqual(['Fabricantes']);
     expect(element.textContent).not.toContain('Usuarios');
     expect(element.textContent).not.toContain('Campus');
+    expect(element.textContent).not.toContain('Áreas');
   });
 
   it('LAY-026 shows Campus independently when it is the only granted module', () => {

@@ -301,3 +301,35 @@ campus_claves/{claveKey}
 - `claveKey` es el SHA-256 hexadecimal de `tipo + valorNormalizado` con separadores no ambiguos.
 - Código, nombre y sus dos reservas se crean, modifican o eliminan en una transacción.
 - Ningún cliente podrá leer o escribir este índice.
+
+## Colección `areas`
+
+```text
+areas/{areaId}
+  campusId: string
+  nombre: string
+  nombreNormalizado: string
+  notas: string | null
+  activo: boolean
+  fechaCreacion: Timestamp
+  fechaActualizacion: Timestamp
+```
+
+- `areaId` es estable y generado por backend. `campusId` referencia un documento canónico de `campus`.
+- `nombre` admite 120 caracteres; `nombreNormalizado` usa NFKD, elimina diacríticos, usa minúsculas, colapsa espacios y se recorta.
+- `notas` admite 1,000 caracteres, se recorta y una cadena vacía se almacena como `null`.
+- Todo registro inicia activo. Estado, normalización y fechas no son editables por clientes.
+- El contador `campus.cantidadAreas` incluye todos los documentos existentes, activos e inactivos.
+
+## Índice técnico `areas_claves`
+
+```text
+areas_claves/{claveKey}
+  areaId: string
+  campusId: string
+  nombreNormalizado: string
+```
+
+- `claveKey` es SHA-256 de `campus + campusId + nombre + nombreNormalizado` con separadores no ambiguos.
+- Área, reserva y contadores afectados se crean, transfieren o eliminan en una transacción.
+- Ningún cliente puede leer o escribir esta colección.

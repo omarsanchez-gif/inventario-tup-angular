@@ -30,6 +30,8 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 ### 2. Áreas
 
+**Estado al 12 de noviembre de 2026:** autorizado e implementado en `codex/modulo-areas`; validación y publicación de staging se registran de forma independiente.
+
 **Objetivo:** crear la unidad física bajo Campus que después puedan referenciar coberturas, Usuarios y Activos.
 
 **Dependencias:** Campus aprobado e implementado; `cantidadAreas` preparado; autorización administrativa, diálogos y tablas compartidas disponibles.
@@ -121,7 +123,7 @@ Usuarios + Categorías + Fabricantes + Modelos ──> permisos granulares
 Alcance territorial ──> incremento posterior e independiente
 ```
 
-## Condiciones para iniciar Áreas
+## Condiciones de cierre de Áreas
 
 - [ ] Alcance funcional aprobado por el responsable.
 - [ ] Decisiones bloqueantes D-ARE-001 a D-ARE-004 resueltas.

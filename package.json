@@ -14,7 +14,7 @@
     "functions:build": "npm --workspace functions run build",
     "test:functions": "vitest run functions/src",
     "test:categories:emulator": "firebase emulators:exec --only firestore --project demo-inventario-tup \"vitest run functions/src/categories-firestore.spec.ts\"",
-    "test:emulators": "npm run functions:build && firebase emulators:exec --only auth,firestore,functions,storage --project demo-inventario-tup \"vitest run --no-file-parallelism functions/src/categories-firestore.spec.ts functions/src/manufacturers-firestore.spec.ts functions/src/campuses-firestore.spec.ts functions/src/asset-models-firestore.spec.ts functions/src/asset-model-images-emulator.spec.ts functions/src/asset-model-storage-emulator.spec.ts functions/src/seed-emulator.spec.ts functions/src/users-emulator.spec.ts\"",
+    "test:emulators": "npm run functions:build && firebase emulators:exec --only auth,firestore,functions,storage --project demo-inventario-tup \"vitest run --no-file-parallelism functions/src/categories-firestore.spec.ts functions/src/manufacturers-firestore.spec.ts functions/src/campuses-firestore.spec.ts functions/src/areas-firestore.spec.ts functions/src/asset-models-firestore.spec.ts functions/src/asset-model-images-emulator.spec.ts functions/src/asset-model-storage-emulator.spec.ts functions/src/seed-emulator.spec.ts functions/src/users-emulator.spec.ts\"",
     "lint": "ng lint && npm run lint:functions && npm run lint:visual",
     "lint:functions": "eslint functions/src --max-warnings=0",
     "lint:visual": "node scripts/check-visual-primitives.mjs",

@@ -71,12 +71,13 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - La primera lectura autenticada de una miniatura reveló falta de permiso de firma. Con autorización expresa se concedió `roles/iam.serviceAccountTokenCreator` únicamente a la cuenta runtime de staging sobre sí misma y se actualizó solo `getAssetModelImageAccess`; la miniatura cargó en sesión administrativa, Storage siguió cerrado y producción no fue modificada.
 - `modulo-campus`: aprobado el 9 de noviembre de 2026 como raíz física para Áreas, coberturas de Coordinaciones, asignaciones y Activos; implementación, pruebas y despliegue exclusivo a staging están autorizados conforme a sus specs. No incluye crear FCS, TUP ni otros datos.
 - Campus fue desplegado únicamente a `inventario-stg` el 9 de noviembre de 2026: Firestore Rules, cinco Functions y Hosting. Las Functions están `ACTIVE`, la ruta administrativa fue verificada vacía y no se crearon datos de negocio; producción permaneció intacta.
+- `modulo-areas`: autorizado el 12 de noviembre de 2026 como catálogo físico dependiente de Campus, limitado a Campus, Nombre y Notas, administración exclusiva de `admin`, integridad transaccional, reconciliación manual y despliegue exclusivo a staging. No incluye datos institucionales, Coordinaciones, alcance ni permisos granulares.
 - Endurecimiento transversal previo a Fabricantes, autorizado el 7 de noviembre de 2026: cierre de lectura directa de Usuarios, revocación defensiva, encabezados y caché de Hosting, CI y reconciliación documental conforme a ADR-004.
 - Permisos granulares para Categorías, Fabricantes, Modelos de activos y Campus, autorizados expresamente el 11 de noviembre de 2026: asignación posterior desde Usuarios, denegación por defecto para `usuario`, autorización canónica en backend y filtrado defensivo de navegación y acciones conforme a ADR-007 y `specs/patrones/permisos-modulares.md`. No incluye Áreas, Coordinaciones ni alcance territorial de Activos.
 
 ## Fuera de alcance actual
 
-- Áreas, Coordinaciones y alcance territorial de Usuarios. `specs/modulo-areas/` es un borrador propuesto y no autoriza implementación.
+- Coordinaciones y alcance territorial de Usuarios.
 - Activos, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.

@@ -25,6 +25,7 @@ Este resumen describe el estado vigente. Las reglas completas permanecen en las 
 | Fabricantes             | Marca productora con Nombre y Notas; no representa comercio o plataforma de compra                               | `/configuraciones/fabricantes`; `admin` o `usuario` con capacidad     | Cinco callables; cada operación revalida su acción canónica          | FAB-001–023                             | Implementado, validado y desplegado; aceptación funcional/móvil pendiente            |
 | Modelos de activos      | Catálogo de Nombre, Categoría, Fabricante, Modelo No., Notas e imagen opcional                                   | `/configuraciones/modelos-activos`; `admin` o `usuario` con capacidad | Nueve callables; Editar controla imágenes y Crear conserva datos     | MOD-001–060                             | Implementado, validado y desplegado; ciclo real completo y revisión móvil pendientes |
 | Campus                  | Raíz física con Código, Nombre, Notas y contadores preparados de Áreas/Activos                                   | `/configuraciones/campus`; `admin` o capacidad explícita              | Cinco callables; `campus` y `campus_claves`                          | CAM-001–038                             | Implementado, validado y desplegado sin crear FCS/TUP; aceptación parcial pendiente  |
+| Áreas                   | Catálogo físico por Campus con Nombre, Notas, estado, transferencia y reconciliación                             | `/configuraciones/areas`; solo `admin`                                | Siete callables; `areas` y `areas_claves`                            | ARE-001–035                             | Implementado; validación, staging y aceptación se registran por separado             |
 | Calidad y entorno local | Seed sintético idempotente, Emulator Suite, Playwright, guardia visual y verificador estructural de trazabilidad | Scripts de `package.json` y CI                                        | Proyecto exclusivo `demo-inventario-tup`; no usa credenciales reales | DEV-001–003 y 72 criterios obligatorios | Validado localmente; CI se comprobará en el PR                                       |
 
 ## Contratos e invariantes relevantes
@@ -53,17 +54,17 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 
 ## Evidencia y estados de entrega
 
-| Etapa                     | Estado al corte                           | Evidencia o límite                                                                                                                                  |
-| ------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Especificado y aprobado   | Sí para los módulos de la tabla; Áreas no | Specs y tareas vigentes                                                                                                                             |
-| Implementado              | Sí para el alcance vigente                | Revocación selectiva y control de imagen en `4013c35`; backend canónico previo conservado                                                           |
-| Validado localmente       | Sí, sobre `4013c35`                       | 86 Angular, 47 Functions, 31 Emulator Suite, 7 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados |
-| Publicado en rama         | Sí                                        | La rama remota contiene `4013c35` y el cierre documental `6c980ce`                                                                                  |
-| Integrado en `desarrollo` | No                                        | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                        |
-| Verificado por CI         | No para este incremento                   | GitHub reporta cero ejecuciones en la rama; sin PR no se disparó `Validación continua / validate`                                                   |
-| Desplegado en staging     | Sí, dentro del alcance documentado        | Este incremento actualizó solo Hosting; Functions, Rules, datos, secretos y producción permanecieron intactos                                       |
-| Aceptado con sesión real  | Parcial                                   | Miniatura real y parte de Campus aceptadas; otras mutaciones, ciclo completo de imagen y revisión móvil siguen pendientes                           |
-| Producción                | No configurada ni autorizada              | Ningún despliegue productivo                                                                                                                        |
+| Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                                                  |
+| ------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                                                             |
+| Implementado              | Sí para el alcance vigente                      | Revocación selectiva y control de imagen en `4013c35`; backend canónico previo conservado                                                           |
+| Validado localmente       | Sí, sobre `4013c35`                             | 86 Angular, 47 Functions, 31 Emulator Suite, 7 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados |
+| Publicado en rama         | Sí                                              | La rama remota contiene `4013c35` y el cierre documental `6c980ce`                                                                                  |
+| Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                        |
+| Verificado por CI         | No para este incremento                         | GitHub reporta cero ejecuciones en la rama; sin PR no se disparó `Validación continua / validate`                                                   |
+| Desplegado en staging     | Sí, dentro del alcance documentado              | Este incremento actualizó solo Hosting; Functions, Rules, datos, secretos y producción permanecieron intactos                                       |
+| Aceptado con sesión real  | Parcial                                         | Miniatura real y parte de Campus aceptadas; otras mutaciones, ciclo completo de imagen y revisión móvil siguen pendientes                           |
+| Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                                                        |
 
 La evidencia histórica de `ef8ae66` permanece vigente para recuperación de imágenes. El incremento de Campus tiene evidencia propia en `2883ff5` y no traslada aceptación manual.
 
@@ -99,13 +100,13 @@ Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación té
 ## Exclusiones actuales
 
 - Aceptación visual autenticada del acordeón de permisos en escritorio y 320 px.
-- Áreas, Coordinaciones, coberturas y alcance territorial de Usuarios.
+- Coordinaciones, coberturas y alcance territorial de Usuarios.
 - Activos individuales, personas, responsables, asignaciones, movimientos y responsivas.
 - Indicadores operativos del Dashboard.
 - Migración o sincronización con Snipe-IT y datos reales.
 - Producción y recursos productivos.
 
-Áreas cuenta únicamente con el [borrador propuesto](modulo-areas/spec.md); no está aprobado ni implementado.
+Áreas cuenta con contrato aprobado, código y pruebas del incremento del 12 de noviembre; staging y aceptación real se conservan como estados separados hasta su evidencia.
 
 ## Discrepancias conciliadas
 
