@@ -4,7 +4,8 @@
 
 - Fecha del corte: 12 de noviembre de 2026.
 - Rama inspeccionada: `codex/modulo-areas`.
-- SHA de endurecimiento de cierre validado y desplegado: `5df7763ca23d862c7b4629f1088299b077d63b8d`.
+- SHA correctivo validado, publicado y desplegado: `88ea3afaa568bcc46a4aed45951e50049c2703fe`.
+- SHA de endurecimiento anterior: `5df7763ca23d862c7b4629f1088299b077d63b8d`.
 - SHA publicado al iniciar la consolidación: `51e71dc599c55e63bed4ddf11ca0b1e91a9ed599`.
 - SHA de implementación de permisos, rutas y Campus con validación completa: `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`.
 - SHA de la animación del acordeón publicada en Hosting de staging: `6f112780370f9f890efc773e21288efc4f4f9497`.
@@ -58,12 +59,12 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 | Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                                                   |
 | ------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                                                              |
-| Implementado              | Sí para el alcance vigente                      | Endurecimiento de sesión, operaciones y Áreas en `5df7763`; protocolos previos conservados                                                           |
-| Validado localmente       | Sí, sobre `5df7763`                             | 104 Angular, 52 Functions, 40 Emulator Suite, 8 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados |
-| Publicado en rama         | Sí                                              | `codex/modulo-areas` contiene `5df7763` y su evidencia documental; publicación sin force push                                                        |
+| Implementado              | Sí para el alcance vigente                      | Correcciones de autorización, carga, identidad e integridad transaccional en `88ea3af`; garantías previas conservadas                                |
+| Validado localmente       | Sí, sobre `88ea3af`                             | 112 Angular, 52 Functions, 42 Emulator Suite, 8 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados |
+| Publicado en rama         | Sí                                              | `codex/modulo-areas` contiene `88ea3af`; publicación sin force push                                                                                  |
 | Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                         |
-| Verificado por CI         | No para este incremento                         | GitHub reporta cero ejecuciones en la rama; sin PR no se disparó `Validación continua / validate`                                                    |
-| Desplegado en staging     | Sí, dentro del alcance documentado              | `createArea`, `updateArea`, `deleteArea`, `reconcileAreaCounts` y Hosting; Rules, datos, secretos y producción intactos                              |
+| Verificado por CI         | No para este incremento                         | GitHub reporta cero runs y cero statuses para `88ea3af`; sin PR no se disparó `Validación continua / validate`                                       |
+| Desplegado en staging     | Sí, dentro del diff real                        | `createArea`, `updateArea` y Hosting; Rules, demás Functions, datos, secretos y producción intactos                                                  |
 | Aceptado con sesión real  | Parcial                                         | Miniatura real y parte de Campus aceptadas; otras mutaciones, ciclo completo de imagen y revisión móvil siguen pendientes                            |
 | Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                                                         |
 
@@ -75,23 +76,23 @@ El 10 de noviembre de 2026 se aplicó la skill oficial `angular-developer` al es
 
 ## Incremento autorizado: permisos granulares
 
-El 10 de noviembre de 2026 se especificó un incremento que permite asignar después del alta permisos Ver, Crear, Editar, Cambiar estado y Eliminar sobre Categorías, Fabricantes y Modelos. El 11 de noviembre se amplió a Campus, se validó el backend sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724` y se desplegó únicamente a staging. Ese mismo día la matriz se compactó en un acordeón y `6f112780370f9f890efc773e21288efc4f4f9497` incorporó su transición accesible. El cierre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af` añade revocación inmediata y selectiva: conserva sesión y módulos ajenos, invalida respuestas pendientes por acción, revalida negativas concurrentes una sola vez y separa Crear Modelo de Editar imagen. `admin` conserva acceso total; `usuario` inicia sin permisos y recibe solo acciones explícitas desde la tabla de Usuarios. No incluye Coordinaciones, Áreas ni alcance sobre Activos. La aceptación funcional autenticada permanece pendiente. Su decisión está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
+El 10 de noviembre de 2026 se especificó un incremento que permite asignar después del alta permisos Ver, Crear, Editar, Cambiar estado y Eliminar sobre Categorías, Fabricantes y Modelos. El 11 de noviembre se amplió a Campus, se validó el backend sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724` y se desplegó únicamente a staging. Ese mismo día la matriz se compactó en un acordeón y `6f112780370f9f890efc773e21288efc4f4f9497` incorporó su transición accesible. El cierre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af` añadió revocación inmediata y selectiva; `88ea3afaa568bcc46a4aed45951e50049c2703fe` completa la frescura: negativas acumuladas antes de una ronda la comparten y una negativa posterior agenda otra lectura canónica, sin que errores sustituidos afecten la sesión vigente. `admin` conserva acceso total; `usuario` inicia sin permisos y recibe solo acciones explícitas desde la tabla de Usuarios. No incluye Coordinaciones, Áreas ni alcance sobre Activos. La aceptación funcional autenticada permanece pendiente. Su decisión está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
 
 ## Staging vigente
 
 - Proyecto exclusivo: `inventario-stg`; alias obligatorio `staging`.
-- Hosting responde HTTP 200 y sirve `main-5BT6D7I5.js` y `styles-K7H52MHM.css` con `no-store` para el documento.
-- Las callables conservan Node.js 22 y `us-central1`; este cierre actualizó por separado `createArea`, `updateArea`, `deleteArea` y `reconcileAreaCounts`.
+- Hosting responde HTTP 200 y sirve `main-HZGOJ7WY.js` y `styles-K7H52MHM.css` con `no-store` para el documento.
+- Las callables conservan Node.js 22 y `us-central1`; este cierre actualizó por separado únicamente `createArea` y `updateArea`.
 - Firestore Rules niega acceso directo a las colecciones administrativas y Storage Rules conserva denegación total.
 - El último incremento de recuperación desplegó `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` en revisión `00004`, el ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting.
 - Storage Rules, índices, secretos, datos y producción no se modificaron en ese cierre.
-- La comprobación anónima posterior devolvió HTTP 401 en las cuatro callables actualizadas. No se desplegaron Rules, Storage Rules, índices, datos, secretos, IAM ni producción.
+- La comprobación anónima posterior devolvió HTTP 401 en las dos callables actualizadas. No se desplegaron Rules, Storage Rules, índices, datos, secretos, IAM ni producción.
 
 Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación técnica, no aceptación funcional autenticada.
 
 ## Limitaciones conocidas y pendientes de entrega
 
-- La rama endurecida no está integrada en `desarrollo`. No existe un PR abierto para `codex/modulo-areas`; el intento anterior mediante conector respondió `must be a collaborator`, `gh` continúa sin sesión y no se repitió una escritura equivalente. GitHub reporta cero ejecuciones de Actions para la rama y la consulta pública de checks obligatorios de `desarrollo` respondió HTTP 401.
+- La rama endurecida no está integrada en `desarrollo`. No existe un PR abierto para `codex/modulo-areas`; la conexión GitHub vigente identifica a `victoryama-wq` con permiso de solo lectura (`pull: true`, `push: false`), por lo que no se repitió una escritura equivalente. GitHub reporta cero runs y cero statuses para `88ea3af`. El endpoint clásico de protección de `desarrollo` respondió 403 para la integración y el repositorio devolvió una lista vacía de rulesets; no fue posible comprobar si `Validación continua / validate` es obligatorio.
 - Falta aceptación autenticada de sustitución, retirada y expiración de imágenes y de los flujos administrativos que no se ejercieron con datos reales.
 - Falta revisión visual autenticada integral desde escritorio y 320 px.
 - La recuperación de imagen conserva indefinidamente evidencia insuficiente cuando no existe acuse ni ambas variantes; requiere un reintento autorizado y puede seguir pendiente.
@@ -119,9 +120,10 @@ Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación té
 | Historia mezclada con estado | La matriz destacaba SHAs intermedios y obligaba a reconstruir el corte actual                                  | Se agrega estado vigente y se mantienen hitos históricos como evidencia fechada                         |
 | Evidencia insuficiente       | HTTP 200, Function `ACTIVE` y pruebas locales podían leerse como aceptación total                              | Se separan validación, publicación, integración, CI, despliegue y aceptación autenticada                |
 | Decisión resuelta            | Áreas requería unicidad, transferencia, referencias y reconciliación                                           | ADR-008 aprueba unicidad por Campus, transacciones y reconciliación administrativa                      |
+| Defecto funcional corregido  | Errores de autorización sustituidos, negativas posteriores, `loading` huérfano y U+FE0F aislado                | `88ea3af` agrega vigencia por intento, revisiones pendientes, propietario de carga e identidad efectiva |
 | Límite técnico               | Una carga sin acuse y con cero o una variante no demuestra finalización                                        | Se conserva explícitamente reconciliación pendiente; no se promete cierre automático                    |
 
-No se observó durante esta conciliación una implementación que contradijera una regla vigente y exigiera alterar código. Las diferencias pendientes son de aceptación, integración o decisión funcional, no se legitimaron reescribiendo reglas.
+Las correcciones funcionales quedaron implementadas y probadas sin ampliar módulos, permisos o datos. Las diferencias restantes son de aceptación, integración o decisión futura y no se legitimaron reescribiendo reglas.
 
 ## Enlaces principales
 
@@ -130,4 +132,4 @@ No se observó durante esta conciliación una implementación que contradijera u
 - [Integraciones y despliegues](integraciones.md)
 - [Calidad y trazabilidad](calidad/spec.md)
 - [Sistema de diseño](design-system/spec.md)
-- [Borrador de Áreas](modulo-areas/spec.md)
+- [Spec vigente de Áreas](modulo-areas/spec.md)

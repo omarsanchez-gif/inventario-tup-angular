@@ -1,6 +1,6 @@
 # Matriz de trazabilidad
 
-## Estado vigente — 11 de noviembre de 2026
+## Estado vigente — 12 de noviembre de 2026
 
 | Alcance            | Reglas          | Implementación o propuesta                             | Pruebas                            |
 | ------------------ | --------------- | ------------------------------------------------------ | ---------------------------------- |
@@ -18,17 +18,13 @@
 
 Áreas incorpora criterios obligatorios estructurales y manuales. La evidencia automatizada debe vincularse al SHA final validado; ARE-033 permanece como aceptación real separada y no se considera aprobada por emuladores o HTTP 200.
 
-El incremento se validó sobre `306826f1b0c9b27429a8109c81748f1d17c267b9` y se desplegó desde `bc54b9699435a9be2e200ed98db177f3d9329d40`. ARE-032 tiene evidencia técnica remota; ARE-033 continúa pendiente de aceptación autenticada real.
-
 ## Endurecimiento de cierre — 12 de noviembre de 2026
 
-- AUT-020 exige una ronda de autorización posterior al rechazo y evita reutilizar una consulta anterior pendiente.
+- AUT-014 y AUT-020 descartan errores y finalizaciones de intentos sustituidos y garantizan que cada negativa quede cubierta por una lectura canónica iniciada después de recibirla, incluso si llega durante bootstrap o claims.
 - CAT-028, FAB-024, CAM-039 y MOD-061 vinculan `saving` con la operación y acción exactas.
 - MOD-062 aísla cada diálogo de Modelos frente a respuestas tardías de creación e imagen.
-- ARE-036–043 cubren orden de listados y catálogos, pérdida y recuperación administrativa, contadores derivados inválidos, nombres invisibles, inspector indeterminado, concurrencia y datos E2E con propiedad explícita.
-- La evidencia local quedó asociada a `5df7763ca23d862c7b4629f1088299b077d63b8d`: 104 pruebas Angular, 52 unitarias de Functions, 40 con Emulator Suite y 8 recorridos Chromium. El manifiesto registra 286 criterios inventariados, 100 obligatorios, 100 trazados y 99 verificados; ARE-033 es el único obligatorio pendiente por aceptación real.
-
-El ajuste final `7d7854e89c9fab4ee29ca2451fffb66a7c878798` conserva Campus históricos inactivos en el filtro, aprobó 91 pruebas Angular, lint, build y publicación exclusiva de Hosting; no modifica Rules ni Functions.
+- ARE-022, ARE-023, ARE-035, ARE-036, ARE-040 y ARE-042 cubren referencia canónica con contador cero, carreras coordinadas, recuperación sin alta duplicada, propiedad terminal de `loading` e identidad normalizada visible.
+- La evidencia local está asociada a `88ea3afaa568bcc46a4aed45951e50049c2703fe`: 112 pruebas Angular, 52 unitarias de Functions, 42 con Emulator Suite y 8 recorridos Chromium. El manifiesto registra 286 criterios inventariados, 100 obligatorios, 100 trazados y 99 verificados; ARE-033 es el único obligatorio pendiente por aceptación real.
 
 ## Significado de los estados
 
@@ -44,41 +40,26 @@ El ajuste final `7d7854e89c9fab4ee29ca2451fffb66a7c878798` conserva Campus hist�
 
 El manifiesto [trazabilidad.json](trazabilidad.json) y `npm run traceability:check` rechazan criterios obligatorios ausentes, duplicados, referencias inexistentes y evidencia ajena. Los estados manuales, pendientes y futuros son válidos, pero no se cuentan como aprobados.
 
-## Corte validado de implementación
+## Corte vigente de implementación y entrega
 
-- SHA: `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`.
-- 86 pruebas Angular aprobadas.
-- 47 pruebas unitarias de Functions aprobadas.
-- 31 pruebas con Emulator Suite aprobadas.
-- 7 recorridos Chromium aprobados.
-- 7 casos negativos/positivos del verificador de trazabilidad aprobados; el resumen vigente es 270 inventariados, 72 obligatorios, 72 trazados y 72 con ejecución verificada.
-- Lint Angular/Functions, guardia visual, formato, builds de Functions y staging, `git diff --check` y auditoría de runtime con umbral high aprobados.
-- La auditoría conserva cuatro alertas moderadas transitivas de `google-gax` y cero altas o críticas.
-- MOD-049 permaneció aprobado al atravesar Admin SDK, Firestore Emulator y Storage Emulator reales; no sustituyó el bucket por `FakeBucket`.
-- MOD-052 verificó que un acuse observado después de los borrados no cierre esa ronda.
-- MOD-053 verificó recuperación cuando ambos objetos existen sin acuse durable.
-
-La regresión de revocación volvió a ejecutar todas las suites sobre `4013c35`; la aceptación manual, el despliegue y la integración en `desarrollo` continúan como estados independientes.
-
-## Publicación, integración, CI, staging y aceptación
-
-| Estado          | Situación vigente                                                                                                                                    |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Rama publicada  | `codex/hardening-sesion-imagenes-trazabilidad` incluye `4013c35` y el cierre documental `6c980ce`                                                    |
-| `desarrollo`    | Permanece en `179e79863e2a6c940c9a24165b219bfb8ce59cc1`; el endurecimiento no está integrado                                                         |
-| PR              | No existe; el intento actual de crearlo en borrador respondió `must be a collaborator` y no se repiten escrituras sin cambio de permisos             |
-| CI              | GitHub reporta cero ejecuciones para la rama; sin PR no se ejecutó `Validación continua / validate`                                                  |
-| Staging         | Doce Functions del contrato de cuatro módulos y Hosting publicados; Rules y las demás Functions no se modificaron                                    |
-| Aceptación real | Parcial: lectura autenticada de miniatura y parte de Campus aceptadas; ciclo completo de imagen, otras mutaciones y revisión móvil siguen pendientes |
-| Producción      | No configurada ni autorizada                                                                                                                         |
-
-El cierre de revocación selectiva actualizó únicamente Hosting en `inventario-stg`. La verificación remota respondió HTTP 200 con `main-BEAIWWJ4.js` y `styles-K7H52MHM.css`; Functions, Rules, índices, datos, secretos y producción no se modificaron.
-
-La protección de `desarrollo` no pudo comprobarse: el endpoint respondió HTTP 403 `Resource not accessible by integration`. Por ello no se afirma si `Validación continua / validate` es un requisito obligatorio.
+| Estado                    | Situación vigente                                                                                                                                                |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SHA probado               | `88ea3afaa568bcc46a4aed45951e50049c2703fe`                                                                                                                       |
+| Validación local          | 112 Angular, 52 Functions, 42 Emulator Suite, 8 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados             |
+| Rama publicada            | `codex/modulo-areas` contiene `88ea3af` sin force push                                                                                                           |
+| Staging                   | `createArea`, `updateArea` y Hosting; ambas callables v2 Node 22 rechazan anónimo con 401 y Hosting sirve `main-HZGOJ7WY.js`; Rules y demás servicios intactos   |
+| Integración en desarrollo | Pendiente; publicar la rama no equivale a fusionarla                                                                                                             |
+| PR y CI                   | No existe PR; la conexión GitHub tiene solo lectura (`pull: true`, `push: false`) y `88ea3af` no registra runs ni statuses. No se atribuye CI sin ejecución real |
+| Protección de rama        | El endpoint clásico de `desarrollo` responde 403 para la integración y el repositorio no expone rulesets; el check obligatorio no pudo verificarse               |
+| Aceptación autenticada    | ARE-033 pendiente; Emulator Suite, rechazo anónimo y Hosting 200 no la sustituyen                                                                                |
+| Producción                | No configurada ni autorizada                                                                                                                                     |
 
 ## Evidencia histórica relevante
 
 - Categorías, Fabricantes y Modelos fueron publicados únicamente en staging el 7 de noviembre de 2026; Campus el 9 de noviembre.
+- El corte `4013c35ae9e8d6eb95bbcefe9321706a876ce5af` perteneció a `codex/hardening-sesion-imagenes-trazabilidad`: 86 Angular, 47 Functions, 31 Emulator Suite, 7 Chromium y el resumen histórico 270 inventariados/72 obligatorios/72 trazados/72 verificados. Su Hosting sirvió `main-BEAIWWJ4.js`; no es la situación vigente.
+- La primera implementación de Áreas se validó en `306826f1b0c9b27429a8109c81748f1d17c267b9` y se desplegó desde `bc54b9699435a9be2e200ed98db177f3d9329d40`. El ajuste `7d7854e89c9fab4ee29ca2451fffb66a7c878798` conservó Campus históricos en el filtro y publicó `main-2LPPUI52.js`.
+- El endurecimiento previo `5df7763ca23d862c7b4629f1088299b077d63b8d` aprobó 104 Angular, 52 Functions, 40 Emulator Suite y 8 Chromium; Hosting publicó `main-5BT6D7I5.js`.
 - El seguimiento de sesión, eliminaciones modales, trazabilidad, seed e imágenes se implementó inicialmente en `1706695cc3d2a302ac490c3b917417bf4d6dacd2` y se reforzó mediante `58a0ab3f4e7452d349cf5bf93632258f0068aeac` y `ef8ae667cb3d30104edc1cc4ebd4fc2f8d5ddd04`.
 - El cierre acumulado actualizó únicamente tres Functions de imagen en revisión `00004`, Firestore Rules con ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting con `main-525UVZWO.js` y `styles-CISTRGAV.css`.
 - Ese cierre no modificó Storage Rules, índices, datos, secretos ni producción.

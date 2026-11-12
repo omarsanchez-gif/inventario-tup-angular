@@ -1,12 +1,12 @@
 {
   "version": 2,
   "baseReviewSha": "4a3407b14acd7a069ec62f39d1e6ee5a3b04ac1f",
-  "implementationSha": "5df7763ca23d862c7b4629f1088299b077d63b8d",
+  "implementationSha": "88ea3afaa568bcc46a4aed45951e50049c2703fe",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
     "branchPublication": "complete",
-    "stagingDeployment": "complete-four-area-functions-and-hosting-hardening",
+    "stagingDeployment": "complete-create-update-area-and-hosting-corrections",
     "continuousIntegration": "not-triggered-without-pull-request",
     "manualAcceptance": "pending"
   },
@@ -299,6 +299,32 @@
       "command": "firebase deploy --only functions:createArea --project staging; firebase deploy --only functions:updateArea --project staging; firebase deploy --only functions:deleteArea --project staging; firebase deploy --only functions:reconcileAreaCounts --project staging; firebase deploy --only hosting --project staging; functions:list; anonymous HTTP checks",
       "result": "Cuatro Functions v2 Node 22 actualizadas por separado; las cuatro rechazaron anónimo con HTTP 401; Hosting HTTP 200 sirve main-5BT6D7I5.js y styles-K7H52MHM.css; Rules, datos, secretos, IAM y producción intactos.",
       "criteria": []
+    },
+    {
+      "id": "areas-auth-corrections-88ea3af",
+      "sha": "88ea3afaa568bcc46a4aed45951e50049c2703fe",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "112 pruebas Angular, 52 unitarias de Functions, 42 con Emulator Suite, 8 recorridos Chromium y 7 controles negativos de trazabilidad aprobados; lint, guardia visual, formato, builds y diff aprobaron; auditoría sin altas o críticas y con cuatro moderadas transitivas aceptadas; bundle main-HZGOJ7WY.js.",
+      "criteria": [
+        "AUT-014",
+        "AUT-019",
+        "AUT-020",
+        "ARE-022",
+        "ARE-023",
+        "ARE-035",
+        "ARE-036",
+        "ARE-040",
+        "ARE-042"
+      ]
+    },
+    {
+      "id": "areas-auth-staging-88ea3af",
+      "sha": "88ea3afaa568bcc46a4aed45951e50049c2703fe",
+      "status": "passed",
+      "command": "firebase deploy --only functions:createArea --project staging; firebase deploy --only functions:updateArea --project staging; firebase deploy --only hosting --project staging; firebase functions:list --project staging; anonymous HTTP and Hosting checks",
+      "result": "createArea y updateArea v2 Node 22 actualizadas por separado y con rechazo anónimo HTTP 401; Hosting HTTP 200 sirve main-HZGOJ7WY.js y styles-K7H52MHM.css; Rules, demás Functions, índices, datos, secretos, IAM y producción intactos.",
+      "criteria": []
     }
   ],
   "entries": [
@@ -340,7 +366,7 @@
       "verification": "automated",
       "tests": ["src/app/core/auth/auth.facade.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "angular-1706695"
+      "evidenceId": "areas-auth-corrections-88ea3af"
     },
     {
       "requirement": "RN-USR-009",
@@ -861,7 +887,7 @@
       "verification": "automated",
       "tests": ["src/app/core/auth/auth.facade.spec.ts"],
       "state": "deployed-staging",
-      "evidenceId": "permissions-revocation-4013c35"
+      "evidenceId": "areas-auth-corrections-88ea3af"
     },
     {
       "requirement": "RN-PER-019",
@@ -952,7 +978,7 @@
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "areas-306826f"
+      "evidenceId": "areas-auth-corrections-88ea3af"
     },
     {
       "requirement": "RN-ARE-005",
@@ -960,7 +986,7 @@
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "areas-306826f"
+      "evidenceId": "areas-auth-corrections-88ea3af"
     },
     {
       "requirement": "RN-ARE-010",
@@ -1007,7 +1033,7 @@
       "verification": "automated",
       "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "areas-306826f"
+      "evidenceId": "areas-auth-corrections-88ea3af"
     },
     {
       "requirement": "RN-PER-023",
@@ -1015,7 +1041,7 @@
       "verification": "automated",
       "tests": ["src/app/core/auth/auth.facade.spec.ts", "src/app/core/auth/session-scope.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "closure-hardening-5df7763"
+      "evidenceId": "areas-auth-corrections-88ea3af"
     },
     {
       "requirement": "RN-PER-024",
@@ -1063,7 +1089,7 @@
       "verification": "automated",
       "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "closure-hardening-5df7763"
+      "evidenceId": "areas-auth-corrections-88ea3af"
     },
     {
       "requirement": "RN-ARE-013",
@@ -1095,7 +1121,7 @@
       "verification": "automated",
       "tests": ["functions/src/admin-areas.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "closure-hardening-5df7763"
+      "evidenceId": "areas-auth-corrections-88ea3af"
     },
     {
       "requirement": "RN-ARE-017",
@@ -1111,7 +1137,7 @@
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "closure-hardening-5df7763"
+      "evidenceId": "areas-auth-corrections-88ea3af"
     },
     {
       "requirement": "RN-ARE-018",
