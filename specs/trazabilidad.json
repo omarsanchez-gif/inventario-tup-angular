@@ -8,7 +8,7 @@
     "branchPublication": "complete",
     "stagingDeployment": "complete-create-update-area-and-hosting-corrections",
     "continuousIntegration": "not-triggered-without-pull-request",
-    "manualAcceptance": "pending"
+    "manualAcceptance": "partial-areas-delete-and-cleanup-pending"
   },
   "matrixScopes": [
     { "prefix": "AUT", "label": "Autenticación" },
@@ -976,7 +976,10 @@
       "requirement": "RN-ARE-008",
       "criterion": "ARE-022",
       "verification": "emulator",
-      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "tests": [
+        "functions/src/areas-firestore.spec.ts",
+        "functions/src/campuses-firestore.spec.ts"
+      ],
       "state": "verified-local",
       "evidenceId": "areas-auth-corrections-88ea3af"
     },

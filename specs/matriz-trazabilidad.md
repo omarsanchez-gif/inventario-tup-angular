@@ -26,6 +26,14 @@
 - ARE-022, ARE-023, ARE-035, ARE-036, ARE-040 y ARE-042 cubren referencia canónica con contador cero, carreras coordinadas, recuperación sin alta duplicada, propiedad terminal de `loading` e identidad normalizada visible.
 - La evidencia local está asociada a `88ea3afaa568bcc46a4aed45951e50049c2703fe`: 112 pruebas Angular, 52 unitarias de Functions, 42 con Emulator Suite y 8 recorridos Chromium. El manifiesto registra 286 criterios inventariados, 100 obligatorios, 100 trazados y 99 verificados; ARE-033 es el único obligatorio pendiente por aceptación real.
 
+## Aceptación autenticada parcial — 12 de noviembre de 2026
+
+- Una sesión real con perfil `Omar Sánchez / Administrador` ejercitó Áreas en `inventario-stg`, versión `main-HZGOJ7WY.js`.
+- Aprobaron alta, edición, transferencia entre dos Campus sintéticos, desactivación, reactivación, rechazo de nombre duplicado y rechazo de nombre obligatorio.
+- Se conservaron por instrucción expresa del responsable `QAARE33A-121126`, `QAARE33B-121126` y `Área ARE-033 editada 20261112`; la eliminación y la limpieza no se ejecutaron.
+- ARE-033 permanece `pending-manual`: el criterio exige eliminación además de los casos ya observados y las condiciones de esta ejecución exigían limpieza acotada.
+- La aceptación de la matriz de permisos, el ciclo completo de imágenes y la revisión visual autenticada desde 320 px conservan su estado pendiente; esta ejecución no los cubrió.
+
 ## Significado de los estados
 
 - **Inventariado:** identificador único encontrado en un documento `pruebas.md`; incluye criterios futuros.
@@ -51,7 +59,7 @@ El manifiesto [trazabilidad.json](trazabilidad.json) y `npm run traceability:che
 | Integración en desarrollo | Pendiente; publicar la rama no equivale a fusionarla                                                                                                             |
 | PR y CI                   | No existe PR; la conexión GitHub tiene solo lectura (`pull: true`, `push: false`) y `88ea3af` no registra runs ni statuses. No se atribuye CI sin ejecución real |
 | Protección de rama        | El endpoint clásico de `desarrollo` responde 403 para la integración y el repositorio no expone rulesets; el check obligatorio no pudo verificarse               |
-| Aceptación autenticada    | ARE-033 pendiente; Emulator Suite, rechazo anónimo y Hosting 200 no la sustituyen                                                                                |
+| Aceptación autenticada    | ARE-033 parcial: alta, edición, transferencia, estado y rechazos aprobaron; eliminación y limpieza no se ejecutaron                                              |
 | Producción                | No configurada ni autorizada                                                                                                                                     |
 
 ## Evidencia histórica relevante

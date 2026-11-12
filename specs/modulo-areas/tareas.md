@@ -30,10 +30,11 @@
 
 - [x] Desplegar únicamente Rules, siete Functions de Áreas, `deleteCampus` y Hosting con `--project staging` y `--only` explícito.
 - [x] Verificar Functions, rechazo anónimo, Rules, Hosting y bundles sin crear datos.
-- [ ] Completar aceptación administrativa real y revisión visual en escritorio y móvil.
+- [ ] Completar ARE-033: la sesión administrativa real aprobó alta, edición, transferencia, estado y rechazos; eliminación y limpieza no se ejecutaron porque el responsable indicó conservar los datos sintéticos.
+- [ ] Completar la revisión visual autenticada en escritorio y móvil.
 - [x] Mantener producción, datos reales, IAM, secretos y migración fuera de alcance.
 
 ## Pendientes externos
 
 - PR, CI obligatorio, protección de rama y aceptación manual son estados independientes; no se infieren de pruebas locales o despliegue técnico.
-- La aceptación administrativa real de ARE-033 y la revisión visual móvil permanecen pendientes hasta contar con sesión institucional disponible.
+- La sesión institucional ya permitió una aceptación parcial de ARE-033. Permanecen pendientes la eliminación, la limpieza prevista por el protocolo y la revisión visual móvil.

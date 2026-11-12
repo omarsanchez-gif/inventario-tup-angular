@@ -65,7 +65,7 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 | Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                         |
 | Verificado por CI         | No para este incremento                         | GitHub reporta cero runs y cero statuses para `88ea3af`; sin PR no se disparó `Validación continua / validate`                                       |
 | Desplegado en staging     | Sí, dentro del diff real                        | `createArea`, `updateArea` y Hosting; Rules, demás Functions, datos, secretos y producción intactos                                                  |
-| Aceptado con sesión real  | Parcial                                         | Miniatura real y parte de Campus aceptadas; otras mutaciones, ciclo completo de imagen y revisión móvil siguen pendientes                            |
+| Aceptado con sesión real  | Parcial                                         | Áreas aprobó alta, edición, transferencia, estado y rechazos; eliminación, limpieza, ciclo completo de imagen y revisión móvil siguen pendientes     |
 | Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                                                         |
 
 La evidencia histórica de `ef8ae66` permanece vigente para recuperación de imágenes. El incremento de Campus tiene evidencia propia en `2883ff5` y no traslada aceptación manual.
@@ -90,10 +90,15 @@ El 10 de noviembre de 2026 se especificó un incremento que permite asignar desp
 
 Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación técnica, no aceptación funcional autenticada.
 
+### Aceptación autenticada de Áreas
+
+El 12 de noviembre de 2026 una sesión real `Omar Sánchez / Administrador` ejercitó `main-HZGOJ7WY.js` en `inventario-stg`. Se comprobaron alta, edición, transferencia aprobada, desactivación, reactivación, rechazo de duplicado y validación de nombre obligatorio. Los Campus sintéticos `QAARE33A-121126` y `QAARE33B-121126` y el Área activa `Área ARE-033 editada 20261112`, asociada al segundo Campus, se conservaron por instrucción expresa del responsable. No se ejecutaron la eliminación ni la limpieza; por ello ARE-033 continúa pendiente y el total verificado permanece en 99 de 100 obligatorios.
+
 ## Limitaciones conocidas y pendientes de entrega
 
 - La rama endurecida no está integrada en `desarrollo`. No existe un PR abierto para `codex/modulo-areas`; la conexión GitHub vigente identifica a `victoryama-wq` con permiso de solo lectura (`pull: true`, `push: false`), por lo que no se repitió una escritura equivalente. GitHub reporta cero runs y cero statuses para `88ea3af`. El endpoint clásico de protección de `desarrollo` respondió 403 para la integración y el repositorio devolvió una lista vacía de rulesets; no fue posible comprobar si `Validación continua / validate` es obligatorio.
 - Falta aceptación autenticada de sustitución, retirada y expiración de imágenes y de los flujos administrativos que no se ejercieron con datos reales.
+- ARE-033 tiene aceptación parcial real; falta ejecutar la eliminación y, si se exige cerrar bajo las condiciones originales, retirar los tres registros sintéticos conservados por decisión del responsable.
 - Falta revisión visual autenticada integral desde escritorio y 320 px.
 - La recuperación de imagen conserva indefinidamente evidencia insuficiente cuando no existe acuse ni ambas variantes; requiere un reintento autorizado y puede seguir pendiente.
 - App Check, PITR y bitácora administrativa requieren decisiones separadas.
