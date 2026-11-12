@@ -55,11 +55,11 @@ El manifiesto [trazabilidad.json](trazabilidad.json) y `npm run traceability:che
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | SHA probado               | `88ea3afaa568bcc46a4aed45951e50049c2703fe` para el cierre funcional; `5e645debf1df4239c6c5f73fc56ca9263ac65ae4` para la corrección responsive                                            |
 | Validación local          | Evidencia funcional histórica: 112 Angular, 52 Functions y 42 Emulator Suite; sobre `5e645de`: 8 Chromium, lint, guardia visual, formato, build, trazabilidad y diff aprobados           |
-| Rama publicada            | `codex/modulo-areas` contiene `5e645de` sin force push                                                                                                                                   |
+| Rama publicada            | `codex/modulo-areas` contiene el cierre documental `b0ec1b6` sin force push                                                                                                              |
 | Staging                   | `createArea`, `updateArea` y Hosting históricos; la corrección responsive actualizó solo Hosting, que sirve `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css`; Rules y demás servicios intactos |
 | Integración en desarrollo | Pendiente; publicar la rama no equivale a fusionarla                                                                                                                                     |
-| PR y CI                   | No existe PR; la conexión GitHub tiene solo lectura (`pull: true`, `push: false`) y `88ea3af` no registra runs ni statuses. No se atribuye CI sin ejecución real                         |
-| Protección de rama        | El endpoint clásico de `desarrollo` responde 403 para la integración y el repositorio no expone rulesets; el check obligatorio no pudo verificarse                                       |
+| PR y CI                   | No existe PR; la conexión GitHub conserva solo lectura y `b0ec1b6` no registra workflow runs ni statuses. No se atribuye CI sin ejecución real                                           |
+| Protección de rama        | La consulta pública clásica de `desarrollo` responde 401 y la lista pública de rulesets está vacía; el check obligatorio no pudo verificarse                                             |
 | Aceptación autenticada    | Visual escritorio/320 px aprobada; ARE-033 parcial sin eliminación; imágenes y matriz funcional bajo sesión `usuario` pendientes                                                         |
 | Producción                | No configurada ni autorizada                                                                                                                                                             |
 
