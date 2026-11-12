@@ -128,7 +128,7 @@
       <label for="area-campus-filter">Filtrar por Campus</label
       ><select id="area-campus-filter" [value]="areas.campusFilter()" (change)="setFilter($event)">
         <option value="">Todos los Campus</option>
-        @for (campus of areas.campuses(); track campus.documentId) {
+        @for (campus of areas.filterCampuses(); track campus.documentId) {
           <option [value]="campus.documentId">{{ campus.codigo }} — {{ campus.nombre }}</option>
         }
       </select>

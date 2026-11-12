@@ -65,6 +65,7 @@ describe('AreasFacade', () => {
     expect(facade.filteredAreas()).toHaveLength(1);
     facade.setCampusFilter('otra');
     expect(facade.filteredAreas()).toHaveLength(0);
+    expect(facade.filterCampuses().map((campus) => campus.documentId)).toContain('c');
   });
   it('ARE-030 discards a late list after logout or user change', async () => {
     const { facade, scope, gateway } = setup();

@@ -70,6 +70,15 @@ export class AreasFacade {
           ).includes(query)),
     );
   });
+  readonly filterCampuses = computed(() => {
+    const campuses = new Map(this.campusesState().map((campus) => [campus.documentId, campus]));
+    for (const area of this.areasState()) {
+      if (!campuses.has(area.campusId)) campuses.set(area.campusId, area.campus);
+    }
+    return [...campuses.values()].sort((left, right) =>
+      left.nombre.localeCompare(right.nombre, 'es-MX'),
+    );
+  });
   constructor() {
     this.session.registerInvalidationListener(() => this.reset());
   }
