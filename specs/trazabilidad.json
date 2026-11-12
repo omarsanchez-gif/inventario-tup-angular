@@ -1,7 +1,7 @@
 {
   "version": 2,
   "baseReviewSha": "4a3407b14acd7a069ec62f39d1e6ee5a3b04ac1f",
-  "implementationSha": "306826f1b0c9b27429a8109c81748f1d17c267b9",
+  "implementationSha": "7d7854e89c9fab4ee29ca2451fffb66a7c878798",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
@@ -260,6 +260,14 @@
       "command": "firebase deploy --only firestore:rules --project staging; firebase deploy --only functions:listAreas,functions:getAreaCatalogs,functions:createArea,functions:updateArea,functions:setAreaStatus,functions:deleteArea,functions:reconcileAreaCounts,functions:deleteCampus --project staging; firebase deploy --only hosting --project staging; functions:list; anonymous HTTP and Firestore REST checks",
       "result": "Rules publicadas; siete Functions de Áreas creadas y deleteCampus actualizado en Node 22; siete rechazos anónimos 401; areas y areas_claves 403; Hosting 200 con main-2WSN4PTD.js y styles-K7H52MHM.css; producción y datos intactos.",
       "criteria": ["ARE-032"]
+    },
+    {
+      "id": "areas-filter-7d7854e",
+      "sha": "7d7854e89c9fab4ee29ca2451fffb66a7c878798",
+      "status": "passed",
+      "command": "npm test; npm run lint; npm run build:staging; git diff --check; firebase deploy --only hosting --project staging; Hosting HTTP verification",
+      "result": "91 pruebas Angular, lint, guardia visual, build y diff aprobados; el filtro incluye Campus históricos presentes en Áreas y Hosting 200 sirve main-2LPPUI52.js con styles-K7H52MHM.css.",
+      "criteria": []
     }
   ],
   "entries": [
