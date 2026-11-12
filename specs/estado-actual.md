@@ -60,7 +60,7 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 | Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                                                              |
 | Implementado              | Sí para el alcance vigente                      | Endurecimiento de sesión, operaciones y Áreas en `5df7763`; protocolos previos conservados                                                           |
 | Validado localmente       | Sí, sobre `5df7763`                             | 104 Angular, 52 Functions, 40 Emulator Suite, 8 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados |
-| Publicado en rama         | Pendiente del commit documental final           | El commit de implementación `5df7763` se publicará junto con su evidencia documental                                                                 |
+| Publicado en rama         | Sí                                              | `codex/modulo-areas` contiene `5df7763` y su evidencia documental; publicación sin force push                                                         |
 | Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                         |
 | Verificado por CI         | No para este incremento                         | GitHub reporta cero ejecuciones en la rama; sin PR no se disparó `Validación continua / validate`                                                    |
 | Desplegado en staging     | Sí, dentro del alcance documentado              | `createArea`, `updateArea`, `deleteArea`, `reconcileAreaCounts` y Hosting; Rules, datos, secretos y producción intactos                              |
@@ -91,7 +91,7 @@ Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación té
 
 ## Limitaciones conocidas y pendientes de entrega
 
-- La rama endurecida no está integrada en `desarrollo`. El único intento de abrir el PR en borrador respondió `must be a collaborator`; GitHub reporta cero ejecuciones de Actions para la rama y la integración no permite consultar la protección de `desarrollo` (HTTP 403).
+- La rama endurecida no está integrada en `desarrollo`. No existe un PR abierto para `codex/modulo-areas`; el intento anterior mediante conector respondió `must be a collaborator`, `gh` continúa sin sesión y no se repitió una escritura equivalente. GitHub reporta cero ejecuciones de Actions para la rama y la consulta pública de checks obligatorios de `desarrollo` respondió HTTP 401.
 - Falta aceptación autenticada de sustitución, retirada y expiración de imágenes y de los flujos administrativos que no se ejercieron con datos reales.
 - Falta revisión visual autenticada integral desde escritorio y 320 px.
 - La recuperación de imagen conserva indefinidamente evidencia insuficiente cuando no existe acuse ni ambas variantes; requiere un reintento autorizado y puede seguir pendiente.
