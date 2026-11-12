@@ -1,7 +1,7 @@
 {
   "version": 2,
   "baseReviewSha": "4a3407b14acd7a069ec62f39d1e6ee5a3b04ac1f",
-  "implementationSha": "4013c35ae9e8d6eb95bbcefe9321706a876ce5af",
+  "implementationSha": "306826f1b0c9b27429a8109c81748f1d17c267b9",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
@@ -230,6 +230,27 @@
         "MOD-055",
         "MOD-059",
         "MOD-060"
+      ]
+    },
+    {
+      "id": "areas-306826f",
+      "sha": "306826f1b0c9b27429a8109c81748f1d17c267b9",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "91 pruebas Angular, 51 unitarias de Functions, 37 con Emulator Suite, 8 recorridos Chromium y 7 controles negativos de trazabilidad aprobados; lint, guardia visual, formato, builds y diff aprobaron; auditoría de ejecución sin vulnerabilidades altas o críticas y con cuatro moderadas transitivas.",
+      "criteria": [
+        "ARE-001",
+        "ARE-002",
+        "ARE-005",
+        "ARE-008",
+        "ARE-016",
+        "ARE-019",
+        "ARE-022",
+        "ARE-023",
+        "ARE-025",
+        "ARE-030",
+        "ARE-034",
+        "ARE-035"
       ]
     }
   ],
@@ -835,70 +856,80 @@
       "criterion": "ARE-001",
       "verification": "automated",
       "tests": ["functions/src/admin-areas.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-011",
       "criterion": "ARE-002",
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-005",
       "criterion": "ARE-005",
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-003",
       "criterion": "ARE-008",
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-005",
       "criterion": "ARE-016",
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-007",
       "criterion": "ARE-019",
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-008",
       "criterion": "ARE-022",
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-005",
       "criterion": "ARE-023",
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-010",
       "criterion": "ARE-025",
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-001",
       "criterion": "ARE-030",
       "verification": "automated",
       "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-011",
@@ -919,14 +950,16 @@
       "criterion": "ARE-034",
       "verification": "automated",
       "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     },
     {
       "requirement": "RN-ARE-005",
       "criterion": "ARE-035",
       "verification": "automated",
       "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
     }
   ]
 }
