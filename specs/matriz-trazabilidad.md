@@ -26,7 +26,7 @@ El incremento se validó sobre `306826f1b0c9b27429a8109c81748f1d17c267b9` y se d
 - CAT-028, FAB-024, CAM-039 y MOD-061 vinculan `saving` con la operación y acción exactas.
 - MOD-062 aísla cada diálogo de Modelos frente a respuestas tardías de creación e imagen.
 - ARE-036–043 cubren orden de listados y catálogos, pérdida y recuperación administrativa, contadores derivados inválidos, nombres invisibles, inspector indeterminado, concurrencia y datos E2E con propiedad explícita.
-- La evidencia de ejecución se asociará al SHA que contenga estas correcciones; hasta entonces el manifiesto las distingue como implementadas pendientes de verificación. ARE-033 continúa como aceptación real separada.
+- La evidencia local quedó asociada a `5df7763ca23d862c7b4629f1088299b077d63b8d`: 104 pruebas Angular, 52 unitarias de Functions, 40 con Emulator Suite y 8 recorridos Chromium. El manifiesto registra 286 criterios inventariados, 100 obligatorios, 100 trazados y 99 verificados; ARE-033 es el único obligatorio pendiente por aceptación real.
 
 El ajuste final `7d7854e89c9fab4ee29ca2451fffb66a7c878798` conserva Campus históricos inactivos en el filtro, aprobó 91 pruebas Angular, lint, build y publicación exclusiva de Hosting; no modifica Rules ni Functions.
 

@@ -2,8 +2,9 @@
 
 ## Corte documental
 
-- Fecha del corte: 11 de noviembre de 2026.
-- Rama inspeccionada: `codex/hardening-sesion-imagenes-trazabilidad`.
+- Fecha del corte: 12 de noviembre de 2026.
+- Rama inspeccionada: `codex/modulo-areas`.
+- SHA de endurecimiento de cierre validado y desplegado: `5df7763ca23d862c7b4629f1088299b077d63b8d`.
 - SHA publicado al iniciar la consolidación: `51e71dc599c55e63bed4ddf11ca0b1e91a9ed599`.
 - SHA de implementación de permisos, rutas y Campus con validación completa: `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`.
 - SHA de la animación del acordeón publicada en Hosting de staging: `6f112780370f9f890efc773e21288efc4f4f9497`.
@@ -15,18 +16,18 @@ Este resumen describe el estado vigente. Las reglas completas permanecen en las 
 
 ## Alcance aprobado e implementado
 
-| Módulo                  | Propósito y comportamiento vigente                                                                               | Acceso y entrada                                                      | Backend y datos                                                      | Criterios                               | Estado real                                                                          |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------ |
-| Autenticación y sesión  | Google institucional, autorización previa, permisos sanitizados y generación selectiva por módulo/acción         | `/login`; todo usuario autorizado entra a `/dashboard`                | `bootstrapAuthorization`; `usuarios` es canónica                     | AUT-001–019                             | Implementado, validado y desplegado; popup real conserva aceptación manual separada  |
-| Layout privado          | Sidebar responsive y Configuraciones filtrado; retirar Ver abandona solo la ruta afectada                        | Shell privado; Usuarios solo `admin`; catálogos según `ver`           | Guards defensivos y revalidación deduplicada; backend es autoridad   | LAY-001–028                             | Implementado, validado y desplegado; revisión visual móvil autenticada pendiente     |
-| Dashboard inicial       | Bienvenida, identidad y estado de plataforma, sin métricas ficticias                                             | `/dashboard`; `admin` y `usuario` autorizados                         | No crea read model ni KPI operativos                                 | DASH-001–004                            | Implementado y desplegado; indicadores operativos son un incremento futuro           |
-| Usuarios                | Administra autorizaciones y asigna después del alta una matriz compacta de cuatro módulos                        | `/usuarios`; solo `admin`                                             | Siete callables; cambio de rol limpia permisos                       | USR-001–035                             | Implementado, validado y desplegado; aceptación autenticada de la matriz pendiente   |
-| Categorías              | Nombre, notas, estado y contador preparado de Activos; eliminación bloqueada por Modelos                         | `/configuraciones/categorias`; `admin` o `usuario` con capacidad      | Cinco callables; cada operación revalida su acción canónica          | CAT-001–027                             | Implementado, validado y desplegado; contador permanece en cero hasta Activos        |
-| Fabricantes             | Marca productora con Nombre y Notas; no representa comercio o plataforma de compra                               | `/configuraciones/fabricantes`; `admin` o `usuario` con capacidad     | Cinco callables; cada operación revalida su acción canónica          | FAB-001–023                             | Implementado, validado y desplegado; aceptación funcional/móvil pendiente            |
-| Modelos de activos      | Catálogo de Nombre, Categoría, Fabricante, Modelo No., Notas e imagen opcional                                   | `/configuraciones/modelos-activos`; `admin` o `usuario` con capacidad | Nueve callables; Editar controla imágenes y Crear conserva datos     | MOD-001–060                             | Implementado, validado y desplegado; ciclo real completo y revisión móvil pendientes |
-| Campus                  | Raíz física con Código, Nombre, Notas y contadores preparados de Áreas/Activos                                   | `/configuraciones/campus`; `admin` o capacidad explícita              | Cinco callables; `campus` y `campus_claves`                          | CAM-001–038                             | Implementado, validado y desplegado sin crear FCS/TUP; aceptación parcial pendiente  |
-| Áreas                   | Catálogo físico por Campus con Nombre, Notas, estado, transferencia y reconciliación                             | `/configuraciones/areas`; solo `admin`                                | Siete callables; `areas` y `areas_claves`                            | ARE-001–035                             | Implementado, validado y desplegado a staging; aceptación real pendiente             |
-| Calidad y entorno local | Seed sintético idempotente, Emulator Suite, Playwright, guardia visual y verificador estructural de trazabilidad | Scripts de `package.json` y CI                                        | Proyecto exclusivo `demo-inventario-tup`; no usa credenciales reales | DEV-001–003 y 72 criterios obligatorios | Validado localmente; CI se comprobará en el PR                                       |
+| Módulo                  | Propósito y comportamiento vigente                                                                               | Acceso y entrada                                                      | Backend y datos                                                      | Criterios                                | Estado real                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------ |
+| Autenticación y sesión  | Google institucional, autorización previa, permisos sanitizados y generación selectiva por módulo/acción         | `/login`; todo usuario autorizado entra a `/dashboard`                | `bootstrapAuthorization`; `usuarios` es canónica                     | AUT-001–020                              | Implementado, validado y desplegado; popup real conserva aceptación manual separada  |
+| Layout privado          | Sidebar responsive y Configuraciones filtrado; retirar Ver abandona solo la ruta afectada                        | Shell privado; Usuarios solo `admin`; catálogos según `ver`           | Guards defensivos y revalidación deduplicada; backend es autoridad   | LAY-001–028                              | Implementado, validado y desplegado; revisión visual móvil autenticada pendiente     |
+| Dashboard inicial       | Bienvenida, identidad y estado de plataforma, sin métricas ficticias                                             | `/dashboard`; `admin` y `usuario` autorizados                         | No crea read model ni KPI operativos                                 | DASH-001–004                             | Implementado y desplegado; indicadores operativos son un incremento futuro           |
+| Usuarios                | Administra autorizaciones y asigna después del alta una matriz compacta de cuatro módulos                        | `/usuarios`; solo `admin`                                             | Siete callables; cambio de rol limpia permisos                       | USR-001–035                              | Implementado, validado y desplegado; aceptación autenticada de la matriz pendiente   |
+| Categorías              | Nombre, notas, estado y contador preparado de Activos; eliminación bloqueada por Modelos                         | `/configuraciones/categorias`; `admin` o `usuario` con capacidad      | Cinco callables; cada operación revalida su acción canónica          | CAT-001–028                              | Implementado, validado y desplegado; contador permanece en cero hasta Activos        |
+| Fabricantes             | Marca productora con Nombre y Notas; no representa comercio o plataforma de compra                               | `/configuraciones/fabricantes`; `admin` o `usuario` con capacidad     | Cinco callables; cada operación revalida su acción canónica          | FAB-001–024                              | Implementado, validado y desplegado; aceptación funcional/móvil pendiente            |
+| Modelos de activos      | Catálogo de Nombre, Categoría, Fabricante, Modelo No., Notas e imagen opcional                                   | `/configuraciones/modelos-activos`; `admin` o `usuario` con capacidad | Nueve callables; Editar controla imágenes y Crear conserva datos     | MOD-001–062                              | Implementado, validado y desplegado; ciclo real completo y revisión móvil pendientes |
+| Campus                  | Raíz física con Código, Nombre, Notas y contadores preparados de Áreas/Activos                                   | `/configuraciones/campus`; `admin` o capacidad explícita              | Cinco callables; `campus` y `campus_claves`                          | CAM-001–039                              | Implementado, validado y desplegado sin crear FCS/TUP; aceptación parcial pendiente  |
+| Áreas                   | Catálogo físico por Campus con Nombre, Notas, estado, transferencia y reconciliación                             | `/configuraciones/areas`; solo `admin`                                | Siete callables; `areas` y `areas_claves`                            | ARE-001–043                              | Implementado, validado y desplegado a staging; aceptación real pendiente             |
+| Calidad y entorno local | Seed sintético idempotente, Emulator Suite, Playwright, guardia visual y verificador estructural de trazabilidad | Scripts de `package.json` y CI                                        | Proyecto exclusivo `demo-inventario-tup`; no usa credenciales reales | DEV-001–003 y 100 criterios obligatorios | Validado localmente; CI se comprobará en el PR                                       |
 
 ## Contratos e invariantes relevantes
 
@@ -36,9 +37,9 @@ Este resumen describe el estado vigente. Las reglas completas permanecen en las 
 - Usuarios administra autorizaciones en Firestore. Crear una autorización no crea una cuenta en Firebase Authentication.
 - Categorías, Fabricantes, Modelos y Campus usan identificadores estables y reservas transaccionales; renombrar no cambia la identidad.
 - Modelos referencia Categoría y Fabricante. Los Activos físicos individuales todavía no existen y, cuando se aprueben, referenciarán `modeloId` en vez de duplicar la imagen.
-- `cantidadActivos` de Categoría y Campus y `cantidadAreas` de Campus son read models protegidos. Sus fuentes canónicas aún no existen, por lo que permanecen en cero y no autorizan eliminaciones.
+- `cantidadActivos` de Categoría y Campus permanece preparado para Activos. `cantidadAreas` ya se deriva de `areas`, se mantiene transaccionalmente y puede reconciliar valores inválidos sin relajar las mutaciones ordinarias.
 - Una reducción para el mismo UID incrementa únicamente la generación del módulo y la acción afectados. Retirar `ver` limpia ese módulo y abandona su ruta; retirar otra acción cierra solo la operación dependiente.
-- Los rechazos `permission-denied` de catálogos o imágenes comparten una revalidación canónica. No cierran una sesión todavía válida ni reintentan automáticamente la mutación rechazada.
+- Los rechazos `permission-denied` comparten una ronda canónica nueva iniciada después del rechazo; nunca reutilizan una consulta anterior pendiente, no cierran una sesión todavía válida ni reintentan automáticamente la mutación rechazada.
 
 ## Protocolo vigente de imágenes
 
@@ -54,17 +55,17 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 
 ## Evidencia y estados de entrega
 
-| Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                                                  |
-| ------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                                                             |
-| Implementado              | Sí para el alcance vigente                      | Revocación selectiva y control de imagen en `4013c35`; backend canónico previo conservado                                                           |
-| Validado localmente       | Sí, sobre `4013c35`                             | 86 Angular, 47 Functions, 31 Emulator Suite, 7 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados |
-| Publicado en rama         | Sí                                              | La rama remota contiene `4013c35` y el cierre documental `6c980ce`                                                                                  |
-| Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                        |
-| Verificado por CI         | No para este incremento                         | GitHub reporta cero ejecuciones en la rama; sin PR no se disparó `Validación continua / validate`                                                   |
-| Desplegado en staging     | Sí, dentro del alcance documentado              | Este incremento actualizó solo Hosting; Functions, Rules, datos, secretos y producción permanecieron intactos                                       |
-| Aceptado con sesión real  | Parcial                                         | Miniatura real y parte de Campus aceptadas; otras mutaciones, ciclo completo de imagen y revisión móvil siguen pendientes                           |
-| Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                                                        |
+| Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                                                   |
+| ------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                                                              |
+| Implementado              | Sí para el alcance vigente                      | Endurecimiento de sesión, operaciones y Áreas en `5df7763`; protocolos previos conservados                                                           |
+| Validado localmente       | Sí, sobre `5df7763`                             | 104 Angular, 52 Functions, 40 Emulator Suite, 8 Chromium y 7 del verificador; lint, guardia visual, formato, builds, auditoría high y diff aprobados |
+| Publicado en rama         | Pendiente del commit documental final           | El commit de implementación `5df7763` se publicará junto con su evidencia documental                                                                 |
+| Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                         |
+| Verificado por CI         | No para este incremento                         | GitHub reporta cero ejecuciones en la rama; sin PR no se disparó `Validación continua / validate`                                                    |
+| Desplegado en staging     | Sí, dentro del alcance documentado              | `createArea`, `updateArea`, `deleteArea`, `reconcileAreaCounts` y Hosting; Rules, datos, secretos y producción intactos                              |
+| Aceptado con sesión real  | Parcial                                         | Miniatura real y parte de Campus aceptadas; otras mutaciones, ciclo completo de imagen y revisión móvil siguen pendientes                            |
+| Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                                                         |
 
 La evidencia histórica de `ef8ae66` permanece vigente para recuperación de imágenes. El incremento de Campus tiene evidencia propia en `2883ff5` y no traslada aceptación manual.
 
@@ -79,11 +80,12 @@ El 10 de noviembre de 2026 se especificó un incremento que permite asignar desp
 ## Staging vigente
 
 - Proyecto exclusivo: `inventario-stg`; alias obligatorio `staging`.
-- Hosting responde HTTP 200 y sirve `main-BEAIWWJ4.js` y `styles-K7H52MHM.css` con `no-store` para el documento.
-- Las 30 callables previas conservan Node.js 22 y `us-central1`; ninguna Function se desplegó en este incremento.
+- Hosting responde HTTP 200 y sirve `main-5BT6D7I5.js` y `styles-K7H52MHM.css` con `no-store` para el documento.
+- Las callables conservan Node.js 22 y `us-central1`; este cierre actualizó por separado `createArea`, `updateArea`, `deleteArea` y `reconcileAreaCounts`.
 - Firestore Rules niega acceso directo a las colecciones administrativas y Storage Rules conserva denegación total.
 - El último incremento de recuperación desplegó `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` en revisión `00004`, el ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting.
 - Storage Rules, índices, secretos, datos y producción no se modificaron en ese cierre.
+- La comprobación anónima posterior devolvió HTTP 401 en las cuatro callables actualizadas. No se desplegaron Rules, Storage Rules, índices, datos, secretos, IAM ni producción.
 
 Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación técnica, no aceptación funcional autenticada.
 
