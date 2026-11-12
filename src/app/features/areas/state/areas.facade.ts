@@ -221,6 +221,7 @@ export class AreasFacade {
   }
   private beginOperation(): number {
     this.listRequest += 1;
+    this.loadingState.set(false);
     return ++this.operationRequest;
   }
   private currentAccess(context: AdminAccessContext): boolean {

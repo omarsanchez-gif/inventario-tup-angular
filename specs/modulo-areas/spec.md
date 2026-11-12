@@ -14,7 +14,7 @@ Permitir que un `admin` administre las divisiones físicas operativas de cada Ca
 
 - Campus es la raíz física aprobada y cada Área futura pertenecerá exactamente a un Campus mediante `campusId`.
 - Los roles vigentes continúan siendo `admin` y `usuario`; este borrador no crea un rol de coordinación.
-- `cantidadAreas` ya existe como read model protegido en Campus, inicia en cero y debe mantenerse desde la fuente canónica cuando Áreas sea aprobada.
+- `cantidadAreas` es un read model protegido de Campus y se mantiene desde las Áreas canónicas implementadas.
 - Los clientes no acceden directamente a datos administrativos; guards y visibilidad del menú no sustituyen la autorización canónica de backend.
 - Las altas, ediciones y confirmaciones reutilizan `AppDialog`, las tablas usan búsqueda automática, paginación e icon-buttons compartidos y la interfaz debe funcionar desde 320 px.
 
@@ -73,10 +73,10 @@ areas_claves/{claveKey}
   nombreNormalizado: string
 ```
 
-- `areaId` sería estable, generado por backend e independiente del nombre, Campus e identificadores externos.
-- La clave lógica recomendada es `campusId + nombreNormalizado`, porque nombres como Salones pueden existir legítimamente en FCS y TUP.
+- `areaId` es estable, generado por backend e independiente del nombre, Campus e identificadores externos.
+- La clave lógica es `campusId + nombreNormalizado`, porque nombres como Salones pueden existir legítimamente en FCS y TUP.
 - `claveKey` se calcularía mediante SHA-256 con separadores no ambiguos.
-- Área, reserva y contador del Campus se crearían, transferirían o eliminarían dentro de una transacción.
+- Área, reserva y contador del Campus se crean, transfieren o eliminan dentro de una transacción.
 - Ningún cliente podría leer o escribir la colección ni su índice técnico directamente.
 
 Estos recursos son canónicos y permanecen cerrados a clientes mediante Firestore Rules.
@@ -96,7 +96,7 @@ Estos recursos son canónicos y permanecen cerrados a clientes mediante Firestor
 - Máximo propuesto de 120 caracteres.
 - Debe contener al menos un carácter visible.
 - Espacios Unicode, controles y caracteres de formato como U+200B no cuentan como contenido visible; un nombre compuesto solo por ellos se rechaza antes de invocar el repositorio.
-- `nombreNormalizado` aplicaría Unicode NFKD, eliminación de diacríticos, minúsculas, colapso de espacios y recorte.
+- `nombreNormalizado` aplica Unicode NFKD, eliminación de diacríticos y selectores de variación, minúsculas, colapso de espacios y recorte. El resultado debe conservar contenido visible y no puede ser vacío.
 - La recomendación es unicidad por Campus, no global.
 
 ### Notas
@@ -136,6 +136,7 @@ Estos recursos son canónicos y permanecen cerrados a clientes mediante Firestor
 - Cada callable revalida Authentication, claim administrativo y documento canónico `usuarios`.
 - La interfaz captura una generación de acceso administrativo además de la sesión. Perder el rol invalida permanentemente listados, catálogos, mutaciones y diálogos iniciados antes, incluso si el mismo UID recupera el rol.
 - Listado y catálogo usan secuencias independientes; una respuesta anterior nunca reemplaza una consulta más nueva ni el catálogo histórico solicitado para una edición.
+- `loading` pertenece al listado público vigente. Crear, mutar o reconciliar invalida el listado anterior, termina ese indicador y usa `saving`; su recarga interna no permite que una finalización antigua oculte datos recientes.
 - La futura visibilidad de Áreas para `usuario` depende del incremento de Coordinaciones, coberturas y alcance de Usuarios; no se anticipa aquí.
 - Firestore Rules mantendría denegación total para las colecciones propuestas.
 
@@ -209,13 +210,14 @@ La interfaz traduciría los códigos a mensajes institucionales y no expondría 
 
 ## Presentación propuesta
 
-- `Áreas` sería una opción secundaria de `Configuraciones`, después de Campus, solo cuando el módulo esté aprobado e implementado.
+- `Áreas` es una opción secundaria de `Configuraciones`, después de Campus, visible únicamente a `admin`.
 - Encabezado: etiqueta `Configuraciones`, título `Áreas`, descripción y acción textual `Nueva área`.
 - Búsqueda automática a todo el ancho y paginación compartida de 10 registros.
 - Tabla propuesta: `Nombre`, `Campus`, `Notas`, `Estado` y `Acciones`.
 - Alta y edición usan `AppDialog` con Campus, Nombre y Notas.
 - Las acciones contextuales Editar, Activar/Desactivar y Eliminar usan `AppIcon`, tooltip y nombre accesible.
 - La confirmación de eliminación identifica Área y Campus, mantiene abierto el diálogo ante error y anuncia la causa mediante `role="alert"` sin duplicarla en el fondo.
+- Si el alta ya fue confirmada y falla la recarga, el diálogo se cierra, se conserva el identificador y el error ofrece actualizar el listado; esa recuperación nunca reenvía el alta.
 - La tabla permite desplazamiento horizontal y conserva objetivos táctiles de al menos 44 × 44 px desde 320 px.
 - Foco, Escape, backdrop, retorno de foco, estados de carga y movimiento reducido siguen el sistema de diseño vigente.
 

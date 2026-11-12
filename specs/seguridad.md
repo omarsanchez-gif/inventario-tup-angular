@@ -20,6 +20,7 @@ El endurecimiento y las restricciones administrativas desplegadas se describen e
 - SEC-052: El despliegue del contrato se ordena Functions antes de Hosting para que una pestaña antigua falle cerrada y nunca elimine silenciosamente permisos de Campus.
 - SEC-053: La revalidación del mismo UID aplica revisiones independientes por módulo y acción; un rechazo canónico no permite que respuestas pendientes restauren datos, mensajes, URLs temporales o acciones revocadas.
 - SEC-054: Las negativas concurrentes de acceso a imágenes comparten una sola revalidación de autorización por ronda; Storage permanece cerrado y no existe reintento infinito de URLs firmadas.
+- SEC-055: Un error o finalización de autorización solo puede modificar sesión, navegación, mensajes o carga cuando conserva UID, generación e intento vigentes. Cada negativa posterior al inicio de una ronda exige otra lectura canónica posterior, agrupable con negativas pendientes.
 - SEC-007: Los errores expuestos se sanitizan y nunca incluyen tokens, secretos o stack traces.
 - SEC-008: La configuración pública de Firebase no se considera autorización; Security Rules y Functions son obligatorias.
 - SEC-009: Storage permanece cerrado a clientes; toda ruta y consumidor requiere especificación y acceso backend autorizado.
@@ -73,7 +74,7 @@ El endurecimiento y las restricciones administrativas desplegadas se describen e
 - SEC-056: `areas` y `areas_claves` deniegan toda lectura y escritura directa desde clientes.
 - SEC-057: transferir o eliminar un Área exige que el inspector canónico responda explícitamente que no hay referencias. Un resultado verdadero, indeterminado o una excepción bloquean la transacción con reconciliación requerida.
 - SEC-058: perder rol administrativo invalida de forma irreversible el contexto asíncrono anterior, aunque el mismo UID recupere después el rol; ninguna respuesta de ese contexto vuelve a publicar datos privados.
-- SEC-057: las siete callables de Áreas exigen Authentication, claim `authorized`, rol `admin` y un único perfil canónico activo con rol administrativo.
-- SEC-058: la interfaz, el guard y el menú no conceden autoridad; cada lectura, mutación y reconciliación revalida en backend.
-- SEC-059: Áreas no se agrega al mapa de permisos granulares. Una futura lectura de `usuario` requiere un contrato sanitizado y reglas aprobadas con Coordinaciones.
+- SEC-059: las siete callables de Áreas exigen Authentication, claim `authorized`, rol `admin` y un único perfil canónico activo con rol administrativo.
+- SEC-060: la interfaz, el guard y el menú no conceden autoridad; cada lectura, mutación y reconciliación revalida en backend.
+- SEC-061: Áreas no se agrega al mapa de permisos granulares. Una futura lectura de `usuario` requiere un contrato sanitizado y reglas aprobadas con Coordinaciones.
 - SEC-060: errores no exponen reservas, hashes, stack traces, rutas internas ni datos administrativos de Campus fuera del resumen permitido.

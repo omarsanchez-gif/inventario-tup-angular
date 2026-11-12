@@ -25,7 +25,13 @@ import { AreasFacade } from '../state/areas.facade';
 function visibleContent(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
   if (typeof value !== 'string') return { visibleContent: true };
-  return value.replace(/[\p{White_Space}\p{Cf}\p{Cc}\p{Cs}]/gu, '')
+  const normalized = value
+    .trim()
+    .replace(/\s+/gu, ' ')
+    .normalize('NFKD')
+    .replace(/\p{M}+/gu, '')
+    .toLocaleLowerCase('es-MX');
+  return normalized.replace(/[\p{White_Space}\p{Cf}\p{Cc}\p{Cs}]/gu, '')
     ? null
     : { visibleContent: true };
 }
@@ -149,6 +155,9 @@ export class AreasPage {
   protected async confirmDeletion(): Promise<void> {
     const area = this.pendingDeletion();
     if (area && (await this.areas.delete(area))) this.pendingDeletion.set(null);
+  }
+  protected async reloadList(): Promise<void> {
+    await this.areas.load();
   }
   private closePrivateUi(): void {
     this.openingGeneration += 1;

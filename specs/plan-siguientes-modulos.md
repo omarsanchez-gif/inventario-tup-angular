@@ -28,9 +28,9 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 **Estado:** implementado, validado y publicado únicamente en staging; aceptación autenticada integral pendiente.
 
-### 2. Áreas
+### 2. Áreas — implementado en staging
 
-**Estado al 12 de noviembre de 2026:** autorizado e implementado en `codex/modulo-areas`; validación y publicación de staging se registran de forma independiente.
+**Estado al 12 de noviembre de 2026:** autorizado, implementado, validado técnicamente y publicado en staging desde `codex/modulo-areas`; aceptación administrativa autenticada ARE-033 e integración en `desarrollo` permanecen separadas.
 
 **Objetivo:** crear la unidad física bajo Campus que después puedan referenciar coberturas, Usuarios y Activos.
 
@@ -40,9 +40,9 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 **Decisiones principales:** unicidad por Campus, transferencia, eliminación frente a referencias, reconciliación del contador y alcance exclusivo de `admin`.
 
-**Límite:** no incluye Coordinaciones, permisos de `usuario`, Activos ni datos institucionales. El detalle está en el [borrador de Áreas](modulo-areas/spec.md).
+**Límite:** no incluye Coordinaciones, permisos de `usuario`, Activos ni datos institucionales. El detalle está en la [spec vigente de Áreas](modulo-areas/spec.md).
 
-**Estado:** borrador propuesto, pendiente de aprobación.
+**Estado:** implementación completada y desplegada exclusivamente en staging; no crea FCS, TUP ni Áreas reales. ARE-033, PR, CI e integración continúan pendientes formales.
 
 ### 3. Coordinaciones, coberturas y alcance de Usuarios
 
@@ -123,17 +123,17 @@ Usuarios + Categorías + Fabricantes + Modelos ──> permisos granulares
 Alcance territorial ──> incremento posterior e independiente
 ```
 
-## Condiciones de cierre de Áreas
+## Condiciones de cierre técnico de Áreas
 
-- [ ] Alcance funcional aprobado por el responsable.
-- [ ] Decisiones bloqueantes D-ARE-001 a D-ARE-004 resueltas.
-- [ ] Contratos y modelo revisados en las fuentes transversales.
-- [ ] Criterios ARE aprobados e identificados sin evidencia ficticia.
-- [ ] Rama base identificada y endurecimiento integrado o decisión explícita sobre su base.
-- [ ] Estado de CI y aceptación pendiente de la base conocido.
-- [ ] Autorización separada para implementación y posterior despliegue a staging.
+- [x] Alcance funcional aprobado por el responsable.
+- [x] Decisiones bloqueantes D-ARE-001 a D-ARE-004 resueltas en ADR-008 y la spec.
+- [x] Contratos y modelo revisados en las fuentes transversales.
+- [x] Criterios ARE aprobados e identificados sin evidencia ficticia.
+- [x] Rama base identificada y estado de integración documentado.
+- [x] Estado de CI y aceptación pendiente conocido.
+- [x] Implementación y despliegue técnico exclusivo a staging autorizados y realizados.
 
-Al corte actual ninguna de estas condiciones se declara satisfecha únicamente por preparar el borrador.
+El cierre formal exige todavía ARE-033, PR, CI e integración en `desarrollo`; ninguna prueba local, HTTP 200 o rechazo anónimo sustituye esas etapas.
 
 ## Criterio para pasar de especificación a implementación
 

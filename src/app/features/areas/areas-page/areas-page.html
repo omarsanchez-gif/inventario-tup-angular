@@ -17,7 +17,17 @@
     </div>
   </header>
   @if (!formVisible() && !pendingDeletion() && areas.error(); as error) {
-    <div class="alert alert--error" role="alert">{{ error }}</div>
+    <div class="alert alert--error" role="alert">
+      <span>{{ error }}</span>
+      <button
+        class="button button--secondary"
+        type="button"
+        [disabled]="areas.loading() || areas.saving()"
+        (click)="reloadList()"
+      >
+        {{ areas.loading() ? 'Actualizando…' : 'Actualizar listado' }}
+      </button>
+    </div>
   }
   @if (areas.success(); as success) {
     <div class="alert alert--success" role="status">{{ success }}</div>

@@ -9,6 +9,13 @@ import { createAdminCampusesRepository } from './firestore-campuses.repository.j
 const host = process.env['FIRESTORE_EMULATOR_HOST'];
 const projectId = 'demo-inventario-tup';
 const suite = host ? describe : describe.skip;
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>((done) => {
+    resolve = done;
+  });
+  return { promise, resolve };
+}
 suite('areas firestore repository', () => {
   const app =
     getApps().find((entry) => entry.name === 'areas-firestore-test') ??
@@ -112,6 +119,57 @@ suite('areas firestore repository', () => {
     expect((await areas.list(10))[0]).toMatchObject({ documentId: areaId, campusId: source });
   });
 
+  it('ARE-023 serializes an overlapping transfer and deletion without harming unrelated data', async () => {
+    const source = await campuses.create(uid, campus('SRC', 'Origen'));
+    const target = await campuses.create(uid, campus('DST', 'Destino'));
+    const unrelated = await campuses.create(uid, campus('OTH', 'Ajeno'));
+    const movingId = await areas.create(uid, area(source, 'Mover'));
+    const deletingId = await areas.create(uid, area(source, 'Eliminar'));
+    const unrelatedId = await areas.create(uid, area(unrelated, 'Conservar'));
+    const bothEntered = deferred<void>();
+    const release = deferred<void>();
+    const entered = new Set<string>();
+    const overlapping = createAdminAreasRepository(firestore, {
+      async hasReferences(_transaction, areaId) {
+        if (!entered.has(areaId)) {
+          entered.add(areaId);
+          if (entered.size === 2) bothEntered.resolve();
+          await release.promise;
+        }
+        return false;
+      },
+    });
+
+    const transfer = overlapping.update(uid, {
+      documentId: movingId,
+      ...area(target, 'Mover'),
+    });
+    const deletion = overlapping.delete(uid, deletingId);
+    await bothEntered.promise;
+    release.resolve();
+    await Promise.all([transfer, deletion]);
+
+    const finalAreas = await areas.list(10);
+    expect(finalAreas).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ documentId: movingId, campusId: target }),
+        expect.objectContaining({ documentId: unrelatedId, campusId: unrelated }),
+      ]),
+    );
+    expect(finalAreas.some((entry) => entry.documentId === deletingId)).toBe(false);
+    expect(
+      Object.fromEntries(
+        (await campuses.list(10)).map((entry) => [entry.documentId, entry.cantidadAreas]),
+      ),
+    ).toEqual({ [source]: 0, [target]: 1, [unrelated]: 1 });
+    const reservations = await firestore.collection('areas_claves').get();
+    expect(reservations.size).toBe(2);
+    expect(reservations.docs.map((entry) => entry.data()['areaId']).sort()).toEqual(
+      [movingId, unrelatedId].sort(),
+    );
+    expect(await areas.reconcile(uid)).toMatchObject({ campusesCorrected: 0 });
+  }, 20_000);
+
   it('ARE-041 treats an indeterminate reference result as reconciliation-required', async () => {
     const source = await campuses.create(uid, campus('TUP', 'Tecnológico'));
     const target = await campuses.create(uid, campus('FCS', 'Salud'));
@@ -171,10 +229,70 @@ suite('areas firestore repository', () => {
     }
   });
 
-  it('ARE-042 converges when reconciliation and a canonical mutation overlap', async () => {
-    const campusId = await campuses.create(uid, campus('TUP', 'Tecnológico'));
-    await Promise.all([areas.create(uid, area(campusId, 'Concurrente')), areas.reconcile(uid)]);
-    expect((await campuses.list(10))[0]?.cantidadAreas).toBe(1);
+  it('ARE-042 retries transfers and deletions that overlap a correcting reconciliation', async () => {
+    const source = await campuses.create(uid, campus('SRC', 'Origen'));
+    const target = await campuses.create(uid, campus('DST', 'Destino'));
+    const unrelated = await campuses.create(uid, campus('OTH', 'Ajeno'));
+    const movingId = await areas.create(uid, area(source, 'Concurrente'));
+    const unrelatedId = await areas.create(uid, area(unrelated, 'Conservar'));
+
+    await firestore.collection('campus').doc(source).update({ cantidadAreas: 7 });
+    const transferEntered = deferred<void>();
+    const releaseTransfer = deferred<void>();
+    let transferBlocked = false;
+    const transferRepository = createAdminAreasRepository(firestore, {
+      async hasReferences() {
+        if (!transferBlocked) {
+          transferBlocked = true;
+          transferEntered.resolve();
+          await releaseTransfer.promise;
+        }
+        return false;
+      },
+    });
+    const transfer = transferRepository.update(uid, {
+      documentId: movingId,
+      ...area(target, 'Concurrente'),
+    });
+    await transferEntered.promise;
+    const transferReconciliation = areas.reconcile(uid);
+    releaseTransfer.resolve();
+    const [transferReconciliationResult] = await Promise.all([transferReconciliation, transfer]);
+    expect(transferReconciliationResult).toMatchObject({ campusesCorrected: 1 });
+
+    await firestore.collection('campus').doc(target).update({ cantidadAreas: 9 });
+    const deletionEntered = deferred<void>();
+    const releaseDeletion = deferred<void>();
+    let deletionBlocked = false;
+    const deletionRepository = createAdminAreasRepository(firestore, {
+      async hasReferences() {
+        if (!deletionBlocked) {
+          deletionBlocked = true;
+          deletionEntered.resolve();
+          await releaseDeletion.promise;
+        }
+        return false;
+      },
+    });
+    const deletion = deletionRepository.delete(uid, movingId);
+    await deletionEntered.promise;
+    const deletionReconciliation = areas.reconcile(uid);
+    releaseDeletion.resolve();
+    const [deletionReconciliationResult] = await Promise.all([deletionReconciliation, deletion]);
+    expect(deletionReconciliationResult).toMatchObject({ campusesCorrected: 1 });
+
+    expect((await areas.list(10)).map((entry) => entry.documentId)).toEqual([unrelatedId]);
+    expect(
+      Object.fromEntries(
+        (await campuses.list(10)).map((entry) => [entry.documentId, entry.cantidadAreas]),
+      ),
+    ).toEqual({ [source]: 0, [target]: 0, [unrelated]: 1 });
+    const reservations = await firestore.collection('areas_claves').get();
+    expect(reservations.size).toBe(1);
+    expect(reservations.docs[0]?.data()).toMatchObject({
+      areaId: unrelatedId,
+      campusId: unrelated,
+    });
     expect(await areas.reconcile(uid)).toMatchObject({ campusesCorrected: 0 });
   }, 20_000);
 

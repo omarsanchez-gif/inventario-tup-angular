@@ -33,11 +33,11 @@ Los criterios siguientes son obligatorios. Su presencia en una prueba no acredit
 - ARE-019: eliminar un Área libre elimina documento y reserva y decrementa exactamente una vez `cantidadAreas`. <!-- trace:required -->
 - ARE-020: un Área referenciada responde `area-in-use`, permanece disponible para desactivación y no altera reservas ni contador. Depende de D-ARE-003.
 - ARE-021: un error al comprobar referencias responde reconciliación y falla de forma segura sin eliminar.
-- ARE-022: `deleteCampus` rechaza un Campus con cualquier Área activa o inactiva y un error de consulta nunca permite borrarlo. <!-- trace:required -->
+- ARE-022: `deleteCampus` rechaza un Campus con cualquier Área activa o inactiva aunque `cantidadAreas` sea cero; conserva Campus, Área y reservas y un error de consulta nunca permite borrarlo. <!-- trace:required -->
 
 ## Contadores y concurrencia
 
-- ARE-023: altas, eliminaciones y transferencias concurrentes conservan `cantidadAreas` sin incrementos perdidos, dobles decrementos ni valores negativos. <!-- trace:required -->
+- ARE-023: altas, eliminaciones y transferencias concurrentes coordinadas para solaparse conservan Áreas, Campus, propietarios de reservas y `cantidadAreas` sin incrementos perdidos, dobles decrementos, valores negativos ni cambios a registros ajenos. <!-- trace:required -->
 - ARE-024: renombrar, activar o desactivar no cambia el contador; reintentar una mutación idempotente no lo duplica.
 - ARE-025: la reconciliación reconstruye `cantidadAreas` desde Áreas existentes, reporta diferencias y no acepta un valor calculado por el cliente. <!-- trace:required -->
 
@@ -55,12 +55,12 @@ Los criterios siguientes son obligatorios. Su presencia en una prueba no acredit
 - ARE-032: la validación técnica y el despliegue autorizado se vinculan al SHA exacto; Rules niega acceso directo, Functions rechaza anónimo y Hosting sirve la ruta sin modificar producción ni crear datos. <!-- trace:required -->
 - ARE-033: una sesión administrativa real acepta alta, edición, estado, transferencia aprobada, eliminación y causas de rechazo; esta aceptación se registra separada de HTTP 200, Function `ACTIVE` y pruebas locales. <!-- trace:required -->
 - ARE-034: si el mismo UID pierde el rol administrativo durante una espera, la respuesta se descarta, se cierran diálogos, se limpia el estado y la ruta vuelve a Dashboard. <!-- trace:required -->
-- ARE-035: si el alta queda confirmada pero falla la recarga, la interfaz conserva el identificador retornado y no repite la creación. <!-- trace:required -->
-- ARE-036: dos listados fuera de orden conservan exclusivamente la respuesta de la solicitud más reciente, incluso tras salir y volver a la ruta. <!-- trace:required -->
+- ARE-035: si el alta queda confirmada pero falla la recarga, la página cierra el diálogo, conserva el identificador y permite actualizar el listado sin repetir la creación; `loading` y `saving` terminan. <!-- trace:required -->
+- ARE-036: dos listados fuera de orden conservan exclusivamente la respuesta de la solicitud más reciente; una mutación que sustituye un listado pendiente asume su estado terminal y una finalización antigua no apaga una carga nueva. <!-- trace:required -->
 - ARE-037: el catálogo inicial tardío no reemplaza el catálogo posterior de una edición que conserva un Campus histórico inactivo. <!-- trace:required -->
 - ARE-038: perder y recuperar rol `admin` con el mismo UID no revive operaciones anteriores ni restaura estado, mensajes o diálogos. <!-- trace:required -->
 - ARE-039: reconciliar repara contadores negativos, nulos o ausentes con diagnóstico explícito, conserva relaciones canónicas e idempotencia. <!-- trace:required -->
-- ARE-040: nombres compuestos solo por espacios o caracteres invisibles se rechazan sin Área, reserva o cambio de contador; Unicode visible legítimo permanece permitido. <!-- trace:required -->
+- ARE-040: nombres compuestos solo por espacios, U+200B, U+FE0F, formatos, controles o marcas que dejan identidad normalizada vacía se rechazan sin Área, reserva o cambio de contador; Unicode visible legítimo permanece permitido. <!-- trace:required -->
 - ARE-041: el inspector de referencias permite únicamente un `false` explícito; `true`, excepción o resultado indeterminado bloquean eliminación y transferencia sin cambios parciales. <!-- trace:required -->
-- ARE-042: reconciliación concurrente con alta, transferencia o eliminación converge al contador y reservas exactos mediante reintento transaccional. <!-- trace:required -->
+- ARE-042: reconciliación iniciada mientras una transferencia o eliminación está dentro de su transacción converge al contador, pertenencia y reservas exactos; la prueba coordina el solapamiento sin depender solo de `Promise.all` o pausas arbitrarias. <!-- trace:required -->
 - ARE-043: el recorrido E2E usa identidad sintética única y limpieza limitada a sus propios registros, de modo que una ejecución fallida no colisiona ni provoca borrados globales. <!-- trace:required -->

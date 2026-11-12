@@ -111,7 +111,7 @@ function collapse(value: string): string {
 }
 
 export function hasVisibleAreaName(value: string): boolean {
-  return value.replace(/[\p{White_Space}\p{Cf}\p{Cc}\p{Cs}]/gu, '').length > 0;
+  return normalizeAreaName(value).replace(/[\p{White_Space}\p{Cf}\p{Cc}\p{Cs}]/gu, '').length > 0;
 }
 
 export function normalizeAreaName(value: string): string {
@@ -123,10 +123,12 @@ export function normalizeAreaName(value: string): string {
 
 function draft(request: Readonly<Record<string, unknown>>): AreaDraft {
   const campusId = id(request['campusId'], 'area-campus-required');
+  const rawName = request['nombre'];
   if (
-    typeof request['nombre'] !== 'string' ||
-    !collapse(request['nombre']) ||
-    !hasVisibleAreaName(request['nombre'])
+    typeof rawName !== 'string' ||
+    !collapse(rawName) ||
+    !hasVisibleAreaName(rawName) ||
+    !normalizeAreaName(rawName)
   ) {
     throw new AdminAreasError(
       'area-name-required',
@@ -134,7 +136,8 @@ function draft(request: Readonly<Record<string, unknown>>): AreaDraft {
       'El nombre es obligatorio.',
     );
   }
-  const nombre = collapse(request['nombre']);
+  const nombre = collapse(rawName);
+  const nombreNormalizado = normalizeAreaName(nombre);
   if ([...nombre].length > 120) {
     throw new AdminAreasError(
       'area-name-too-long',
@@ -154,7 +157,7 @@ function draft(request: Readonly<Record<string, unknown>>): AreaDraft {
       'Las notas son demasiado largas.',
     );
   }
-  return { campusId, nombre, nombreNormalizado: normalizeAreaName(nombre), notas };
+  return { campusId, nombre, nombreNormalizado, notas };
 }
 
 export async function listAreas(

@@ -48,6 +48,7 @@ Callable → caso de uso → repositorio → Admin SDK
 - `features/manufacturers`: módulo administrativo de Fabricantes implementado y validado para staging.
 - `features/asset-models`: módulo administrativo de Modelos de activos implementado, validado y desplegado únicamente en staging.
 - `features/campuses`: módulo administrativo de Campus implementado, validado y desplegado únicamente en staging.
+- `features/areas`: catálogo administrativo exclusivo de `admin`, dependiente de Campus, con reserva por Campus, contador transaccional y reconciliación manual implementados y desplegados únicamente en staging.
 
 ## Navegación administrativa
 
@@ -57,7 +58,7 @@ Callable → caso de uso → repositorio → Admin SDK
 - `/configuraciones/modelos-activos` requiere `admin` o `modelosActivos.ver`.
 - Otros catálogos no aparecen hasta contar con especificación e implementación propias.
 - Campus usa `/configuraciones/campus`, protegida por el guard de capacidad `campus.ver` y visible como cuarta opción secundaria para quien tenga acceso.
-- Áreas conserva únicamente un borrador documental; no tiene ruta, opción de menú, código ni backend.
+- Áreas usa `/configuraciones/areas`, guard administrativo, opción secundaria exclusiva de `admin`, facade/gateway y siete callables; permanece deliberadamente fuera del mapa granular.
 - La activación visual del grupo no sustituye guards, callables ni reglas de seguridad.
 
 ## Autorización granular
@@ -116,9 +117,17 @@ Se implementaron nueve callables en `us-central1`: `listAssetModels`, `getAssetM
 ## Ciclo de sesión
 
 - `AuthFacade` asigna una generación a cada UID observado y la invalida al cerrar sesión, perderla o cambiar de usuario.
-- El perfil solo se publica si bootstrap y claims pertenecen a la generación y UID vigentes.
+- El perfil, los errores y las finalizaciones solo se aplican si bootstrap y claims pertenecen al UID, generación e intento de autorización vigentes.
+- Las negativas recibidas antes de iniciar una ronda pueden compartirla; una negativa que llega durante su bootstrap o renovación de claims queda cubierta por una ronda canónica posterior. No se reintenta la mutación rechazada.
 - Las facades administrativas observan `SessionScope`, vacían su estado ante cada invalidación y descartan respuestas iniciadas por una generación anterior.
 - La pérdida de sesión navega a `/login`, lo que desmonta el shell privado; guards y backend continúan aplicando autorización efectiva.
+
+## Estado asíncrono de Áreas
+
+- Listado, catálogos, operaciones y aperturas de diálogo usan identidades independientes.
+- `loading` pertenece únicamente al listado público vigente. Una mutación que sustituye un listado pendiente termina ese indicador y usa `saving` mientras ejecuta su recarga interna.
+- Una finalización antigua no apaga una carga posterior; una recarga antigua no puede publicar datos, mensajes ni recuperar vigencia.
+- Tras un alta confirmada cuya recarga falla, el diálogo se cierra con la identidad creada conservada y la página ofrece actualizar el listado sin reenviar `createArea`.
 
 ## Verificación en navegador
 

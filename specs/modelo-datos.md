@@ -2,7 +2,7 @@
 
 ## Estado
 
-El modelo implementado comprende autorización, Categorías, Fabricantes, Modelos de activos y el contrato de Campus. Firestore Rules protege sus colecciones e índices técnicos; implementación y despliegue no crean documentos de negocio. Áreas, Coordinaciones, Activos y migración continúan pendientes.
+El modelo implementado comprende autorización, Categorías, Fabricantes, Modelos de activos, Campus y Áreas. Firestore Rules protege sus colecciones e índices técnicos; implementación y despliegue no crean documentos de negocio. Coordinaciones, Activos y migración continúan pendientes.
 
 ## Colección `usuarios`
 
@@ -316,7 +316,7 @@ areas/{areaId}
 ```
 
 - `areaId` es estable y generado por backend. `campusId` referencia un documento canónico de `campus`.
-- `nombre` admite 120 caracteres; `nombreNormalizado` usa NFKD, elimina diacríticos, usa minúsculas, colapsa espacios y se recorta.
+- `nombre` admite 120 caracteres; `nombreNormalizado` usa NFKD, elimina diacríticos y selectores de variación, usa minúsculas, colapsa espacios y se recorta. La identidad normalizada debe conservar contenido visible y nunca puede quedar vacía.
 - `notas` admite 1,000 caracteres, se recorta y una cadena vacía se almacena como `null`.
 - Todo registro inicia activo. Estado, normalización y fechas no son editables por clientes.
 - El contador `campus.cantidadAreas` incluye todos los documentos existentes, activos e inactivos.

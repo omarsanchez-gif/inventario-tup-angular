@@ -13,7 +13,7 @@
 - AUT-011: una autorización que termina después de perder la sesión no restaura el perfil ni el contenido privado. <!-- trace:required -->
 - AUT-012: cerrar sesión en otra pestaña navega a Login y limpia los estados administrativos de la pestaña abierta. <!-- trace:required -->
 - AUT-013: cambiar de usuario descarta perfil, claims y respuestas de solicitudes pertenecientes al UID anterior. <!-- trace:required -->
-- AUT-014: un error tardío de `bootstrap` o renovación de claims de A no cierra, limpia ni redirige una sesión B vigente; el error de la sesión vigente conserva el rechazo y cierre esperados. <!-- trace:required -->
+- AUT-014: un error tardío de `bootstrap` o renovación de claims, incluso de una ronda sustituida para el mismo UID, no cierra, limpia, redirige, publica error ni apaga la carga de la autorización vigente; el error del intento vigente conserva el rechazo y cierre esperados. <!-- trace:required -->
 - AUT-015: `bootstrapAuthorization` entrega el mapa efectivo sanitizado sin agregarlo a Custom Claims; `admin` recibe acceso total y `usuario` denegación por defecto o sus acciones canónicas. <!-- trace:required -->
 - AUT-016: una revalidación de permisos tardía de A no modifica menú, acciones, perfil o navegación de una sesión B vigente. <!-- trace:required -->
 
@@ -21,8 +21,8 @@
 
 - AUT-017: `bootstrapAuthorization` incorpora `campus[]`, interpreta su ausencia histórica como denegación para `usuario` y conserva acceso total efectivo de `admin` sin ampliar Custom Claims. <!-- trace:required -->
 - AUT-018: una reducción para el mismo UID invalida únicamente el módulo y la acción modificados; operaciones y estado de otros módulos permanecen vigentes. <!-- trace:required -->
-- AUT-019: varias respuestas `permission-denied` concurrentes comparten una sola revalidación canónica y no generan cierre de sesión ni bucles de navegación. <!-- trace:required -->
-- AUT-020: una negativa no reutiliza una autorización iniciada antes del rechazo; crea una única ronda posterior compartida, y la respuesta antigua no modifica perfil, capacidades, navegación ni sesión. <!-- trace:required -->
+- AUT-019: varias respuestas `permission-denied` acumuladas antes de iniciar la lectura comparten una sola revalidación canónica y no generan cierre de sesión ni bucles de navegación. <!-- trace:required -->
+- AUT-020: cada negativa queda cubierta por una lectura iniciada después de recibirla; si llega durante bootstrap o claims, se ejecuta una ronda posterior agrupada. Las respuestas o errores sustituidos no modifican perfil, capacidades, navegación, sesión ni finalización. <!-- trace:required -->
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 

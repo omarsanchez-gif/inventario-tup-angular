@@ -17,6 +17,8 @@
 - [x] Agregar cobertura determinista y recorridos de navegador con Auth Emulator.
 - [x] Descartar errores tardíos de `bootstrap` y renovación de claims por UID y generación sin afectar una sesión posterior.
 - [x] Ampliar `bootstrapAuthorization` con permisos sanitizados conforme a ADR-007 sin incorporarlos a claims.
+- [x] Descartar éxito, error y finalización de intentos de autorización sustituidos usando UID, generación e identidad de intento.
+- [x] Cubrir cada negativa con una lectura canónica posterior, agrupando revisiones pendientes sin reintentar mutaciones.
 - [x] Revalidar capacidades en guards y al recuperar foco, conservando deduplicación y generación de sesión.
 
 ## Ampliación autorizada: Campus

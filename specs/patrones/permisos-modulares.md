@@ -9,8 +9,9 @@ Patrón vigente para Categorías, Fabricantes, Modelos de activos y Campus. Defi
 - `usuarios` es la fuente canónica. Los módulos son `categorias`, `fabricantes`, `modelosActivos` y `campus`; las acciones son `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`.
 - `admin` tiene todas las acciones por rol. `usuario` requiere la acción exacta y `ver` para cualquier mutación.
 - Menú, botones y guards son defensa de presentación. Cada callable y cada transacción sensible revalida el documento canónico.
-- Un `permission-denied` en listado, mutación, catálogo o acceso temporal a imagen provoca una única revalidación deduplicada de autorización. No se reintenta automáticamente la operación rechazada.
-- Esa revalidación es una ronda nueva iniciada después del rechazo. Nunca reutiliza un `bootstrap` anterior todavía pendiente; varios rechazos que llegan durante la ronda nueva comparten esa ronda.
+- Un `permission-denied` en listado, mutación, catálogo o acceso temporal a imagen incrementa la revisión pendiente de autorización. No se reintenta automáticamente la operación rechazada.
+- La primera revisión inicia una ronda nueva después de los rechazos ya acumulados. Si llega otra negativa mientras esa ronda espera perfil o claims, una ronda posterior cubre todas las revisiones aún pendientes. El proceso termina al alcanzar la última revisión recibida y no mezcla UID, generación ni intento.
+- Éxito, error, limpieza de promesas e indicadores se aplican solo al intento vigente; una ronda sustituida se descarta también cuando falla.
 
 ## Generaciones y respuestas tardías
 

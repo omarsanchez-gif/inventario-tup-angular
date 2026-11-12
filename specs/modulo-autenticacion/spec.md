@@ -38,7 +38,7 @@ ADR-007 amplía `bootstrapAuthorization` para devolver el mapa granular sanitiza
 
 Un documento anterior se sanitiza con `campus[]` vacío para `usuario`; la ausencia del campo nunca concede acceso y no exige migración.
 
-Para el mismo UID, Angular conserva además revisiones independientes por módulo y acción. La revalidación compara el mapa anterior con el nuevo: retirar `ver` invalida todo el módulo y retirar otra acción invalida solo las operaciones iniciadas con ella. Las negativas `permission-denied` concurrentes comparten la revalidación vigente. El patrón completo está en `../patrones/permisos-modulares.md`.
+Para el mismo UID, Angular conserva además revisiones independientes por módulo y acción. La revalidación compara el mapa anterior con el nuevo: retirar `ver` invalida todo el módulo y retirar otra acción invalida solo las operaciones iniciadas con ella. Negativas acumuladas antes de iniciar una ronda la comparten; una negativa recibida durante perfil o claims agenda una ronda posterior. Los errores y finalizaciones de intentos sustituidos no modifican la sesión vigente. El patrón completo está en `../patrones/permisos-modulares.md`.
 
 ## Fuera de alcance
 

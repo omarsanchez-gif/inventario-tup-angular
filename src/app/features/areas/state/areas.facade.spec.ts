@@ -8,10 +8,12 @@ import { AreasFacade } from './areas.facade';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((done) => {
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((done, fail) => {
     resolve = done;
+    reject = fail;
   });
-  return { promise, resolve };
+  return { promise, resolve, reject };
 }
 function setup() {
   const role = signal<'admin' | 'usuario'>('admin');
@@ -172,5 +174,104 @@ describe('AreasFacade', () => {
     pending.resolve({ items: [area('old', 'Anterior')], total: 1, maxSupported: 500 });
     await load;
     expect(facade.areas()).toEqual([]);
+  });
+  it('ARE-036 finishes loading when reconciliation supersedes an initial list', async () => {
+    const { facade, gateway } = setup();
+    const initial = deferred<{
+      items: readonly ReturnType<typeof area>[];
+      total: number;
+      maxSupported: number;
+    }>();
+    vi.mocked(gateway.list)
+      .mockReturnValueOnce(initial.promise)
+      .mockResolvedValueOnce({ items: [area('recent', 'Reciente')], total: 1, maxSupported: 500 });
+
+    const pendingLoad = facade.load();
+    expect(facade.loading()).toBe(true);
+    await expect(facade.reconcile()).resolves.toBe(true);
+    expect(facade.loading()).toBe(false);
+    expect(facade.saving()).toBe(false);
+    expect(facade.areas().map((item) => item.documentId)).toEqual(['recent']);
+    initial.resolve({ items: [area('stale', 'Anterior')], total: 1, maxSupported: 500 });
+    await pendingLoad;
+
+    expect(facade.loading()).toBe(false);
+    expect(facade.areas().map((item) => item.documentId)).toEqual(['recent']);
+    expect(facade.success()).toContain('Reconciliación completada');
+  });
+  it('ARE-035 finishes loading when a confirmed creation supersedes an initial list', async () => {
+    const { facade, gateway } = setup();
+    const initial = deferred<{
+      items: readonly ReturnType<typeof area>[];
+      total: number;
+      maxSupported: number;
+    }>();
+    vi.mocked(gateway.list)
+      .mockReturnValueOnce(initial.promise)
+      .mockResolvedValueOnce({ items: [area('area-1', 'Nueva')], total: 1, maxSupported: 500 });
+
+    const pendingLoad = facade.load();
+    await expect(facade.create({ campusId: 'c', nombre: 'Nueva', notas: null })).resolves.toBe(
+      'area-1',
+    );
+    initial.resolve({ items: [area('stale', 'Anterior')], total: 1, maxSupported: 500 });
+    await pendingLoad;
+
+    expect(facade.loading()).toBe(false);
+    expect(facade.saving()).toBe(false);
+    expect(facade.areas().map((item) => item.documentId)).toEqual(['area-1']);
+    expect(facade.success()).toBe('Área creada correctamente.');
+  });
+  it('ARE-035 leaves loading terminal when a confirmed creation cannot reload', async () => {
+    const { facade, gateway } = setup();
+    const initial = deferred<{
+      items: readonly ReturnType<typeof area>[];
+      total: number;
+      maxSupported: number;
+    }>();
+    vi.mocked(gateway.list)
+      .mockReturnValueOnce(initial.promise)
+      .mockRejectedValueOnce(new Error('offline'));
+
+    const pendingLoad = facade.load();
+    await expect(facade.create({ campusId: 'c', nombre: 'Nueva', notas: null })).resolves.toBe(
+      'area-1',
+    );
+    expect(facade.loading()).toBe(false);
+    expect(facade.saving()).toBe(false);
+    expect(facade.error()).toContain('fue creada');
+    initial.resolve({ items: [area('stale', 'Anterior')], total: 1, maxSupported: 500 });
+    await pendingLoad;
+
+    expect(facade.loading()).toBe(false);
+    expect(facade.areas()).toEqual([]);
+  });
+  it('ARE-036 does not let an old finalization stop a newer list', async () => {
+    const { facade, gateway } = setup();
+    const firstList = deferred<{
+      items: readonly ReturnType<typeof area>[];
+      total: number;
+      maxSupported: number;
+    }>();
+    const secondList = deferred<{
+      items: readonly ReturnType<typeof area>[];
+      total: number;
+      maxSupported: number;
+    }>();
+    vi.mocked(gateway.list)
+      .mockReturnValueOnce(firstList.promise)
+      .mockReturnValueOnce(secondList.promise);
+
+    const first = facade.load();
+    const second = facade.load();
+    firstList.resolve({ items: [area('old', 'Anterior')], total: 1, maxSupported: 500 });
+    await first;
+    expect(facade.loading()).toBe(true);
+    expect(facade.areas()).toEqual([]);
+    secondList.resolve({ items: [area('new', 'Vigente')], total: 1, maxSupported: 500 });
+    await second;
+
+    expect(facade.loading()).toBe(false);
+    expect(facade.areas().map((item) => item.documentId)).toEqual(['new']);
   });
 });

@@ -20,6 +20,10 @@
 - [x] Aislar listados, catálogos, operaciones y aperturas mediante generaciones de solicitud y acceso administrativo.
 - [x] Reparar contadores derivados inválidos con diagnóstico explícito y mantener estrictas las mutaciones ordinarias.
 - [x] Rechazar nombres invisibles y exigir respuesta explícita del inspector de referencias.
+- [x] Rechazar identidades que quedan vacías después de normalizar, incluidos selectores de variación aislados, antes de cualquier escritura.
+- [x] Definir `loading` como propiedad del listado público vigente y terminarlo cuando una mutación sustituye una lectura pendiente.
+- [x] Añadir recuperación de listado posterior a un alta confirmada sin repetir `createArea`.
+- [x] Coordinar en Emulator Suite transferencias, eliminaciones y reconciliación realmente solapadas, y proteger Campus aunque su contador derivado sea cero.
 - [x] Hacer única e idempotente la identidad sintética del recorrido E2E con limpieza limitada por propiedad.
 
 ## Staging y aceptación

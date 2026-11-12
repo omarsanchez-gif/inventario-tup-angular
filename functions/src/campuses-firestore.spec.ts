@@ -1,8 +1,10 @@
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { normalizeAreaName } from './admin-areas.js';
 import { normalizeCampusCode, normalizeCampusName } from './admin-campuses.js';
+import { createAdminAreasRepository } from './firestore-areas.repository.js';
 import { createAdminCampusesRepository } from './firestore-campuses.repository.js';
 
 const emulatorHost = process.env['FIRESTORE_EMULATOR_HOST'];
@@ -15,6 +17,7 @@ emulatorSuite('campuses firestore repository', () => {
     initializeApp({ projectId }, 'campuses-firestore-test');
   const firestore = getFirestore(app);
   const repository = createAdminCampusesRepository(firestore);
+  const areas = createAdminAreasRepository(firestore);
   const adminUid = 'campus-admin';
   const userUid = 'campus-user';
 
@@ -25,7 +28,7 @@ emulatorSuite('campuses firestore repository', () => {
     );
   }
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     await clearFirestore();
     await firestore.collection('usuarios').doc('admin').set({
       uid: adminUid,
@@ -49,7 +52,7 @@ emulatorSuite('campuses firestore repository', () => {
         fechaCreacion: new Date(),
         ultimoAcceso: null,
       });
-  });
+  }, 20_000);
 
   afterAll(async () => {
     await clearFirestore();
@@ -149,5 +152,28 @@ emulatorSuite('campuses firestore repository', () => {
 
     expect(read.status).toBe(403);
     expect(write.status).toBe(403);
+  });
+
+  it('ARE-022 blocks Campus deletion from canonical Areas even when its counter is zero', async () => {
+    const documentId = await repository.create(adminUid, draft('ZERO', 'Campus con Área'));
+    const areaId = await areas.create(adminUid, {
+      campusId: documentId,
+      nombre: 'Consultorio',
+      nombreNormalizado: normalizeAreaName('Consultorio'),
+      notas: null,
+    });
+    await firestore.collection('campus').doc(documentId).update({ cantidadAreas: 0 });
+
+    await expect(repository.delete(adminUid, documentId)).rejects.toMatchObject({
+      functionalCode: 'campus-in-use',
+    });
+    expect((await firestore.collection('campus').doc(documentId).get()).exists).toBe(true);
+    expect((await firestore.collection('areas').doc(areaId).get()).exists).toBe(true);
+    const campusKeys = await firestore.collection('campus_claves').get();
+    const areaKeys = await firestore.collection('areas_claves').get();
+    expect(campusKeys.size).toBe(2);
+    expect(campusKeys.docs.every((entry) => entry.data()['campusId'] === documentId)).toBe(true);
+    expect(areaKeys.size).toBe(1);
+    expect(areaKeys.docs[0]?.data()).toMatchObject({ areaId, campusId: documentId });
   });
 });

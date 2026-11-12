@@ -32,6 +32,9 @@ export class AuthFacade {
   private initializationPromise: Promise<void> | null = null;
   private authorizationPromise: Promise<BootstrapAuthorizationResult> | null = null;
   private denialAuthorizationPromise: Promise<boolean> | null = null;
+  private denialRevision = 0;
+  private denialCoveredRevision = 0;
+  private denialCycle = 0;
   private authorizationUid: string | null = null;
   private sessionUid: string | null = null;
   private authorizationGeneration = 0;
@@ -52,8 +55,10 @@ export class AuthFacade {
 
   async revalidatePermissionDenial(error: unknown): Promise<boolean> {
     if (!isPermissionDenied(error)) return false;
+    this.denialRevision += 1;
     if (this.denialAuthorizationPromise) return this.denialAuthorizationPromise;
-    const operation = this.refreshAuthorization(true);
+    const cycle = this.denialCycle;
+    const operation = Promise.resolve().then(() => this.runDenialRevalidation(cycle));
     this.denialAuthorizationPromise = operation;
     const cleanup = (): void => {
       if (this.denialAuthorizationPromise === operation) this.denialAuthorizationPromise = null;
@@ -67,12 +72,18 @@ export class AuthFacade {
     const user = this.firebaseUser;
     if (!user) return false;
     const generation = this.authorizationGeneration;
+    let attempt = this.authorizationAttempt;
     try {
-      await this.authorize(user, generation, forceNewRound);
-      this.requireCurrentSession(user.uid, generation);
+      const operation = this.authorize(user, generation, forceNewRound);
+      attempt = this.authorizationAttempt;
+      await operation;
+      this.requireCurrentAuthorization(user.uid, generation, attempt);
       return true;
     } catch (error) {
-      if (error instanceof StaleSessionError || !this.isCurrentSession(user.uid, generation)) {
+      if (
+        error instanceof StaleSessionError ||
+        !this.isCurrentAuthorization(user.uid, generation, attempt)
+      ) {
         return false;
       }
       this.invalidateSession(null, true);
@@ -112,6 +123,7 @@ export class AuthFacade {
     await this.initialize();
     let operationUid = this.sessionUid;
     let operationGeneration = this.authorizationGeneration;
+    let operationAttempt: number | null = null;
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
@@ -119,13 +131,17 @@ export class AuthFacade {
       this.firebaseUser = user;
       operationUid = user.uid;
       operationGeneration = this.activateSession(user.uid);
-      await this.authorize(user, operationGeneration);
-      this.requireCurrentSession(user.uid, operationGeneration);
+      const authorization = this.authorize(user, operationGeneration);
+      operationAttempt = this.authorizationAttempt;
+      await authorization;
+      this.requireCurrentAuthorization(user.uid, operationGeneration, operationAttempt);
       await this.router.navigateByUrl('/dashboard', { replaceUrl: true });
     } catch (error) {
       if (
         error instanceof StaleSessionError ||
-        !this.isCurrentSession(operationUid, operationGeneration)
+        !this.isCurrentSession(operationUid, operationGeneration) ||
+        (operationAttempt !== null &&
+          !this.isCurrentAuthorization(operationUid, operationGeneration, operationAttempt))
       ) {
         return;
       }
@@ -134,7 +150,12 @@ export class AuthFacade {
       await this.safeSignOut();
       this.loadingState.set(false);
     } finally {
-      if (this.isCurrentSession(operationUid, operationGeneration)) this.loadingState.set(false);
+      if (
+        this.isCurrentSession(operationUid, operationGeneration) &&
+        (operationAttempt === null ||
+          this.isCurrentAuthorization(operationUid, operationGeneration, operationAttempt))
+      )
+        this.loadingState.set(false);
     }
   }
 
@@ -159,9 +180,12 @@ export class AuthFacade {
     }
     this.firebaseUser = user;
     const generation = this.activateSession(user.uid);
+    let attempt = this.authorizationAttempt;
     this.loadingState.set(true);
     try {
-      await this.authorize(user, generation);
+      const operation = this.authorize(user, generation);
+      attempt = this.authorizationAttempt;
+      await operation;
     } catch (error) {
       if (error instanceof StaleSessionError || !this.isCurrentSession(user.uid, generation))
         return;
@@ -171,7 +195,7 @@ export class AuthFacade {
       this.loadingState.set(false);
       await this.navigateToLogin();
     } finally {
-      if (this.authorizationGeneration === generation) this.loadingState.set(false);
+      if (this.isCurrentAuthorization(user.uid, generation, attempt)) this.loadingState.set(false);
     }
   }
 
@@ -190,7 +214,10 @@ export class AuthFacade {
     }
     this.authorizationUid = user.uid;
     const attempt = ++this.authorizationAttempt;
-    const operation = this.performAuthorization(user, generation, attempt);
+    const operation = this.performAuthorization(user, generation, attempt).catch((error) => {
+      this.requireCurrentAuthorization(user.uid, generation, attempt);
+      throw error;
+    });
     this.authorizationPromise = operation;
     const cleanup = (): void => {
       if (this.authorizationPromise !== operation) return;
@@ -263,13 +290,28 @@ export class AuthFacade {
     this.authorizationPromise = null;
     this.authorizationUid = null;
     this.denialAuthorizationPromise = null;
+    this.denialRevision = 0;
+    this.denialCoveredRevision = 0;
+    this.denialCycle += 1;
   }
 
   private requireCurrentAuthorization(uid: string, generation: number, attempt: number): void {
-    this.requireCurrentSession(uid, generation);
-    if (this.authorizationAttempt !== attempt) {
+    if (!this.isCurrentAuthorization(uid, generation, attempt)) {
       throw new StaleSessionError('La respuesta pertenece a una autorización anterior.');
     }
+  }
+
+  private isCurrentAuthorization(uid: string | null, generation: number, attempt: number): boolean {
+    return this.isCurrentSession(uid, generation) && this.authorizationAttempt === attempt;
+  }
+
+  private async runDenialRevalidation(cycle: number): Promise<boolean> {
+    while (cycle === this.denialCycle && this.denialCoveredRevision < this.denialRevision) {
+      const coveredRevision = this.denialRevision;
+      if (!(await this.refreshAuthorization(true)) || cycle !== this.denialCycle) return false;
+      this.denialCoveredRevision = coveredRevision;
+    }
+    return cycle === this.denialCycle;
   }
 
   private async safeSignOut(): Promise<void> {

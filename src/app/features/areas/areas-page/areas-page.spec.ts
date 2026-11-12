@@ -126,8 +126,47 @@ describe('AreasPage', () => {
       form: { controls: { nombre: { setValue(value: string): void; invalid: boolean } } };
     };
     await component.openNew();
-    component.form.controls.nombre.setValue('\u200B');
-    expect(component.form.controls.nombre.invalid).toBe(true);
+    for (const name of ['\u200B', '\uFE0F', ` \u200B\uFE0F\t`]) {
+      component.form.controls.nombre.setValue(name);
+      expect(component.form.controls.nombre.invalid).toBe(true);
+    }
+    component.form.controls.nombre.setValue('Cámara ❤️');
+    expect(component.form.controls.nombre.invalid).toBe(false);
+  });
+
+  it('ARE-035 recovers a failed post-create reload without creating the Area twice', async () => {
+    facade.load.mockClear();
+    facade.create.mockImplementation(async () => {
+      facade.error.set('El Área fue creada, pero no fue posible actualizar el listado.');
+      return 'area-confirmed';
+    });
+    facade.load.mockImplementation(async () => {
+      facade.error.set(null);
+    });
+    const component = fixture.componentInstance as unknown as {
+      openNew(): Promise<void>;
+      submit(): Promise<void>;
+      formVisible(): boolean;
+      form: {
+        setValue(value: { campusId: string; nombre: string; notas: string }): void;
+      };
+    };
+    await component.openNew();
+    component.form.setValue({ campusId: 'campus', nombre: 'Confirmada', notas: '' });
+    await component.submit();
+    await fixture.whenStable();
+
+    expect(component.formVisible()).toBe(false);
+    expect(facade.create).toHaveBeenCalledOnce();
+    const retry = [...element.querySelectorAll<HTMLButtonElement>('button')].find((button) =>
+      button.textContent?.includes('Actualizar listado'),
+    );
+    expect(retry).toBeTruthy();
+    retry?.click();
+    await fixture.whenStable();
+
+    expect(facade.load).toHaveBeenCalledOnce();
+    expect(facade.create).toHaveBeenCalledOnce();
   });
 
   it('ARE-029 keeps deletion and transfer failures inside the active dialog', async () => {
