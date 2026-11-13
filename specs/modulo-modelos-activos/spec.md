@@ -2,7 +2,7 @@
 
 ## Estado
 
-Especificación base y autorización granular aprobadas, implementadas y desplegadas únicamente a `inventario-stg`. Producción, migración y datos reales permanecen fuera de alcance. La validación local y la verificación técnica remota están aprobadas; la aceptación funcional autenticada del ciclo completo de imagen continúa pendiente.
+Especificación base y autorización granular aprobadas, implementadas y desplegadas únicamente a `inventario-stg`. Producción, migración y datos reales permanecen fuera de alcance. La validación local, la verificación técnica remota y la aceptación funcional autenticada del ciclo completo de imagen están aprobadas; la revisión visual móvil integral permanece separada.
 
 ## Objetivo
 

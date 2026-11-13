@@ -54,7 +54,7 @@
 
 - Firestore Rules se desplegaron sin advertencias y el acceso anónimo directo a `usuarios` respondió HTTP 403.
 - Las cinco callables de Usuarios y `bootstrapAuthorization` quedaron `ACTIVE`, Node.js 22, `us-central1`, `maxInstances: 20`, y respondieron HTTP 401 sin sesión.
-- La aceptación autenticada real del listado y de las mutaciones administrativas permanece pendiente para no alterar datos durante la verificación técnica.
+- En ese corte la aceptación autenticada real del listado y de las mutaciones administrativas permanecía pendiente para no alterar datos durante la verificación técnica; la aceptación acotada de permisos se completó el 13 de noviembre de 2026.
 
 ## Evidencia de staging — 6 de noviembre de 2026
 
@@ -75,7 +75,7 @@
 
 - USR-031–034 aprobaron sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`: Campus aparece como cuarto bloque, el resumen admite hasta cuatro módulos y el contrato anterior se rechaza sin perder el permiso almacenado.
 - Las seis Functions administrativas de Usuarios y `bootstrapAuthorization` se actualizaron antes de Hosting únicamente en staging; quedaron `ACTIVE` y `setAuthorizedUserPermissions` rechazó una solicitud anónima con HTTP 401.
-- La aceptación autenticada del diálogo con una cuenta institucional parcial permanece separada y pendiente.
+- En ese corte la aceptación autenticada del diálogo con una cuenta institucional parcial permanecía separada; se completó el 13 de noviembre de 2026 con la cuenta `PROFESOR`.
 
 ## Evidencia del acordeón de permisos — 11 de noviembre de 2026
 
@@ -92,7 +92,16 @@
 - Una sesión real `Omar Sánchez / Administrador` abrió el diálogo de `Eventos` en escritorio y 320 px sobre `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css`.
 - El acordeón presentó una sola sección expandida, permitió contraer Categorías y abrir Fabricantes, conservó los resúmenes y cerró con Escape devolviendo el foco a `Asignar permisos a Eventos`.
 - La matriz se inspeccionó sin modificarla: Categorías y Fabricantes conservan `Ver`, Modelos no tiene acceso y Campus conserva `Ver`.
-- La presentación visual de USR-035 queda aceptada. La aceptación funcional de permisos continúa pendiente porque no se inició sesión como la cuenta `usuario` ni se ejecutó una reducción con su pestaña abierta.
+- La presentación visual de USR-035 queda aceptada.
+
+## Aceptación funcional de permisos — 13 de noviembre de 2026
+
+- La cuenta real `PROFESOR` (`tup-d3001@tecplayacar.edu.mx`), con rol `usuario`, inició sin permisos y mostró únicamente Dashboard.
+- Con Modelos `Ver + Crear` pudo acceder al listado y abrir `Nuevo modelo`; el formulario no mostró imagen y la tabla no mostró Editar, Cambiar estado ni Eliminar.
+- Al retirar Modelos `Ver` con la ruta abierta, la pestaña volvió a Dashboard, desapareció el submenú, la sesión permaneció activa y la URL directa `/configuraciones/modelos-activos` también regresó a Dashboard.
+- Con Modelos `Ver + Editar` y Campus `Ver`, retirar únicamente Editar cerró el diálogo de edición, retiró esa acción y conservó el listado de Modelos, Campus y la sesión.
+- Al terminar se restauró el mapa vacío: la cuenta volvió a ver solo Dashboard y la tabla administrativa mostró `Sin permisos`. La autorización de `Eventos` no fue modificada.
+- La aceptación funcional confirma concesión, dependencia de Ver, revocación inmediata y selectividad por módulo/acción sobre la versión de staging derivada de `5e645debf1df4239c6c5f73fc56ca9263ac65ae4`; no sustituye las pruebas automatizadas ni una revisión visual móvil integral de cada catálogo.
 
 ## Evidencia local — búsqueda y paginación
 

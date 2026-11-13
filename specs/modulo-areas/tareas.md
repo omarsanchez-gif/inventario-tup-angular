@@ -30,11 +30,11 @@
 
 - [x] Desplegar únicamente Rules, siete Functions de Áreas, `deleteCampus` y Hosting con `--project staging` y `--only` explícito.
 - [x] Verificar Functions, rechazo anónimo, Rules, Hosting y bundles sin crear datos.
-- [ ] Completar ARE-033: la sesión administrativa real aprobó alta, edición, transferencia, estado y rechazos; eliminación y limpieza no se ejecutaron porque el responsable indicó conservar los datos sintéticos.
-- [ ] Completar la revisión visual autenticada en escritorio y móvil.
+- [x] Completar ARE-033 con alta, edición, transferencia, estado, rechazos y eliminación acotada de un registro descartable, conservando los datos protegidos.
+- [x] Completar la revisión visual autenticada en escritorio y 320 px.
 - [x] Mantener producción, datos reales, IAM, secretos y migración fuera de alcance.
 
 ## Pendientes externos
 
 - PR, CI obligatorio, protección de rama y aceptación manual son estados independientes; no se infieren de pruebas locales o despliegue técnico.
-- La sesión institucional ya permitió una aceptación parcial de ARE-033. Permanecen pendientes la eliminación, la limpieza prevista por el protocolo y la revisión visual móvil.
+- ARE-033 y la revisión visual de Áreas quedaron aceptados el 13 de noviembre de 2026. PR, CI y protección de rama continúan siendo estados externos independientes.

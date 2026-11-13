@@ -2,13 +2,13 @@
 
 El 7 de noviembre de 2026 aprobaron 27 pruebas Angular, 28 pruebas unitarias de Functions y 9 pruebas integrales con Auth, Firestore, Functions y Storage Emulator. También aprobaron lint, guardia visual, formato, compilación de Functions y build de staging; `npm audit --omit=dev --audit-level=high` no reportó vulnerabilidades altas o críticas y conservó cuatro moderadas transitivas ya documentadas en ADR-002.
 
-La automatización cubre autorización, sanitización, límites de payload, transformación real a WebP, unicidad transaccional, conservación de catálogos inactivos vigentes, bloqueo de Categoría/Fabricante en uso, reglas cerradas, modales, columnas, acciones, búsqueda, paginación, descarte de miniaturas fuera de página y renovación de URLs vencidas. La prueba remota autenticada de sustitución, eliminación y expiración de imagen, así como la aceptación visual móvil, permanecen pendientes.
+La automatización cubre autorización, sanitización, límites de payload, transformación real a WebP, unicidad transaccional, conservación de catálogos inactivos vigentes, bloqueo de Categoría/Fabricante en uso, reglas cerradas, modales, columnas, acciones, búsqueda, paginación, descarte de miniaturas fuera de página y renovación de URLs vencidas. La prueba remota autenticada de carga, sustitución, retirada, eliminación y expiración de imagen quedó aceptada el 13 de noviembre de 2026; la revisión visual móvil integral permanece pendiente.
 
 La verificación remota posterior al despliegue confirmó las nueve callables `ACTIVE` en Node.js 22, `us-central1`, con `maxInstances: 20`; las nueve rechazaron solicitudes anónimas con HTTP 401. Firestore rechazó lectura anónima de `modelos_activos` y Storage rechazó lectura anónima de `modelos-activos/**`, ambas con HTTP 403. `/configuraciones/modelos-activos` y sus bundles `main-ALBLFGKY.js`, `styles-CISTRGAV.css` y `chunk-CA-BBvnz.js` respondieron HTTP 200. No se crearon documentos ni objetos de negocio.
 
-La primera comprobación autenticada de un Modelo con imagen expuso `SigningError` en `getAssetModelImageAccess` y la interfaz mostró el placeholder seguro. Tras conceder a la cuenta runtime el vínculo propio mínimo para `iam.serviceAccounts.signBlob` y actualizar únicamente esa callable, una recarga autenticada confirmó que la alerta desapareció y la miniatura del Modelo `MSI` cargó. MOD-029 queda aceptada para emisión y consumo real de la variante `thumbnail`; las variantes restantes y su expiración conservan cobertura automatizada y aceptación manual pendiente.
+La primera comprobación autenticada de un Modelo con imagen expuso `SigningError` en `getAssetModelImageAccess` y la interfaz mostró el placeholder seguro. Tras conceder a la cuenta runtime el vínculo propio mínimo para `iam.serviceAccounts.signBlob` y actualizar únicamente esa callable, una recarga autenticada confirmó que la alerta desapareció y la miniatura del Modelo `MSI` cargó. MOD-029 quedó aceptada inicialmente para emisión y consumo real de `thumbnail`; la expiración y renovación se aceptaron manualmente el 13 de noviembre de 2026.
 
-El 12 de noviembre de 2026 se prepararon la Categoría `QA Imagen cierre 121126`, el Fabricante `QA Fabricante imágenes 121126` y dos PNG sintéticos menores de 2 MiB. Brave impidió adjuntar el primer archivo porque la extensión de Codex no tenía habilitado acceso a URLs de archivo. El formulario no se guardó: no existe Modelo ni objeto de Storage de esta prueba. Sustitución, retirada y expiración se clasifican `no ejecutado por impedimento de carga`; no se modifica la aceptación previa de MOD-029 ni se presenta este intento como evidencia positiva.
+El primer intento del 12 de noviembre de 2026 preparó la Categoría `QA Imagen cierre 121126`, el Fabricante `QA Fabricante imágenes 121126` y dos PNG sintéticos menores de 2 MiB, pero Brave impidió adjuntar el archivo desde la extensión. Ese intento aislado se conserva como `no ejecutado por impedimento de carga` y no se presenta como evidencia positiva; la ejecución manual posterior sí completó el ciclo.
 
 ## Evidencia local de escrituras tardías — 10 de noviembre de 2026
 
@@ -106,3 +106,11 @@ El 12 de noviembre de 2026 se prepararon la Categoría `QA Imagen cierre 121126`
 ## Evidencia de revocación e imagen — 11 de noviembre de 2026
 
 - MOD-055, MOD-059 y MOD-060 aprobaron sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: cada operación valida su acción exacta, `ver+crear` no expone imágenes y una revocación posterior a la escritura conserva el Modelo confirmado sin iniciar la carga.
+
+## Aceptación funcional autenticada — 12 y 13 de noviembre de 2026
+
+- `QA-MODELO-IMG-20261112-1620` confirmó carga de una imagen roja, sustitución por una azul, retirada y eliminación del Modelo descartable.
+- `QA-EXP-20261113-A` mostró una miniatura roja cuya primera URL firmada vencía en `2026-11-13T16:41:56Z`. Sin recarga manual, después del vencimiento la aplicación obtuvo una URL nueva válida hasta `2026-11-13T16:46:51Z` y la miniatura permaneció visible.
+- El responsable eliminó `QA-EXP-20261113-A`; la comprobación posterior confirmó su ausencia. La Categoría `QA Imagen cierre 121126` y el Fabricante `QA Fabricante imágenes 121126` permanecieron intactos.
+- Esta ejecución acepta el ciclo funcional real de imágenes en escritorio y la renovación prevista por MOD-029/MOD-043. No sustituye la revisión visual móvil integral ni se interpreta como una nueva prueba automatizada.
+- La cuenta `PROFESOR`, con Modelos `Ver + Crear` y sin Editar, pudo crear datos sin ver controles de imagen ni acciones no concedidas. La revocación posterior de `Ver` y de Editar confirmó redirección/cierre selectivo sin cerrar la sesión; al finalizar quedó `Sin permisos`.

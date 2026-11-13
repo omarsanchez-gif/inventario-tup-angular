@@ -42,7 +42,7 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 **Límite:** no incluye Coordinaciones, permisos de `usuario`, Activos ni datos institucionales. El detalle está en la [spec vigente de Áreas](modulo-areas/spec.md).
 
-**Estado:** implementación completada y desplegada exclusivamente en staging; no crea FCS, TUP ni Áreas reales. ARE-033, PR, CI e integración continúan pendientes formales.
+**Estado:** implementación completada, desplegada exclusivamente en staging y ARE-033 aceptado manualmente el 13 de noviembre de 2026; no crea FCS, TUP ni Áreas reales. PR, CI e integración en `desarrollo` continúan pendientes formales.
 
 ### 3. Coordinaciones, coberturas y alcance de Usuarios
 

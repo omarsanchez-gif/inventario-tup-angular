@@ -64,3 +64,10 @@ Los criterios siguientes son obligatorios. Su presencia en una prueba no acredit
 - ARE-041: el inspector de referencias permite únicamente un `false` explícito; `true`, excepción o resultado indeterminado bloquean eliminación y transferencia sin cambios parciales. <!-- trace:required -->
 - ARE-042: reconciliación iniciada mientras una transferencia o eliminación está dentro de su transacción converge al contador, pertenencia y reservas exactos; la prueba coordina el solapamiento sin depender solo de `Promise.all` o pausas arbitrarias. <!-- trace:required -->
 - ARE-043: el recorrido E2E usa identidad sintética única y limpieza limitada a sus propios registros, de modo que una ejecución fallida no colisiona ni provoca borrados globales. <!-- trace:required -->
+
+## Aceptación manual de ARE-033 — 12 y 13 de noviembre de 2026
+
+- La sesión `Omar Sánchez / Administrador` aprobó alta, edición, transferencia entre los dos Campus sintéticos, desactivación, reactivación, rechazo de duplicado y rechazo de nombre obligatorio.
+- La eliminación se completó únicamente sobre `QA-DEL-20261112-1620`; la comprobación posterior confirmó que ya no aparecía en el listado.
+- `QAARE33A-121126`, `QAARE33B-121126`, `Área ARE-033 editada 20261112` y `Área temporal eliminación ARE-033 20261112-1525` permanecieron activos e intactos.
+- Esta evidencia manual acepta ARE-033 sobre la versión de staging derivada de `5e645debf1df4239c6c5f73fc56ca9263ac65ae4`; no se infiere de las pruebas locales, HTTP 200 o Functions `ACTIVE`.

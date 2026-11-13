@@ -34,7 +34,8 @@
 - [x] Desplegar por separado Rules, Functions, Storage Rules y Hosting a `inventario-stg`.
 - [x] Verificar evidencia remota sin crear datos reales ni tocar producción.
 - [x] Corregir el `SigningError` de la primera prueba autenticada con un vínculo IAM propio y verificar la miniatura del Modelo de prueba existente.
-- [ ] Completar aceptación funcional y visual autenticada en escritorio y móvil.
+- [x] Completar aceptación funcional autenticada en escritorio de carga, sustitución, retirada, expiración, renovación y eliminación de imagen.
+- [ ] Completar la revisión visual autenticada integral del módulo en móvil.
 - [x] Sustituir rutas compartidas por versiones inmutables y generaciones de Storage.
 - [x] Persistir y reintentar limpiezas incompletas para imagen y eliminación de Modelo.
 - [x] Corregir detección AVIF de Sharp (`heif` con compresión `av1`).

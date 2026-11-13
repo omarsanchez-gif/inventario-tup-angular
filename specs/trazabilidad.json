@@ -8,7 +8,7 @@
     "branchPublication": "complete",
     "stagingDeployment": "complete-create-update-area-and-layout-hosting-corrections",
     "continuousIntegration": "not-triggered-without-pull-request",
-    "manualAcceptance": "partial-visual-complete-area-delete-images-permissions-pending"
+    "manualAcceptance": "complete-area-images-permissions-mobile-catalog-reviews-pending"
   },
   "matrixScopes": [
     { "prefix": "AUT", "label": "Autenticación" },
@@ -341,6 +341,14 @@
       "command": "firebase deploy --only hosting --project staging; authenticated desktop and 320 px verification",
       "result": "Hosting publicó 15 archivos únicamente en inventario-stg; la aplicación conservó main-HZGOJ7WY.js, actualizó styles-TYZCJRJC.css y la sesión administrativa observó scrollWidth igual a clientWidth en 320 px y escritorio.",
       "criteria": []
+    },
+    {
+      "id": "manual-staging-acceptance-20261113",
+      "sha": "5e645debf1df4239c6c5f73fc56ca9263ac65ae4",
+      "status": "passed",
+      "command": "authenticated manual staging acceptance on inventario-stg",
+      "result": "ARE-033 completó eliminación acotada; el ciclo real de imagen confirmó carga, sustitución, retirada, renovación tras expiración y eliminación; la cuenta PROFESOR confirmó concesión y revocación selectiva y terminó sin permisos.",
+      "criteria": ["ARE-033"]
     }
   ],
   "entries": [
@@ -1036,7 +1044,8 @@
       "criterion": "ARE-033",
       "verification": "manual",
       "tests": [],
-      "state": "pending-manual"
+      "state": "accepted-manual",
+      "evidenceId": "manual-staging-acceptance-20261113"
     },
     {
       "requirement": "RN-ARE-001",
