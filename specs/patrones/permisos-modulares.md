@@ -7,6 +7,7 @@ Patrón vigente para Categorías, Fabricantes, Modelos de activos, Campus y Áre
 ## Contrato canónico
 
 - `usuarios` es la fuente canónica. Los módulos son `categorias`, `fabricantes`, `modelosActivos`, `campus` y `areas`; las acciones son `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`.
+- El registro tipado del frontend conserva por módulo identificador, etiqueta y ruta. Usuarios deriva de él las secciones y controles del acordeón; Layout deriva enlaces, correspondencia de ruta y listeners de revocación. Los arreglos de identificadores son proyecciones del registro, no otra enumeración.
 - `admin` tiene todas las acciones por rol. `usuario` requiere la acción exacta y `ver` para cualquier mutación.
 - Menú, botones y guards son defensa de presentación. Cada callable y cada transacción sensible revalida el documento canónico.
 - Un `permission-denied` en listado, mutación, catálogo o acceso temporal a imagen incrementa la revisión pendiente de autorización. No se reintenta automáticamente la operación rechazada.
@@ -22,6 +23,7 @@ Patrón vigente para Categorías, Fabricantes, Modelos de activos, Campus y Áre
 - Si backend ya confirmó una escritura y después cambia el permiso, la interfaz no la presenta como cancelada. Descarta respuestas obsoletas y comunica únicamente el estado que puede sostener; una recarga posterior reconcilia el listado.
 - El estado `saving` pertenece al identificador y acción de la operación activa. Una revocación ajena no lo modifica y el `finally` de una operación anterior no puede apagar una operación posterior.
 - Cada diálogo conserva una generación propia. Cerrar, destruir o perder su capacidad la invalida antes de limpiar la interfaz; cualquier `await`, error o `finally` comprueba esa generación antes de modificar el diálogo.
+- Si abrir un diálogo requiere cargar catálogos, la apertura captura primero el contexto de capacidad. Revocar y volver a conceder la acción cambia su generación y no rehabilita la espera anterior; una apertura nueva captura un contexto nuevo.
 
 ## Interfaz ante revocación
 
@@ -35,6 +37,7 @@ Patrón vigente para Categorías, Fabricantes, Modelos de activos, Campus y Áre
 Todo módulo funcional nuevo debe incorporarse al sistema de permisos durante su implementación. No se considera terminado hasta contar con:
 
 - identificador reconocido por los registros tipados de frontend y backend;
+- etiqueta y ruta declaradas una vez en el registro de frontend, del que se derivan diálogo, navegación y listeners;
 - sección visible en Usuarios → Asignar permisos;
 - acciones soportadas expresamente y limitadas a operaciones implementadas;
 - asignación y persistencia desde Usuarios;

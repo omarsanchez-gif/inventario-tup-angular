@@ -75,6 +75,7 @@ Callable → Authentication + claim base + usuarios canónico + permiso de acci�
 - `bootstrapAuthorization` entrega permisos sanitizados y toda revalidación conserva UID y generación de sesión.
 - Permisos y alcance son capas independientes. La autorización granular vigente contiene Categorías, Fabricantes, Modelos de activos, Campus y Áreas; no contiene todavía Coordinaciones ni alcance operativo de Activos.
 - La revalidación, las revisiones por módulo/acción, el descarte de respuestas tardías y la incorporación de módulos futuros siguen `specs/patrones/permisos-modulares.md`.
+- El registro tipado de permisos del frontend incluye identificador, etiqueta y ruta. El acordeón de Usuarios, controles, navegación, resolución de ruta y listeners de revocación se proyectan desde ese registro; el registro separado de Functions se mantiene equivalente mediante prueba de contrato.
 - La decisión completa está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
 
 ## Backend de Categorías
@@ -125,6 +126,7 @@ Se implementaron nueve callables en `us-central1`: `listAssetModels`, `getAssetM
 ## Estado asíncrono de Áreas
 
 - Listado, catálogos, operaciones y aperturas de diálogo usan identidades independientes.
+- Alta y edición capturan el contexto de `crear` o `editar` antes de cargar Campus y lo revalidan después; revocar y restituir no revive la apertura anterior.
 - `loading` pertenece únicamente al listado público vigente. Una mutación que sustituye un listado pendiente termina ese indicador y usa `saving` mientras ejecuta su recarga interna.
 - Una finalización antigua no apaga una carga posterior; una recarga antigua no puede publicar datos, mensajes ni recuperar vigencia.
 - Tras un alta confirmada cuya recarga falla, el diálogo se cierra con la identidad creada conservada y la página ofrece actualizar el listado sin reenviar `createArea`.

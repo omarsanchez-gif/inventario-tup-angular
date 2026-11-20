@@ -1457,6 +1457,27 @@
       "tests": ["scripts/check-permission-contract.spec.ts"],
       "state": "verified-local",
       "evidenceId": "areas-permissions-quality-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-026",
+      "criterion": "USR-040",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-026",
+      "criterion": "LAY-032",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-025",
+      "criterion": "ARE-059",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/areas-page/areas-page.spec.ts"],
+      "state": "implemented-pending-verification"
     }
   ]
 }

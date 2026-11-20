@@ -136,6 +136,7 @@ Estos recursos son canónicos y permanecen cerrados a clientes mediante Firestor
 - `reconcileAreaCounts` permanece exclusivo de `admin` canónico activo aunque un usuario tenga las cinco acciones ordinarias.
 - Cada callable revalida Authentication, claim base y documento canónico `usuarios`; cada mutación revalida su acción exacta dentro de la transacción.
 - La interfaz captura generaciones por módulo y acción. Perder `ver` limpia datos, cierra diálogos, retira el enlace y redirige a Dashboard sin cerrar sesión; perder otra acción invalida solo su operación y diálogo dependiente.
+- Abrir alta o edición captura la generación de `crear` o `editar` antes de solicitar el catálogo y vuelve a comprobarla después de la espera. Revocar y restituir la acción no rehabilita una apertura anterior; cada apertura posterior conserva una identidad independiente.
 - Listado y catálogo usan secuencias independientes; una respuesta anterior nunca reemplaza una consulta más nueva ni el catálogo histórico solicitado para una edición.
 - `loading` pertenece al listado público vigente. Crear, mutar o reconciliar invalida el listado anterior, termina ese indicador y usa `saving`; su recarga interna no permite que una finalización antigua oculte datos recientes.
 - El permiso funcional de Áreas no define cobertura territorial ni acceso a activos; Coordinaciones y alcance permanecen fuera de este incremento.
@@ -232,6 +233,7 @@ Autorización exclusiva de `admin` canónico activo. No se concede por poseer la
 - Búsqueda automática a todo el ancho y paginación compartida de 10 registros.
 - Tabla propuesta: `Nombre`, `Campus`, `Notas`, `Estado` y `Acciones`.
 - Alta y edición usan `AppDialog` con Campus, Nombre y Notas.
+- Una respuesta tardía del catálogo solo puede abrir el diálogo que conserve la misma identidad de apertura y capacidad; nunca repone un formulario revocado ni sobrescribe otro posterior.
 - Las acciones contextuales Editar, Activar/Desactivar y Eliminar usan `AppIcon`, tooltip y nombre accesible.
 - La acción de reconciliación solo se presenta a `admin`; las demás acciones se muestran según capacidad.
 - La confirmación de eliminación identifica Área y Campus, mantiene abierto el diálogo ante error y anuncia la causa mediante `role="alert"` sin duplicarla en el fondo.

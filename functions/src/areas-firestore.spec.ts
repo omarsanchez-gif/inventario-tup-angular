@@ -1,8 +1,16 @@
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { normalizeAreaName } from './admin-areas.js';
+import {
+  createArea,
+  deleteArea,
+  normalizeAreaName,
+  setAreaStatus,
+  updateArea,
+  type AdminAreasRepository,
+} from './admin-areas.js';
 import { normalizeCampusCode, normalizeCampusName } from './admin-campuses.js';
+import { emptyPermissionMap, type PermissionAction } from './catalog-permissions.js';
 import { createAdminAreasRepository } from './firestore-areas.repository.js';
 import { createAdminCampusesRepository } from './firestore-campuses.repository.js';
 
@@ -58,6 +66,21 @@ suite('areas firestore repository', () => {
     return { campusId, nombre: name, nombreNormalizado: normalizeAreaName(name), notas: null };
   }
 
+  async function areaMutationState() {
+    const collections = await Promise.all(
+      ['areas', 'areas_claves', 'campus'].map(async (collectionName) => {
+        const snapshot = await firestore.collection(collectionName).get();
+        return [
+          collectionName,
+          snapshot.docs
+            .map((document) => ({ documentId: document.id, ...document.data() }))
+            .sort((left, right) => left.documentId.localeCompare(right.documentId)),
+        ] as const;
+      }),
+    );
+    return Object.fromEntries(collections);
+  }
+
   it('ARE-005 ARE-008 ARE-009 ARE-023 creates atomically and keeps concurrent uniqueness per Campus', async () => {
     const tup = await campuses.create(uid, campus('TUP', 'Tecnológico'));
     const fcs = await campuses.create(uid, campus('FCS', 'Salud'));
@@ -97,49 +120,124 @@ suite('areas firestore repository', () => {
     ).toBe(0);
   });
 
-  it('ARE-048 revalidates the exact Areas capability inside every mutation transaction', async () => {
-    const campusId = await campuses.create(uid, campus('CAP', 'Capacidades'));
+  it('ARE-048 rejects every mutation when its exact capability is revoked after preliminary authorization', async () => {
+    const sourceCampusId = await campuses.create(uid, campus('CAP', 'Capacidades'));
+    const targetCampusId = await campuses.create(uid, campus('DST', 'Destino'));
     const userUid = 'area-capability-user';
     const userRef = firestore.collection('usuarios').doc('area-capability-user');
+    const identity = { uid: userUid, authorized: true, role: 'usuario' } as const;
+
+    async function setUserPermission(action: PermissionAction): Promise<void> {
+      await userRef.set({
+        uid: userUid,
+        nombre: 'Usuario Áreas',
+        correo: 'areas@tecplayacar.edu.mx',
+        rol: 'usuario',
+        activo: true,
+        permisos: { ...emptyPermissionMap(), areas: ['ver', action] },
+        fechaCreacion: new Date(),
+        ultimoAcceso: null,
+      });
+    }
+
+    async function expectConcurrentRevocation(
+      action: PermissionAction,
+      operation: (repository: AdminAreasRepository) => Promise<unknown>,
+    ): Promise<void> {
+      await setUserPermission(action);
+      const entered = deferred<void>();
+      const release = deferred<void>();
+      const heldRepository: AdminAreasRepository = {
+        ...areas,
+        async hasCanonicalPermission(candidateUid, candidateAction) {
+          const allowed = await areas.hasCanonicalPermission(candidateUid, candidateAction);
+          if (candidateUid === userUid && candidateAction === action && allowed) {
+            entered.resolve();
+            await release.promise;
+          }
+          return allowed;
+        },
+      };
+      const before = await areaMutationState();
+      const pending = operation(heldRepository);
+
+      await entered.promise;
+      await userRef.update({ 'permisos.areas': ['ver'] });
+      await expect(areas.hasCanonicalPermission(userUid, action)).resolves.toBe(false);
+      release.resolve();
+
+      await expect(pending).rejects.toMatchObject({ functionalCode: 'permission-denied' });
+      expect(await areaMutationState()).toEqual(before);
+    }
+
+    await expectConcurrentRevocation('crear', (repository) =>
+      createArea(
+        identity,
+        { campusId: sourceCampusId, nombre: 'Creación revocada', notas: null },
+        { repository },
+      ),
+    );
+
+    const transferId = await areas.create(uid, area(sourceCampusId, 'Transferencia pendiente'));
+    await expectConcurrentRevocation('editar', (repository) =>
+      updateArea(
+        identity,
+        {
+          documentId: transferId,
+          campusId: targetCampusId,
+          nombre: 'Transferencia revocada',
+          notas: 'No debe persistirse',
+        },
+        { repository },
+      ),
+    );
+
+    const statusId = await areas.create(uid, area(sourceCampusId, 'Estado pendiente'));
+    await expectConcurrentRevocation('cambiarEstado', (repository) =>
+      setAreaStatus(identity, { documentId: statusId, activo: false }, { repository }),
+    );
+
+    const deleteId = await areas.create(uid, area(sourceCampusId, 'Eliminación pendiente'));
+    await expectConcurrentRevocation('eliminar', (repository) =>
+      deleteArea(identity, { documentId: deleteId }, { repository }),
+    );
+  });
+
+  it('ARE-048 preserves a committed write and blocks the next operation after revocation', async () => {
+    const campusId = await campuses.create(uid, campus('ORD', 'Orden confirmado'));
+    const userUid = 'area-ordered-user';
+    const userRef = firestore.collection('usuarios').doc(userUid);
+    const identity = { uid: userUid, authorized: true, role: 'usuario' } as const;
     await userRef.set({
       uid: userUid,
-      nombre: 'Usuario Áreas',
-      correo: 'areas@tecplayacar.edu.mx',
+      nombre: 'Usuario Orden',
+      correo: 'orden@tecplayacar.edu.mx',
       rol: 'usuario',
       activo: true,
-      permisos: {
-        categorias: [],
-        fabricantes: [],
-        modelosActivos: [],
-        campus: [],
-        areas: ['ver', 'crear'],
-      },
+      permisos: { ...emptyPermissionMap(), areas: ['ver', 'crear'] },
       fechaCreacion: new Date(),
       ultimoAcceso: null,
     });
 
-    const areaId = await areas.create(userUid, area(campusId, 'Permitida'));
+    const confirmed = await createArea(
+      identity,
+      { campusId, nombre: 'Confirmada antes de revocar', notas: null },
+      { repository: areas },
+    );
+    const committedState = await areaMutationState();
+    await userRef.update({ 'permisos.areas': ['ver'] });
+
     await expect(
-      areas.update(userUid, {
-        documentId: areaId,
-        ...area(campusId, 'Sin editar'),
-      }),
+      createArea(
+        identity,
+        { campusId, nombre: 'Bloqueada después de revocar', notas: null },
+        { repository: areas },
+      ),
     ).rejects.toMatchObject({ functionalCode: 'permission-denied' });
-
-    await userRef.update({ 'permisos.areas': ['ver', 'editar'] });
-    await areas.update(userUid, { documentId: areaId, ...area(campusId, 'Editada') });
-    await expect(areas.setStatus(userUid, areaId, false)).rejects.toMatchObject({
-      functionalCode: 'permission-denied',
-    });
-
-    await userRef.update({ 'permisos.areas': ['ver', 'cambiarEstado'] });
-    await areas.setStatus(userUid, areaId, false);
-    await expect(areas.delete(userUid, areaId)).rejects.toMatchObject({
-      functionalCode: 'permission-denied',
-    });
-
-    await userRef.update({ 'permisos.areas': ['ver', 'eliminar'] });
-    await areas.delete(userUid, areaId);
+    expect(await areaMutationState()).toEqual(committedState);
+    expect((await areas.list(10)).some((entry) => entry.documentId === confirmed.documentId)).toBe(
+      true,
+    );
   });
 
   it('ARE-018 ARE-020 ARE-021 ARE-057 uses fail-safe reference inspection and keeps state intact', async () => {

@@ -20,10 +20,10 @@
 
 ## Permisos granulares de catálogos — incremento autorizado
 
-RN-PER-001–025 y las ampliaciones granulares de Layout, Categorías, Fabricantes, Modelos y Campus describen el incremento autorizado e implementado conforme a ADR-007. Su despliegue se limita a staging.
+RN-PER-001–026 y las ampliaciones granulares de Layout, Categorías, Fabricantes, Modelos, Campus y Áreas describen el incremento autorizado e implementado conforme a ADR-007. Su despliegue se limita a staging.
 
 - RN-PER-001: `usuarios` es la fuente canónica de permisos; Custom Claims conserva solo autorización y rol.
-- RN-PER-002: En este incremento solo son autorizables `categorias`, `fabricantes`, `modelosActivos` y `campus`.
+- RN-PER-002: En este incremento solo son autorizables `categorias`, `fabricantes`, `modelosActivos`, `campus` y `areas`.
 - RN-PER-003: Cada módulo admite `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; cualquier acción distinta de `ver` exige también `ver`.
 - RN-PER-004: La ausencia del mapa, módulo o acción equivale a denegación para `usuario`; no existen concesiones implícitas por puesto, correo o coordinación.
 - RN-PER-005: Crear un usuario no asigna permisos. La asignación se realiza después mediante una acción independiente.
@@ -41,7 +41,7 @@ RN-PER-001–025 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-PER-014: `campus` admite `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; cada callable exige exactamente su acción y toda acción distinta de `ver` requiere también `ver`.
 - RN-PER-015: Para `usuario`, la ausencia de `permisos.campus` o `permisos.areas` equivale a denegación del módulo ausente. `admin` conserva acceso total por rol sin migrar documentos anteriores.
 - RN-PER-016: La callable de asignación exige el mapa completo de cinco módulos. Un cliente anterior que omita Áreas se rechaza de forma explícita y recuperable sin modificar permisos almacenados.
-- RN-PER-026: Todo módulo funcional nuevo se incorpora al registro tipado, Usuarios → Asignar permisos, backend canónico, guard, navegación, interfaz, revocación, pruebas y trazabilidad durante su implementación; de lo contrario no está terminado.
+- RN-PER-026: Todo módulo funcional nuevo se incorpora al registro tipado, Usuarios → Asignar permisos, backend canónico, guard, navegación, interfaz, revocación, pruebas y trazabilidad durante su implementación; de lo contrario no está terminado. Etiqueta, ruta y controles del frontend, así como listeners de revocación, se derivan de ese registro y no de enumeraciones manuales paralelas.
 - RN-PER-017: Los permisos de Campus administrarán el catálogo institucional completo; no representan alcance sobre Activos, Áreas, Coordinaciones o sedes asignadas al usuario.
 - RN-PER-018: Una reducción del mismo UID invalida por módulo y acción las operaciones pendientes; no invalida la sesión completa ni limpia estados de módulos no afectados.
 - RN-PER-019: Retirar `ver` descarta estado privado, URLs y temporizadores del módulo, cierra sus diálogos y abandona su ruta. Retirar otra acción conserva el listado y cierra únicamente la operación dependiente con un anuncio accesible.
@@ -192,7 +192,7 @@ RN-PER-001–025 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-ARE-010: La reconciliación es administrativa, idempotente, calculada en backend y transaccional; el cliente no envía cantidades.
 - RN-ARE-011: Firestore permanece cerrado a clientes y toda operación usa callables que revalidan rol, claim y perfil canónico.
 - RN-ARE-012: Áreas forma parte del mapa granular con `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; reconciliación permanece exclusiva de admin y el permiso no representa alcance territorial.
-- RN-ARE-013: Listados, catálogos y aperturas de Áreas usan generaciones independientes; solo la solicitud más reciente de la capacidad vigente puede escribir estado o mensajes. `loading` pertenece exclusivamente al listado vigente; una mutación que lo sustituye termina ese indicador y usa `saving` durante su recarga interna.
+- RN-ARE-013: Listados, catálogos y aperturas de Áreas usan generaciones independientes; solo la solicitud más reciente de la capacidad vigente puede escribir estado o mensajes. Alta y edición capturan además la generación de su acción antes de esperar Campus y la revalidan después. `loading` pertenece exclusivamente al listado vigente; una mutación que lo sustituye termina ese indicador y usa `saving` durante su recarga interna.
 - RN-ARE-014: Perder `areas.ver` invalida permanentemente toda operación anterior aunque el mismo UID recupere después el permiso; perder una acción mutante invalida únicamente operaciones iniciadas con esa acción.
 - RN-ARE-019: `getAreaCatalogs` requiere `areas.ver`, entrega solo identificador, código, nombre y estado aplicables de Campus y no exige `campus.ver`.
 - RN-ARE-020: `createArea`, `updateArea`, `setAreaStatus` y `deleteArea` revalidan respectivamente `crear`, `editar`, `cambiarEstado` y `eliminar` dentro de su transacción; el mapa canónico garantiza además `ver`.

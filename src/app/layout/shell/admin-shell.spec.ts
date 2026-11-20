@@ -5,7 +5,12 @@ import { provideRouter, Router } from '@angular/router';
 import { AuthFacade } from '../../core/auth/auth.facade';
 import { SessionScope } from '../../core/auth/session-scope';
 import type { AuthorizedUser } from '../../shared/models/authorized-user';
-import { emptyPermissionMap, fullPermissionMap } from '../../shared/models/catalog-permissions';
+import {
+  emptyPermissionMap,
+  fullPermissionMap,
+  permissionModuleDefinitions,
+  type PermissionMap,
+} from '../../shared/models/catalog-permissions';
 import { AdminShell } from './admin-shell';
 
 @Component({ template: '' })
@@ -59,11 +64,10 @@ describe('AdminShell', () => {
         provideRouter([
           { path: 'dashboard', component: RouteStub },
           { path: 'usuarios', component: RouteStub },
-          { path: 'configuraciones/categorias', component: RouteStub },
-          { path: 'configuraciones/fabricantes', component: RouteStub },
-          { path: 'configuraciones/modelos-activos', component: RouteStub },
-          { path: 'configuraciones/campus', component: RouteStub },
-          { path: 'configuraciones/areas', component: RouteStub },
+          ...permissionModuleDefinitions.map(({ route }) => ({
+            path: route.slice(1),
+            component: RouteStub,
+          })),
         ]),
         {
           provide: AuthFacade,
@@ -169,7 +173,7 @@ describe('AdminShell', () => {
     expect(settings.getAttribute('aria-expanded')).toBe('true');
     expect(
       [...element.querySelectorAll('.navigation__sublink')].map((link) => link.textContent?.trim()),
-    ).toEqual(['Categorías', 'Fabricantes', 'Modelos de activos', 'Campus', 'Áreas']);
+    ).toEqual(permissionModuleDefinitions.map(({ label }) => label));
 
     await TestBed.inject(Router).navigateByUrl('/configuraciones/categorias');
     fixture.detectChanges();
@@ -263,39 +267,22 @@ describe('AdminShell', () => {
     expect(element.textContent).not.toContain('Usuarios');
   });
 
-  it('LAY-028 leaves a module route when Ver is revoked without ending the session', async () => {
+  it('LAY-028 LAY-031 LAY-032 leaves every registered module route when Ver is revoked', async () => {
     createShell();
     const router = TestBed.inject(Router);
-    await router.navigateByUrl('/configuraciones/campus');
-    const previous = { ...emptyPermissionMap(), campus: ['ver'] as const };
+    const scope = TestBed.inject(SessionScope);
+    for (const module of permissionModuleDefinitions) {
+      const granted = {
+        ...emptyPermissionMap(),
+        [module.id]: ['ver'] as const,
+      } as PermissionMap;
+      scope.reconcileCapabilities('usuario', emptyPermissionMap(), 'usuario', granted);
+      await router.navigateByUrl(module.route);
+      scope.reconcileCapabilities('usuario', granted, 'usuario', emptyPermissionMap());
+      await fixture.whenStable();
 
-    TestBed.inject(SessionScope).reconcileCapabilities(
-      'usuario',
-      previous,
-      'usuario',
-      emptyPermissionMap(),
-    );
-    await fixture.whenStable();
-
-    expect(router.url).toBe('/dashboard');
-    expect(logout).not.toHaveBeenCalled();
-  });
-
-  it('LAY-031 leaves the Areas route when areas.ver is revoked without ending the session', async () => {
-    createShell();
-    const router = TestBed.inject(Router);
-    await router.navigateByUrl('/configuraciones/areas');
-    const previous = { ...emptyPermissionMap(), areas: ['ver'] as const };
-
-    TestBed.inject(SessionScope).reconcileCapabilities(
-      'usuario',
-      previous,
-      'usuario',
-      emptyPermissionMap(),
-    );
-    await fixture.whenStable();
-
-    expect(router.url).toBe('/dashboard');
+      expect(router.url).toBe('/dashboard');
+    }
     expect(logout).not.toHaveBeenCalled();
   });
 });

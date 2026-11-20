@@ -52,3 +52,12 @@
 
 - PR, CI obligatorio, protección de rama y aceptación manual son estados independientes; no se infieren de pruebas locales o despliegue técnico.
 - ARE-033 y la revisión visual de Áreas quedaron aceptados el 13 de noviembre de 2026. PR, CI y protección de rama continúan siendo estados externos independientes.
+
+## Cierre de fase — aperturas, registro y concurrencia
+
+- [x] Vincular las aperturas de alta y edición al contexto de capacidad de `SessionScope` y revalidarlo después de cargar Campus.
+- [x] Probar revocación seguida de restitución, apertura posterior válida y aislamiento frente a respuestas anteriores.
+- [x] Derivar secciones, controles y listeners del registro tipado compartido sin enumeraciones paralelas en Usuarios o Layout.
+- [x] Corregir ARE-001 y ARE-003 al contrato granular vigente, conservando reconciliación exclusiva de administrador.
+- [x] Reforzar ARE-048 con barreras deterministas y repositorios reales sobre Firestore Emulator para las cuatro mutaciones y el orden inverso.
+- [ ] Registrar la validación completa, publicar la rama y desplegar únicamente Hosting de staging desde el SHA efectivamente probado.

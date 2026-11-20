@@ -6,9 +6,9 @@ Los criterios siguientes son obligatorios. Su presencia en una prueba no acredit
 
 ## Autorización y seguridad
 
-- ARE-001: `admin` activo puede listar y administrar; `usuario`, perfil inactivo y solicitud anónima son rechazados. <!-- trace:required -->
+- ARE-001: `admin` activo conserva acceso ordinario total; un `usuario` activo puede listar o administrar únicamente con `areas.ver` y la acción explícita correspondiente; perfil inactivo, capacidad ausente y solicitud anónima son rechazados. <!-- trace:required -->
 - ARE-002: toda lectura o escritura directa a `areas` y `areas_claves` es rechazada. <!-- trace:required -->
-- ARE-003: cada callable revalida Authentication, claim administrativo y perfil canónico antes de leer o mutar.
+- ARE-003: cada callable revalida Authentication, autorización base y perfil canónico activo; las operaciones ordinarias exigen la capacidad exacta y `reconcileAreaCounts` continúa exigiendo administrador canónico.
 - ARE-004: errores y registros no exponen tokens, stack traces, reservas, hashes ni credenciales.
 
 ## Validación, identidad y Campus
@@ -78,7 +78,7 @@ Los criterios siguientes son obligatorios. Su presencia en una prueba no acredit
 - ARE-045: un usuario sin `areas` no ve enlace, no entra por URL y recibe denegación en las seis callables ordinarias. <!-- trace:required -->
 - ARE-046: un usuario con solo `areas.ver` lista Áreas y obtiene el catálogo mínimo de Campus sin `campus.ver`, pero no dispone de mutaciones. <!-- trace:required -->
 - ARE-047: crear, editar/transferir, cambiar estado y eliminar exigen `ver` más su acción exacta. <!-- trace:required -->
-- ARE-048: cada mutación revalida la acción exacta dentro de su transacción y una revocación concurrente impide la escritura. <!-- trace:required -->
+- ARE-048: crear, editar/transferir, cambiar estado y eliminar se retienen mediante una barrera después de una autorización preliminar real; si se revoca la acción conservando `ver` antes de la transacción, la operación se rechaza sin cambiar Área, reserva, contadores ni fechas. Una escritura ya confirmada conserva sus efectos y la revocación posterior bloquea las siguientes. <!-- trace:required -->
 - ARE-049: retirar `areas.ver` invalida pendientes, limpia datos, cierra diálogos, oculta el enlace y redirige a Dashboard sin cerrar sesión. <!-- trace:required -->
 - ARE-050: retirar `areas.editar` cierra el diálogo de edición e invalida solo esa operación; conserva listado, ruta y otras acciones vigentes. <!-- trace:required -->
 - ARE-051: revocar y volver a conceder una capacidad de Áreas no rehabilita respuestas de la concesión anterior. <!-- trace:required -->
@@ -89,3 +89,4 @@ Los criterios siguientes son obligatorios. Su presencia en una prueba no acredit
 - ARE-056: `reconcileAreaCounts` continúa denegado a `usuario` aunque tenga las cinco acciones ordinarias de Áreas. <!-- trace:required -->
 - ARE-057: la incorporación granular conserva unicidad, reservas, contadores, Campus histórico, inspector fail-safe y protección de `deleteCampus`. <!-- trace:required -->
 - ARE-058: los registros tipados de módulos y acciones de Angular y Functions coinciden mediante una prueba de contrato. <!-- trace:required -->
+- ARE-059: una apertura pendiente de alta o edición queda vinculada a la generación de su capacidad; revocar y restituir la acción no revive esa apertura, una apertura nueva sí funciona y una respuesta anterior no modifica un diálogo posterior. <!-- trace:required -->

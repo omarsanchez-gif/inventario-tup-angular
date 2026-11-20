@@ -77,6 +77,7 @@
 - USR-037: alta y cambio de rol producen el mapa vacío completo de cinco módulos; listado y bootstrap entregan `areas` sanitizado. <!-- trace:required -->
 - USR-038: un payload anterior de cuatro módulos responde `user-permissions-contract-outdated`, no escribe parcialmente y permite reintentar después de actualizar la pestaña. <!-- trace:required -->
 - USR-039: el resumen de la tabla cuenta hasta cinco módulos con `ver` y no concede Áreas a usuarios existentes. <!-- trace:required -->
+- USR-040: cada módulo del registro tipado aparece exactamente una vez en Asignar permisos, contiene todos los controles de acción registrados y el mapa enviado conserva exactamente las claves canónicas; la prueba deriva sus expectativas del registro y detecta omisiones sin copiar otra lista manual. <!-- trace:required -->
 
 ## Evidencia del mapa de cuatro módulos — 11 de noviembre de 2026
 

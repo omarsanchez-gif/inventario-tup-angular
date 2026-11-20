@@ -39,3 +39,4 @@
 - [x] Conservar Usuarios exclusivo de `admin` y Campus independiente del alcance territorial.
 - [x] Obtener validación expresa del responsable.
 - [x] Incorporar Campus al registro del shell y probar combinaciones de cero a cuatro submenús.
+- [x] Derivar submenús, resolución de ruta y listeners de revocación del registro tipado y probar dinámicamente cada módulo vigente.

@@ -82,19 +82,31 @@ export class AreasPage {
   }
   protected async openNew(): Promise<void> {
     if (!this.auth.can('areas', 'crear')) return;
+    const context = this.sessionScope.captureCapability('areas', 'crear');
     const generation = ++this.openingGeneration;
     this.areas.clearMessages();
     this.editingId.set(null);
     this.form.reset({ campusId: '', nombre: '', notas: '' });
-    if ((await this.areas.loadCatalogs()) && generation === this.openingGeneration) {
+    if (
+      (await this.areas.loadCatalogs()) &&
+      generation === this.openingGeneration &&
+      this.sessionScope.isCapabilityCurrent(context) &&
+      this.auth.can('areas', 'crear')
+    ) {
       this.formVisible.set(true);
     }
   }
   protected async edit(area: InventoryArea): Promise<void> {
     if (!this.auth.can('areas', 'editar')) return;
+    const context = this.sessionScope.captureCapability('areas', 'editar');
     const generation = ++this.openingGeneration;
     this.areas.clearMessages();
-    if (!(await this.areas.loadCatalogs(area.campusId)) || generation !== this.openingGeneration)
+    if (
+      !(await this.areas.loadCatalogs(area.campusId)) ||
+      generation !== this.openingGeneration ||
+      !this.sessionScope.isCapabilityCurrent(context) ||
+      !this.auth.can('areas', 'editar')
+    )
       return;
     this.editingId.set(area.documentId);
     this.form.reset({ campusId: area.campusId, nombre: area.nombre, notas: area.notas ?? '' });

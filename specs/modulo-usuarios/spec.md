@@ -69,9 +69,9 @@ permisos:
 
 ## Administración de permisos
 
-- La tabla agrega una columna `Permisos` con `Acceso total`, `Sin permisos`, `1 módulo`, `2 módulos`, `3 módulos` o `4 módulos`.
+- La tabla agrega una columna `Permisos` con `Acceso total`, `Sin permisos` o la cantidad de módulos vigentes con `ver`; actualmente admite de uno a cinco.
 - Una acción iconográfica `Asignar permisos` abre un `AppDialog` independiente; no se incorpora al alta o edición de identidad.
-- El diálogo identifica al usuario y presenta los módulos como un acordeón de apertura individual: solo un módulo puede estar expandido y cada panel conserva su `fieldset` con las cinco acciones mediante controles nativos etiquetados.
+- El diálogo identifica al usuario y presenta los módulos como un acordeón de apertura individual derivado del registro tipado: solo un módulo puede estar expandido y cada panel conserva su `fieldset` con las acciones declaradas mediante controles nativos etiquetados.
 - Al abrir el diálogo se expande el primer módulo que ya tenga permisos; si ninguno los tiene, se expande el primero. Cada encabezado muestra el nombre, un resumen textual (`Sin acceso`, `Solo ver`, cantidad de permisos o `Acceso completo`) y un indicador de expansión.
 - Contraer o cambiar de módulo no descarta selecciones. Los encabezados son botones nativos con `aria-expanded` y `aria-controls`; el acordeón admite teclado y mantiene todos los paneles en el mismo formulario.
 - La apertura y el cierre interpolan altura y opacidad durante un intervalo breve, sin desplazar bruscamente el contenido. Todo panel contraído queda a altura cero, oculto para tecnologías de asistencia e inerte; `prefers-reduced-motion` reduce la transición al mínimo.
@@ -94,6 +94,7 @@ permisos:
   fabricantes: string[]
   modelosActivos: string[]
   campus: string[]
+  areas: string[]
 ```
 
 Comportamiento:
@@ -104,7 +105,7 @@ Comportamiento:
 - Rechaza campos, módulos, acciones, duplicados o dependencias desconocidas sin realizar escrituras parciales.
 - No modifica nombre, correo, UID, rol, estado, fechas ni claims.
 - Responde con el mapa sanitizado persistido.
-- `campus` es obligatorio en la entrada junto con los otros tres módulos; un mapa anterior de tres módulos es inválido y no produce escritura parcial.
+- `campus` y `areas` son obligatorios junto con los otros tres módulos; un mapa anterior de cuatro módulos es inválido y no produce escritura parcial.
 
 Códigos funcionales nuevos:
 
@@ -139,7 +140,7 @@ Importación masiva, invitaciones, auditoría completa, perfiles reutilizables, 
 
 ## Ampliación vigente: Áreas como quinto módulo
 
-- El diálogo `Asignar permisos` deriva sus cinco secciones del registro tipado: Categorías, Fabricantes, Modelos de activos, Campus y Áreas.
+- El diálogo `Asignar permisos` deriva todas sus secciones, etiquetas, controles y resumen del registro tipado: actualmente Categorías, Fabricantes, Modelos de activos, Campus y Áreas. Agregar un módulo al registro lo incorpora exactamente una vez sin editar otra lista de la página.
 - Áreas admite `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; marcar una escritura activa también `ver` y retirar `ver` limpia las escrituras del módulo.
 - Crear un usuario y cambiar su rol producen el mapa de cinco módulos; listar y bootstrap sanitizan un documento histórico sin `areas` como `areas: []` para `usuario`.
 - `setAuthorizedUserPermissions` reemplaza exactamente los cinco módulos. Un payload antiguo de cuatro módulos responde `user-permissions-contract-outdated`, conserva íntegro el mapa almacenado y permite recuperar la operación recargando la aplicación.

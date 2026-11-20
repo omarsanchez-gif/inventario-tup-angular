@@ -51,7 +51,7 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 
 ## Autorización
 
-El layout solo presenta rutas ya autorizadas. `Usuarios` se mantiene exclusivo de `admin`; un `usuario` ve cada catálogo únicamente con el `ver` correspondiente, incluido `areas.ver`. `Configuraciones` aparece completo para `admin`; para `usuario` aparece cuando existe al menos un permiso `ver` y contiene solo los módulos concedidos. Un grupo vacío no se renderiza. Guards y Functions conservan la autorización efectiva y el grupo no muestra enlaces de módulos todavía no implementados.
+El layout solo presenta rutas ya autorizadas. `Usuarios` se mantiene exclusivo de `admin`; un `usuario` ve cada catálogo únicamente con el `ver` correspondiente, incluido `areas.ver`. `Configuraciones` aparece completo para `admin`; para `usuario` aparece cuando existe al menos un permiso `ver` y contiene solo los módulos concedidos. Un grupo vacío no se renderiza. Etiqueta, ruta, enlace y listener de revocación se derivan del registro tipado de módulos, sin una segunda enumeración en el shell. Guards y Functions conservan la autorización efectiva y el grupo no muestra enlaces de módulos todavía no implementados.
 
 Una revalidación de permisos actualiza menú y acciones solo si pertenece al UID y generación vigentes. Ocultar un enlace no sustituye la denegación backend.
 

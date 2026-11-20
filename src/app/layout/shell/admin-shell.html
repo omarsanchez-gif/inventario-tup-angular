@@ -62,60 +62,18 @@
           </button>
           @if (settingsExpanded()) {
             <div class="navigation__subnav" id="settings-navigation">
-              @if (auth.can('categorias', 'ver')) {
-                <a
-                  class="navigation__sublink"
-                  routerLink="/configuraciones/categorias"
-                  routerLinkActive="navigation__sublink--active"
-                  ariaCurrentWhenActive="page"
-                  (click)="closeNavigationOnMobile()"
-                >
-                  Categorías
-                </a>
-              }
-              @if (auth.can('fabricantes', 'ver')) {
-                <a
-                  class="navigation__sublink"
-                  routerLink="/configuraciones/fabricantes"
-                  routerLinkActive="navigation__sublink--active"
-                  ariaCurrentWhenActive="page"
-                  (click)="closeNavigationOnMobile()"
-                >
-                  Fabricantes
-                </a>
-              }
-              @if (auth.can('modelosActivos', 'ver')) {
-                <a
-                  class="navigation__sublink"
-                  routerLink="/configuraciones/modelos-activos"
-                  routerLinkActive="navigation__sublink--active"
-                  ariaCurrentWhenActive="page"
-                  (click)="closeNavigationOnMobile()"
-                >
-                  Modelos de activos
-                </a>
-              }
-              @if (auth.can('campus', 'ver')) {
-                <a
-                  class="navigation__sublink"
-                  routerLink="/configuraciones/campus"
-                  routerLinkActive="navigation__sublink--active"
-                  ariaCurrentWhenActive="page"
-                  (click)="closeNavigationOnMobile()"
-                >
-                  Campus
-                </a>
-              }
-              @if (auth.can('areas', 'ver')) {
-                <a
-                  class="navigation__sublink"
-                  routerLink="/configuraciones/areas"
-                  routerLinkActive="navigation__sublink--active"
-                  ariaCurrentWhenActive="page"
-                  (click)="closeNavigationOnMobile()"
-                >
-                  Áreas
-                </a>
+              @for (module of settingsModules; track module.id) {
+                @if (auth.can(module.id, 'ver')) {
+                  <a
+                    class="navigation__sublink"
+                    [routerLink]="module.route"
+                    routerLinkActive="navigation__sublink--active"
+                    ariaCurrentWhenActive="page"
+                    (click)="closeNavigationOnMobile()"
+                  >
+                    {{ module.label }}
+                  </a>
+                }
               }
             </div>
           }

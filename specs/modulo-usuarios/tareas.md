@@ -68,3 +68,4 @@
 - [x] Actualizar altas, cambios de rol, listado y bootstrap al mapa de cinco módulos.
 - [x] Validar y desplegar primero Functions compatibles y después Hosting en staging.
 - [x] Completar aceptación autenticada de la concesión y reducción de Áreas con la cuenta `PROFESOR`.
+- [x] Derivar secciones, etiquetas, controles y mapa del formulario desde el registro tipado y cubrir cada módulo registrado sin otra enumeración de prueba.

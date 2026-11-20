@@ -67,3 +67,4 @@
 - LAY-029: un usuario con solo `areas.ver` ve Configuraciones y únicamente el enlace Áreas; sin esa capacidad no lo ve. <!-- trace:required -->
 - LAY-030: el guard de `/configuraciones/areas` acepta admin o `areas.ver` canónico y redirige cualquier otra sesión autorizada a Dashboard. <!-- trace:required -->
 - LAY-031: retirar `areas.ver` con la ruta abierta elimina el enlace y redirige a Dashboard sin logout ni cambios en otros submenús. <!-- trace:required -->
+- LAY-032: cada módulo del registro tipado produce exactamente un submenú con su etiqueta y ruta, registra revocación de `ver` y abandona únicamente su ruta activa; la prueba recorre el registro sin mantener otra lista de módulos. <!-- trace:required -->

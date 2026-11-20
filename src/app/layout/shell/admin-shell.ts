@@ -13,7 +13,10 @@ import { filter } from 'rxjs';
 
 import { AuthFacade } from '../../core/auth/auth.facade';
 import { SessionScope } from '../../core/auth/session-scope';
-import type { PermissionModule } from '../../shared/models/catalog-permissions';
+import {
+  permissionModuleDefinitions,
+  type PermissionModule,
+} from '../../shared/models/catalog-permissions';
 import { AppIcon } from '../../shared/ui/icon/app-icon';
 
 @Component({
@@ -37,14 +40,11 @@ export class AdminShell implements OnDestroy {
     this.currentUrl().startsWith('/configuraciones/'),
   );
   protected readonly settingsExpanded = this.settingsOpen.asReadonly();
+  protected readonly settingsModules = permissionModuleDefinitions;
   protected readonly settingsVisible = computed(
     () =>
       this.auth.role() === 'admin' ||
-      this.auth.can('categorias', 'ver') ||
-      this.auth.can('fabricantes', 'ver') ||
-      this.auth.can('modelosActivos', 'ver') ||
-      this.auth.can('campus', 'ver') ||
-      this.auth.can('areas', 'ver'),
+      permissionModuleDefinitions.some(({ id }) => this.auth.can(id, 'ver')),
   );
   protected readonly menuActionLabel = computed(() =>
     this.navigationOpen() ? 'Ocultar menú principal' : 'Mostrar menú principal',
@@ -79,13 +79,7 @@ export class AdminShell implements OnDestroy {
         this.currentUrl.set(event.urlAfterRedirects);
         if (event.urlAfterRedirects.startsWith('/configuraciones/')) this.settingsOpen.set(true);
       });
-    for (const module of [
-      'categorias',
-      'fabricantes',
-      'modelosActivos',
-      'campus',
-      'areas',
-    ] as const) {
+    for (const { id: module } of permissionModuleDefinitions) {
       this.unregisterCapabilityListeners.push(
         this.sessionScope.registerCapabilityListener(module, (change) => {
           if (change.action === 'ver' && !change.allowed && this.routeUsesModule(module)) {
@@ -129,13 +123,7 @@ export class AdminShell implements OnDestroy {
   }
 
   private routeUsesModule(module: PermissionModule): boolean {
-    const paths: Record<PermissionModule, string> = {
-      categorias: '/configuraciones/categorias',
-      fabricantes: '/configuraciones/fabricantes',
-      modelosActivos: '/configuraciones/modelos-activos',
-      campus: '/configuraciones/campus',
-      areas: '/configuraciones/areas',
-    };
-    return this.router.url.startsWith(paths[module]);
+    const definition = permissionModuleDefinitions.find(({ id }) => id === module);
+    return definition ? this.router.url.startsWith(definition.route) : false;
   }
 }

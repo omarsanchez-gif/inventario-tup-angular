@@ -3,7 +3,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
 import type { AuthorizedUser } from '../../../shared/models/authorized-user';
-import { emptyPermissionMap, fullPermissionMap } from '../../../shared/models/catalog-permissions';
+import {
+  emptyPermissionMap,
+  fullPermissionMap,
+  permissionActionDefinitions,
+  permissionModuleDefinitions,
+  permissionModules,
+} from '../../../shared/models/catalog-permissions';
 import type { SystemUser } from '../../../shared/models/system-user';
 import { UsersFacade } from '../state/users.facade';
 import { UsersPage } from './users-page';
@@ -177,14 +183,27 @@ describe('UsersPage dialogs', () => {
     );
   });
 
-  it('USR-022 USR-028 USR-032 USR-036 USR-039 ARE-044 CAM-036 assigns five-module permissions in a separate recoverable dialog', async () => {
+  it('USR-022 USR-028 USR-032 USR-036 USR-039 USR-040 ARE-044 CAM-036 renders every registered module once with every permission control', async () => {
     actionButton('Asignar permisos a Usuario Prueba').click();
     fixture.detectChanges();
     expect(element.querySelector('.dialog__title')?.textContent).toContain(
       'Asignar permisos a Usuario Prueba',
     );
-    expect(element.querySelector('[aria-controls="campus-permissions-panel"]')).toBeTruthy();
-    expect(element.querySelector('[aria-controls="areas-permissions-panel"]')).toBeTruthy();
+    const moduleTriggers = element.querySelectorAll<HTMLButtonElement>(
+      '[aria-controls$="-permissions-panel"]',
+    );
+    expect(moduleTriggers).toHaveLength(permissionModuleDefinitions.length);
+    for (const module of permissionModuleDefinitions) {
+      const triggers = element.querySelectorAll<HTMLButtonElement>(
+        `[aria-controls="${module.id}-permissions-panel"]`,
+      );
+      expect(triggers).toHaveLength(1);
+      expect(triggers[0]?.textContent).toContain(module.label);
+      expect(element.querySelectorAll(`#${module.id}-permissions-panel`)).toHaveLength(1);
+      for (const action of permissionActionDefinitions) {
+        expect(element.querySelectorAll(`#${module.id}-${action.id}`)).toHaveLength(1);
+      }
+    }
 
     const edit = element.querySelector<HTMLInputElement>('#categorias-editar')!;
     edit.click();
@@ -207,6 +226,9 @@ describe('UsersPage dialogs', () => {
         campus: [],
         areas: ['ver', 'eliminar'],
       }),
+    );
+    expect(Object.keys(users.setPermissions.mock.calls[0]?.[1] ?? {}).sort()).toEqual(
+      [...permissionModules].sort(),
     );
     expect(element.querySelector('dialog[open]')).toBeNull();
   });
@@ -296,11 +318,11 @@ describe('UsersPage dialogs', () => {
     ).toBe('false');
   });
 
-  it('USR-039 summarizes all five granted modules', async () => {
+  it('USR-039 summarizes every granted registered module', async () => {
     users.filteredUsers.set([{ ...managedUser, permisos: fullPermissionMap() }]);
     await fixture.whenStable();
     expect(element.querySelector('tbody tr td:nth-child(6)')?.textContent?.trim()).toBe(
-      '5 módulos',
+      `${permissionModuleDefinitions.length} módulos`,
     );
   });
 

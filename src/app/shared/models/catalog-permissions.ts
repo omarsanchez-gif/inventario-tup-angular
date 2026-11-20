@@ -1,28 +1,61 @@
-export const permissionModules = [
-  'categorias',
-  'fabricantes',
-  'modelosActivos',
-  'campus',
-  'areas',
+export const permissionModuleDefinitions = [
+  {
+    id: 'categorias',
+    label: 'Categorías',
+    route: '/configuraciones/categorias',
+  },
+  {
+    id: 'fabricantes',
+    label: 'Fabricantes',
+    route: '/configuraciones/fabricantes',
+  },
+  {
+    id: 'modelosActivos',
+    label: 'Modelos de activos',
+    route: '/configuraciones/modelos-activos',
+  },
+  {
+    id: 'campus',
+    label: 'Campus',
+    route: '/configuraciones/campus',
+  },
+  {
+    id: 'areas',
+    label: 'Áreas',
+    route: '/configuraciones/areas',
+  },
 ] as const;
-export const permissionActions = ['ver', 'crear', 'editar', 'cambiarEstado', 'eliminar'] as const;
+export const permissionActionDefinitions = [
+  { id: 'ver', label: 'Ver' },
+  { id: 'crear', label: 'Crear' },
+  { id: 'editar', label: 'Editar' },
+  { id: 'cambiarEstado', label: 'Cambiar estado' },
+  { id: 'eliminar', label: 'Eliminar' },
+] as const;
 
-export type PermissionModule = (typeof permissionModules)[number];
-export type PermissionAction = (typeof permissionActions)[number];
+export type PermissionModule = (typeof permissionModuleDefinitions)[number]['id'];
+export type PermissionAction = (typeof permissionActionDefinitions)[number]['id'];
 export type PermissionMap = Readonly<Record<PermissionModule, readonly PermissionAction[]>>;
 
+export const permissionModules = permissionModuleDefinitions.map(
+  ({ id }) => id,
+) as readonly PermissionModule[];
+export const permissionActions = permissionActionDefinitions.map(
+  ({ id }) => id,
+) as readonly PermissionAction[];
+
+function permissionMap(factory: () => readonly PermissionAction[]): PermissionMap {
+  return Object.fromEntries(
+    permissionModules.map((module) => [module, factory()]),
+  ) as PermissionMap;
+}
+
 export function emptyPermissionMap(): PermissionMap {
-  return { categorias: [], fabricantes: [], modelosActivos: [], campus: [], areas: [] };
+  return permissionMap(() => []);
 }
 
 export function fullPermissionMap(): PermissionMap {
-  return {
-    categorias: [...permissionActions],
-    fabricantes: [...permissionActions],
-    modelosActivos: [...permissionActions],
-    campus: [...permissionActions],
-    areas: [...permissionActions],
-  };
+  return permissionMap(() => [...permissionActions]);
 }
 
 export function hasPermission(

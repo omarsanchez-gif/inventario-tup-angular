@@ -141,6 +141,68 @@ describe('AreasPage', () => {
     expect(component.form.controls.nombre.value).toBe('Nueva');
   });
 
+  it('ARE-059 does not revive a pending create after its capability is revoked and restored', async () => {
+    const granted = { ...emptyPermissionMap(), areas: ['ver', 'crear'] as const };
+    const viewOnly = { ...emptyPermissionMap(), areas: ['ver'] as const };
+    role.set('usuario');
+    permissions.set(granted);
+    scope.reconcileCapabilities('admin', fullPermissionMap(), 'usuario', granted);
+    const pending = deferred<boolean>();
+    facade.loadCatalogs.mockReturnValueOnce(pending.promise);
+    const component = fixture.componentInstance as unknown as {
+      openNew(): Promise<void>;
+      formVisible(): boolean;
+    };
+
+    const oldOpening = component.openNew();
+    permissions.set(viewOnly);
+    scope.reconcileCapabilities('usuario', granted, 'usuario', viewOnly);
+    permissions.set(granted);
+    scope.reconcileCapabilities('usuario', viewOnly, 'usuario', granted);
+    pending.resolve(true);
+    await oldOpening;
+
+    expect(component.formVisible()).toBe(false);
+
+    facade.loadCatalogs.mockResolvedValueOnce(true);
+    await component.openNew();
+    expect(component.formVisible()).toBe(true);
+  });
+
+  it('ARE-059 keeps a newer edit when an older revoked opening resolves afterwards', async () => {
+    const granted = { ...emptyPermissionMap(), areas: ['ver', 'editar'] as const };
+    const viewOnly = { ...emptyPermissionMap(), areas: ['ver'] as const };
+    role.set('usuario');
+    permissions.set(granted);
+    scope.reconcileCapabilities('admin', fullPermissionMap(), 'usuario', granted);
+    const oldCatalog = deferred<boolean>();
+    const newCatalog = deferred<boolean>();
+    facade.loadCatalogs
+      .mockReturnValueOnce(oldCatalog.promise)
+      .mockReturnValueOnce(newCatalog.promise);
+    const component = fixture.componentInstance as unknown as {
+      edit(value: InventoryArea): Promise<void>;
+      editingId(): string | null;
+      formVisible(): boolean;
+      form: { controls: { nombre: { value: string } } };
+    };
+
+    const oldOpening = component.edit(area('old', 'Anterior'));
+    permissions.set(viewOnly);
+    scope.reconcileCapabilities('usuario', granted, 'usuario', viewOnly);
+    permissions.set(granted);
+    scope.reconcileCapabilities('usuario', viewOnly, 'usuario', granted);
+    const newOpening = component.edit(area('new', 'Vigente'));
+    newCatalog.resolve(true);
+    await newOpening;
+    oldCatalog.resolve(true);
+    await oldOpening;
+
+    expect(component.formVisible()).toBe(true);
+    expect(component.editingId()).toBe('new');
+    expect(component.form.controls.nombre.value).toBe('Vigente');
+  });
+
   it('ARE-040 rejects an invisible-only name in the reactive form', async () => {
     facade.loadCatalogs.mockResolvedValue(true);
     const component = fixture.componentInstance as unknown as {
