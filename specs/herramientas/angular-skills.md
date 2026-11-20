@@ -2,7 +2,7 @@
 
 ## Finalidad
 
-El proyecto incorpora la skill oficial `angular-developer` como guía técnica para futuros trabajos Angular autorizados. Complementa las especificaciones del Sistema Institucional de Inventario TUP; no modifica su alcance, arquitectura, dependencias ni comportamiento y no autoriza Áreas u otros módulos futuros.
+El proyecto incorpora la skill oficial `angular-developer` como guía técnica para trabajos Angular autorizados. Complementa las especificaciones del Sistema Institucional de Inventario TUP; no modifica por sí misma alcance, arquitectura, dependencias ni comportamiento, ni autoriza módulos futuros.
 
 ## Instalación registrada
 

@@ -1,6 +1,6 @@
 # Spec: Áreas
 
-> Contrato aprobado e implementado — 12 de noviembre de 2026
+> Contrato aprobado e implementado — 12 de noviembre de 2026; autorización granular ordinaria aprobada el 20 de noviembre de 2026
 
 ## Estado
 
@@ -8,7 +8,7 @@ Este documento es la fuente funcional del catálogo administrativo de Áreas. Au
 
 ## Objetivo
 
-Permitir que un `admin` administre las divisiones físicas operativas de cada Campus, por ejemplo Cámara de Gesell, Quirófano, Consultorio, Salones o Caseta de seguridad. Un Área sería la unidad física que después podrán usar las coberturas de Coordinaciones, el alcance de Usuarios y los Activos individuales.
+Permitir que un `admin` o un `usuario` con capacidades explícitas administre las divisiones físicas operativas de cada Campus, por ejemplo Cámara de Gesell, Quirófano, Consultorio, Salones o Caseta de seguridad. Un Área es una unidad física que después podrán usar las coberturas de Coordinaciones, el alcance de Usuarios y los Activos individuales.
 
 ## Hechos establecidos
 
@@ -20,7 +20,7 @@ Permitir que un `admin` administre las divisiones físicas operativas de cada Ca
 
 ## Alcance aprobado
 
-- Ruta privada `/configuraciones/areas`, visible únicamente a `admin`.
+- Ruta privada `/configuraciones/areas`, visible con `areas.ver`.
 - Listado administrativo completo, ordenado por Campus y nombre, con límite inicial propuesto de 500 registros.
 - Búsqueda automática por nombre, Campus o notas y filtro opcional por Campus.
 - Alta, edición, activación, desactivación y eliminación condicionada.
@@ -33,7 +33,7 @@ Permitir que un `admin` administre las divisiones físicas operativas de cada Ca
 ## Exclusiones
 
 - Coordinaciones, coberturas, asignaciones o permisos por ámbito.
-- Reestructuración del módulo Usuarios.
+- Reestructuración general del módulo Usuarios fuera de añadir Áreas a la matriz vigente.
 - Activos individuales, responsables, movimientos, responsivas o inventario operativo.
 - Edificios, pisos, geolocalización, fotografías, planos o jerarquías anidadas de ubicaciones.
 - Alta rápida de Campus dentro del modal.
@@ -131,18 +131,21 @@ Estos recursos son canónicos y permanecen cerrados a clientes mediante Firestor
 
 ## Autorización
 
-- Solo un `admin` autenticado, autorizado y activo administra Áreas.
-- `usuario`, perfiles inactivos y solicitudes anónimas no listan ni mutan el catálogo administrativo.
-- Cada callable revalida Authentication, claim administrativo y documento canónico `usuarios`.
-- La interfaz captura una generación de acceso administrativo además de la sesión. Perder el rol invalida permanentemente listados, catálogos, mutaciones y diálogos iniciados antes, incluso si el mismo UID recupera el rol.
+- `admin` autenticado, autorizado y activo conserva todas las capacidades ordinarias por rol. `usuario` requiere asignación explícita en `permisos.areas`; perfiles inactivos y solicitudes anónimas se deniegan.
+- `listAreas` y `getAreaCatalogs` exigen `areas.ver`; crear exige además `areas.crear`, actualizar o transferir `areas.editar`, cambiar estado `areas.cambiarEstado` y eliminar `areas.eliminar`.
+- `reconcileAreaCounts` permanece exclusivo de `admin` canónico activo aunque un usuario tenga las cinco acciones ordinarias.
+- Cada callable revalida Authentication, claim base y documento canónico `usuarios`; cada mutación revalida su acción exacta dentro de la transacción.
+- La interfaz captura generaciones por módulo y acción. Perder `ver` limpia datos, cierra diálogos, retira el enlace y redirige a Dashboard sin cerrar sesión; perder otra acción invalida solo su operación y diálogo dependiente.
 - Listado y catálogo usan secuencias independientes; una respuesta anterior nunca reemplaza una consulta más nueva ni el catálogo histórico solicitado para una edición.
 - `loading` pertenece al listado público vigente. Crear, mutar o reconciliar invalida el listado anterior, termina ese indicador y usa `saving`; su recarga interna no permite que una finalización antigua oculte datos recientes.
-- La futura visibilidad de Áreas para `usuario` depende del incremento de Coordinaciones, coberturas y alcance de Usuarios; no se anticipa aquí.
+- El permiso funcional de Áreas no define cobertura territorial ni acceso a activos; Coordinaciones y alcance permanecen fuera de este incremento.
 - Firestore Rules mantendría denegación total para las colecciones propuestas.
 
 ## Contratos callable
 
 ### `listAreas`
+
+Autorización: `areas.ver`.
 
 Entrada: objeto vacío.
 
@@ -163,11 +166,15 @@ Devuelve hasta 500 registros ordenados y no expone normalización, reservas ni d
 
 ### `getAreaCatalogs`
 
+Autorización: `areas.ver`, sin exigir `campus.ver`.
+
 Entrada: `currentCampusId?: string`.
 
 Devuelve únicamente identificador, código y nombre de Campus activos y, al editar, permite conservar el Campus vigente aunque esté inactivo. No entrega documentos administrativos completos.
 
 ### `createArea`
+
+Autorización: `areas.ver + areas.crear`.
 
 Entrada: `campusId`, `nombre`, `notas`.
 
@@ -175,17 +182,23 @@ Valida Campus, reserva identidad, crea el Área activa e incrementa `cantidadAre
 
 ### `updateArea`
 
+Autorización: `areas.ver + areas.editar`.
+
 Entrada: `documentId`, `campusId`, `nombre`, `notas`.
 
 Conserva identidad y fecha de creación; reemplaza la reserva y, si la transferencia queda aprobada y procede, ajusta ambos Campus en la misma transacción.
 
 ### `setAreaStatus`
 
+Autorización: `areas.ver + areas.cambiarEstado`.
+
 Entrada: `documentId`, `activo`.
 
 Cambia únicamente estado y fecha. Repetir el estado es idempotente.
 
 ### `deleteArea`
+
+Autorización: `areas.ver + areas.eliminar`.
 
 Entrada: `documentId`.
 
@@ -208,14 +221,19 @@ Comprueba referencias de forma fail-safe, elimina Área y reserva y decrementa e
 
 La interfaz traduciría los códigos a mensajes institucionales y no expondría stack traces, claves, rutas internas ni credenciales.
 
+### `reconcileAreaCounts`
+
+Autorización exclusiva de `admin` canónico activo. No se concede por poseer las cinco acciones ordinarias.
+
 ## Presentación propuesta
 
-- `Áreas` es una opción secundaria de `Configuraciones`, después de Campus, visible únicamente a `admin`.
+- `Áreas` es una opción secundaria de `Configuraciones`, después de Campus, visible con `areas.ver`.
 - Encabezado: etiqueta `Configuraciones`, título `Áreas`, descripción y acción textual `Nueva área`.
 - Búsqueda automática a todo el ancho y paginación compartida de 10 registros.
 - Tabla propuesta: `Nombre`, `Campus`, `Notas`, `Estado` y `Acciones`.
 - Alta y edición usan `AppDialog` con Campus, Nombre y Notas.
 - Las acciones contextuales Editar, Activar/Desactivar y Eliminar usan `AppIcon`, tooltip y nombre accesible.
+- La acción de reconciliación solo se presenta a `admin`; las demás acciones se muestran según capacidad.
 - La confirmación de eliminación identifica Área y Campus, mantiene abierto el diálogo ante error y anuncia la causa mediante `role="alert"` sin duplicarla en el fondo.
 - Si el alta ya fue confirmada y falla la recarga, el diálogo se cierra, se conserva el identificador y el error ofrece actualizar el listado; esa recuperación nunca reenvía el alta.
 - La tabla permite desplazamiento horizontal y conserva objetivos táctiles de al menos 44 × 44 px desde 320 px.

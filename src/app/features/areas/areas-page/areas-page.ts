@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -14,9 +13,9 @@ import {
   type ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
 import type { InventoryArea } from '../../../shared/models/inventory-area';
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope, type CapabilityChange } from '../../../core/auth/session-scope';
 import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { AppIcon } from '../../../shared/ui/icon/app-icon';
 import { AppPagination } from '../../../shared/ui/pagination/app-pagination';
@@ -45,13 +44,14 @@ function visibleContent(control: AbstractControl): ValidationErrors | null {
 })
 export class AreasPage {
   private readonly builder = inject(FormBuilder);
-  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly sessionScope = inject(SessionScope);
   protected readonly auth = inject(AuthFacade);
   protected readonly areas = inject(AreasFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly pendingDeletion = signal<InventoryArea | null>(null);
+  protected readonly authorizationNotice = signal<string | null>(null);
   protected readonly pageSize = 10;
   protected readonly currentPage = signal(1);
   private openingGeneration = 0;
@@ -69,21 +69,19 @@ export class AreasPage {
     notas: ['', Validators.maxLength(1_000)],
   });
   constructor() {
+    const unregister = this.sessionScope.registerCapabilityListener('areas', (change) =>
+      this.handleCapabilityChange(change),
+    );
     this.destroyRef.onDestroy(() => {
+      unregister();
       this.openingGeneration += 1;
       this.areas.invalidateView();
-    });
-    effect(() => {
-      if (this.auth.role() !== 'admin') {
-        this.closePrivateUi();
-        this.areas.reset();
-        void this.router.navigateByUrl('/dashboard', { replaceUrl: true });
-      }
     });
     void this.areas.load();
     void this.areas.loadCatalogs();
   }
   protected async openNew(): Promise<void> {
+    if (!this.auth.can('areas', 'crear')) return;
     const generation = ++this.openingGeneration;
     this.areas.clearMessages();
     this.editingId.set(null);
@@ -93,6 +91,7 @@ export class AreasPage {
     }
   }
   protected async edit(area: InventoryArea): Promise<void> {
+    if (!this.auth.can('areas', 'editar')) return;
     const generation = ++this.openingGeneration;
     this.areas.clearMessages();
     if (!(await this.areas.loadCatalogs(area.campusId)) || generation !== this.openingGeneration)
@@ -143,6 +142,7 @@ export class AreasPage {
     this.currentPage.set(Math.min(Math.max(1, page), this.totalPages()));
   }
   protected requestDeletion(area: InventoryArea): void {
+    if (!this.auth.can('areas', 'eliminar')) return;
     this.areas.clearMessages();
     this.pendingDeletion.set(area);
   }
@@ -164,5 +164,25 @@ export class AreasPage {
     this.formVisible.set(false);
     this.editingId.set(null);
     this.pendingDeletion.set(null);
+  }
+
+  private handleCapabilityChange(change: CapabilityChange): void {
+    if (change.allowed) return;
+    const closesForm =
+      (change.action === 'crear' && this.formVisible() && this.editingId() === null) ||
+      (change.action === 'editar' && this.formVisible() && this.editingId() !== null);
+    const closesDeletion = change.action === 'eliminar' && this.pendingDeletion() !== null;
+    if (change.action === 'ver') this.closePrivateUi();
+    else if (closesForm) {
+      this.openingGeneration += 1;
+      this.formVisible.set(false);
+      this.editingId.set(null);
+    } else if (closesDeletion) {
+      this.pendingDeletion.set(null);
+    }
+    this.areas.clearMessages();
+    this.authorizationNotice.set(
+      'Sus permisos de Áreas cambiaron. Las acciones disponibles se actualizaron sin presentar resultados obsoletos.',
+    );
   }
 }

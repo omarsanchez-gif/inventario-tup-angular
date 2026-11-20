@@ -58,7 +58,7 @@
 
 **Decisión:** mantenimiento transaccional y operación manual `reconcileAreaCounts`, calculada solo en backend e idempotente.
 
-## D-ARE-005 — Acceso del rol `usuario`
+## D-ARE-005 — Acceso del rol `usuario` (decisión inicial sustituida)
 
 **Pregunta:** ¿el primer incremento debe exponer Áreas a usuarios no administradores?
 
@@ -70,7 +70,7 @@
 
 **Efecto:** evita exponer estructura o inventario fuera de ámbito y no inventa permisos temporales que luego deban migrarse.
 
-**Decisión:** primer incremento exclusivamente administrativo; Áreas no se agrega al mapa granular de permisos.
+**Decisión histórica:** el primer incremento fue exclusivamente administrativo. El 20 de noviembre de 2026 esta decisión quedó sustituida para las operaciones ordinarias: Áreas se incorporó al mapa granular como permiso funcional global, sin modelar cobertura territorial. `reconcileAreaCounts` permanece exclusivo de admin.
 
 ## D-ARE-006 — Datos iniciales
 

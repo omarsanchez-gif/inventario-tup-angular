@@ -2,13 +2,13 @@
 
 ## Estado
 
-El incremento para Categorías, Fabricantes, Modelos y Campus fue aprobado, implementado, validado y desplegado exclusivamente a staging el 11 de noviembre de 2026. El endurecimiento de revocación selectiva del mismo UID se documenta en `../patrones/permisos-modulares.md` y no amplía el alcance territorial.
+El incremento para Categorías, Fabricantes, Modelos y Campus fue aprobado, implementado, validado y desplegado exclusivamente a staging el 11 de noviembre de 2026. El 20 de noviembre de 2026 se aprobó incorporar Áreas como quinto módulo funcional. La exclusión anterior de Áreas queda sustituida para operaciones ordinarias; reconciliación continúa exclusiva de admin. El endurecimiento de revocación selectiva se documenta en `../patrones/permisos-modulares.md` y no amplía el alcance territorial.
 
 ## Contexto
 
-Los módulos Categorías, Fabricantes, Modelos de activos y Campus admiten permisos granulares para usuarios seleccionados sin convertirlos en administradores generales.
+Los módulos Categorías, Fabricantes, Modelos de activos, Campus y Áreas admiten permisos granulares para usuarios seleccionados sin convertirlos en administradores generales.
 
-Campus ya existe como catálogo administrativo y puede incorporarse como cuarto módulo funcional. Áreas, Coordinaciones y el alcance sobre Activos constituyen otra dimensión de autorización que todavía no está cerrada; esta ampliación no debe inventar campos provisionales para esa cobertura.
+Campus se incorporó como cuarto módulo y Áreas como quinto. Coordinaciones y el alcance sobre Activos constituyen otra dimensión de autorización todavía no cerrada; esta ampliación no inventa campos provisionales para esa cobertura.
 
 ## Decisión
 
@@ -33,6 +33,7 @@ Módulos autorizables vigentes:
 - `fabricantes`
 - `modelosActivos`
 - `campus`
+- `areas`
 
 Acciones autorizables:
 
@@ -62,13 +63,15 @@ En Modelos, `ver` también permite solicitar miniaturas y el catálogo sanitizad
 
 En Campus, `ver` habilita ruta, submenú y `listCampuses`; las otras cuatro acciones se asocian respectivamente con `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus`. Estos permisos son globales para el catálogo y no representan alcance territorial sobre Activos, Áreas o Coordinaciones.
 
+En Áreas, `ver` habilita ruta, submenú, `listAreas` y `getAreaCatalogs`; las otras acciones se asocian con `createArea`, `updateArea`, `setAreaStatus` y `deleteArea`. El catálogo mínimo de Campus no exige `campus.ver`. La reconciliación global de contadores queda fuera de la matriz y exige `admin` canónico.
+
 ### Evolución compatible del mapa
 
-- El mapa canónico contiene cuatro módulos: Categorías, Fabricantes, Modelos y Campus.
-- Un documento histórico sin `permisos.campus` se interpreta con Campus denegado para `usuario`; no requiere migración destructiva.
+- El mapa canónico contiene cinco módulos: Categorías, Fabricantes, Modelos, Campus y Áreas.
+- Un documento histórico sin `permisos.campus` o `permisos.areas` interpreta el módulo ausente como denegado para `usuario`; no requiere migración destructiva.
 - `admin` conserva acceso total por rol aunque el mapa almacenado sea anterior.
-- `setAuthorizedUserPermissions` reemplaza el mapa completo y exige exactamente el vocabulario canónico vigente. Omitir Campus o enviar un módulo desconocido responde `user-permissions-invalid` sin escritura parcial.
-- El contrato se desplegó primero en las Functions que entienden cuatro módulos y después en Hosting. Una pestaña antigua que intente guardar tres módulos falla de forma segura y debe recargarse; nunca borra un permiso de Campus ya concedido.
+- `setAuthorizedUserPermissions` reemplaza el mapa completo y exige exactamente el vocabulario canónico vigente. Omitir Áreas responde `user-permissions-contract-outdated`; cualquier otra forma inválida responde `user-permissions-invalid`, siempre sin escritura parcial.
+- El contrato de cinco módulos se despliega primero en Functions compatibles y después en Hosting. Una pestaña antigua que intente guardar cuatro módulos falla de forma segura, indica que debe recargarse y nunca borra un permiso de Áreas ya concedido.
 - Los módulos futuros se incorporarán únicamente después de tener specs, backend y rutas aprobados; no se mostrarán controles de permisos anticipados.
 
 ### Vigencia y sesiones

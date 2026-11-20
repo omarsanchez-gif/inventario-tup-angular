@@ -215,7 +215,7 @@ test('LAY-020 keeps mobile navigation and forms usable at 320 px', async ({ page
   expect(hasGlobalOverflow).toBe(false);
 });
 
-test('USR-022 USR-035 assigns permissions through the accessible module accordion', async ({
+test('USR-022 USR-035 USR-036 ARE-044 assigns five-module permissions through the accessible module accordion', async ({
   page,
 }) => {
   const reference = firestore.collection('usuarios').doc('permission-target-e2e');
@@ -237,9 +237,11 @@ test('USR-022 USR-035 assigns permissions through the accessible module accordio
     const dialog = page.getByRole('dialog');
     const categoriesTrigger = dialog.locator('[aria-controls="categorias-permissions-panel"]');
     const manufacturersTrigger = dialog.locator('[aria-controls="fabricantes-permissions-panel"]');
+    const areasTrigger = dialog.locator('[aria-controls="areas-permissions-panel"]');
     const categoriesPanel = dialog.locator('#categorias-permissions-panel');
     const manufacturersPanel = dialog.locator('#fabricantes-permissions-panel');
     await expect(categoriesTrigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(areasTrigger).toBeVisible();
     await expect(categoriesPanel).toBeVisible();
     await expect(manufacturersPanel).toBeHidden();
     await manufacturersTrigger.click();
@@ -259,6 +261,7 @@ test('USR-022 USR-035 assigns permissions through the accessible module accordio
       fabricantes: [],
       modelosActivos: [],
       campus: [],
+      areas: [],
     });
   } finally {
     await reference.delete();

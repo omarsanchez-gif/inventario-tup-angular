@@ -113,8 +113,8 @@
     >
       <form class="dialog-form" [formGroup]="permissionsForm" (ngSubmit)="savePermissions()">
         <p class="dialog__help">
-          El acceso se aplica a los catálogos globales. Las áreas y el alcance de activos se
-          configurarán en un incremento posterior.
+          El acceso se aplica a los módulos funcionales implementados. El alcance territorial de
+          activos se configurará en un incremento posterior.
         </p>
         @if (users.error(); as error) {
           <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>

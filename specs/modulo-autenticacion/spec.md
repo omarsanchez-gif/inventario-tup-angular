@@ -2,7 +2,7 @@
 
 ## Estado
 
-El contrato base y la entrega de permisos sanitizados para Categorías, Fabricantes, Modelos y Campus están implementados. La publicación del contrato de cuatro módulos se limita a staging.
+El contrato base y la entrega de permisos sanitizados para Categorías, Fabricantes, Modelos, Campus y Áreas están implementados. La publicación del contrato de cinco módulos se limita a staging.
 
 ## Objetivo
 
@@ -43,3 +43,7 @@ Para el mismo UID, Angular conserva además revisiones independientes por módul
 ## Fuera de alcance
 
 Registro público, contraseña, MFA, otros proveedores, invitaciones y alcance por Campus/Coordinación/Área.
+
+## Compatibilidad del mapa de cinco módulos
+
+`bootstrapAuthorization` entrega el mapa sanitizado de Categorías, Fabricantes, Modelos de activos, Campus y Áreas. Para un perfil `usuario` anterior sin `permisos.areas`, la respuesta contiene `areas: []`; `admin` recibe las cinco capacidades completas por rol. Los Custom Claims permanecen limitados a `authorized` y `role`. La reconciliación de una reducción de Áreas usa las generaciones de `SessionScope` y nunca rehabilita respuestas de una concesión anterior.

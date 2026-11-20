@@ -44,4 +44,23 @@ describe('capabilityGuard', () => {
     );
     expect(result).toEqual({ commands: ['/dashboard'] });
   });
+
+  it('LAY-030 checks exactly areas.ver for the Areas route', async () => {
+    const auth = {
+      refreshAuthorization: vi.fn().mockResolvedValue(true),
+      can: vi.fn().mockReturnValue(true),
+    };
+    const router = { createUrlTree: vi.fn((commands) => ({ commands })) };
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthFacade, useValue: auth },
+        { provide: Router, useValue: router },
+      ],
+    });
+
+    await expect(
+      TestBed.runInInjectionContext(() => capabilityGuard('areas')({} as never, {} as never)),
+    ).resolves.toBe(true);
+    expect(auth.can).toHaveBeenCalledWith('areas', 'ver');
+  });
 });

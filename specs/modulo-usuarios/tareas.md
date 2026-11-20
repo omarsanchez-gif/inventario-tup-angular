@@ -59,4 +59,12 @@
 - [x] Documentar el patrón común de revisiones por módulo y acción.
 - [x] Mantener separado el alcance funcional del futuro alcance territorial.
 - [x] Reforzar USR-034 con rechazo atómico real del payload anterior y conservación del mapa de cuatro módulos.
+
+## Ampliación autorizada: permisos de Áreas
+
+- [x] Añadir Áreas como quinto bloque del acordeón y del resumen modular.
+- [x] Persistir el mapa completo de cinco módulos conservando permisos ajenos a Áreas.
+- [x] Normalizar documentos anteriores sin `areas` y rechazar con mensaje recuperable una pestaña antigua de cuatro módulos.
+- [x] Actualizar altas, cambios de rol, listado y bootstrap al mapa de cinco módulos.
+- [ ] Validar y desplegar primero Functions compatibles y después Hosting en staging.
 - [ ] Completar aceptación autenticada de una reducción mientras la pestaña del usuario afectado permanece abierta.

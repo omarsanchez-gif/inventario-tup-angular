@@ -24,7 +24,7 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 **Decisiones principales:** alta sin permisos, asignación posterior, mapa completo por módulo/acción, `admin` con acceso total, `usuario` con denegación por defecto y permisos fuera de claims.
 
-**Límite:** no incluye perfiles reutilizables, puestos Jefe/Auxiliar, Coordinaciones, Áreas o alcance sobre Activos.
+**Límite:** no incluye perfiles reutilizables, puestos Jefe/Auxiliar, Coordinaciones o alcance sobre Activos. Áreas se incorporó después como quinto módulo funcional.
 
 **Estado:** implementado, validado y publicado únicamente en staging; aceptación autenticada integral pendiente.
 
@@ -38,9 +38,9 @@ Este documento ordena dependencias y condiciones de entrada. Solo el alcance des
 
 **Reutilización:** patrón de Campus para identidad, estado y reservas; transacciones y errores fail-safe; catálogo sanitizado; primitivas visuales.
 
-**Decisiones principales:** unicidad por Campus, transferencia, eliminación frente a referencias, reconciliación del contador y alcance exclusivo de `admin`.
+**Decisiones principales:** unicidad por Campus, transferencia, eliminación frente a referencias, reconciliación del contador y capacidades ordinarias granulares; reconciliación exclusiva de `admin`.
 
-**Límite:** no incluye Coordinaciones, permisos de `usuario`, Activos ni datos institucionales. El detalle está en la [spec vigente de Áreas](modulo-areas/spec.md).
+**Límite:** no incluye Coordinaciones, alcance territorial, Activos ni datos institucionales. El detalle está en la [spec vigente de Áreas](modulo-areas/spec.md).
 
 **Estado:** implementación completada, desplegada exclusivamente en staging y ARE-033 aceptado manualmente el 13 de noviembre de 2026; no crea FCS, TUP ni Áreas reales. PR, CI e integración en `desarrollo` continúan pendientes formales.
 

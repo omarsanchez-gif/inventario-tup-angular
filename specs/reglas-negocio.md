@@ -32,15 +32,16 @@ RN-PER-001–025 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-PER-008: Un usuario inactivo no tiene permisos efectivos, aunque su configuración se conserve para una posible reactivación.
 - RN-PER-009: Cada callable revalida el permiso canónico de su acción. Menú, botones y guards solo son defensas de presentación.
 - RN-PER-010: Una reducción entra en vigor inmediatamente en backend; una respuesta de autorización anterior nunca restaura permisos en una sesión nueva.
-- RN-PER-011: Los permisos de los cuatro catálogos vigentes son globales y no anticipan Coordinaciones, Áreas o alcance sobre Activos.
+- RN-PER-011: Los permisos de los cinco módulos vigentes son funcionales y globales; Áreas no representa alcance territorial y no anticipa Coordinaciones o alcance sobre Activos.
 - RN-PER-012: `ver` Modelos permite obtener sus referencias sanitizadas y acceso temporal a sus imágenes, sin conceder acceso administrativo a Categorías o Fabricantes.
 
 ### Ampliación autorizada para Campus
 
 - RN-PER-013: Campus es el cuarto módulo autorizable del mapa canónico.
 - RN-PER-014: `campus` admite `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; cada callable exige exactamente su acción y toda acción distinta de `ver` requiere también `ver`.
-- RN-PER-015: Para `usuario`, la ausencia de `permisos.campus` equivaldrá a denegación. `admin` conservará acceso total por rol sin migrar documentos anteriores.
-- RN-PER-016: La callable de asignación exige el mapa completo de los cuatro módulos. Un cliente anterior que omita Campus es rechazado sin modificar permisos almacenados.
+- RN-PER-015: Para `usuario`, la ausencia de `permisos.campus` o `permisos.areas` equivale a denegación del módulo ausente. `admin` conserva acceso total por rol sin migrar documentos anteriores.
+- RN-PER-016: La callable de asignación exige el mapa completo de cinco módulos. Un cliente anterior que omita Áreas se rechaza de forma explícita y recuperable sin modificar permisos almacenados.
+- RN-PER-026: Todo módulo funcional nuevo se incorpora al registro tipado, Usuarios → Asignar permisos, backend canónico, guard, navegación, interfaz, revocación, pruebas y trazabilidad durante su implementación; de lo contrario no está terminado.
 - RN-PER-017: Los permisos de Campus administrarán el catálogo institucional completo; no representan alcance sobre Activos, Áreas, Coordinaciones o sedes asignadas al usuario.
 - RN-PER-018: Una reducción del mismo UID invalida por módulo y acción las operaciones pendientes; no invalida la sesión completa ni limpia estados de módulos no afectados.
 - RN-PER-019: Retirar `ver` descarta estado privado, URLs y temporizadores del módulo, cierra sus diálogos y abandona su ruta. Retirar otra acción conserva el listado y cierra únicamente la operación dependiente con un anuncio accesible.
@@ -179,7 +180,7 @@ RN-PER-001–025 y las ampliaciones granulares de Layout, Categorías, Fabricant
 
 ## Áreas
 
-- RN-ARE-001: Cada Área pertenece exactamente a un Campus mediante `campusId`; solo un `admin` autenticado, activo y canónico administra el catálogo inicial.
+- RN-ARE-001: Cada Área pertenece exactamente a un Campus mediante `campusId`; `admin` conserva acceso ordinario total y `usuario` requiere la capacidad canónica explícita de Áreas.
 - RN-ARE-002: Los únicos campos capturados son Campus, nombre y notas; identidad, normalización, estado, reservas, contadores y fechas son de backend.
 - RN-ARE-003: El nombre es único por Campus después de normalizar Unicode, diacríticos, mayúsculas y espacios; puede repetirse en Campus distintos.
 - RN-ARE-004: Un alta exige Campus activo; una edición histórica puede conservar su Campus inactivo, pero una transferencia solo admite destino activo.
@@ -190,9 +191,11 @@ RN-PER-001–025 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-ARE-009: El listado completo admite hasta 500 Áreas y falla sin respuesta parcial al exceder el límite.
 - RN-ARE-010: La reconciliación es administrativa, idempotente, calculada en backend y transaccional; el cliente no envía cantidades.
 - RN-ARE-011: Firestore permanece cerrado a clientes y toda operación usa callables que revalidan rol, claim y perfil canónico.
-- RN-ARE-012: Áreas no forma parte del mapa granular vigente; su futura lectura por `usuario` se especificará con Coordinaciones y alcance.
-- RN-ARE-013: Listados, catálogos y aperturas de Áreas usan generaciones independientes; solo la solicitud más reciente del contexto administrativo vigente puede escribir estado o mensajes. `loading` pertenece exclusivamente al listado público vigente; una mutación que lo sustituye termina ese indicador y usa `saving` durante su recarga interna.
-- RN-ARE-014: Perder acceso administrativo invalida permanentemente toda operación anterior aunque el mismo UID recupere después el rol sin cerrar sesión.
+- RN-ARE-012: Áreas forma parte del mapa granular con `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; reconciliación permanece exclusiva de admin y el permiso no representa alcance territorial.
+- RN-ARE-013: Listados, catálogos y aperturas de Áreas usan generaciones independientes; solo la solicitud más reciente de la capacidad vigente puede escribir estado o mensajes. `loading` pertenece exclusivamente al listado vigente; una mutación que lo sustituye termina ese indicador y usa `saving` durante su recarga interna.
+- RN-ARE-014: Perder `areas.ver` invalida permanentemente toda operación anterior aunque el mismo UID recupere después el permiso; perder una acción mutante invalida únicamente operaciones iniciadas con esa acción.
+- RN-ARE-019: `getAreaCatalogs` requiere `areas.ver`, entrega solo identificador, código, nombre y estado aplicables de Campus y no exige `campus.ver`.
+- RN-ARE-020: `createArea`, `updateArea`, `setAreaStatus` y `deleteArea` revalidan respectivamente `crear`, `editar`, `cambiarEstado` y `eliminar` dentro de su transacción; el mapa canónico garantiza además `ver`.
 - RN-ARE-015: La reconciliación puede reparar un `cantidadAreas` derivado ausente, nulo, negativo o no entero cuando las relaciones canónicas son consistentes; informa el estado previo como inválido sin inventar un cero.
 - RN-ARE-016: El nombre de Área debe contener contenido visible efectivo y producir una identidad normalizada no vacía; espacios, controles, formatos invisibles, selectores de variación o marcas aisladas se rechazan antes de crear Área, reserva o modificar contadores.
 - RN-ARE-017: El inspector de referencias solo permite transferir o eliminar cuando responde explícitamente `false`; `true`, excepción o resultado indeterminado bloquean de forma segura.

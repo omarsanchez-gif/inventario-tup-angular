@@ -8,7 +8,7 @@ import {
 } from './catalog-permissions.js';
 
 describe('catalog permissions', () => {
-  it('USR-021 USR-031 CAM-035 denies absent and malformed legacy maps while preserving known canonical actions', () => {
+  it('USR-021 USR-031 USR-037 AUT-021 ARE-053 CAM-035 denies absent and malformed legacy maps while preserving known canonical actions', () => {
     expect(sanitizePermissionMap(undefined)).toEqual(emptyPermissionMap());
     expect(
       sanitizePermissionMap({
@@ -22,6 +22,7 @@ describe('catalog permissions', () => {
       fabricantes: ['ver', 'crear'],
       modelosActivos: ['ver', 'eliminar'],
       campus: [],
+      areas: [],
     });
   });
 
@@ -32,14 +33,22 @@ describe('catalog permissions', () => {
         fabricantes: [],
         modelosActivos: [],
         campus: [],
+        areas: [],
       }),
-    ).toEqual({ categorias: ['ver', 'editar'], fabricantes: [], modelosActivos: [], campus: [] });
+    ).toEqual({
+      categorias: ['ver', 'editar'],
+      fabricantes: [],
+      modelosActivos: [],
+      campus: [],
+      areas: [],
+    });
     expect(
       validatePermissionMap({
         categorias: ['editar'],
         fabricantes: [],
         modelosActivos: [],
         campus: [],
+        areas: [],
       }),
     ).toBeNull();
     expect(
@@ -51,6 +60,7 @@ describe('catalog permissions', () => {
         fabricantes: [],
         modelosActivos: [],
         campus: [],
+        areas: [],
       }),
     ).toBeNull();
   });
@@ -64,7 +74,13 @@ describe('catalog permissions', () => {
         {
           activo: true,
           rol: 'usuario',
-          permisos: { categorias: ['ver'], fabricantes: [], modelosActivos: [], campus: [] },
+          permisos: {
+            categorias: ['ver'],
+            fabricantes: [],
+            modelosActivos: [],
+            campus: [],
+            areas: [],
+          },
         },
         'categorias',
         'ver',
@@ -75,11 +91,36 @@ describe('catalog permissions', () => {
         {
           activo: false,
           rol: 'usuario',
-          permisos: { categorias: ['ver'], fabricantes: [], modelosActivos: [], campus: [] },
+          permisos: {
+            categorias: ['ver'],
+            fabricantes: [],
+            modelosActivos: [],
+            campus: [],
+            areas: [],
+          },
         },
         'categorias',
         'ver',
       ),
     ).toBe(false);
+  });
+
+  it('USR-038 ARE-054 rejects a four-module stale payload without converting the missing Areas entry into a removal', () => {
+    expect(
+      validatePermissionMap({
+        categorias: ['ver'],
+        fabricantes: [],
+        modelosActivos: [],
+        campus: [],
+      }),
+    ).toBeNull();
+    expect(
+      sanitizePermissionMap({
+        categorias: [],
+        fabricantes: [],
+        modelosActivos: [],
+        campus: [],
+      }).areas,
+    ).toEqual([]);
   });
 });

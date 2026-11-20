@@ -1,22 +1,28 @@
 # Matriz de trazabilidad
 
-## Estado vigente — 13 de noviembre de 2026
+## Estado vigente — 20 de noviembre de 2026
 
 | Alcance            | Reglas          | Implementación o propuesta                             | Pruebas                            |
 | ------------------ | --------------- | ------------------------------------------------------ | ---------------------------------- |
-| Autenticación      | RN-AUT-001–009  | Base, permisos y revocación selectiva implementados    | AUT-001–AUT-020                    |
+| Autenticación      | RN-AUT-001–009  | Base, permisos y revocación selectiva implementados    | AUT-001–AUT-023                    |
 | Dashboard inicial  | RN-DASH-001–003 | `features/dashboard`                                   | DASH-001–004                       |
-| Usuarios           | RN-USR-001–011  | Base y matriz de cuatro módulos implementadas          | USR-001–USR-035                    |
-| Layout privado     | RN-LAY-001–012  | Navegación y revocación granular implementadas         | LAY-001–LAY-028                    |
+| Usuarios           | RN-USR-001–011  | Base y matriz de cinco módulos implementadas           | USR-001–USR-039                    |
+| Layout privado     | RN-LAY-001–012  | Navegación y revocación granular implementadas         | LAY-001–LAY-031                    |
 | Categorías         | RN-CAT-001–012  | Base y autorización granular implementadas             | CAT-001–CAT-028                    |
 | Fabricantes        | RN-FAB-001–012  | Base y autorización granular implementadas             | FAB-001–FAB-024                    |
 | Modelos de activos | RN-MOD-001–030  | Base y autorización granular implementadas             | MOD-001–MOD-062                    |
-| Permisos           | RN-PER-001–025  | Autorización y revocación funcional implementadas      | Cubiertos por criterios de módulos |
+| Permisos           | RN-PER-001–026  | Autorización y revocación funcional implementadas      | Cubiertos por criterios de módulos |
 | Campus             | RN-CAM-001–016  | Base y permiso funcional implementados                 | CAM-001–CAM-039                    |
 | Calidad local      | RN-DEV-001–003  | seed, emuladores, Playwright y verificador estructural | DEV-001–DEV-003                    |
-| Áreas              | RN-ARE-001–018  | Catálogo por Campus, transacciones y reconciliación    | ARE-001–ARE-043                    |
+| Áreas              | RN-ARE-001–020  | Catálogo, permisos, transacciones y reconciliación     | ARE-001–ARE-058                    |
 
 Áreas incorpora criterios obligatorios estructurales y manuales. La evidencia automatizada se vincula al SHA validado y ARE-033 conserva evidencia manual separada; emuladores, HTTP 200 o una Function `ACTIVE` no sustituyen esa aceptación.
+
+## Incremento de permisos de Áreas — 20 de noviembre de 2026
+
+- La decisión histórica “Áreas solo admin” queda sustituida para sus seis operaciones ordinarias; reconciliación permanece exclusiva de admin.
+- El mapa canónico contiene cinco módulos y una pestaña anterior de cuatro módulos falla cerrada sin sobrescribir permisos.
+- Se añadieron 25 criterios obligatorios nuevos. Su estado y cifras se calculan desde el manifiesto; la aceptación administrativa previa de Áreas no se reutiliza como aceptación granular.
 
 ## Endurecimiento de cierre — 12 de noviembre de 2026
 

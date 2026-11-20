@@ -250,11 +250,42 @@ describe('AdminShell', () => {
     expect(element.textContent).not.toContain('Usuarios');
   });
 
+  it('LAY-029 shows Areas independently when it is the only granted module', () => {
+    roleState.set('usuario');
+    can.mockImplementation((module: string) => module === 'areas');
+    createShell();
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('.navigation__group-toggle')!.click();
+    fixture.detectChanges();
+    expect(
+      [...element.querySelectorAll('.navigation__sublink')].map((link) => link.textContent?.trim()),
+    ).toEqual(['Áreas']);
+    expect(element.textContent).not.toContain('Usuarios');
+  });
+
   it('LAY-028 leaves a module route when Ver is revoked without ending the session', async () => {
     createShell();
     const router = TestBed.inject(Router);
     await router.navigateByUrl('/configuraciones/campus');
     const previous = { ...emptyPermissionMap(), campus: ['ver'] as const };
+
+    TestBed.inject(SessionScope).reconcileCapabilities(
+      'usuario',
+      previous,
+      'usuario',
+      emptyPermissionMap(),
+    );
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/dashboard');
+    expect(logout).not.toHaveBeenCalled();
+  });
+
+  it('LAY-031 leaves the Areas route when areas.ver is revoked without ending the session', async () => {
+    createShell();
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/configuraciones/areas');
+    const previous = { ...emptyPermissionMap(), areas: ['ver'] as const };
 
     TestBed.inject(SessionScope).reconcileCapabilities(
       'usuario',

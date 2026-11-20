@@ -46,6 +46,12 @@
 - Las 17 pruebas integrales con emuladores comprobaron primer acceso, inactividad, UID conflictivo y autorización canónica sin utilizar proyectos reales.
 - Playwright aprobó cuatro recorridos en Chromium, incluido cierre entre pestañas y rechazo de un perfil inactivo con datos sintéticos.
 
+## Criterios de compatibilidad con Áreas
+
+- AUT-021: `bootstrapAuthorization` normaliza un perfil anterior sin Áreas a `areas: []` para `usuario` y mapa completo para `admin`. <!-- trace:required -->
+- AUT-022: retirar y restituir `areas.ver` incrementa su generación y ninguna respuesta anterior modifica la autorización vigente. <!-- trace:required -->
+- AUT-023: una reducción de Áreas conserva la sesión, UID, claims y capacidades no relacionadas. <!-- trace:required -->
+
 ## Evidencia de revocación selectiva — 11 de noviembre de 2026
 
 - AUT-018 y AUT-019 aprobaron sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: la generación cambia solo para el módulo y la acción reducidos, y las negativas concurrentes comparten una única revalidación canónica.

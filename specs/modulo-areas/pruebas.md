@@ -43,7 +43,7 @@ Los criterios siguientes son obligatorios. Su presencia en una prueba no acredit
 
 ## Interfaz, sesión y accesibilidad
 
-- ARE-026: `Áreas` solo aparece para `admin` dentro de `Configuraciones` después de aprobación e implementación; la ruta conserva guard administrativo.
+- ARE-026: `Áreas` aparece dentro de `Configuraciones` con `areas.ver`; la ruta usa el guard de capacidad y reconciliación conserva su control administrativo independiente.
 - ARE-027: alta y edición usan `AppDialog` con únicamente Campus, Nombre y Notas; no contienen alta rápida ni permisos, Coordinaciones, Usuarios o Activos.
 - ARE-028: búsqueda automática, filtro de Campus y paginación reinician correctamente la página y la tabla muestra Nombre, Campus, Notas, Estado y acciones iconográficas.
 - ARE-029: un error de eliminación o transferencia permanece dentro de `dialog[open]` con `role="alert"`, mantiene foco y controles de recuperación y no se duplica en el fondo.
@@ -71,3 +71,21 @@ Los criterios siguientes son obligatorios. Su presencia en una prueba no acredit
 - La eliminación se completó únicamente sobre `QA-DEL-20261112-1620`; la comprobación posterior confirmó que ya no aparecía en el listado.
 - `QAARE33A-121126`, `QAARE33B-121126`, `Área ARE-033 editada 20261112` y `Área temporal eliminación ARE-033 20261112-1525` permanecieron activos e intactos.
 - Esta evidencia manual acepta ARE-033 sobre la versión de staging derivada de `5e645debf1df4239c6c5f73fc56ca9263ac65ae4`; no se infiere de las pruebas locales, HTTP 200 o Functions `ACTIVE`.
+
+## Criterios del incremento de permisos granulares
+
+- ARE-044: Áreas aparece como quinto módulo en Asignar permisos con `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; guardar conserva los otros cuatro módulos. <!-- trace:required -->
+- ARE-045: un usuario sin `areas` no ve enlace, no entra por URL y recibe denegación en las seis callables ordinarias. <!-- trace:required -->
+- ARE-046: un usuario con solo `areas.ver` lista Áreas y obtiene el catálogo mínimo de Campus sin `campus.ver`, pero no dispone de mutaciones. <!-- trace:required -->
+- ARE-047: crear, editar/transferir, cambiar estado y eliminar exigen `ver` más su acción exacta. <!-- trace:required -->
+- ARE-048: cada mutación revalida la acción exacta dentro de su transacción y una revocación concurrente impide la escritura. <!-- trace:required -->
+- ARE-049: retirar `areas.ver` invalida pendientes, limpia datos, cierra diálogos, oculta el enlace y redirige a Dashboard sin cerrar sesión. <!-- trace:required -->
+- ARE-050: retirar `areas.editar` cierra el diálogo de edición e invalida solo esa operación; conserva listado, ruta y otras acciones vigentes. <!-- trace:required -->
+- ARE-051: revocar y volver a conceder una capacidad de Áreas no rehabilita respuestas de la concesión anterior. <!-- trace:required -->
+- ARE-052: revocar Áreas no limpia estado ni operaciones de otro módulo y conserva la sesión. <!-- trace:required -->
+- ARE-053: un perfil histórico sin `permisos.areas` se normaliza como `areas: []` sin error ni migración. <!-- trace:required -->
+- ARE-054: un payload antiguo de cuatro módulos se rechaza con mensaje de actualización y conserva íntegro el mapa de cinco módulos. <!-- trace:required -->
+- ARE-055: `getAreaCatalogs` entrega únicamente la proyección necesaria de Campus a quien tenga `areas.ver`, sin conceder administración de Campus. <!-- trace:required -->
+- ARE-056: `reconcileAreaCounts` continúa denegado a `usuario` aunque tenga las cinco acciones ordinarias de Áreas. <!-- trace:required -->
+- ARE-057: la incorporación granular conserva unicidad, reservas, contadores, Campus histórico, inspector fail-safe y protección de `deleteCampus`. <!-- trace:required -->
+- ARE-058: los registros tipados de módulos y acciones de Angular y Functions coinciden mediante una prueba de contrato. <!-- trace:required -->

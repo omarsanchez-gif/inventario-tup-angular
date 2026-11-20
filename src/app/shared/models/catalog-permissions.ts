@@ -1,4 +1,10 @@
-export const permissionModules = ['categorias', 'fabricantes', 'modelosActivos', 'campus'] as const;
+export const permissionModules = [
+  'categorias',
+  'fabricantes',
+  'modelosActivos',
+  'campus',
+  'areas',
+] as const;
 export const permissionActions = ['ver', 'crear', 'editar', 'cambiarEstado', 'eliminar'] as const;
 
 export type PermissionModule = (typeof permissionModules)[number];
@@ -6,7 +12,7 @@ export type PermissionAction = (typeof permissionActions)[number];
 export type PermissionMap = Readonly<Record<PermissionModule, readonly PermissionAction[]>>;
 
 export function emptyPermissionMap(): PermissionMap {
-  return { categorias: [], fabricantes: [], modelosActivos: [], campus: [] };
+  return { categorias: [], fabricantes: [], modelosActivos: [], campus: [], areas: [] };
 }
 
 export function fullPermissionMap(): PermissionMap {
@@ -15,6 +21,7 @@ export function fullPermissionMap(): PermissionMap {
     fabricantes: [...permissionActions],
     modelosActivos: [...permissionActions],
     campus: [...permissionActions],
+    areas: [...permissionActions],
   };
 }
 
@@ -25,6 +32,6 @@ export function hasPermission(
   action: PermissionAction,
 ): boolean {
   return (
-    role === 'admin' || (role === 'usuario' && permissions?.[module].includes(action) === true)
+    role === 'admin' || (role === 'usuario' && permissions?.[module]?.includes(action) === true)
   );
 }

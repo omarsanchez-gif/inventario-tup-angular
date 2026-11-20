@@ -29,6 +29,8 @@ function userErrorMessage(error: unknown): string {
       return 'El cambio requiere reconciliación. Reintente o revise la autorización.';
     case 'user-permissions-invalid':
       return 'La selección de permisos no es válida.';
+    case 'user-permissions-contract-outdated':
+      return 'La aplicación cambió. Actualice esta pestaña antes de guardar permisos.';
     case 'user-permissions-role-managed':
       return 'El acceso de un administrador se controla por su rol.';
     case 'user-permissions-self-forbidden':

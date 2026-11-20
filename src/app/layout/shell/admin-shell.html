@@ -106,7 +106,7 @@
                   Campus
                 </a>
               }
-              @if (auth.role() === 'admin') {
+              @if (auth.can('areas', 'ver')) {
                 <a
                   class="navigation__sublink"
                   routerLink="/configuraciones/areas"

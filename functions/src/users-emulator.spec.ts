@@ -223,6 +223,7 @@ emulatorSuite('users auth, functions and firestore integration', () => {
       fabricantes: [],
       modelosActivos: [],
       campus: [],
+      areas: [],
     });
   }, 15_000);
 
@@ -263,6 +264,7 @@ emulatorSuite('users auth, functions and firestore integration', () => {
         fabricantes: [],
         modelosActivos: [],
         campus: [],
+        areas: [],
       }),
     ).rejects.toMatchObject({ functionalCode: 'user-permissions-self-forbidden' });
     const granted = await callFunction(
@@ -273,14 +275,17 @@ emulatorSuite('users auth, functions and firestore integration', () => {
           categorias: ['ver'],
           fabricantes: [],
           modelosActivos: [],
-          campus: ['ver'],
+          campus: [],
+          areas: ['ver'],
         },
       },
       admin.idToken,
     );
     expect(granted.status).toBe(200);
     expect((await callFunction('listCategories', {}, regular.idToken)).status).toBe(200);
-    expect((await callFunction('listCampuses', {}, regular.idToken)).status).toBe(200);
+    expect((await callFunction('listCampuses', {}, regular.idToken)).status).toBe(403);
+    expect((await callFunction('listAreas', {}, regular.idToken)).status).toBe(200);
+    expect((await callFunction('getAreaCatalogs', {}, regular.idToken)).status).toBe(200);
     expect(
       (
         await callFunction(
@@ -295,7 +300,13 @@ emulatorSuite('users auth, functions and firestore integration', () => {
     expect(bootstrap.status).toBe(200);
     expect((await bootstrap.json()) as object).toMatchObject({
       result: {
-        permisos: { categorias: ['ver'], fabricantes: [], modelosActivos: [], campus: ['ver'] },
+        permisos: {
+          categorias: ['ver'],
+          fabricantes: [],
+          modelosActivos: [],
+          campus: [],
+          areas: ['ver'],
+        },
       },
     });
 
@@ -303,20 +314,32 @@ emulatorSuite('users auth, functions and firestore integration', () => {
       'setAuthorizedUserPermissions',
       {
         documentId: 'permissions-user',
-        permisos: { categorias: [], fabricantes: [], modelosActivos: [] },
+        permisos: { categorias: [], fabricantes: [], modelosActivos: [], campus: [] },
       },
       admin.idToken,
     );
     expect(legacyPayload.status).toBe(400);
     expect(
       (await firestore.collection('usuarios').doc('permissions-user').get()).data()?.['permisos'],
-    ).toEqual({ categorias: ['ver'], fabricantes: [], modelosActivos: [], campus: ['ver'] });
+    ).toEqual({
+      categorias: ['ver'],
+      fabricantes: [],
+      modelosActivos: [],
+      campus: [],
+      areas: ['ver'],
+    });
 
     const revoked = await callFunction(
       'setAuthorizedUserPermissions',
       {
         documentId: 'permissions-user',
-        permisos: { categorias: [], fabricantes: [], modelosActivos: [], campus: [] },
+        permisos: {
+          categorias: [],
+          fabricantes: [],
+          modelosActivos: [],
+          campus: [],
+          areas: [],
+        },
       },
       admin.idToken,
     );
@@ -328,6 +351,7 @@ emulatorSuite('users auth, functions and firestore integration', () => {
       fabricantes: [],
       modelosActivos: [],
       campus: [],
+      areas: [],
     });
     await repository.update(admin.localId, {
       documentId: 'permissions-user',
@@ -337,6 +361,6 @@ emulatorSuite('users auth, functions and firestore integration', () => {
     });
     expect(
       (await firestore.collection('usuarios').doc('permissions-user').get()).data()?.['permisos'],
-    ).toEqual({ categorias: [], fabricantes: [], modelosActivos: [], campus: [] });
+    ).toEqual({ categorias: [], fabricantes: [], modelosActivos: [], campus: [], areas: [] });
   }, 20_000);
 });

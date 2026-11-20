@@ -6,7 +6,7 @@ El modelo implementado comprende autorización, Categorías, Fabricantes, Modelo
 
 ## Colección `usuarios`
 
-El bloque `permisos` de cuatro módulos pertenece al incremento de ADR-007 autorizado el 11 de noviembre de 2026. La ausencia histórica de `campus` se sanitiza como denegación para `usuario`.
+El bloque `permisos` de cinco módulos pertenece a ADR-007 y su ampliación de Áreas del 20 de noviembre de 2026. La ausencia histórica de `campus` o `areas` se sanitiza como denegación para `usuario`.
 
 ```text
 usuarios/{documentId}
@@ -20,6 +20,7 @@ usuarios/{documentId}
     fabricantes: string[]
     modelosActivos: string[]
     campus: string[]
+    areas: string[]
   fechaCreacion: Timestamp
   ultimoAcceso: Timestamp | null
 ```
@@ -31,13 +32,13 @@ Restricciones:
 - `fechaCreacion` y `ultimoAcceso` usan tiempo de servidor.
 - Cada lista de `permisos` usa exclusivamente `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`, sin duplicados y en ese orden canónico.
 - Toda acción distinta de `ver` requiere que la misma lista incluya `ver`.
-- Nuevos documentos con rol `usuario` se crean con las cuatro listas vacías. `admin` obtiene acceso total por rol y no depende del contenido del mapa.
+- Nuevos documentos con rol `usuario` se crean con las cinco listas vacías. `admin` obtiene acceso total por rol y no depende del contenido del mapa.
 - La ausencia del campo en documentos anteriores se interpreta como mapa vacío para `usuario`; la implementación no requiere reescribirlos para denegar acceso.
-- Cambiar el rol reemplaza `permisos` por las cuatro listas vacías. Desactivar conserva el mapa, pero lo vuelve inefectivo.
-- `permisos` no incluye Coordinaciones, Áreas, Activos, puestos o perfiles reutilizables.
+- Cambiar el rol reemplaza `permisos` por las cinco listas vacías. Desactivar conserva el mapa, pero lo vuelve inefectivo.
+- `permisos` incluye Áreas como permiso funcional global; no incluye Coordinaciones, alcance territorial de Activos, puestos o perfiles reutilizables.
 - No se agregan entidades de Snipe-IT hasta aprobar su mapeo.
 
-### Mapa canónico vigente con Campus
+### Mapa canónico vigente con Áreas
 
 El mapa completo vigente es:
 
@@ -47,12 +48,13 @@ permisos:
   fabricantes: string[]
   modelosActivos: string[]
   campus: string[]
+  areas: string[]
 ```
 
-- `campus` utiliza el mismo vocabulario ordenado: `ver`, `crear`, `editar`, `cambiarEstado`, `eliminar`.
-- Los documentos existentes que omitan `campus` se leerán como lista vacía para `usuario`; no se ejecutará una migración masiva.
-- Crear un `usuario` persiste las cuatro listas vacías y cambiar rol limpia las cuatro.
-- La escritura administrativa exigirá exactamente los cuatro módulos vigentes. Un payload anterior de tres módulos fallará de forma atómica y conservará el mapa previo.
+- `campus` y `areas` utilizan el mismo vocabulario ordenado: `ver`, `crear`, `editar`, `cambiarEstado`, `eliminar`.
+- Los documentos existentes que omitan `campus` o `areas` se leen con la lista ausente vacía para `usuario`; no se ejecutará una migración masiva.
+- Crear un `usuario` persiste las cinco listas vacías y cambiar rol limpia las cinco.
+- La escritura administrativa exige exactamente los cinco módulos vigentes. Un payload anterior de cuatro módulos falla con `user-permissions-contract-outdated`, de forma atómica, y conserva el mapa previo.
 - Este cambio no agrega Campus, Coordinación o Área como alcance dentro del permiso ni crea colecciones nuevas.
 
 ## Colección `categorias`

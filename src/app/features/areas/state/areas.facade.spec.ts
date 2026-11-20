@@ -3,6 +3,12 @@ import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthFacade } from '../../../core/auth/auth.facade';
 import { SessionScope } from '../../../core/auth/session-scope';
+import {
+  emptyPermissionMap,
+  fullPermissionMap,
+  hasPermission,
+  type PermissionMap,
+} from '../../../shared/models/catalog-permissions';
 import { AREAS_GATEWAY, type AreasGateway } from '../data/areas.gateway';
 import { AreasFacade } from './areas.facade';
 
@@ -17,6 +23,7 @@ function deferred<T>() {
 }
 function setup() {
   const role = signal<'admin' | 'usuario'>('admin');
+  const permissions = signal<PermissionMap>(fullPermissionMap());
   const gateway: AreasGateway = {
     list: vi.fn().mockResolvedValue({ items: [], total: 0, maxSupported: 500 }),
     catalogs: vi.fn().mockResolvedValue({ campuses: [] }),
@@ -26,7 +33,11 @@ function setup() {
     delete: vi.fn(),
     reconcile: vi.fn().mockResolvedValue({ campusesChecked: 1, campusesCorrected: 0 }),
   };
-  const auth = { role: role.asReadonly(), revalidatePermissionDenial: vi.fn() };
+  const auth = {
+    role: role.asReadonly(),
+    can: vi.fn((module, action) => hasPermission(role(), permissions(), module, action)),
+    revalidatePermissionDenial: vi.fn(),
+  };
   TestBed.configureTestingModule({
     providers: [
       AreasFacade,
@@ -40,6 +51,7 @@ function setup() {
     scope: TestBed.inject(SessionScope),
     gateway,
     role,
+    permissions,
   };
 }
 const area = (documentId: string, nombre: string) => ({
@@ -91,11 +103,13 @@ describe('AreasFacade', () => {
     expect(facade.loading()).toBe(false);
   });
   it('ARE-034 discards a response after same-UID admin access loss', async () => {
-    const { facade, gateway, role } = setup();
+    const { facade, gateway, role, permissions, scope } = setup();
     const pending = deferred<{ items: readonly []; total: number; maxSupported: number }>();
     vi.mocked(gateway.list).mockReturnValue(pending.promise);
     const load = facade.load();
     role.set('usuario');
+    permissions.set(emptyPermissionMap());
+    scope.reconcileCapabilities('admin', fullPermissionMap(), 'usuario', emptyPermissionMap());
     pending.resolve({ items: [], total: 0, maxSupported: 500 });
     await load;
     expect(facade.success()).toBeNull();
@@ -158,7 +172,7 @@ describe('AreasFacade', () => {
     expect(facade.campuses().map((campus) => campus.documentId)).toEqual(['historic']);
   });
   it('ARE-038 never revives an operation after admin loss and recovery', async () => {
-    const { facade, gateway, role, scope } = setup();
+    const { facade, gateway, role, permissions, scope } = setup();
     scope.reconcileAdminAccess(null, 'admin');
     const pending = deferred<{
       items: readonly ReturnType<typeof area>[];
@@ -168,12 +182,70 @@ describe('AreasFacade', () => {
     vi.mocked(gateway.list).mockReturnValueOnce(pending.promise);
     const load = facade.load();
     role.set('usuario');
+    permissions.set(emptyPermissionMap());
     scope.reconcileAdminAccess('admin', 'usuario');
+    scope.reconcileCapabilities('admin', fullPermissionMap(), 'usuario', emptyPermissionMap());
     role.set('admin');
+    permissions.set(fullPermissionMap());
     scope.reconcileAdminAccess('usuario', 'admin');
+    scope.reconcileCapabilities('usuario', emptyPermissionMap(), 'admin', fullPermissionMap());
     pending.resolve({ items: [area('old', 'Anterior')], total: 1, maxSupported: 500 });
     await load;
     expect(facade.areas()).toEqual([]);
+  });
+
+  it('ARE-050 invalidates only an edit operation when editar is revoked and keeps the visible list', async () => {
+    const { facade, gateway, role, permissions, scope } = setup();
+    role.set('usuario');
+    const granted = { ...emptyPermissionMap(), areas: ['ver', 'editar'] as const };
+    permissions.set(granted);
+    scope.reconcileCapabilities('admin', fullPermissionMap(), 'usuario', granted);
+    vi.mocked(gateway.list).mockResolvedValue({
+      items: [area('visible', 'Visible')],
+      total: 1,
+      maxSupported: 500,
+    });
+    await facade.load();
+    const pending = deferred<void>();
+    vi.mocked(gateway.update).mockReturnValue(pending.promise);
+    const update = facade.update({
+      documentId: 'visible',
+      campusId: 'c',
+      nombre: 'Editada',
+      notas: null,
+    });
+    const reduced = { ...emptyPermissionMap(), areas: ['ver'] as const };
+    permissions.set(reduced);
+    scope.reconcileCapabilities('usuario', granted, 'usuario', reduced);
+    pending.resolve();
+    await expect(update).resolves.toBe(false);
+    expect(facade.areas().map((item) => item.documentId)).toEqual(['visible']);
+    expect(facade.saving()).toBe(false);
+  });
+
+  it('ARE-049 ARE-051 discards an old list after ver is revoked and restored', async () => {
+    const { facade, gateway, role, permissions, scope } = setup();
+    role.set('usuario');
+    const granted = { ...emptyPermissionMap(), areas: ['ver'] as const };
+    permissions.set(granted);
+    scope.reconcileCapabilities('admin', fullPermissionMap(), 'usuario', granted);
+    const pending = deferred<{
+      items: readonly ReturnType<typeof area>[];
+      total: number;
+      maxSupported: number;
+    }>();
+    vi.mocked(gateway.list).mockReturnValue(pending.promise);
+    const load = facade.load();
+
+    permissions.set(emptyPermissionMap());
+    scope.reconcileCapabilities('usuario', granted, 'usuario', emptyPermissionMap());
+    permissions.set(granted);
+    scope.reconcileCapabilities('usuario', emptyPermissionMap(), 'usuario', granted);
+    pending.resolve({ items: [area('stale', 'Anterior')], total: 1, maxSupported: 500 });
+    await load;
+
+    expect(facade.areas()).toEqual([]);
+    expect(facade.loading()).toBe(false);
   });
   it('ARE-036 finishes loading when reconciliation supersedes an initial list', async () => {
     const { facade, gateway } = setup();

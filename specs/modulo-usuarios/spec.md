@@ -2,7 +2,7 @@
 
 ## Estado
 
-El módulo base y el incremento de permisos para Categorías, Fabricantes, Modelos y Campus están implementados. La publicación se limita a staging.
+El módulo base y el incremento de permisos para Categorías, Fabricantes, Modelos, Campus y Áreas están implementados. La publicación se limita a staging.
 
 ## Objetivo
 
@@ -15,7 +15,7 @@ Permitir que `admin` gestione las autorizaciones institucionales del sistema.
 - Alta, edición, activación, desactivación y eliminación.
 - Roles iniciales `admin` y `usuario`.
 - Sincronización de claims y revocación cuando exista UID.
-- Asignación posterior e independiente de permisos sobre Categorías, Fabricantes, Modelos de activos y Campus.
+- Asignación posterior e independiente de permisos sobre Categorías, Fabricantes, Modelos de activos, Campus y Áreas.
 
 ## Reglas críticas
 
@@ -47,12 +47,12 @@ permisos:
 
 - Las listas no contienen duplicados y se persisten en el orden canónico mostrado.
 - Cualquier acción distinta de `ver` exige incluir `ver`.
-- En documentos anteriores, la ausencia de `permisos` o de `permisos.campus` equivale a las cuatro listas vacías aplicables para `usuario` y a acceso total para `admin`; no se necesita una migración destructiva.
+- En documentos anteriores, la ausencia de `permisos`, `permisos.campus` o `permisos.areas` equivale a listas vacías para los módulos ausentes de `usuario` y a acceso total para `admin`; no se necesita una migración destructiva.
 - Un usuario inactivo conserva su configuración, pero no tiene ningún permiso efectivo hasta reactivarse.
-- Los permisos son institucionales y globales para estos catálogos; no contienen alcance por Campus, Coordinaciones o Áreas.
+- Los permisos son institucionales y funcionales para estos catálogos; `areas` permite administrar el catálogo global, pero no contiene alcance por Campus, Coordinaciones o activos de Áreas concretas.
 - Los Custom Claims no incluyen este mapa. `usuarios` permanece como autoridad y `bootstrapAuthorization` devuelve una copia sanitizada para presentación y guards.
 
-### Campus dentro del mapa vigente
+### Evolución histórica: Campus como cuarto módulo
 
 El cuarto módulo vigente es:
 
@@ -62,8 +62,8 @@ permisos:
 ```
 
 - La ausencia de `campus` en documentos anteriores se interpreta como lista vacía para `usuario` y acceso total para `admin` por rol.
-- La tabla resume `1 módulo` hasta `4 módulos`; Campus aparece como cuarto `fieldset` del mismo diálogo.
-- Guardar seguirá siendo un reemplazo completo y atómico. Una vez desplegado el contrato nuevo, la entrada deberá contener exactamente Categorías, Fabricantes, Modelos y Campus.
+- En ese corte la tabla resumía hasta cuatro módulos y Campus aparecía como cuarto `fieldset`; Áreas amplía ahora el mismo contrato a cinco.
+- Guardar sigue siendo un reemplazo completo y atómico. El contrato vigente exige Categorías, Fabricantes, Modelos, Campus y Áreas.
 - Un cliente anterior que envíe solo tres módulos recibirá `user-permissions-invalid`; el mapa existente no se modificará y la interfaz solicitará recargar.
 - Conceder Campus no concede acceso a Activos de un Campus ni asigna Coordinaciones o Áreas.
 
@@ -135,4 +135,12 @@ Códigos funcionales nuevos:
 
 ## Fuera de alcance
 
-Importación masiva, invitaciones, auditoría completa, perfiles reutilizables, puestos Jefe/Auxiliar, permisos para Usuarios, Coordinaciones, Áreas, alcance de Activos y roles adicionales. La ampliación solo incorpora el permiso funcional del catálogo Campus.
+Importación masiva, invitaciones, auditoría completa, perfiles reutilizables, puestos Jefe/Auxiliar, permisos para Usuarios, Coordinaciones, alcance territorial de Activos y roles adicionales.
+
+## Ampliación vigente: Áreas como quinto módulo
+
+- El diálogo `Asignar permisos` deriva sus cinco secciones del registro tipado: Categorías, Fabricantes, Modelos de activos, Campus y Áreas.
+- Áreas admite `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; marcar una escritura activa también `ver` y retirar `ver` limpia las escrituras del módulo.
+- Crear un usuario y cambiar su rol producen el mapa de cinco módulos; listar y bootstrap sanitizan un documento histórico sin `areas` como `areas: []` para `usuario`.
+- `setAuthorizedUserPermissions` reemplaza exactamente los cinco módulos. Un payload antiguo de cuatro módulos responde `user-permissions-contract-outdated`, conserva íntegro el mapa almacenado y permite recuperar la operación recargando la aplicación.
+- Guardar Áreas conserva las selecciones de los otros cuatro módulos. El resumen de tabla cuenta hasta cinco módulos con `ver`.

@@ -1174,6 +1174,184 @@
       "tests": ["e2e/inventory.spec.ts"],
       "state": "verified-local",
       "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-PER-026",
+      "criterion": "USR-036",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-007",
+      "criterion": "USR-037",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-016",
+      "criterion": "USR-038",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-USR-011",
+      "criterion": "USR-039",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-015",
+      "criterion": "AUT-021",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "AUT-022",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/session-scope.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-010",
+      "criterion": "AUT-023",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/session-scope.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-LAY-007",
+      "criterion": "LAY-029",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "LAY-030",
+      "verification": "automated",
+      "tests": ["src/app/core/guards/capability.guard.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "LAY-031",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-026",
+      "criterion": "ARE-044",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "ARE-045",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-019",
+      "criterion": "ARE-046",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/areas-page/areas-page.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-020",
+      "criterion": "ARE-047",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-020",
+      "criterion": "ARE-048",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "ARE-049",
+      "verification": "automated",
+      "tests": [
+        "src/app/features/areas/areas-page/areas-page.spec.ts",
+        "src/app/features/areas/state/areas.facade.spec.ts"
+      ],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "ARE-050",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "ARE-051",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-010",
+      "criterion": "ARE-052",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/session-scope.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-015",
+      "criterion": "ARE-053",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-016",
+      "criterion": "ARE-054",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-019",
+      "criterion": "ARE-055",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-012",
+      "criterion": "ARE-056",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-ARE-005",
+      "criterion": "ARE-057",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "implemented-pending-verification"
+    },
+    {
+      "requirement": "RN-PER-026",
+      "criterion": "ARE-058",
+      "verification": "automated",
+      "tests": ["scripts/check-permission-contract.spec.ts"],
+      "state": "implemented-pending-verification"
     }
   ]
 }

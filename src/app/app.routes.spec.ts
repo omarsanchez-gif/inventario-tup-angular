@@ -44,6 +44,7 @@ describe('application route permissions', () => {
     ['configuraciones/fabricantes', 'fabricantes'],
     ['configuraciones/modelos-activos', 'modelosActivos'],
     ['configuraciones/campus', 'campus'],
+    ['configuraciones/areas', 'areas'],
   ] as const)('LAY-024 LAY-027 maps %s to the exact module capability %s', async (path, module) => {
     await expect(activate(path)).resolves.toBe(true);
     expect(auth.can).toHaveBeenCalledWith(module, 'ver');
@@ -54,12 +55,8 @@ describe('application route permissions', () => {
     expect(auth.can).not.toHaveBeenCalled();
   });
 
-  it('ARE-026 keeps Areas restricted to the admin role and outside granular permissions', async () => {
-    await expect(activate('configuraciones/areas')).resolves.toEqual({
-      commands: ['/dashboard'],
-    });
-    auth.role.mockReturnValue('admin');
+  it('ARE-026 maps Areas to areas.ver instead of the administrative guard', async () => {
     await expect(activate('configuraciones/areas')).resolves.toBe(true);
-    expect(auth.can).not.toHaveBeenCalledWith('areas', 'ver');
+    expect(auth.can).toHaveBeenCalledWith('areas', 'ver');
   });
 });

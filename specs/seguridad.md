@@ -16,8 +16,8 @@ El endurecimiento y las restricciones administrativas desplegadas se describen e
 - SEC-048: Cambiar rol limpia permisos, una reducción se aplica inmediatamente en backend y la interfaz descarta cualquier revalidación de sesión obsoleta.
 - SEC-049: Campus mantiene denegación por defecto: un `usuario` sin `permisos.campus` no puede listar ni mutar el catálogo y `admin` conserva acceso total por rol.
 - SEC-050: Las cinco callables de Campus revalidan la acción exacta contra `usuarios`; el guard, menú y botones continúan siendo defensas de presentación.
-- SEC-051: `setAuthorizedUserPermissions` acepta únicamente el mapa completo de cuatro módulos. Un payload incompleto, anterior o desconocido se rechaza sin escritura parcial.
-- SEC-052: El despliegue del contrato se ordena Functions antes de Hosting para que una pestaña antigua falle cerrada y nunca elimine silenciosamente permisos de Campus.
+- SEC-051: `setAuthorizedUserPermissions` acepta únicamente el mapa completo de cinco módulos. Un payload incompleto, anterior o desconocido se rechaza sin escritura parcial; la ausencia de `areas` informa que la aplicación debe actualizarse.
+- SEC-052: El despliegue del contrato se ordena Functions antes de Hosting para que una pestaña antigua falle cerrada y nunca elimine silenciosamente permisos de Áreas.
 - SEC-053: La revalidación del mismo UID aplica revisiones independientes por módulo y acción; un rechazo canónico no permite que respuestas pendientes restauren datos, mensajes, URLs temporales o acciones revocadas.
 - SEC-054: Las negativas concurrentes de acceso a imágenes comparten una sola revalidación de autorización por ronda; Storage permanece cerrado y no existe reintento infinito de URLs firmadas.
 - SEC-055: Un error o finalización de autorización solo puede modificar sesión, navegación, mensajes o carga cuando conserva UID, generación e intento vigentes. Cada negativa posterior al inicio de una ronda exige otra lectura canónica posterior, agrupable con negativas pendientes.
@@ -73,8 +73,9 @@ El endurecimiento y las restricciones administrativas desplegadas se describen e
 
 - SEC-056: `areas` y `areas_claves` deniegan toda lectura y escritura directa desde clientes.
 - SEC-057: transferir o eliminar un Área exige que el inspector canónico responda explícitamente que no hay referencias. Un resultado verdadero, indeterminado o una excepción bloquean la transacción con reconciliación requerida.
-- SEC-058: perder rol administrativo invalida de forma irreversible el contexto asíncrono anterior, aunque el mismo UID recupere después el rol; ninguna respuesta de ese contexto vuelve a publicar datos privados.
-- SEC-059: las siete callables de Áreas exigen Authentication, claim `authorized`, rol `admin` y un único perfil canónico activo con rol administrativo.
+- SEC-058: perder `areas.ver` invalida de forma irreversible el contexto asíncrono anterior, aunque el mismo UID recupere después el permiso; retirar otra acción invalida solo las operaciones dependientes.
+- SEC-059: las seis callables ordinarias de Áreas exigen Authentication, claim `authorized`, perfil canónico activo y `areas.ver` más la acción exacta cuando corresponda. `reconcileAreaCounts` exige además rol `admin` canónico.
 - SEC-060: la interfaz, el guard y el menú no conceden autoridad; cada lectura, mutación y reconciliación revalida en backend.
-- SEC-061: Áreas no se agrega al mapa de permisos granulares. Una futura lectura de `usuario` requiere un contrato sanitizado y reglas aprobadas con Coordinaciones.
+- SEC-061: Áreas forma parte del mapa granular como permiso funcional global y se deniega por defecto. No concede alcance territorial, Coordinaciones, administración de Usuarios ni reconciliación.
+- SEC-062: cada mutación ordinaria de Áreas revalida su capacidad exacta dentro de la transacción. `getAreaCatalogs` puede entregar la proyección mínima de Campus con `areas.ver` sin exigir `campus.ver`.
 - SEC-060: errores no exponen reservas, hashes, stack traces, rutas internas ni datos administrativos de Campus fuera del resumen permitido.

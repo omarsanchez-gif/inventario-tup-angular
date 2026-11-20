@@ -61,3 +61,9 @@
 ## Evidencia de revocación en sesión — 11 de noviembre de 2026
 
 - LAY-028 aprobó en pruebas de shell y en Chromium sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: retirar `campus.ver` elimina su enlace y navega a Dashboard, mientras Categorías y la sesión permanecen vigentes.
+
+## Criterios de Áreas en navegación
+
+- LAY-029: un usuario con solo `areas.ver` ve Configuraciones y únicamente el enlace Áreas; sin esa capacidad no lo ve. <!-- trace:required -->
+- LAY-030: el guard de `/configuraciones/areas` acepta admin o `areas.ver` canónico y redirige cualquier otra sesión autorizada a Dashboard. <!-- trace:required -->
+- LAY-031: retirar `areas.ver` con la ruta abierta elimina el enlace y redirige a Dashboard sin logout ni cambios en otros submenús. <!-- trace:required -->

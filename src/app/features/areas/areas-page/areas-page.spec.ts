@@ -3,6 +3,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope } from '../../../core/auth/session-scope';
+import {
+  emptyPermissionMap,
+  fullPermissionMap,
+  hasPermission,
+  type PermissionMap,
+} from '../../../shared/models/catalog-permissions';
 import type { InventoryArea } from '../../../shared/models/inventory-area';
 import { AreasFacade } from '../state/areas.facade';
 import { AreasPage } from './areas-page';
@@ -28,6 +35,9 @@ const area = (documentId: string, nombre: string, campusId = 'campus') =>
 describe('AreasPage', () => {
   let fixture: ComponentFixture<AreasPage>;
   let element: HTMLElement;
+  let scope: SessionScope;
+  let role: WritableSignal<'admin' | 'usuario'>;
+  let permissions: WritableSignal<PermissionMap>;
   let facade: {
     load: ReturnType<typeof vi.fn>;
     loadCatalogs: ReturnType<typeof vi.fn>;
@@ -84,14 +94,26 @@ describe('AreasPage', () => {
       error: signal(null),
       success: signal(null),
     };
+    role = signal<'admin' | 'usuario'>('admin');
+    permissions = signal<PermissionMap>(fullPermissionMap());
     await TestBed.configureTestingModule({
       imports: [AreasPage],
       providers: [
         { provide: AreasFacade, useValue: facade },
-        { provide: AuthFacade, useValue: { role: signal('admin') } },
+        {
+          provide: AuthFacade,
+          useValue: {
+            role: role.asReadonly(),
+            can: (
+              module: Parameters<typeof hasPermission>[2],
+              action: Parameters<typeof hasPermission>[3],
+            ) => hasPermission(role(), permissions(), module, action),
+          },
+        },
         { provide: Router, useValue: { navigateByUrl: vi.fn() } },
       ],
     }).compileComponents();
+    scope = TestBed.inject(SessionScope);
     fixture = TestBed.createComponent(AreasPage);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -193,5 +215,63 @@ describe('AreasPage', () => {
       'transferirse',
     );
     expect(element.querySelectorAll('[role="alert"]')).toHaveLength(1);
+  });
+
+  it('closes only the edit dialog when editar is revoked and leaves the Areas view mounted', async () => {
+    const granted = { ...emptyPermissionMap(), areas: ['ver', 'editar'] as const };
+    role.set('usuario');
+    permissions.set(granted);
+    scope.reconcileCapabilities('admin', fullPermissionMap(), 'usuario', granted);
+    facade.loadCatalogs.mockResolvedValue(true);
+    const component = fixture.componentInstance as unknown as {
+      edit(value: InventoryArea): Promise<void>;
+      formVisible(): boolean;
+    };
+    await component.edit(area('edit', 'Editable'));
+    expect(component.formVisible()).toBe(true);
+
+    const reduced = { ...emptyPermissionMap(), areas: ['ver'] as const };
+    permissions.set(reduced);
+    scope.reconcileCapabilities('usuario', granted, 'usuario', reduced);
+    fixture.detectChanges();
+
+    expect(component.formVisible()).toBe(false);
+    expect(facade.reset).not.toHaveBeenCalled();
+    expect(element.textContent).toContain('Sus permisos de Áreas cambiaron');
+  });
+
+  it('ARE-046 hides every write action for a user with only areas.ver', async () => {
+    role.set('usuario');
+    const viewOnly = { ...emptyPermissionMap(), areas: ['ver'] as const };
+    permissions.set(viewOnly);
+    scope.reconcileCapabilities('admin', fullPermissionMap(), 'usuario', viewOnly);
+    facade.filteredAreas.set([area('readonly', 'Solo lectura')]);
+    fixture.detectChanges();
+
+    expect(element.querySelector('[aria-label^="Editar "]')).toBeNull();
+    expect(element.querySelector('[aria-label^="Desactivar "]')).toBeNull();
+    expect(element.querySelector('[aria-label^="Eliminar "]')).toBeNull();
+    expect(element.textContent).not.toContain('Nueva área');
+    expect(element.textContent).not.toContain('Reconciliar cantidades');
+  });
+
+  it('ARE-049 closes private Areas UI when areas.ver is revoked', async () => {
+    const granted = { ...emptyPermissionMap(), areas: ['ver', 'editar'] as const };
+    role.set('usuario');
+    permissions.set(granted);
+    scope.reconcileCapabilities('admin', fullPermissionMap(), 'usuario', granted);
+    facade.loadCatalogs.mockResolvedValue(true);
+    const component = fixture.componentInstance as unknown as {
+      edit(value: InventoryArea): Promise<void>;
+      formVisible(): boolean;
+    };
+    await component.edit(area('edit', 'Editable'));
+    expect(component.formVisible()).toBe(true);
+
+    permissions.set(emptyPermissionMap());
+    scope.reconcileCapabilities('usuario', granted, 'usuario', emptyPermissionMap());
+
+    expect(component.formVisible()).toBe(false);
+    expect(facade.clearMessages).toHaveBeenCalled();
   });
 });

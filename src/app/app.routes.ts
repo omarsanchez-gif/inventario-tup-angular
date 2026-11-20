@@ -72,7 +72,7 @@ export const routes: Routes = [
       },
       {
         path: 'configuraciones/areas',
-        canActivate: [adminGuard],
+        canActivate: [capabilityGuard('areas')],
         loadComponent: () =>
           import('./features/areas/areas-page/areas-page').then((component) => component.AreasPage),
         title: 'Áreas | Sistema de Inventario TUP',

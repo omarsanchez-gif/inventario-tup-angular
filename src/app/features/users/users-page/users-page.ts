@@ -40,6 +40,7 @@ export class UsersPage {
     { id: 'fabricantes', label: 'Fabricantes' },
     { id: 'modelosActivos', label: 'Modelos de activos' },
     { id: 'campus', label: 'Campus' },
+    { id: 'areas', label: 'Áreas' },
   ];
   protected readonly permissionOptions: readonly {
     readonly id: PermissionAction;
@@ -72,6 +73,7 @@ export class UsersPage {
     fabricantes: this.permissionControls(),
     modelosActivos: this.permissionControls(),
     campus: this.permissionControls(),
+    areas: this.permissionControls(),
   });
 
   constructor() {

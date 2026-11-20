@@ -71,6 +71,13 @@
 - El incremento fue desplegado únicamente en Hosting de `inventario-stg`; la comprobación remota confirmó HTTP 200 y los bundles esperados.
 - Queda pendiente su aceptación visual autenticada en escritorio y móvil.
 
+## Criterios de ampliación a Áreas
+
+- USR-036: el acordeón presenta Áreas como quinto módulo y persiste sus acciones sin alterar Categorías, Fabricantes, Modelos o Campus. <!-- trace:required -->
+- USR-037: alta y cambio de rol producen el mapa vacío completo de cinco módulos; listado y bootstrap entregan `areas` sanitizado. <!-- trace:required -->
+- USR-038: un payload anterior de cuatro módulos responde `user-permissions-contract-outdated`, no escribe parcialmente y permite reintentar después de actualizar la pestaña. <!-- trace:required -->
+- USR-039: el resumen de la tabla cuenta hasta cinco módulos con `ver` y no concede Áreas a usuarios existentes. <!-- trace:required -->
+
 ## Evidencia del mapa de cuatro módulos — 11 de noviembre de 2026
 
 - USR-031–034 aprobaron sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`: Campus aparece como cuarto bloque, el resumen admite hasta cuatro módulos y el contrato anterior se rechaza sin perder el permiso almacenado.

@@ -32,6 +32,7 @@ function deps(items: readonly ManagedArea[] = []): AdminAreasDependencies {
   return {
     repository: {
       hasCanonicalAdmin: vi.fn().mockResolvedValue(true),
+      hasCanonicalPermission: vi.fn().mockResolvedValue(true),
       list: vi.fn().mockResolvedValue(items),
       catalogs: vi.fn().mockResolvedValue([item().campus]),
       create: vi.fn().mockResolvedValue('new-area'),
@@ -46,16 +47,17 @@ function deps(items: readonly ManagedArea[] = []): AdminAreasDependencies {
 }
 
 describe('admin areas', () => {
-  it('ARE-001 ARE-003 rejects anonymous, non-admin and missing canonical admin', async () => {
+  it('ARE-001 ARE-003 ARE-045 ARE-046 ARE-056 authorizes ordinary operations by canonical capability and keeps reconciliation admin-only', async () => {
     await expect(listAreas(null, deps())).rejects.toMatchObject({
       functionalCode: 'unauthenticated',
     });
-    await expect(listAreas(user, deps())).rejects.toMatchObject({
+    await expect(listAreas(user, deps())).resolves.toMatchObject({ items: [] });
+    const denied = deps();
+    denied.repository.hasCanonicalPermission = vi.fn().mockResolvedValue(false);
+    await expect(listAreas(user, denied)).rejects.toMatchObject({
       functionalCode: 'permission-denied',
     });
-    const denied = deps();
-    denied.repository.hasCanonicalAdmin = vi.fn().mockResolvedValue(false);
-    await expect(listAreas(admin, denied)).rejects.toMatchObject({
+    await expect(reconcileAreaCounts(user, {}, deps())).rejects.toMatchObject({
       functionalCode: 'permission-denied',
     });
   });
@@ -111,7 +113,7 @@ describe('admin areas', () => {
     expect(result.items[0]).not.toHaveProperty('nombreNormalizado');
     expect(result.items[0]?.campus).not.toHaveProperty('activo');
   });
-  it('ARE-012 ARE-014 ARE-019 ARE-025 forwards catalog, mutations and reconciliation contracts', async () => {
+  it('ARE-012 ARE-014 ARE-019 ARE-025 ARE-047 ARE-055 forwards catalog, exact mutations and reconciliation contracts', async () => {
     const dependencies = deps();
     await getAreaCatalogs(admin, { currentCampusId: 'campus-1' }, dependencies);
     await updateArea(
@@ -132,5 +134,25 @@ describe('admin areas', () => {
     );
     expect(dependencies.repository.setStatus).toHaveBeenCalledWith('admin', 'area-1', false);
     expect(dependencies.repository.delete).toHaveBeenCalledWith('admin', 'area-1');
+    expect(dependencies.repository.hasCanonicalPermission).toHaveBeenNthCalledWith(
+      1,
+      'admin',
+      'ver',
+    );
+    expect(dependencies.repository.hasCanonicalPermission).toHaveBeenNthCalledWith(
+      2,
+      'admin',
+      'editar',
+    );
+    expect(dependencies.repository.hasCanonicalPermission).toHaveBeenNthCalledWith(
+      3,
+      'admin',
+      'cambiarEstado',
+    );
+    expect(dependencies.repository.hasCanonicalPermission).toHaveBeenNthCalledWith(
+      4,
+      'admin',
+      'eliminar',
+    );
   });
 });

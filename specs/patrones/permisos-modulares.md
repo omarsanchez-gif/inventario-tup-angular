@@ -2,11 +2,11 @@
 
 ## Estado
 
-Patrón vigente para Categorías, Fabricantes, Modelos de activos y Campus. Define el comportamiento común de frontend y backend sin sustituir las specs particulares ni crear un framework CRUD genérico.
+Patrón vigente para Categorías, Fabricantes, Modelos de activos, Campus y Áreas. Define el comportamiento común de frontend y backend sin sustituir las specs particulares ni crear un framework CRUD genérico.
 
 ## Contrato canónico
 
-- `usuarios` es la fuente canónica. Los módulos son `categorias`, `fabricantes`, `modelosActivos` y `campus`; las acciones son `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`.
+- `usuarios` es la fuente canónica. Los módulos son `categorias`, `fabricantes`, `modelosActivos`, `campus` y `areas`; las acciones son `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`.
 - `admin` tiene todas las acciones por rol. `usuario` requiere la acción exacta y `ver` para cualquier mutación.
 - Menú, botones y guards son defensa de presentación. Cada callable y cada transacción sensible revalida el documento canónico.
 - Un `permission-denied` en listado, mutación, catálogo o acceso temporal a imagen incrementa la revisión pendiente de autorización. No se reintenta automáticamente la operación rechazada.
@@ -30,9 +30,23 @@ Patrón vigente para Categorías, Fabricantes, Modelos de activos y Campus. Defi
 - Retirar `cambiarEstado` oculta la acción e invalida su operación pendiente, sin vaciar el listado.
 - En Modelos, seleccionar, cargar, sustituir o retirar una imagen requiere `editar`. Un usuario con `ver+crear` crea los datos sin ver controles de imagen y sin iniciar la segunda operación. Si `editar` se retira después de crear y antes de cargar, el Modelo confirmado se conserva y la imagen no se procesa.
 
-## Incorporación de módulos futuros
+## Incorporación obligatoria de módulos nuevos
 
-Un módulo se agrega al mapa asignable solo cuando su spec, backend canónico, guard, navegación, interfaz y pruebas estén implementados. Debe declarar acciones soportadas, tratamiento de revocación, códigos funcionales y criterios de trazabilidad. La incorporación no concede alcance territorial ni acceso a Activos; ese alcance se modelará separadamente.
+Todo módulo funcional nuevo debe incorporarse al sistema de permisos durante su implementación. No se considera terminado hasta contar con:
+
+- identificador reconocido por los registros tipados de frontend y backend;
+- sección visible en Usuarios → Asignar permisos;
+- acciones soportadas expresamente y limitadas a operaciones implementadas;
+- asignación y persistencia desde Usuarios;
+- validación canónica en callable y revalidación dentro de cada escritura sensible;
+- guard, navegación y acciones de interfaz según capacidad;
+- revocación durante la sesión, denegación por defecto, pruebas y trazabilidad del contrato.
+
+Frontend y backend conservan registros separados por sus límites de compilación; una prueba de contrato debe demostrar que módulos y acciones coinciden. No se admiten listas manuales paralelas fuera de esos registros. La incorporación no concede alcance territorial ni acceso a Activos; ese alcance se modelará separadamente.
+
+## Excepción de mantenimiento de Áreas
+
+Las operaciones ordinarias de Áreas usan `areas.ver`, `areas.crear`, `areas.editar`, `areas.cambiarEstado` y `areas.eliminar`. `getAreaCatalogs` requiere solo `areas.ver` y entrega la proyección mínima de Campus, sin exigir `campus.ver`. `reconcileAreaCounts` no forma parte de la matriz: permanece exclusivo de `admin` canónico activo.
 
 ## Verificación mínima
 

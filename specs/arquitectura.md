@@ -48,7 +48,7 @@ Callable → caso de uso → repositorio → Admin SDK
 - `features/manufacturers`: módulo administrativo de Fabricantes implementado y validado para staging.
 - `features/asset-models`: módulo administrativo de Modelos de activos implementado, validado y desplegado únicamente en staging.
 - `features/campuses`: módulo administrativo de Campus implementado, validado y desplegado únicamente en staging.
-- `features/areas`: catálogo administrativo exclusivo de `admin`, dependiente de Campus, con reserva por Campus, contador transaccional y reconciliación manual implementados y desplegados únicamente en staging.
+- `features/areas`: catálogo administrativo por capacidades, dependiente de Campus, con reserva por Campus, contador transaccional y reconciliación manual exclusiva de admin.
 
 ## Navegación administrativa
 
@@ -58,7 +58,7 @@ Callable → caso de uso → repositorio → Admin SDK
 - `/configuraciones/modelos-activos` requiere `admin` o `modelosActivos.ver`.
 - Otros catálogos no aparecen hasta contar con especificación e implementación propias.
 - Campus usa `/configuraciones/campus`, protegida por el guard de capacidad `campus.ver` y visible como cuarta opción secundaria para quien tenga acceso.
-- Áreas usa `/configuraciones/areas`, guard administrativo, opción secundaria exclusiva de `admin`, facade/gateway y siete callables; permanece deliberadamente fuera del mapa granular.
+- Áreas usa `/configuraciones/areas`, guard `areas.ver`, opción secundaria por capacidad, facade/gateway y siete callables; seis operaciones ordinarias forman parte del mapa granular y reconciliación permanece administrativa.
 - La activación visual del grupo no sustituye guards, callables ni reglas de seguridad.
 
 ## Autorización granular
@@ -73,7 +73,7 @@ Callable → Authentication + claim base + usuarios canónico + permiso de acci�
 - `admin` satisface todas las capacidades vigentes. `usuario` requiere una acción explícita y activa.
 - El shell filtra enlaces y las páginas filtran acciones para claridad, pero cada callable vuelve a resolver la capacidad.
 - `bootstrapAuthorization` entrega permisos sanitizados y toda revalidación conserva UID y generación de sesión.
-- Permisos y alcance son capas independientes. La autorización granular vigente contiene Categorías, Fabricantes, Modelos de activos y Campus; no contiene todavía Coordinaciones, Áreas ni alcance operativo de Activos.
+- Permisos y alcance son capas independientes. La autorización granular vigente contiene Categorías, Fabricantes, Modelos de activos, Campus y Áreas; no contiene todavía Coordinaciones ni alcance operativo de Activos.
 - La revalidación, las revisiones por módulo/acción, el descarte de respuestas tardías y la incorporación de módulos futuros siguen `specs/patrones/permisos-modulares.md`.
 - La decisión completa está en [ADR-007](decisiones/ADR-007-permisos-granulares-catalogos.md).
 
@@ -151,8 +151,9 @@ Callable → caso de uso de Campus → repositorio → Admin SDK
 
 # Incremento Áreas
 
-- `/configuraciones/areas` es una ruta diferida protegida por `adminGuard`; su enlace se muestra solo al rol administrativo.
+- `/configuraciones/areas` es una ruta diferida protegida por `capabilityGuard('areas')`; su enlace se muestra con `areas.ver`.
 - Angular conserva `AreasGateway` → `AreasFacade` → `AreasPage`; ningún componente consulta Firebase directamente.
 - Backend conserva callable → caso de uso `admin-areas` → `firestore-areas.repository` → Admin SDK.
 - La integridad Área/reserva/contadores se resuelve transaccionalmente. El inspector de referencias es el punto de extensión fail-safe para consumidores futuros.
 - `reconcileAreaCounts` reutiliza Firestore y no incorpora cron, cola ni infraestructura adicional.
+- `listAreas` y `getAreaCatalogs` exigen `areas.ver`; las cuatro mutaciones exigen `ver` y su acción exacta, revalidada en la transacción. El catálogo mínimo de Campus no depende de `campus.ver`.

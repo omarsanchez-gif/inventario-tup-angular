@@ -177,25 +177,36 @@ describe('UsersPage dialogs', () => {
     );
   });
 
-  it('USR-022 USR-028 USR-032 CAM-036 assigns permissions in a separate recoverable dialog', async () => {
+  it('USR-022 USR-028 USR-032 USR-036 USR-039 ARE-044 CAM-036 assigns five-module permissions in a separate recoverable dialog', async () => {
     actionButton('Asignar permisos a Usuario Prueba').click();
     fixture.detectChanges();
     expect(element.querySelector('.dialog__title')?.textContent).toContain(
       'Asignar permisos a Usuario Prueba',
     );
     expect(element.querySelector('[aria-controls="campus-permissions-panel"]')).toBeTruthy();
+    expect(element.querySelector('[aria-controls="areas-permissions-panel"]')).toBeTruthy();
 
     const edit = element.querySelector<HTMLInputElement>('#categorias-editar')!;
     edit.click();
     fixture.detectChanges();
     expect(element.querySelector<HTMLInputElement>('#categorias-ver')?.checked).toBe(true);
 
+    element.querySelector<HTMLButtonElement>('[aria-controls="areas-permissions-panel"]')!.click();
+    fixture.detectChanges();
+    element.querySelector<HTMLInputElement>('#areas-eliminar')!.click();
+    fixture.detectChanges();
+    expect(element.querySelector<HTMLInputElement>('#areas-ver')?.checked).toBe(true);
+
     button('Guardar permisos').click();
     await fixture.whenStable();
     fixture.detectChanges();
     expect(users.setPermissions).toHaveBeenCalledWith(
       managedUser,
-      expect.objectContaining({ categorias: ['ver', 'editar'], campus: [] }),
+      expect.objectContaining({
+        categorias: ['ver', 'editar'],
+        campus: [],
+        areas: ['ver', 'eliminar'],
+      }),
     );
     expect(element.querySelector('dialog[open]')).toBeNull();
   });
@@ -283,6 +294,14 @@ describe('UsersPage dialogs', () => {
         .querySelector('[aria-controls="categorias-permissions-panel"]')
         ?.getAttribute('aria-expanded'),
     ).toBe('false');
+  });
+
+  it('USR-039 summarizes all five granted modules', async () => {
+    users.filteredUsers.set([{ ...managedUser, permisos: fullPermissionMap() }]);
+    await fixture.whenStable();
+    expect(element.querySelector('tbody tr td:nth-child(6)')?.textContent?.trim()).toBe(
+      '5 módulos',
+    );
   });
 
   it('filters automatically and resets the paginated table to the first page', () => {

@@ -97,7 +97,52 @@ suite('areas firestore repository', () => {
     ).toBe(0);
   });
 
-  it('ARE-018 ARE-020 ARE-021 uses fail-safe reference inspection and keeps state intact', async () => {
+  it('ARE-048 revalidates the exact Areas capability inside every mutation transaction', async () => {
+    const campusId = await campuses.create(uid, campus('CAP', 'Capacidades'));
+    const userUid = 'area-capability-user';
+    const userRef = firestore.collection('usuarios').doc('area-capability-user');
+    await userRef.set({
+      uid: userUid,
+      nombre: 'Usuario Áreas',
+      correo: 'areas@tecplayacar.edu.mx',
+      rol: 'usuario',
+      activo: true,
+      permisos: {
+        categorias: [],
+        fabricantes: [],
+        modelosActivos: [],
+        campus: [],
+        areas: ['ver', 'crear'],
+      },
+      fechaCreacion: new Date(),
+      ultimoAcceso: null,
+    });
+
+    const areaId = await areas.create(userUid, area(campusId, 'Permitida'));
+    await expect(
+      areas.update(userUid, {
+        documentId: areaId,
+        ...area(campusId, 'Sin editar'),
+      }),
+    ).rejects.toMatchObject({ functionalCode: 'permission-denied' });
+
+    await userRef.update({ 'permisos.areas': ['ver', 'editar'] });
+    await areas.update(userUid, { documentId: areaId, ...area(campusId, 'Editada') });
+    await expect(areas.setStatus(userUid, areaId, false)).rejects.toMatchObject({
+      functionalCode: 'permission-denied',
+    });
+
+    await userRef.update({ 'permisos.areas': ['ver', 'cambiarEstado'] });
+    await areas.setStatus(userUid, areaId, false);
+    await expect(areas.delete(userUid, areaId)).rejects.toMatchObject({
+      functionalCode: 'permission-denied',
+    });
+
+    await userRef.update({ 'permisos.areas': ['ver', 'eliminar'] });
+    await areas.delete(userUid, areaId);
+  });
+
+  it('ARE-018 ARE-020 ARE-021 ARE-057 uses fail-safe reference inspection and keeps state intact', async () => {
     const source = await campuses.create(uid, campus('TUP', 'Tecnológico'));
     const target = await campuses.create(uid, campus('FCS', 'Salud'));
     const areaId = await areas.create(uid, area(source, 'Laboratorio'));

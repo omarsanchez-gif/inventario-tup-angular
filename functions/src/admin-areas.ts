@@ -1,6 +1,7 @@
 import type { FunctionsErrorCode } from 'firebase-functions/https';
 
 import type { AdminIdentity } from './admin-users.js';
+import type { PermissionAction } from './catalog-permissions.js';
 
 export const MAX_SUPPORTED_AREAS = 500;
 
@@ -51,6 +52,7 @@ export interface AreaReconciliationResult {
 
 export interface AdminAreasRepository {
   hasCanonicalAdmin(uid: string): Promise<boolean>;
+  hasCanonicalPermission(uid: string, action: PermissionAction): Promise<boolean>;
   list(limit: number): Promise<readonly ManagedArea[]>;
   catalogs(currentCampusId?: string): Promise<readonly AreaCampusSummary[]>;
   create(requesterUid: string, input: AreaDraft): Promise<string>;
@@ -81,6 +83,22 @@ async function requireAdmin(identity: AdminIdentity | null, dependencies: AdminA
     throw new AdminAreasError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
   if (!(await dependencies.repository.hasCanonicalAdmin(identity.uid))) {
+    throw new AdminAreasError('permission-denied', 'permission-denied', 'Acceso denegado.');
+  }
+  return identity;
+}
+
+async function requirePermission(
+  identity: AdminIdentity | null,
+  dependencies: AdminAreasDependencies,
+  action: PermissionAction,
+): Promise<AdminIdentity> {
+  if (!identity)
+    throw new AdminAreasError('unauthenticated', 'unauthenticated', 'Se requiere una sesión.');
+  if (!identity.authorized) {
+    throw new AdminAreasError('permission-denied', 'permission-denied', 'Acceso denegado.');
+  }
+  if (!(await dependencies.repository.hasCanonicalPermission(identity.uid, action))) {
     throw new AdminAreasError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
   return identity;
@@ -164,7 +182,7 @@ export async function listAreas(
   identity: AdminIdentity | null,
   dependencies: AdminAreasDependencies,
 ) {
-  await requireAdmin(identity, dependencies);
+  await requirePermission(identity, dependencies, 'ver');
   const areas = await dependencies.repository.list(MAX_SUPPORTED_AREAS + 1);
   if (areas.length > MAX_SUPPORTED_AREAS) {
     throw new AdminAreasError(
@@ -202,7 +220,7 @@ export async function getAreaCatalogs(
   data: unknown,
   dependencies: AdminAreasDependencies,
 ) {
-  await requireAdmin(identity, dependencies);
+  await requirePermission(identity, dependencies, 'ver');
   const request = object(data);
   fields(request, ['currentCampusId']);
   const currentCampusId =
@@ -216,7 +234,7 @@ export async function createArea(
   data: unknown,
   dependencies: AdminAreasDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'crear');
   const request = object(data);
   fields(request, ['campusId', 'nombre', 'notas']);
   const documentId = await dependencies.repository.create(requester.uid, draft(request));
@@ -228,7 +246,7 @@ export async function updateArea(
   data: unknown,
   dependencies: AdminAreasDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'editar');
   const request = object(data);
   fields(request, ['documentId', 'campusId', 'nombre', 'notas']);
   const documentId = id(request['documentId']);
@@ -241,7 +259,7 @@ export async function setAreaStatus(
   data: unknown,
   dependencies: AdminAreasDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'cambiarEstado');
   const request = object(data);
   fields(request, ['documentId', 'activo']);
   if (typeof request['activo'] !== 'boolean')
@@ -256,7 +274,7 @@ export async function deleteArea(
   data: unknown,
   dependencies: AdminAreasDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'eliminar');
   const request = object(data);
   fields(request, ['documentId']);
   const documentId = id(request['documentId']);

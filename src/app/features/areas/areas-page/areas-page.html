@@ -6,16 +6,24 @@
       <p>Administre las áreas físicas asociadas a cada Campus.</p>
     </div>
     <div class="page-actions">
-      <button
-        class="button button--secondary"
-        type="button"
-        [disabled]="areas.saving()"
-        (click)="areas.reconcile()"
-      >
-        Reconciliar cantidades</button
-      ><button class="button button--primary" type="button" (click)="openNew()">Nueva área</button>
+      @if (auth.role() === 'admin') {
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="areas.saving()"
+          (click)="areas.reconcile()"
+        >
+          Reconciliar cantidades
+        </button>
+      }
+      @if (auth.can('areas', 'crear')) {
+        <button class="button button--primary" type="button" (click)="openNew()">Nueva área</button>
+      }
     </div>
   </header>
+  @if (authorizationNotice(); as notice) {
+    <div class="alert alert--info" role="status" aria-live="polite">{{ notice }}</div>
+  }
   @if (!formVisible() && !pendingDeletion() && areas.error(); as error) {
     <div class="alert alert--error" role="alert">
       <span>{{ error }}</span>
@@ -187,36 +195,42 @@
               </td>
               <td>
                 <div class="record-actions">
-                  <button
-                    class="icon-button icon-button--secondary"
-                    type="button"
-                    [disabled]="areas.saving()"
-                    [attr.aria-label]="'Editar ' + area.nombre"
-                    [attr.title]="'Editar ' + area.nombre"
-                    (click)="edit(area)"
-                  >
-                    <app-icon name="edit" />
-                  </button>
-                  <button
-                    class="icon-button icon-button--secondary"
-                    type="button"
-                    [disabled]="areas.saving()"
-                    [attr.aria-label]="(area.activo ? 'Desactivar ' : 'Activar ') + area.nombre"
-                    [attr.title]="(area.activo ? 'Desactivar ' : 'Activar ') + area.nombre"
-                    (click)="areas.setStatus(area)"
-                  >
-                    <app-icon [name]="area.activo ? 'deactivate' : 'activate'" />
-                  </button>
-                  <button
-                    class="icon-button icon-button--danger"
-                    type="button"
-                    [disabled]="areas.saving()"
-                    [attr.aria-label]="'Eliminar ' + area.nombre"
-                    [attr.title]="'Eliminar ' + area.nombre"
-                    (click)="requestDeletion(area)"
-                  >
-                    <app-icon name="delete" />
-                  </button>
+                  @if (auth.can('areas', 'editar')) {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="areas.saving()"
+                      [attr.aria-label]="'Editar ' + area.nombre"
+                      [attr.title]="'Editar ' + area.nombre"
+                      (click)="edit(area)"
+                    >
+                      <app-icon name="edit" />
+                    </button>
+                  }
+                  @if (auth.can('areas', 'cambiarEstado')) {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="areas.saving()"
+                      [attr.aria-label]="(area.activo ? 'Desactivar ' : 'Activar ') + area.nombre"
+                      [attr.title]="(area.activo ? 'Desactivar ' : 'Activar ') + area.nombre"
+                      (click)="areas.setStatus(area)"
+                    >
+                      <app-icon [name]="area.activo ? 'deactivate' : 'activate'" />
+                    </button>
+                  }
+                  @if (auth.can('areas', 'eliminar')) {
+                    <button
+                      class="icon-button icon-button--danger"
+                      type="button"
+                      [disabled]="areas.saving()"
+                      [attr.aria-label]="'Eliminar ' + area.nombre"
+                      [attr.title]="'Eliminar ' + area.nombre"
+                      (click)="requestDeletion(area)"
+                    >
+                      <app-icon name="delete" />
+                    </button>
+                  }
                 </div>
               </td>
             </tr>

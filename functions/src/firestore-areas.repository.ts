@@ -16,6 +16,10 @@ import {
   type AreaUpdate,
   type ManagedArea,
 } from './admin-areas.js';
+import {
+  hasCanonicalPermission as canonicalPermissionGranted,
+  type PermissionAction,
+} from './catalog-permissions.js';
 
 export interface AreaReferenceInspector {
   hasReferences(transaction: Transaction, areaId: string): Promise<boolean | undefined>;
@@ -124,6 +128,29 @@ export function createAdminAreasRepository(
       throw new AdminAreasError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
 
+  async function hasAreaPermission(
+    transaction: Transaction | null,
+    uid: string,
+    action: PermissionAction,
+  ): Promise<boolean> {
+    return canonicalPermissionGranted(
+      transaction,
+      users.where('uid', '==', uid).limit(2),
+      'areas',
+      action,
+    );
+  }
+
+  async function requirePermission(
+    transaction: Transaction,
+    uid: string,
+    action: PermissionAction,
+  ): Promise<void> {
+    if (!(await hasAreaPermission(transaction, uid, action))) {
+      throw new AdminAreasError('permission-denied', 'permission-denied', 'Acceso denegado.');
+    }
+  }
+
   function verifyKey(
     data: DocumentData | undefined,
     areaId: string,
@@ -141,6 +168,7 @@ export function createAdminAreasRepository(
 
   return {
     hasCanonicalAdmin: (uid) => canonicalAdmin(null, uid),
+    hasCanonicalPermission: (uid, action) => hasAreaPermission(null, uid, action),
     async list(limit) {
       const snapshot = await areas.limit(limit).get();
       const campusIds = [
@@ -172,7 +200,7 @@ export function createAdminAreasRepository(
     async create(uid, input: AreaDraft) {
       const reference = areas.doc();
       await firestore.runTransaction(async (transaction) => {
-        await requireAdmin(transaction, uid);
+        await requirePermission(transaction, uid, 'crear');
         const campusReference = campuses.doc(input.campusId);
         const keyReference = keys.doc(areaKey(input.campusId, input.nombreNormalizado));
         const [campusSnapshot, keySnapshot, areaSnapshot] = await Promise.all([
@@ -221,7 +249,7 @@ export function createAdminAreasRepository(
     },
     async update(uid, input: AreaUpdate) {
       await firestore.runTransaction(async (transaction) => {
-        await requireAdmin(transaction, uid);
+        await requirePermission(transaction, uid, 'editar');
         const reference = areas.doc(input.documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists)
@@ -301,7 +329,7 @@ export function createAdminAreasRepository(
     },
     async setStatus(uid, documentId, activo) {
       await firestore.runTransaction(async (transaction) => {
-        await requireAdmin(transaction, uid);
+        await requirePermission(transaction, uid, 'cambiarEstado');
         const reference = areas.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists)
@@ -315,7 +343,7 @@ export function createAdminAreasRepository(
     },
     async delete(uid, documentId) {
       await firestore.runTransaction(async (transaction) => {
-        await requireAdmin(transaction, uid);
+        await requirePermission(transaction, uid, 'eliminar');
         const reference = areas.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists)

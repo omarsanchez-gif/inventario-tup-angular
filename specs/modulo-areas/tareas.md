@@ -9,7 +9,7 @@
 - [x] Implementar `areas`, `areas_claves`, contador transaccional y protección de `deleteCampus`.
 - [x] Implementar las siete callables administrativas y denegación directa por Rules.
 - [x] Implementar ruta, navegación, gateway, facade, búsqueda, filtro, paginación, modales y reconciliación.
-- [x] Conservar Áreas fuera del mapa granular; el acceso inicial es exclusivamente para `admin` canónico.
+- [x] Decisión histórica: conservar Áreas fuera del mapa granular en el corte inicial del 12 de noviembre; sustituida por el incremento autorizado del 20 de noviembre de 2026.
 
 ## Validación
 
@@ -32,6 +32,20 @@
 - [x] Verificar Functions, rechazo anónimo, Rules, Hosting y bundles sin crear datos.
 - [x] Completar ARE-033 con alta, edición, transferencia, estado, rechazos y eliminación acotada de un registro descartable, conservando los datos protegidos.
 - [x] Completar la revisión visual autenticada en escritorio y 320 px.
+
+## Incremento autorizado: permisos granulares de Áreas
+
+- [x] Incorporar `areas` al registro tipado de frontend y backend y comprobar su correspondencia por contrato.
+- [x] Mostrar Áreas en Usuarios → Asignar permisos con las cinco acciones vigentes.
+- [x] Normalizar perfiles anteriores sin `permisos.areas` como lista vacía y rechazar atómicamente payloads antiguos de cuatro módulos.
+- [x] Proteger ruta, enlace, listado, catálogo y acciones de interfaz por capacidad.
+- [x] Revalidar cada callable ordinaria y cada mutación transaccional con la acción exacta.
+- [x] Conservar `reconcileAreaCounts` exclusivamente para admin canónico.
+- [x] Implementar revocación de `ver` y de acciones específicas sin afectar sesión ni otros módulos.
+- [x] Documentar la obligación permanente de incorporar cada módulo funcional al sistema de permisos.
+- [ ] Ejecutar validación completa y registrar evidencia sobre el SHA final.
+- [ ] Desplegar Functions compatibles antes de Hosting exclusivamente a staging.
+- [ ] Completar aceptación real con usuario y restaurar su configuración.
 - [x] Mantener producción, datos reales, IAM, secretos y migración fuera de alcance.
 
 ## Pendientes externos

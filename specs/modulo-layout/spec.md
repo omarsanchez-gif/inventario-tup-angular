@@ -2,7 +2,7 @@
 
 ## Estado
 
-El layout base y el filtrado independiente de Categorías, Fabricantes, Modelos y Campus están implementados. Su publicación se limita a staging.
+El layout base y el filtrado independiente de Categorías, Fabricantes, Modelos, Campus y Áreas están implementados. Su publicación se limita a staging.
 
 ## Objetivo
 
@@ -51,10 +51,17 @@ Proporcionar un shell administrativo consistente, responsive y accesible para to
 
 ## Autorización
 
-El layout solo presenta rutas ya autorizadas. `Usuarios` se mantiene exclusivo de `admin`; un `usuario` ve Campus únicamente con `campus.ver`. `Configuraciones` aparece completo para `admin`; para `usuario` aparece cuando existe al menos un permiso `ver` y contiene solo los módulos concedidos. Un grupo vacío no se renderiza. Guards y Functions conservan la autorización efectiva y el grupo no muestra enlaces de módulos todavía no implementados.
+El layout solo presenta rutas ya autorizadas. `Usuarios` se mantiene exclusivo de `admin`; un `usuario` ve cada catálogo únicamente con el `ver` correspondiente, incluido `areas.ver`. `Configuraciones` aparece completo para `admin`; para `usuario` aparece cuando existe al menos un permiso `ver` y contiene solo los módulos concedidos. Un grupo vacío no se renderiza. Guards y Functions conservan la autorización efectiva y el grupo no muestra enlaces de módulos todavía no implementados.
 
 Una revalidación de permisos actualiza menú y acciones solo si pertenece al UID y generación vigentes. Ocultar un enlace no sustituye la denegación backend.
 
 ## Fuera de alcance
 
 Personalización de tema, modo oscuro, ordenamiento de módulos y persistencia del estado del menú entre sesiones.
+
+## Incorporación de Áreas
+
+- `Configuraciones` incluye Áreas cuando `auth.can('areas', 'ver')`; un usuario con solo esa capacidad ve el grupo y únicamente ese submenú.
+- `/configuraciones/areas` usa el guard de capacidad, no `adminGuard`.
+- Retirar `areas.ver` oculta enlace y grupo si queda vacío y redirige una ruta de Áreas abierta a `/dashboard` sin cerrar sesión ni alterar otros módulos.
+- Las acciones internas se muestran por capacidad; reconciliación permanece visible solo para `admin`.

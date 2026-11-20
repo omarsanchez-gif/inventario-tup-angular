@@ -54,4 +54,25 @@ describe('SessionScope capability revisions', () => {
     expect(scope.isAdminAccessCurrent(context)).toBe(false);
     expect(scope.isAdminAccessCurrent(scope.captureAdminAccess())).toBe(true);
   });
+
+  it('AUT-022 AUT-023 ARE-052 permanently invalidates only Areas across revoke and restore', () => {
+    const scope = TestBed.inject(SessionScope);
+    const granted = {
+      ...emptyPermissionMap(),
+      categorias: ['ver'] as const,
+      areas: ['ver', 'editar'] as const,
+    };
+    const areaRead = scope.captureCapability('areas', 'ver');
+    const areaEdit = scope.captureCapability('areas', 'editar');
+    const categoryRead = scope.captureCapability('categorias', 'ver');
+
+    const reduced = { ...granted, areas: [] as const };
+    scope.reconcileCapabilities('usuario', granted, 'usuario', reduced);
+    scope.reconcileCapabilities('usuario', reduced, 'usuario', granted);
+
+    expect(scope.isCapabilityCurrent(areaRead)).toBe(false);
+    expect(scope.isCapabilityCurrent(areaEdit)).toBe(false);
+    expect(scope.isCapabilityCurrent(categoryRead)).toBe(true);
+    expect(scope.isCapabilityCurrent(scope.captureCapability('areas', 'ver'))).toBe(true);
+  });
 });

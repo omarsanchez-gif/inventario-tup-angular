@@ -43,7 +43,8 @@ export class AdminShell implements OnDestroy {
       this.auth.can('categorias', 'ver') ||
       this.auth.can('fabricantes', 'ver') ||
       this.auth.can('modelosActivos', 'ver') ||
-      this.auth.can('campus', 'ver'),
+      this.auth.can('campus', 'ver') ||
+      this.auth.can('areas', 'ver'),
   );
   protected readonly menuActionLabel = computed(() =>
     this.navigationOpen() ? 'Ocultar menú principal' : 'Mostrar menú principal',
@@ -78,7 +79,13 @@ export class AdminShell implements OnDestroy {
         this.currentUrl.set(event.urlAfterRedirects);
         if (event.urlAfterRedirects.startsWith('/configuraciones/')) this.settingsOpen.set(true);
       });
-    for (const module of ['categorias', 'fabricantes', 'modelosActivos', 'campus'] as const) {
+    for (const module of [
+      'categorias',
+      'fabricantes',
+      'modelosActivos',
+      'campus',
+      'areas',
+    ] as const) {
       this.unregisterCapabilityListeners.push(
         this.sessionScope.registerCapabilityListener(module, (change) => {
           if (change.action === 'ver' && !change.allowed && this.routeUsesModule(module)) {
@@ -127,6 +134,7 @@ export class AdminShell implements OnDestroy {
       fabricantes: '/configuraciones/fabricantes',
       modelosActivos: '/configuraciones/modelos-activos',
       campus: '/configuraciones/campus',
+      areas: '/configuraciones/areas',
     };
     return this.router.url.startsWith(paths[module]);
   }

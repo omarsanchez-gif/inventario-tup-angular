@@ -99,6 +99,7 @@ describe('admin users', () => {
       fabricantes: [] as const,
       modelosActivos: ['ver', 'editar'] as const,
       campus: [] as const,
+      areas: ['ver'] as const,
     };
     vi.mocked(deps.repository.setPermissions).mockResolvedValue({
       documentId: 'target',
@@ -126,10 +127,27 @@ describe('admin users', () => {
         { uid: 'uid-admin', authorized: true, role: 'admin' },
         {
           documentId: 'target',
-          permisos: { categorias: ['editar'], fabricantes: [], modelosActivos: [], campus: [] },
+          permisos: {
+            categorias: ['editar'],
+            fabricantes: [],
+            modelosActivos: [],
+            campus: [],
+            areas: [],
+          },
         },
         deps,
       ),
     ).rejects.toMatchObject({ functionalCode: 'user-permissions-invalid' });
+
+    await expect(
+      setAuthorizedUserPermissions(
+        { uid: 'uid-admin', authorized: true, role: 'admin' },
+        {
+          documentId: 'target',
+          permisos: { categorias: [], fabricantes: [], modelosActivos: [], campus: [] },
+        },
+        deps,
+      ),
+    ).rejects.toMatchObject({ functionalCode: 'user-permissions-contract-outdated' });
   });
 });

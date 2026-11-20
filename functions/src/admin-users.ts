@@ -285,10 +285,18 @@ export async function setAuthorizedUserPermissions(
   allowedFields(request, ['documentId', 'permisos']);
   const permissions = validatePermissionMap(request['permisos']);
   if (!permissions) {
+    const permissionValue = request['permisos'];
+    const isOutdatedContract =
+      permissionValue !== null &&
+      typeof permissionValue === 'object' &&
+      !Array.isArray(permissionValue) &&
+      !Object.prototype.hasOwnProperty.call(permissionValue, 'areas');
     throw new AdminUsersError(
-      'user-permissions-invalid',
+      isOutdatedContract ? 'user-permissions-contract-outdated' : 'user-permissions-invalid',
       'invalid-argument',
-      'Los permisos no son válidos.',
+      isOutdatedContract
+        ? 'Actualice la aplicación antes de guardar permisos.'
+        : 'Los permisos no son válidos.',
     );
   }
   const user = await dependencies.repository.setPermissions(

@@ -21,4 +21,4 @@ La reconciliación admite que el contador derivado anterior sea inválido y regi
 - Todo consumidor futuro de `areaId` debe agregarse al inspector canónico antes de habilitarse.
 - El inspector devuelve `false` explícito para autorizar; `true`, excepción o resultado indeterminado bloquean. El adaptador vacío actual devuelve `false` de manera explícita y se reemplazará al aprobar el primer consumidor.
 - `deleteCampus` consulta siempre las Áreas canónicas; `cantidadAreas`, incluso cuando sea cero o esté desfasado, no autoriza por sí solo una eliminación.
-- Áreas permanece fuera del mapa granular hasta especificar Coordinaciones y alcance.
+- La integridad Área–Campus es independiente de la autorización. Desde el 20 de noviembre de 2026 las operaciones ordinarias aceptan capacidades granulares; Coordinaciones y alcance territorial siguen pendientes y reconciliación permanece solo admin.
