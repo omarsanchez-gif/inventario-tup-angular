@@ -66,5 +66,5 @@
 - [x] Persistir el mapa completo de cinco módulos conservando permisos ajenos a Áreas.
 - [x] Normalizar documentos anteriores sin `areas` y rechazar con mensaje recuperable una pestaña antigua de cuatro módulos.
 - [x] Actualizar altas, cambios de rol, listado y bootstrap al mapa de cinco módulos.
-- [ ] Validar y desplegar primero Functions compatibles y después Hosting en staging.
-- [ ] Completar aceptación autenticada de una reducción mientras la pestaña del usuario afectado permanece abierta.
+- [x] Validar y desplegar primero Functions compatibles y después Hosting en staging.
+- [x] Completar aceptación autenticada de la concesión y reducción de Áreas con la cuenta `PROFESOR`.

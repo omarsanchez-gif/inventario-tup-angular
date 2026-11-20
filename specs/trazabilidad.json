@@ -6,9 +6,9 @@
   "delivery": {
     "localValidation": "complete",
     "branchPublication": "complete",
-    "stagingDeployment": "complete-create-update-area-and-layout-hosting-corrections",
+    "stagingDeployment": "complete-five-module-functions-before-hosting",
     "continuousIntegration": "not-triggered-without-pull-request",
-    "manualAcceptance": "complete-area-images-permissions-mobile-catalog-reviews-pending"
+    "manualAcceptance": "complete-area-granular-grant-revoke-and-restoration"
   },
   "matrixScopes": [
     { "prefix": "AUT", "label": "Autenticación" },
@@ -413,6 +413,22 @@
       "command": "npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
       "result": "Contrato de permisos y trazabilidad aprobaron; lint, guardia visual, formato, ambos builds, auditoría sin altas/críticas y diff aprobaron. Bundle main-BXI7LJCY.js.",
       "criteria": ["ARE-058"]
+    },
+    {
+      "id": "areas-permissions-staging-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "firebase deploy --only functions:<11 compatibles> --project staging; firebase deploy --only hosting --project staging; functions:list; anonymous HTTP and Hosting checks",
+      "result": "Once Functions de Autenticación, Usuarios y Áreas quedaron ACTIVE en Node.js 22 con hash común 6508c9d6fb576d85b8dceb857d79381897465d64; Hosting HTTP 200 publicó main-BXI7LJCY.js y styles-TYZCJRJC.css; cuatro callables representativas rechazaron acceso anónimo con HTTP 401.",
+      "criteria": []
+    },
+    {
+      "id": "areas-permissions-manual-20261120",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "authenticated manual staging acceptance on inventario-stg",
+      "result": "El responsable confirmó con PROFESOR la asignación efectiva de Ver, Editar y Crear en Áreas, la creación permitida y la pérdida de acceso al retirar permisos; la configuración quedó restaurada.",
+      "criteria": []
     }
   ],
   "entries": [

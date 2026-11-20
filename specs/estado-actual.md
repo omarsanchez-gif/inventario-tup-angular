@@ -4,7 +4,7 @@
 
 - Fecha del corte: 20 de noviembre de 2026.
 - Rama inspeccionada: `codex/modulo-areas`.
-- SHA correctivo validado, publicado y desplegado: `88ea3afaa568bcc46a4aed45951e50049c2703fe`.
+- SHA funcional de permisos de Áreas validado y desplegado: `36b5a593d1eab0c90dc478f986d9a318501c0a07`; evidencia documental publicada inicialmente en `32edfbef1a88c17ce6610c9ed81dda12e60c1bd4`.
 - SHA de endurecimiento anterior: `5df7763ca23d862c7b4629f1088299b077d63b8d`.
 - SHA publicado al iniciar la consolidación: `51e71dc599c55e63bed4ddf11ca0b1e91a9ed599`.
 - SHA de implementación de permisos, rutas y Campus con validación completa: `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`.
@@ -19,16 +19,16 @@ Este resumen describe el estado vigente. Las reglas completas permanecen en las 
 
 | Módulo                  | Propósito y comportamiento vigente                                                                               | Acceso y entrada                                                      | Backend y datos                                                      | Criterios                                | Estado real                                                                         |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------- |
-| Autenticación y sesión  | Google institucional, autorización previa, permisos sanitizados y generación selectiva por módulo/acción         | `/login`; todo usuario autorizado entra a `/dashboard`                | `bootstrapAuthorization`; `usuarios` es canónica                     | AUT-001–023                              | Cinco módulos implementados; validación y publicación de Áreas en curso             |
-| Layout privado          | Sidebar responsive y Configuraciones filtrado; retirar Ver abandona solo la ruta afectada                        | Shell privado; Usuarios solo `admin`; catálogos según `ver`           | Guards defensivos y revalidación deduplicada; backend es autoridad   | LAY-001–031                              | Áreas por capacidad implementada; validación y publicación en curso                 |
+| Autenticación y sesión  | Google institucional, autorización previa, permisos sanitizados y generación selectiva por módulo/acción         | `/login`; todo usuario autorizado entra a `/dashboard`                | `bootstrapAuthorization`; `usuarios` es canónica                     | AUT-001–023                              | Cinco módulos implementados, validados, desplegados y aceptados en staging          |
+| Layout privado          | Sidebar responsive y Configuraciones filtrado; retirar Ver abandona solo la ruta afectada                        | Shell privado; Usuarios solo `admin`; catálogos según `ver`           | Guards defensivos y revalidación deduplicada; backend es autoridad   | LAY-001–031                              | Áreas por capacidad implementada, desplegada y con revocación real aceptada         |
 | Dashboard inicial       | Bienvenida, identidad y estado de plataforma, sin métricas ficticias                                             | `/dashboard`; `admin` y `usuario` autorizados                         | No crea read model ni KPI operativos                                 | DASH-001–004                             | Implementado y desplegado; indicadores operativos son un incremento futuro          |
-| Usuarios                | Administra autorizaciones y asigna después del alta una matriz compacta de cinco módulos                         | `/usuarios`; solo `admin`                                             | Siete callables; cambio de rol limpia permisos                       | USR-001–039                              | Quinto módulo implementado; validación, despliegue y aceptación en curso            |
+| Usuarios                | Administra autorizaciones y asigna después del alta una matriz compacta de cinco módulos                         | `/usuarios`; solo `admin`                                             | Siete callables; cambio de rol limpia permisos                       | USR-001–039                              | Quinto módulo validado, desplegado y aceptado con cuenta de prueba                  |
 | Categorías              | Nombre, notas, estado y contador preparado de Activos; eliminación bloqueada por Modelos                         | `/configuraciones/categorias`; `admin` o `usuario` con capacidad      | Cinco callables; cada operación revalida su acción canónica          | CAT-001–028                              | Implementado, validado y desplegado; contador permanece en cero hasta Activos       |
 | Fabricantes             | Marca productora con Nombre y Notas; no representa comercio o plataforma de compra                               | `/configuraciones/fabricantes`; `admin` o `usuario` con capacidad     | Cinco callables; cada operación revalida su acción canónica          | FAB-001–024                              | Implementado, validado y desplegado; aceptación funcional/móvil pendiente           |
 | Modelos de activos      | Catálogo de Nombre, Categoría, Fabricante, Modelo No., Notas e imagen opcional                                   | `/configuraciones/modelos-activos`; `admin` o `usuario` con capacidad | Nueve callables; Editar controla imágenes y Crear conserva datos     | MOD-001–062                              | Implementado, validado y desplegado; ciclo real de imagen aceptado en escritorio    |
 | Campus                  | Raíz física con Código, Nombre, Notas y contadores preparados de Áreas/Activos                                   | `/configuraciones/campus`; `admin` o capacidad explícita              | Cinco callables; `campus` y `campus_claves`                          | CAM-001–039                              | Implementado, validado y desplegado sin crear FCS/TUP; aceptación parcial pendiente |
-| Áreas                   | Catálogo físico por Campus con Nombre, Notas, estado, transferencia y reconciliación                             | `/configuraciones/areas`; `admin` o capacidad explícita               | Seis callables granulares y reconciliación solo admin                | ARE-001–058                              | Permisos implementados; validación, despliegue y aceptación granular en curso       |
-| Calidad y entorno local | Seed sintético idempotente, Emulator Suite, Playwright, guardia visual y verificador estructural de trazabilidad | Scripts de `package.json` y CI                                        | Proyecto exclusivo `demo-inventario-tup`; no usa credenciales reales | DEV-001–003 y 125 criterios obligatorios | Verificador actualizado; validación completa del incremento en curso                |
+| Áreas                   | Catálogo físico por Campus con Nombre, Notas, estado, transferencia y reconciliación                             | `/configuraciones/areas`; `admin` o capacidad explícita               | Seis callables granulares y reconciliación solo admin                | ARE-001–058                              | Permisos validados, desplegados y aceptados con concesión y revocación real         |
+| Calidad y entorno local | Seed sintético idempotente, Emulator Suite, Playwright, guardia visual y verificador estructural de trazabilidad | Scripts de `package.json` y CI                                        | Proyecto exclusivo `demo-inventario-tup`; no usa credenciales reales | DEV-001–003 y 125 criterios obligatorios | 311 inventariados, 125 obligatorios, 125 trazados y 125 verificados                 |
 
 ## Contratos e invariantes relevantes
 
@@ -56,17 +56,17 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 
 ## Evidencia y estados de entrega
 
-| Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                                                                          |
-| ------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                                                                                     |
-| Implementado              | Sí para el alcance vigente                      | Correcciones de autorización, carga, identidad e integridad transaccional en `88ea3af`; garantías previas conservadas                                                       |
-| Validado localmente       | Sí, sobre `88ea3af` y `5e645de`                 | Evidencia funcional completa en `88ea3af`; corrección responsive en `5e645de` con 8 Chromium y controles proporcionales aprobados                                           |
-| Publicado en rama         | Sí                                              | `codex/modulo-areas` contiene la aceptación documental `23c62c0`; publicación sin force push                                                                                |
-| Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                                                |
-| Verificado por CI         | No para este incremento                         | GitHub reporta cero runs y cero statuses para `23c62c0`; sin PR no se disparó `Validación continua / validate`                                                              |
-| Desplegado en staging     | Sí, dentro del diff real                        | `createArea`, `updateArea` y Hosting; Rules, demás Functions, datos, secretos y producción intactos                                                                         |
-| Aceptado con sesión real  | Sí para el cierre solicitado                    | Escritorio/320 px, ARE-033, ciclo real de imagen y permisos/revocación selectiva fueron ejercitados en staging; revisiones móviles integrales de catálogos siguen separadas |
-| Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                                                                                |
+| Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                    |
+| ------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                               |
+| Implementado              | Sí para el alcance vigente                      | Permisos de Áreas en `36b5a59`; garantías previas conservadas                                                         |
+| Validado localmente       | Sí, sobre `36b5a59`                             | 123 Angular, 53 Functions, 43 Emulator Suite, 8 Chromium y 8 de trazabilidad/contrato; controles de calidad aprobados |
+| Publicado en rama         | Sí                                              | `codex/modulo-areas` publicó `32edfbe` sin force push; el cierre documental final se añade después de la aceptación   |
+| Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                          |
+| Verificado por CI         | No para este incremento                         | GitHub reporta cero runs y cero statuses para `23c62c0`; sin PR no se disparó `Validación continua / validate`        |
+| Desplegado en staging     | Sí, dentro del diff real                        | Once Functions compatibles y Hosting; Rules, Storage Rules, índices, datos, secretos, IAM y producción intactos       |
+| Aceptado con sesión real  | Sí para el incremento de Áreas                  | `PROFESOR` confirmó Ver, Editar, Crear y la pérdida de acceso al retirar permisos; configuración restaurada           |
+| Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                          |
 
 La evidencia histórica de `ef8ae66` permanece vigente para recuperación de imágenes. El incremento de Campus tiene evidencia propia en `2883ff5` y no traslada aceptación manual.
 
@@ -81,12 +81,12 @@ El 10 de noviembre de 2026 se especificó un incremento que permite asignar desp
 ## Staging vigente
 
 - Proyecto exclusivo: `inventario-stg`; alias obligatorio `staging`.
-- Hosting responde HTTP 200 y sirve `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css` con `no-store` para el documento.
-- Las callables conservan Node.js 22 y `us-central1`; este cierre actualizó por separado únicamente `createArea` y `updateArea`.
+- Hosting responde HTTP 200 y sirve `main-BXI7LJCY.js` y `styles-TYZCJRJC.css`.
+- Las once callables compatibles de Autenticación, Usuarios y Áreas conservan Node.js 22, `us-central1`, estado `ACTIVE` y hash común `6508c9d6fb576d85b8dceb857d79381897465d64`.
 - Firestore Rules niega acceso directo a las colecciones administrativas y Storage Rules conserva denegación total.
 - El último incremento de recuperación desplegó `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` en revisión `00004`, el ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting.
 - Storage Rules, índices, secretos, datos y producción no se modificaron en ese cierre.
-- La comprobación anónima posterior devolvió HTTP 401 en las dos callables actualizadas. No se desplegaron Rules, Storage Rules, índices, datos, secretos, IAM ni producción.
+- La comprobación anónima posterior devolvió HTTP 401 en `bootstrapAuthorization`, `listAreas`, `createArea` y `setAuthorizedUserPermissions`. No se desplegaron Rules, Storage Rules, índices, datos, secretos, IAM ni producción.
 
 Una Function `ACTIVE`, HTTP 200 o rechazo anónimo constituyen verificación técnica, no aceptación funcional autenticada.
 
