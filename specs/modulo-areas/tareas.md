@@ -43,7 +43,7 @@
 - [x] Conservar `reconcileAreaCounts` exclusivamente para admin canónico.
 - [x] Implementar revocación de `ver` y de acciones específicas sin afectar sesión ni otros módulos.
 - [x] Documentar la obligación permanente de incorporar cada módulo funcional al sistema de permisos.
-- [ ] Ejecutar validación completa y registrar evidencia sobre el SHA final.
+- [x] Ejecutar validación completa y registrar evidencia sobre el SHA `36b5a593d1eab0c90dc478f986d9a318501c0a07`.
 - [ ] Desplegar Functions compatibles antes de Hosting exclusivamente a staging.
 - [ ] Completar aceptación real con usuario y restaurar su configuración.
 - [x] Mantener producción, datos reales, IAM, secretos y migración fuera de alcance.

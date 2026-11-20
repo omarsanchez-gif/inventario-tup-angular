@@ -22,7 +22,7 @@
 
 - La decisión histórica “Áreas solo admin” queda sustituida para sus seis operaciones ordinarias; reconciliación permanece exclusiva de admin.
 - El mapa canónico contiene cinco módulos y una pestaña anterior de cuatro módulos falla cerrada sin sobrescribir permisos.
-- Se añadieron 25 criterios obligatorios nuevos. Su estado y cifras se calculan desde el manifiesto; la aceptación administrativa previa de Áreas no se reutiliza como aceptación granular.
+- Se añadieron 25 criterios obligatorios nuevos. Los 25 quedaron verificados localmente sobre `36b5a593d1eab0c90dc478f986d9a318501c0a07`; la aceptación administrativa previa de Áreas no se reutiliza como aceptación granular ni como aceptación real de este incremento.
 
 ## Endurecimiento de cierre — 12 de noviembre de 2026
 
@@ -58,17 +58,17 @@ El manifiesto [trazabilidad.json](trazabilidad.json) y `npm run traceability:che
 
 ## Corte vigente de implementación y entrega
 
-| Estado                    | Situación vigente                                                                                                                                                                        |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SHA probado               | `88ea3afaa568bcc46a4aed45951e50049c2703fe` para el cierre funcional; `5e645debf1df4239c6c5f73fc56ca9263ac65ae4` para la corrección responsive                                            |
-| Validación local          | Evidencia funcional histórica: 112 Angular, 52 Functions y 42 Emulator Suite; sobre `5e645de`: 8 Chromium, lint, guardia visual, formato, build, trazabilidad y diff aprobados           |
-| Rama publicada            | `codex/modulo-areas` contiene la aceptación documental `23c62c0` sin force push                                                                                                          |
-| Staging                   | `createArea`, `updateArea` y Hosting históricos; la corrección responsive actualizó solo Hosting, que sirve `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css`; Rules y demás servicios intactos |
-| Integración en desarrollo | Pendiente; publicar la rama no equivale a fusionarla                                                                                                                                     |
-| PR y CI                   | No existe PR; el conector respondió `422 must be a collaborator`, `gh` no tiene sesión y `23c62c0` no registra workflow runs ni statuses. No se atribuye CI sin ejecución real           |
-| Protección de rama        | La protección clásica de `desarrollo` responde 403 al conector y la lista accesible de rulesets está vacía; el check obligatorio no pudo verificarse                                     |
-| Aceptación autenticada    | Visual escritorio/320 px, ARE-033, ciclo funcional de imagen y permisos/revocación selectiva aprobados; revisiones visuales móviles integrales de cada catálogo permanecen separadas     |
-| Producción                | No configurada ni autorizada                                                                                                                                                             |
+| Estado                    | Situación vigente                                                                                                                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SHA probado               | `36b5a593d1eab0c90dc478f986d9a318501c0a07` para la incorporación granular de Áreas; se conserva la evidencia histórica de cierres anteriores                                                 |
+| Validación local          | Sobre `36b5a59`: 123 Angular, 53 Functions, 43 Emulator Suite, 8 Chromium y 8 pruebas de trazabilidad/contrato; lint, guardia visual, formato, ambos builds, auditoría high y diff aprobados |
+| Rama publicada            | `codex/modulo-areas` contiene la aceptación documental `23c62c0` sin force push                                                                                                              |
+| Staging                   | `createArea`, `updateArea` y Hosting históricos; la corrección responsive actualizó solo Hosting, que sirve `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css`; Rules y demás servicios intactos     |
+| Integración en desarrollo | Pendiente; publicar la rama no equivale a fusionarla                                                                                                                                         |
+| PR y CI                   | No existe PR; el conector respondió `422 must be a collaborator`, `gh` no tiene sesión y `23c62c0` no registra workflow runs ni statuses. No se atribuye CI sin ejecución real               |
+| Protección de rama        | La protección clásica de `desarrollo` responde 403 al conector y la lista accesible de rulesets está vacía; el check obligatorio no pudo verificarse                                         |
+| Aceptación autenticada    | Visual escritorio/320 px, ARE-033, ciclo funcional de imagen y permisos/revocación selectiva aprobados; revisiones visuales móviles integrales de cada catálogo permanecen separadas         |
+| Producción                | No configurada ni autorizada                                                                                                                                                                 |
 
 ## Evidencia histórica relevante
 

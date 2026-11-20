@@ -1,7 +1,7 @@
 {
   "version": 2,
   "baseReviewSha": "4a3407b14acd7a069ec62f39d1e6ee5a3b04ac1f",
-  "implementationSha": "5e645debf1df4239c6c5f73fc56ca9263ac65ae4",
+  "implementationSha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
@@ -349,6 +349,70 @@
       "command": "authenticated manual staging acceptance on inventario-stg",
       "result": "ARE-033 completó eliminación acotada; el ciclo real de imagen confirmó carga, sustitución, retirada, renovación tras expiración y eliminación; la cuenta PROFESOR confirmó concesión y revocación selectiva y terminó sin permisos.",
       "criteria": ["ARE-033"]
+    },
+    {
+      "id": "areas-permissions-angular-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "npm test",
+      "result": "22 archivos y 123 pruebas Angular aprobadas; incluye quinto módulo, guard, shell, acciones y revocación selectiva de Áreas.",
+      "criteria": [
+        "USR-036",
+        "USR-039",
+        "AUT-022",
+        "AUT-023",
+        "LAY-029",
+        "LAY-030",
+        "LAY-031",
+        "ARE-044",
+        "ARE-046",
+        "ARE-049",
+        "ARE-050",
+        "ARE-051",
+        "ARE-052"
+      ]
+    },
+    {
+      "id": "areas-permissions-functions-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "npm run test:functions",
+      "result": "10 archivos y 53 pruebas unitarias de Functions aprobadas; 43 escenarios de emulador omitidos aquí por diseño y ejecutados por separado.",
+      "criteria": [
+        "USR-037",
+        "USR-038",
+        "AUT-021",
+        "ARE-045",
+        "ARE-047",
+        "ARE-053",
+        "ARE-054",
+        "ARE-055",
+        "ARE-056"
+      ]
+    },
+    {
+      "id": "areas-permissions-emulators-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "npm run test:emulators",
+      "result": "9 archivos y 43 pruebas con Auth, Firestore, Functions y Storage Emulator aprobadas; incluye autorización callable, catálogo mínimo y revalidación transaccional de Áreas.",
+      "criteria": ["ARE-048", "ARE-057"]
+    },
+    {
+      "id": "areas-permissions-browser-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "npm run test:e2e",
+      "result": "8 recorridos Chromium aprobados; el acordeón accesible mostró y conservó el mapa completo de cinco módulos en escritorio y 320 px.",
+      "criteria": []
+    },
+    {
+      "id": "areas-permissions-quality-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "Contrato de permisos y trazabilidad aprobaron; lint, guardia visual, formato, ambos builds, auditoría sin altas/críticas y diff aprobaron. Bundle main-BXI7LJCY.js.",
+      "criteria": ["ARE-058"]
     }
   ],
   "entries": [
@@ -1180,105 +1244,120 @@
       "criterion": "USR-036",
       "verification": "automated",
       "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-PER-007",
       "criterion": "USR-037",
       "verification": "automated",
       "tests": ["functions/src/catalog-permissions.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
     },
     {
       "requirement": "RN-PER-016",
       "criterion": "USR-038",
       "verification": "automated",
       "tests": ["functions/src/catalog-permissions.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
     },
     {
       "requirement": "RN-USR-011",
       "criterion": "USR-039",
       "verification": "automated",
       "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-PER-015",
       "criterion": "AUT-021",
       "verification": "automated",
       "tests": ["functions/src/catalog-permissions.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
     },
     {
       "requirement": "RN-ARE-014",
       "criterion": "AUT-022",
       "verification": "automated",
       "tests": ["src/app/core/auth/session-scope.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-PER-010",
       "criterion": "AUT-023",
       "verification": "automated",
       "tests": ["src/app/core/auth/session-scope.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-LAY-007",
       "criterion": "LAY-029",
       "verification": "automated",
       "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-ARE-001",
       "criterion": "LAY-030",
       "verification": "automated",
       "tests": ["src/app/core/guards/capability.guard.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-ARE-014",
       "criterion": "LAY-031",
       "verification": "automated",
       "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-PER-026",
       "criterion": "ARE-044",
       "verification": "automated",
       "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-ARE-001",
       "criterion": "ARE-045",
       "verification": "automated",
       "tests": ["functions/src/admin-areas.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
     },
     {
       "requirement": "RN-ARE-019",
       "criterion": "ARE-046",
       "verification": "automated",
       "tests": ["src/app/features/areas/areas-page/areas-page.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-ARE-020",
       "criterion": "ARE-047",
       "verification": "automated",
       "tests": ["functions/src/admin-areas.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
     },
     {
       "requirement": "RN-ARE-020",
       "criterion": "ARE-048",
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-emulators-36b5a59"
     },
     {
       "requirement": "RN-ARE-014",
@@ -1288,70 +1367,80 @@
         "src/app/features/areas/areas-page/areas-page.spec.ts",
         "src/app/features/areas/state/areas.facade.spec.ts"
       ],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-ARE-014",
       "criterion": "ARE-050",
       "verification": "automated",
       "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-ARE-014",
       "criterion": "ARE-051",
       "verification": "automated",
       "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-PER-010",
       "criterion": "ARE-052",
       "verification": "automated",
       "tests": ["src/app/core/auth/session-scope.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
     },
     {
       "requirement": "RN-PER-015",
       "criterion": "ARE-053",
       "verification": "automated",
       "tests": ["functions/src/catalog-permissions.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
     },
     {
       "requirement": "RN-PER-016",
       "criterion": "ARE-054",
       "verification": "automated",
       "tests": ["functions/src/catalog-permissions.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
     },
     {
       "requirement": "RN-ARE-019",
       "criterion": "ARE-055",
       "verification": "automated",
       "tests": ["functions/src/admin-areas.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
     },
     {
       "requirement": "RN-ARE-012",
       "criterion": "ARE-056",
       "verification": "automated",
       "tests": ["functions/src/admin-areas.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
     },
     {
       "requirement": "RN-ARE-005",
       "criterion": "ARE-057",
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-emulators-36b5a59"
     },
     {
       "requirement": "RN-PER-026",
       "criterion": "ARE-058",
       "verification": "automated",
       "tests": ["scripts/check-permission-contract.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-quality-36b5a59"
     }
   ]
 }
