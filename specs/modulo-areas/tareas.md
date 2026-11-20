@@ -60,4 +60,4 @@
 - [x] Derivar secciones, controles y listeners del registro tipado compartido sin enumeraciones paralelas en Usuarios o Layout.
 - [x] Corregir ARE-001 y ARE-003 al contrato granular vigente, conservando reconciliación exclusiva de administrador.
 - [x] Reforzar ARE-048 con barreras deterministas y repositorios reales sobre Firestore Emulator para las cuatro mutaciones y el orden inverso.
-- [ ] Registrar la validación completa, publicar la rama y desplegar únicamente Hosting de staging desde el SHA efectivamente probado.
+- [x] Registrar la validación completa sobre `7e1e277adc039cadd5f87d2ffab8f1e33701e0fc`, publicar la rama y desplegar únicamente Hosting de staging.

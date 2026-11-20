@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "baseReviewSha": "4a3407b14acd7a069ec62f39d1e6ee5a3b04ac1f",
-  "implementationSha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+  "baseReviewSha": "bd911b37b857e043c129f8ca9de5daab20dc9fa2",
+  "implementationSha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
     "branchPublication": "complete",
-    "stagingDeployment": "complete-five-module-functions-before-hosting",
+    "stagingDeployment": "complete-hosting-only-no-functions-change",
     "continuousIntegration": "not-triggered-without-pull-request",
     "manualAcceptance": "complete-area-granular-grant-revoke-and-restoration"
   },
@@ -428,6 +428,54 @@
       "status": "passed",
       "command": "authenticated manual staging acceptance on inventario-stg",
       "result": "El responsable confirmó con PROFESOR la asignación efectiva de Ver, Editar y Crear en Áreas, la creación permitida y la pérdida de acceso al retirar permisos; la configuración quedó restaurada.",
+      "criteria": []
+    },
+    {
+      "id": "phase-close-angular-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "npm test",
+      "result": "22 archivos y 124 pruebas Angular aprobadas; incluye aperturas ligadas a capacidad y cobertura dinámica del registro en Usuarios y Layout.",
+      "criteria": ["USR-040", "LAY-032", "ARE-059"]
+    },
+    {
+      "id": "phase-close-functions-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "npm run test:functions",
+      "result": "10 archivos y 53 pruebas unitarias de Functions aprobadas; 44 escenarios de emulador omitidos aquí por diseño y ejecutados por separado.",
+      "criteria": ["ARE-001"]
+    },
+    {
+      "id": "phase-close-emulators-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "npm run test:emulators",
+      "result": "9 archivos y 44 pruebas con Auth, Firestore, Functions y Storage Emulator aprobadas; ARE-048 retuvo cada mutación con barrera determinista tras autorización preliminar real y comprobó el orden inverso.",
+      "criteria": ["ARE-048"]
+    },
+    {
+      "id": "phase-close-browser-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "npm run test:e2e",
+      "result": "8 recorridos Chromium aprobados con identidad y datos sintéticos.",
+      "criteria": []
+    },
+    {
+      "id": "phase-close-quality-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "314 criterios inventariados y 128 obligatorios trazados; 8 pruebas de trazabilidad/contrato, lint, guardia visual, formato, ambos builds, auditoría sin altas/críticas y diff aprobaron. Bundle main-YXTMA5SG.js.",
+      "criteria": []
+    },
+    {
+      "id": "phase-close-staging-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "firebase deploy --only hosting --project staging; HTTP verification",
+      "result": "Hosting publicó 15 archivos únicamente en inventario-stg; índice, main-YXTMA5SG.js y styles-TYZCJRJC.css respondieron HTTP 200. Functions, Rules, datos y producción permanecieron intactos.",
       "criteria": []
     }
   ],
@@ -1034,7 +1082,7 @@
       "verification": "automated",
       "tests": ["functions/src/admin-areas.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "areas-306826f"
+      "evidenceId": "phase-close-functions-7e1e277"
     },
     {
       "requirement": "RN-ARE-011",
@@ -1373,7 +1421,7 @@
       "verification": "emulator",
       "tests": ["functions/src/areas-firestore.spec.ts"],
       "state": "verified-local",
-      "evidenceId": "areas-permissions-emulators-36b5a59"
+      "evidenceId": "phase-close-emulators-7e1e277"
     },
     {
       "requirement": "RN-ARE-014",
@@ -1463,21 +1511,24 @@
       "criterion": "USR-040",
       "verification": "automated",
       "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "phase-close-angular-7e1e277"
     },
     {
       "requirement": "RN-PER-026",
       "criterion": "LAY-032",
       "verification": "automated",
       "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "phase-close-angular-7e1e277"
     },
     {
       "requirement": "RN-PER-025",
       "criterion": "ARE-059",
       "verification": "automated",
       "tests": ["src/app/features/areas/areas-page/areas-page.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "phase-close-angular-7e1e277"
     }
   ]
 }

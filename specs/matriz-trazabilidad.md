@@ -24,6 +24,14 @@
 - El mapa canónico contiene cinco módulos y una pestaña anterior de cuatro módulos falla cerrada sin sobrescribir permisos.
 - Se añadieron 25 criterios obligatorios nuevos. Los 25 quedaron verificados localmente sobre `36b5a593d1eab0c90dc478f986d9a318501c0a07`; la aceptación administrativa previa de Áreas no se reutiliza como aceptación granular ni como aceptación real de este incremento.
 
+## Cierre de fase — 20 de noviembre de 2026
+
+- `ARE-001` y `ARE-003` expresan el contrato granular vigente: usuario activo con capacidad explícita para operaciones ordinarias y reconciliación exclusiva de administrador canónico activo. Su evidencia histórica se conserva como histórica; ARE-001 se vinculó a la reejecución del corte actual.
+- `ARE-048` usa repositorios reales y una barrera determinista después de la autorización preliminar para crear, editar/transferir, cambiar estado y eliminar. Revocar la acción antes de la transacción no cambia documentos, reservas, contadores ni fechas; una escritura ya confirmada permanece y las siguientes se bloquean.
+- `ARE-059`, `USR-040` y `LAY-032` agregan tres criterios obligatorios: aperturas ligadas a su generación de capacidad y cobertura dinámica de cada módulo registrado en el diálogo, navegación y listeners.
+- El SHA probado es `7e1e277adc039cadd5f87d2ffab8f1e33701e0fc`: 124 Angular, 53 Functions, 44 Emulator Suite, 8 Chromium y 8 pruebas de trazabilidad/contrato. Lint, guardia visual, formato, ambos builds, auditoría high y `git diff --check` aprobaron.
+- Solo cambió código Angular y pruebas de Functions. Se publicó la misma rama sin force push y se desplegó únicamente Hosting; Functions, Rules, datos y producción permanecieron intactos.
+
 ## Endurecimiento de cierre — 12 de noviembre de 2026
 
 - AUT-014 y AUT-020 descartan errores y finalizaciones de intentos sustituidos y garantizan que cada negativa quede cubierta por una lectura canónica iniciada después de recibirla, incluso si llega durante bootstrap o claims.
@@ -58,17 +66,17 @@ El manifiesto [trazabilidad.json](trazabilidad.json) y `npm run traceability:che
 
 ## Corte vigente de implementación y entrega
 
-| Estado                    | Situación vigente                                                                                                                                                                            |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SHA probado               | `36b5a593d1eab0c90dc478f986d9a318501c0a07` para la incorporación granular de Áreas; se conserva la evidencia histórica de cierres anteriores                                                 |
-| Validación local          | Sobre `36b5a59`: 123 Angular, 53 Functions, 43 Emulator Suite, 8 Chromium y 8 pruebas de trazabilidad/contrato; lint, guardia visual, formato, ambos builds, auditoría high y diff aprobados |
-| Rama publicada            | `codex/modulo-areas` contiene la aceptación documental `23c62c0` sin force push                                                                                                              |
-| Staging                   | `createArea`, `updateArea` y Hosting históricos; la corrección responsive actualizó solo Hosting, que sirve `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css`; Rules y demás servicios intactos     |
-| Integración en desarrollo | Pendiente; publicar la rama no equivale a fusionarla                                                                                                                                         |
-| PR y CI                   | No existe PR; el conector respondió `422 must be a collaborator`, `gh` no tiene sesión y `23c62c0` no registra workflow runs ni statuses. No se atribuye CI sin ejecución real               |
-| Protección de rama        | La protección clásica de `desarrollo` responde 403 al conector y la lista accesible de rulesets está vacía; el check obligatorio no pudo verificarse                                         |
-| Aceptación autenticada    | Visual escritorio/320 px, ARE-033, ciclo funcional de imagen y permisos/revocación selectiva aprobados; revisiones visuales móviles integrales de cada catálogo permanecen separadas         |
-| Producción                | No configurada ni autorizada                                                                                                                                                                 |
+| Estado                    | Situación vigente                                                                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| SHA probado               | `7e1e277adc039cadd5f87d2ffab8f1e33701e0fc`; se conserva la evidencia histórica de cierres anteriores                                                                                 |
+| Validación local          | 124 Angular, 53 Functions, 44 Emulator Suite, 8 Chromium y 8 pruebas de trazabilidad/contrato; lint, guardia visual, formato, ambos builds, auditoría high y diff aprobados          |
+| Rama publicada            | `codex/modulo-areas` contiene `7e1e277` sin force push; el commit documental posterior no modifica implementación                                                                    |
+| Staging                   | Solo Hosting actualizado: 15 archivos, `main-YXTMA5SG.js` y `styles-TYZCJRJC.css` con HTTP 200; Functions, Rules, datos y producción intactos                                        |
+| Integración en desarrollo | Pendiente; publicar la rama no equivale a fusionarla                                                                                                                                 |
+| PR y CI                   | No existe PR; no se repitió la escritura previamente rechazada y la consulta pública de Actions devolvió cero runs para `7e1e277`. No se atribuye CI sin ejecución real              |
+| Protección de rama        | La protección clásica de `desarrollo` responde 403 al conector y la lista accesible de rulesets está vacía; el check obligatorio no pudo verificarse                                 |
+| Aceptación autenticada    | Visual escritorio/320 px, ARE-033, ciclo funcional de imagen y permisos/revocación selectiva aprobados; revisiones visuales móviles integrales de cada catálogo permanecen separadas |
+| Producción                | No configurada ni autorizada                                                                                                                                                         |
 
 ## Evidencia histórica relevante
 
