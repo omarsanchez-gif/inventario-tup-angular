@@ -61,9 +61,9 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 | Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                               |
 | Implementado              | Sí para el alcance vigente                      | Permisos de Áreas en `36b5a59`; garantías previas conservadas                                                         |
 | Validado localmente       | Sí, sobre `36b5a59`                             | 123 Angular, 53 Functions, 43 Emulator Suite, 8 Chromium y 8 de trazabilidad/contrato; controles de calidad aprobados |
-| Publicado en rama         | Sí                                              | `codex/modulo-areas` publicó `32edfbe` sin force push; el cierre documental final se añade después de la aceptación   |
+| Publicado en rama         | Sí                                              | `codex/modulo-areas` contiene implementación, evidencia, despliegue y aceptación sin force push                       |
 | Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                          |
-| Verificado por CI         | No para este incremento                         | GitHub reporta cero runs y cero statuses para `23c62c0`; sin PR no se disparó `Validación continua / validate`        |
+| Verificado por CI         | No para este incremento                         | La API pública reporta cero PR hacia `desarrollo` y cero workflow runs para la rama; no se atribuye CI sin ejecución  |
 | Desplegado en staging     | Sí, dentro del diff real                        | Once Functions compatibles y Hosting; Rules, Storage Rules, índices, datos, secretos, IAM y producción intactos       |
 | Aceptado con sesión real  | Sí para el incremento de Áreas                  | `PROFESOR` confirmó Ver, Editar, Crear y la pérdida de acceso al retirar permisos; configuración restaurada           |
 | Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                          |
