@@ -20,6 +20,7 @@
 - [x] Descartar éxito, error y finalización de intentos de autorización sustituidos usando UID, generación e identidad de intento.
 - [x] Cubrir cada negativa con una lectura canónica posterior, agrupando revisiones pendientes sin reintentar mutaciones.
 - [x] Revalidar capacidades en guards y al recuperar foco, conservando deduplicación y generación de sesión.
+- [x] Aplicar la generación administrativa existente a Usuarios y a su ruta para aislar reducciones de rol con el mismo UID.
 
 ## Ampliación autorizada: Campus
 

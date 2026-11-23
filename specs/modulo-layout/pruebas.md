@@ -69,3 +69,7 @@
 - LAY-031: retirar `areas.ver` con la ruta abierta elimina el enlace y redirige a Dashboard sin logout ni cambios en otros submenús. <!-- trace:required -->
 - LAY-032: cada módulo del registro tipado produce exactamente un submenú con su etiqueta y ruta, registra revocación de `ver` y abandona únicamente su ruta activa; la prueba recorre el registro sin mantener otra lista de módulos. <!-- trace:required -->
 - LAY-033: perder `admin` con `/usuarios` abierta redirige a Dashboard sin logout; restaurar el rol conserva Dashboard y exige una navegación administrativa nueva. <!-- trace:required -->
+
+## Evidencia de ruta administrativa — 23 de noviembre de 2026
+
+- LAY-033 aprobó sobre `161aabd271e2d6d79935b85470572a230097ae8b`: `/usuarios` volvió a Dashboard al reducir el rol, no invocó logout y no reapareció al restaurar `admin`.

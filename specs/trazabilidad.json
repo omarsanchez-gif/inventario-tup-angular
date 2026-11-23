@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "baseReviewSha": "bd911b37b857e043c129f8ca9de5daab20dc9fa2",
-  "implementationSha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+  "baseReviewSha": "aa556567aecc1e5b0fb60c4c91a2156d9143fa3c",
+  "implementationSha": "161aabd271e2d6d79935b85470572a230097ae8b",
   "requiredMarker": "<!-- trace:required -->",
   "delivery": {
     "localValidation": "complete",
     "branchPublication": "complete",
-    "stagingDeployment": "complete-hosting-only-no-functions-change",
+    "stagingDeployment": "not-requested-for-current-increment",
     "continuousIntegration": "not-triggered-without-pull-request",
     "manualAcceptance": "complete-area-granular-grant-revoke-and-restoration"
   },
@@ -477,6 +477,22 @@
       "command": "firebase deploy --only hosting --project staging; HTTP verification",
       "result": "Hosting publicó 15 archivos únicamente en inventario-stg; índice, main-YXTMA5SG.js y styles-TYZCJRJC.css respondieron HTTP 200. Functions, Rules, datos y producción permanecieron intactos.",
       "criteria": []
+    },
+    {
+      "id": "admin-scope-angular-161aabd",
+      "sha": "161aabd271e2d6d79935b85470572a230097ae8b",
+      "status": "passed",
+      "command": "npm test",
+      "result": "22 archivos y 128 pruebas Angular aprobadas; Usuarios limpió datos y diálogos, aisló respuestas entre generaciones admin y el shell abandonó /usuarios sin logout.",
+      "criteria": ["USR-041", "USR-042", "LAY-033"]
+    },
+    {
+      "id": "image-cleanup-emulator-161aabd",
+      "sha": "161aabd271e2d6d79935b85470572a230097ae8b",
+      "status": "passed",
+      "command": "npm run test:emulators",
+      "result": "9 archivos y 45 pruebas con Auth, Firestore, Functions y Storage Emulator aprobadas; 51 limpiezas demostraron reconciliación tras el primer lote y convergencia sin dañar la versión canónica.",
+      "criteria": ["MOD-063"]
     }
   ],
   "entries": [
@@ -1535,28 +1551,32 @@
       "criterion": "USR-041",
       "verification": "automated",
       "tests": ["src/app/features/users/state/users.facade.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "admin-scope-angular-161aabd"
     },
     {
       "requirement": "RN-USR-012",
       "criterion": "USR-042",
       "verification": "automated",
       "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "admin-scope-angular-161aabd"
     },
     {
       "requirement": "RN-LAY-013",
       "criterion": "LAY-033",
       "verification": "automated",
       "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "admin-scope-angular-161aabd"
     },
     {
       "requirement": "RN-MOD-031",
       "criterion": "MOD-063",
       "verification": "emulator",
       "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
-      "state": "implemented-pending-verification"
+      "state": "verified-local",
+      "evidenceId": "image-cleanup-emulator-161aabd"
     }
   ]
 }

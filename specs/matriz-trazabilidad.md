@@ -23,7 +23,7 @@
 - USR-041 y USR-042 ligan listado, mutaciones y diálogos a la generación de acceso administrativo. La secuencia `admin → usuario → admin` no rehabilita respuestas anteriores.
 - LAY-033 abandona `/usuarios` al perder `admin` sin cerrar la sesión válida ni restaurar automáticamente la ruta.
 - MOD-063 conserva el lote máximo de 50 limpiezas, comprueba remanentes y exige reintento hasta cerrar objetos y registros técnicos sin afectar la versión canónica.
-- El manifiesto registra estos cuatro criterios como implementados pendientes de asociar a la ejecución completa sobre un SHA publicado; las pruebas focalizadas no se presentan todavía como evidencia final del corte.
+- Los cuatro criterios quedaron verificados localmente sobre `161aabd271e2d6d79935b85470572a230097ae8b`: 128 pruebas Angular y 45 escenarios con Emulator Suite. La ejecución completa adicional aprobó 53 unitarias de Functions, 8 recorridos Chromium, trazabilidad, lint, guardia visual, formato, ambos builds, auditoría sin altas/críticas y `git diff --check`.
 
 ## Incremento de permisos de Áreas — 20 de noviembre de 2026
 

@@ -113,6 +113,11 @@
 - Al terminar se restauró el mapa vacío: la cuenta volvió a ver solo Dashboard y la tabla administrativa mostró `Sin permisos`. La autorización de `Eventos` no fue modificada.
 - La aceptación funcional confirma concesión, dependencia de Ver, revocación inmediata y selectividad por módulo/acción sobre la versión de staging derivada de `5e645debf1df4239c6c5f73fc56ca9263ac65ae4`; no sustituye las pruebas automatizadas ni una revisión visual móvil integral de cada catálogo.
 
+## Evidencia de aislamiento administrativo — 23 de noviembre de 2026
+
+- USR-041 y USR-042 aprobaron sobre `161aabd271e2d6d79935b85470572a230097ae8b` dentro de 128 pruebas Angular: perder `admin` limpió listado, búsqueda, mensajes e indicadores, cerró los tres tipos de diálogo y descartó listados y mutaciones pendientes aun después de restituir el rol al mismo UID.
+- Una operación administrativa nueva después de la restitución publicó su propio listado y mensaje; resolver después la mutación anterior no los alteró.
+
 ## Evidencia local — búsqueda y paginación
 
 - USR-014 aprobó la búsqueda automática, el campo compartido a todo el ancho y el reinicio a página 1.

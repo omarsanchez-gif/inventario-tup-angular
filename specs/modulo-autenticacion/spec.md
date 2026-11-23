@@ -34,6 +34,8 @@ Errores: `unauthenticated`, `domain-not-allowed`, `user-not-authorized`, `user-i
 
 Angular mantiene una generación por identidad. Bootstrap, renovación de claims y lecturas administrativas solo pueden publicar estado si UID y generación continúan vigentes. `onAuthStateChanged(null)` y el logout invalidan primero la generación y luego retiran el shell privado.
 
+`SessionScope` mantiene además una generación de acceso administrativo. Cambiar entre `admin` y `usuario` la incrementa aunque el UID no cambie; los consumidores exclusivos de `admin` capturan ese contexto y no pueden reutilizarlo después de retirar y restituir el rol.
+
 ADR-007 amplía `bootstrapAuthorization` para devolver el mapa granular sanitizado desde `usuarios`; no lo copia a Custom Claims. `admin` recibe acceso efectivo total y `usuario` solo sus acciones explícitas. La misma operación revalida capacidades al entrar a una ruta protegida o recuperar foco, sin aceptar resultados de otra generación de sesión.
 
 Un documento anterior se sanitiza con `campus[]` vacío para `usuario`; la ausencia del campo nunca concede acceso y no exige migración.

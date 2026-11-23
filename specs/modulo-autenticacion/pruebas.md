@@ -56,3 +56,7 @@
 
 - AUT-018 y AUT-019 aprobaron sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: la generación cambia solo para el módulo y la acción reducidos, y las negativas concurrentes comparten una única revalidación canónica.
 - La regresión acumulada aprobó 86 pruebas Angular y no cerró la sesión ni alteró módulos ajenos al permiso retirado.
+
+## Evidencia de generación administrativa — 23 de noviembre de 2026
+
+- Sobre `161aabd271e2d6d79935b85470572a230097ae8b`, USR-041, USR-042 y LAY-033 aplicaron el contexto `captureAdminAccess` / `isAdminAccessCurrent` a Usuarios y comprobaron `admin → usuario → admin` sin cerrar la sesión ni rehabilitar datos, operaciones, diálogos o ruta anteriores.

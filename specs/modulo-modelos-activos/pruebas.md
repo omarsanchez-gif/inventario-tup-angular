@@ -104,6 +104,10 @@ El primer intento del 12 de noviembre de 2026 preparó la Categoría `QA Imagen 
 - MOD-062: una creación con imagen invalidada por revocación no cambia campos, errores, cierre o indicador de un diálogo nuevo, aunque su promesa se resuelva después. <!-- trace:required -->
 - MOD-063: más de 50 sustituciones con borrado físico fallido acumulan trabajos reintentables; al recuperar Storage, la primera invocación procesa solo su lote y responde reconciliación mientras quede trabajo, conserva la versión canónica y los reintentos terminan sin objetos, operaciones ni limpiezas pendientes. <!-- trace:required -->
 
+## Evidencia de limpieza por lotes — 23 de noviembre de 2026
+
+- MOD-063 aprobó sobre `161aabd271e2d6d79935b85470572a230097ae8b` dentro de 45 pruebas con Emulator Suite. Cincuenta y una sustituciones con borrado fallido conservaron sus trabajos; al recuperar Storage, la primera llamada retiró un solo lote, devolvió reconciliación y preservó ambos objetos canónicos. El reintento terminó con metadata nula y cero objetos, operaciones o limpiezas.
+
 ## Evidencia de revocación e imagen — 11 de noviembre de 2026
 
 - MOD-055, MOD-059 y MOD-060 aprobaron sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: cada operación valida su acción exacta, `ver+crear` no expone imágenes y una revocación posterior a la escritura conserva el Modelo confirmado sin iniciar la carga.
