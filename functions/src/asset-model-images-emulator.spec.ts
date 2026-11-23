@@ -28,6 +28,7 @@ function deferred() {
 class FakeBucket {
   readonly objects = new Map<string, StoredObject>();
   failNextDelete = false;
+  failDeletes = false;
   failNextOriginalSave = false;
   failNextThumbnailSave = false;
   blockDeletes = false;
@@ -71,6 +72,7 @@ class FakeBucket {
           this.failNextDelete = false;
           throw new Error('injected delete failure');
         }
+        if (this.failDeletes) throw new Error('injected persistent delete failure');
         const object = this.objects.get(path);
         if (!object) {
           if (options.ignoreNotFound) return;
@@ -207,6 +209,39 @@ emulatorSuite('asset model image concurrency and recovery', () => {
     expect((await firestore.collection('modelos_activos_limpiezas').get()).empty).toBe(true);
     expect(bucket.objects.size).toBe(0);
   });
+
+  it('MOD-063 never reports success while more than one cleanup batch remains pending', async () => {
+    await service.set(adminUid, documentId, input());
+    bucket.failDeletes = true;
+    for (let replacement = 0; replacement < 51; replacement += 1) {
+      await expect(service.set(adminUid, documentId, input())).rejects.toMatchObject({
+        functionalCode: 'asset-model-image-reconciliation-required',
+      });
+    }
+    expect((await firestore.collection('modelos_activos_limpiezas').get()).size).toBe(51);
+
+    bucket.failDeletes = false;
+    await expect(service.set(adminUid, documentId, input())).rejects.toMatchObject({
+      functionalCode: 'asset-model-image-reconciliation-required',
+    });
+    expect((await firestore.collection('modelos_activos_limpiezas').get()).size).toBeGreaterThan(0);
+    const currentImage = (
+      await firestore.collection('modelos_activos').doc(documentId).get()
+    ).data()?.['imagen'];
+    const currentPrefix = `modelos-activos/${documentId}/versiones/${currentImage?.['version']}/`;
+    expect(bucket.objects.has(`${currentPrefix}original.webp`)).toBe(true);
+    expect(bucket.objects.has(`${currentPrefix}thumbnail.webp`)).toBe(true);
+
+    await service.remove(adminUid, documentId);
+    expect((await firestore.collection('modelos_activos_limpiezas').get()).empty).toBe(true);
+    expect((await firestore.collection('modelos_activos_operaciones_imagen').get()).empty).toBe(
+      true,
+    );
+    expect(bucket.objects.size).toBe(0);
+    expect(
+      (await firestore.collection('modelos_activos').doc(documentId).get()).data()?.['imagen'],
+    ).toBeNull();
+  }, 30_000);
 
   it('MOD-039 compensates a partial object write without confirming metadata', async () => {
     bucket.failNextThumbnailSave = true;

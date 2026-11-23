@@ -1,22 +1,29 @@
 # Matriz de trazabilidad
 
-## Estado vigente — 20 de noviembre de 2026
+## Estado vigente — 23 de noviembre de 2026
 
 | Alcance            | Reglas          | Implementación o propuesta                             | Pruebas                            |
 | ------------------ | --------------- | ------------------------------------------------------ | ---------------------------------- |
 | Autenticación      | RN-AUT-001–009  | Base, permisos y revocación selectiva implementados    | AUT-001–AUT-023                    |
 | Dashboard inicial  | RN-DASH-001–003 | `features/dashboard`                                   | DASH-001–004                       |
-| Usuarios           | RN-USR-001–011  | Base y matriz derivada del registro implementadas      | USR-001–USR-040                    |
-| Layout privado     | RN-LAY-001–012  | Navegación y revocación derivadas del registro         | LAY-001–LAY-032                    |
+| Usuarios           | RN-USR-001–012  | Base, matriz y contexto administrativo implementados   | USR-001–USR-042                    |
+| Layout privado     | RN-LAY-001–013  | Navegación y revocación derivadas del registro         | LAY-001–LAY-033                    |
 | Categorías         | RN-CAT-001–012  | Base y autorización granular implementadas             | CAT-001–CAT-028                    |
 | Fabricantes        | RN-FAB-001–012  | Base y autorización granular implementadas             | FAB-001–FAB-024                    |
-| Modelos de activos | RN-MOD-001–030  | Base y autorización granular implementadas             | MOD-001–MOD-062                    |
+| Modelos de activos | RN-MOD-001–031  | Base, autorización y limpieza por lotes implementadas  | MOD-001–MOD-063                    |
 | Permisos           | RN-PER-001–026  | Autorización y revocación funcional implementadas      | Cubiertos por criterios de módulos |
 | Campus             | RN-CAM-001–016  | Base y permiso funcional implementados                 | CAM-001–CAM-039                    |
 | Calidad local      | RN-DEV-001–003  | seed, emuladores, Playwright y verificador estructural | DEV-001–DEV-003                    |
 | Áreas              | RN-ARE-001–020  | Catálogo, permisos, transacciones y reconciliación     | ARE-001–ARE-059                    |
 
 Áreas incorpora criterios obligatorios estructurales y manuales. La evidencia automatizada se vincula al SHA validado y ARE-033 conserva evidencia manual separada; emuladores, HTTP 200 o una Function `ACTIVE` no sustituyen esa aceptación.
+
+## Endurecimiento de Usuarios e imágenes — 23 de noviembre de 2026
+
+- USR-041 y USR-042 ligan listado, mutaciones y diálogos a la generación de acceso administrativo. La secuencia `admin → usuario → admin` no rehabilita respuestas anteriores.
+- LAY-033 abandona `/usuarios` al perder `admin` sin cerrar la sesión válida ni restaurar automáticamente la ruta.
+- MOD-063 conserva el lote máximo de 50 limpiezas, comprueba remanentes y exige reintento hasta cerrar objetos y registros técnicos sin afectar la versión canónica.
+- El manifiesto registra estos cuatro criterios como implementados pendientes de asociar a la ejecución completa sobre un SHA publicado; las pruebas focalizadas no se presentan todavía como evidencia final del corte.
 
 ## Incremento de permisos de Áreas — 20 de noviembre de 2026
 

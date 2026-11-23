@@ -121,6 +121,9 @@ Códigos funcionales nuevos:
 - Guards de capacidad revalidan la autorización canónica antes de entrar a una ruta de Configuraciones; el shell vuelve a comprobarla al recuperar foco.
 - Una denegación backend refresca el perfil de forma deduplicada y elimina inmediatamente enlaces o acciones que ya no correspondan. La revocación selectiva del mismo UID sigue `../patrones/permisos-modulares.md`.
 - La seguridad no depende del menú, guard o estado local.
+- El listado y cada mutación capturan la generación de acceso administrativo además de la generación global de sesión. Todas las escrituras de estado se revalidan antes y después de cada espera relevante.
+- La transición `admin → usuario` limpia inmediatamente listado, búsqueda, mensajes, indicadores y diálogos de Usuarios. Volver a `admin` con el mismo UID crea una generación nueva: ninguna respuesta de la etapa anterior puede restaurar datos, publicar mensajes, cerrar un diálogo posterior ni apagar su operación.
+- Si `/usuarios` está activa durante la reducción de rol, el shell navega a `/dashboard` sin cerrar la sesión ni retirar capacidades granulares que el perfil vigente conserve.
 
 ## Presentación
 

@@ -55,6 +55,8 @@ El layout solo presenta rutas ya autorizadas. `Usuarios` se mantiene exclusivo d
 
 Una revalidación de permisos actualiza menú y acciones solo si pertenece al UID y generación vigentes. Ocultar un enlace no sustituye la denegación backend.
 
+El acceso exclusivo a Usuarios utiliza además la generación administrativa. Si el rol cambia de `admin` a `usuario` con `/usuarios` abierta, el shell navega a Dashboard sin ejecutar logout y conserva los permisos granulares del perfil vigente. Restaurar `admin` no revive la ruta ni una interacción anterior.
+
 ## Fuera de alcance
 
 Personalización de tema, modo oscuro, ordenamiento de módulos y persistencia del estado del menú entre sesiones.

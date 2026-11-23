@@ -64,3 +64,4 @@
 - [x] Probar cada concesión y denegación con rol `usuario`, Storage privado y regresión completa del protocolo de imagen.
 - [x] Separar Crear de Editar para que un alta sin Editar no exponga ni inicie operaciones de imagen.
 - [x] Invalidar respuestas, URLs y temporizadores del módulo ante revocación y revalidar negativas de imagen de forma deduplicada.
+- [x] Limitar cada ronda de limpiezas y rechazar éxito mientras exista otro lote pendiente, cubriendo más de 50 trabajos con Firestore Emulator.

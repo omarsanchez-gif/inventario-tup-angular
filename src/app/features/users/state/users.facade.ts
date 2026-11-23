@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
-import { SessionScope } from '../../../core/auth/session-scope';
+import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope, type AdminAccessContext } from '../../../core/auth/session-scope';
 import type { SystemUser } from '../../../shared/models/system-user';
 import type { PermissionMap } from '../../../shared/models/catalog-permissions';
 import { USERS_GATEWAY, type UserDraft, type UserUpdate } from '../data/users.gateway';
@@ -44,12 +45,15 @@ function userErrorMessage(error: unknown): string {
 export class UsersFacade {
   private readonly gateway = inject(USERS_GATEWAY);
   private readonly sessionScope = inject(SessionScope);
+  private readonly auth = inject(AuthFacade);
   private readonly usersState = signal<readonly SystemUser[]>([]);
   private readonly queryState = signal('');
   private readonly loadingState = signal(false);
   private readonly savingState = signal(false);
   private readonly errorState = signal<string | null>(null);
   private readonly successState = signal<string | null>(null);
+  private listRequest = 0;
+  private operationRequest = 0;
 
   readonly users = this.usersState.asReadonly();
   readonly query = this.queryState.asReadonly();
@@ -68,6 +72,9 @@ export class UsersFacade {
 
   constructor() {
     this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+    this.sessionScope.registerAdminAccessListener((allowed) => {
+      if (!allowed) this.resetPrivateState();
+    });
   }
 
   setQuery(query: string): void {
@@ -75,16 +82,18 @@ export class UsersFacade {
   }
 
   async load(): Promise<void> {
-    const generation = this.sessionScope.generation();
+    const context = this.sessionScope.captureAdminAccess();
+    if (this.auth.role() !== 'admin') return;
+    const request = ++this.listRequest;
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
       const result = await this.gateway.list();
-      if (this.sessionScope.isCurrent(generation)) this.usersState.set(result.items);
+      if (this.currentList(context, request)) this.usersState.set(result.items);
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) this.errorState.set(userErrorMessage(error));
+      if (this.currentList(context, request)) this.errorState.set(userErrorMessage(error));
     } finally {
-      if (this.sessionScope.isCurrent(generation)) this.loadingState.set(false);
+      if (this.currentList(context, request)) this.loadingState.set(false);
     }
   }
 
@@ -120,25 +129,57 @@ export class UsersFacade {
   }
 
   private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
-    const generation = this.sessionScope.generation();
+    const context = this.sessionScope.captureAdminAccess();
+    if (this.auth.role() !== 'admin') return false;
+    const operationRequest = this.beginOperation();
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
-      if (!this.sessionScope.isCurrent(generation)) return false;
-      await this.load();
-      if (!this.sessionScope.isCurrent(generation)) return false;
+      if (!this.currentOperation(context, operationRequest)) return false;
+      await this.reload(context, operationRequest);
+      if (!this.currentOperation(context, operationRequest)) return false;
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      if (this.sessionScope.isCurrent(generation)) this.errorState.set(userErrorMessage(error));
+      if (this.currentOperation(context, operationRequest)) {
+        this.errorState.set(userErrorMessage(error));
+      }
       return false;
     } finally {
-      if (this.sessionScope.isCurrent(generation)) this.savingState.set(false);
+      if (this.currentOperation(context, operationRequest)) this.savingState.set(false);
     }
   }
 
+  private async reload(context: AdminAccessContext, operation: number): Promise<void> {
+    const request = ++this.listRequest;
+    const result = await this.gateway.list();
+    if (this.currentOperation(context, operation) && this.listRequest === request) {
+      this.usersState.set(result.items);
+    }
+  }
+
+  private beginOperation(): number {
+    this.listRequest += 1;
+    this.loadingState.set(false);
+    return ++this.operationRequest;
+  }
+
+  private currentAdminAccess(context: AdminAccessContext): boolean {
+    return this.sessionScope.isAdminAccessCurrent(context) && this.auth.role() === 'admin';
+  }
+
+  private currentList(context: AdminAccessContext, request: number): boolean {
+    return this.currentAdminAccess(context) && this.listRequest === request;
+  }
+
+  private currentOperation(context: AdminAccessContext, operation: number): boolean {
+    return this.currentAdminAccess(context) && this.operationRequest === operation;
+  }
+
   private resetPrivateState(): void {
+    this.listRequest += 1;
+    this.operationRequest += 1;
     this.usersState.set([]);
     this.queryState.set('');
     this.loadingState.set(false);

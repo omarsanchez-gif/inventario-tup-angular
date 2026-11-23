@@ -69,3 +69,9 @@
 - [x] Validar y desplegar primero Functions compatibles y después Hosting en staging.
 - [x] Completar aceptación autenticada de la concesión y reducción de Áreas con la cuenta `PROFESOR`.
 - [x] Derivar secciones, etiquetas, controles y mapa del formulario desde el registro tipado y cubrir cada módulo registrado sin otra enumeración de prueba.
+
+## Endurecimiento del contexto administrativo
+
+- [x] Vincular listado y mutaciones de Usuarios a la generación de acceso `admin`, además de la sesión.
+- [x] Limpiar estado y cerrar diálogos al reducir el rol sin cerrar la sesión válida.
+- [x] Impedir que `admin → usuario → admin` rehabilite respuestas de la primera etapa administrativa.

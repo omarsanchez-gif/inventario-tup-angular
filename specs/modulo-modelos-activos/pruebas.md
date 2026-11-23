@@ -102,6 +102,7 @@ El primer intento del 12 de noviembre de 2026 preparó la Categoría `QA Imagen 
 - MOD-060: si Editar se revoca después de confirmar la creación y antes de procesar la imagen, se conserva el Modelo, no se inicia la operación de imagen y la interfaz informa el estado confirmado sin presentarlo como cancelación. <!-- trace:required -->
 - MOD-061: revocar una acción distinta de la mutación activa no apaga su indicador; una finalización anterior tampoco altera una operación posterior. <!-- trace:required -->
 - MOD-062: una creación con imagen invalidada por revocación no cambia campos, errores, cierre o indicador de un diálogo nuevo, aunque su promesa se resuelva después. <!-- trace:required -->
+- MOD-063: más de 50 sustituciones con borrado físico fallido acumulan trabajos reintentables; al recuperar Storage, la primera invocación procesa solo su lote y responde reconciliación mientras quede trabajo, conserva la versión canónica y los reintentos terminan sin objetos, operaciones ni limpiezas pendientes. <!-- trace:required -->
 
 ## Evidencia de revocación e imagen — 11 de noviembre de 2026
 

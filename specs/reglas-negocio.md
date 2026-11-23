@@ -65,6 +65,7 @@ RN-PER-001–026 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-USR-009: Ningún cliente lee `usuarios` directamente; incluso el listado administrativo se obtiene mediante una callable con revalidación canónica.
 - RN-USR-010: Al reducir acceso, actualizar claims y revocar refresh tokens son intentos independientes; el fallo de uno no omite el otro y la operación informa reconciliación requerida.
 - RN-USR-011: El listado administrativo entrega el mapa granular sanitizado para administrar y resumir permisos sin exponer campos técnicos.
+- RN-USR-012: El acceso a Usuarios posee una generación administrativa independiente de la identidad. Perder `admin` limpia listado, filtros, mensajes y operaciones privadas; restaurarlo al mismo UID no rehabilita lecturas, mutaciones ni diálogos de la etapa anterior.
 
 ## Dashboard inicial
 
@@ -86,6 +87,7 @@ RN-PER-001–026 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-LAY-010: Si una ruta secundaria está activa, `Configuraciones` expresa su estado activo y se abre al navegar a ella; el usuario puede contraerlo manualmente sin perder el indicador del padre.
 - RN-LAY-011: En móvil, seleccionar una opción secundaria navega y cierra completamente el drawer.
 - RN-LAY-012: El error de una eliminación iniciada en un diálogo se anuncia dentro de ese diálogo, que permanece abierto y recuperable sin duplicar el mensaje en el fondo.
+- RN-LAY-013: Si una sesión válida pierde `admin` mientras `/usuarios` está activa, abandona esa ruta hacia Dashboard, conserva la sesión y sus capacidades granulares restantes y no vuelve automáticamente al restaurar el rol.
 
 ## Categorías
 
@@ -149,6 +151,7 @@ RN-PER-001–026 y las ampliaciones granulares de Layout, Categorías, Fabricant
 - RN-MOD-028: Retirar una imagen solo responde éxito cuando no quedan cargas activas, vencidas o canceladas pendientes; si una operación aún no puede reconciliarse responde `asset-model-image-reconciliation-required` y permite reintento.
 - RN-MOD-029: Una ronda de recuperación solo puede retirar la operación si antes de inspeccionar y borrar Storage ya observó `cargaFinalizada: true` o descubrió las generaciones de ambas variantes. Un acuse que aparece después de los borrados no valida esa ronda.
 - RN-MOD-030: Cuando el escritor terminó sin persistir su acuse, la existencia simultánea de ambas generaciones en las rutas inmutables constituye evidencia autoritativa de finalización física para esa versión; la recuperación las borra con precondición y libera la operación sin inventar `cargaFinalizada`.
+- RN-MOD-031: Cada flujo autorizado procesa como máximo un lote acotado de limpiezas y solo comunica éxito si una comprobación posterior confirma que no quedan trabajos del Modelo; un remanente responde reconciliación requerida y conserva la versión canónica y las referencias reintentables.
 
 ## Calidad y entorno local
 

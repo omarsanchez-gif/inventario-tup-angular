@@ -78,6 +78,8 @@
 - USR-038: un payload anterior de cuatro módulos responde `user-permissions-contract-outdated`, no escribe parcialmente y permite reintentar después de actualizar la pestaña. <!-- trace:required -->
 - USR-039: el resumen de la tabla cuenta hasta cinco módulos con `ver` y no concede Áreas a usuarios existentes. <!-- trace:required -->
 - USR-040: cada módulo del registro tipado aparece exactamente una vez en Asignar permisos, contiene todos los controles de acción registrados y el mapa enviado conserva exactamente las claves canónicas; la prueba deriva sus expectativas del registro y detecta omisiones sin copiar otra lista manual. <!-- trace:required -->
+- USR-041: perder `admin` limpia datos visibles e invalida listado y mutación pendientes; restaurar `admin` al mismo UID no acepta sus respuestas, mientras una operación nueva sí puede publicar listado y mensaje sin ser alterada por la anterior. <!-- trace:required -->
+- USR-042: perder `admin` cierra formularios de alta/edición, confirmación de eliminación y asignación de permisos; una respuesta anterior no cierra ni modifica un diálogo de la nueva etapa administrativa. <!-- trace:required -->
 
 ## Evidencia del mapa de cuatro módulos — 11 de noviembre de 2026
 

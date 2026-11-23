@@ -120,7 +120,8 @@ Se implementaron nueve callables en `us-central1`: `listAssetModels`, `getAssetM
 - `AuthFacade` asigna una generación a cada UID observado y la invalida al cerrar sesión, perderla o cambiar de usuario.
 - El perfil, los errores y las finalizaciones solo se aplican si bootstrap y claims pertenecen al UID, generación e intento de autorización vigentes.
 - Las negativas recibidas antes de iniciar una ronda pueden compartirla; una negativa que llega durante su bootstrap o renovación de claims queda cubierta por una ronda canónica posterior. No se reintenta la mutación rechazada.
-- Las facades administrativas observan `SessionScope`, vacían su estado ante cada invalidación y descartan respuestas iniciadas por una generación anterior.
+- Las facades administrativas observan `SessionScope`, vacían su estado ante cada invalidación y descartan respuestas iniciadas por una generación anterior. Usuarios añade una generación de acceso administrativo: una reducción de rol para el mismo UID invalida estado y operaciones aunque la sesión global continúe.
+- Los trabajos de imagen se procesan en lotes acotados de 50. Los flujos compartidos de guardar, retirar y eliminar comprueban trabajo remanente y responden reconciliación requerida hasta confirmar que no quedan limpiezas del Modelo.
 - La pérdida de sesión navega a `/login`, lo que desmonta el shell privado; guards y backend continúan aplicando autorización efectiva.
 
 ## Estado asíncrono de Áreas

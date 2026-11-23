@@ -32,6 +32,7 @@ const MAX_DIMENSION = 10_000;
 const SIGNED_URL_DURATION_MS = 5 * 60 * 1000;
 const UPLOAD_LEASE_MS = 2 * 60 * 1000;
 const RECOVERY_LEASE_MS = 60 * 1000;
+const CLEANUP_BATCH_SIZE = 50;
 const FORMAT_CONTENT_TYPE: Record<string, string> = {
   jpeg: 'image/jpeg',
   png: 'image/png',
@@ -257,8 +258,11 @@ export function createAssetModelImagesService(
       : null;
   }
 
-  async function processPendingCleanups(documentId: string): Promise<void> {
-    const snapshot = await cleanups.where('modeloId', '==', documentId).limit(50).get();
+  async function processPendingCleanups(documentId: string): Promise<boolean> {
+    const snapshot = await cleanups
+      .where('modeloId', '==', documentId)
+      .limit(CLEANUP_BATCH_SIZE)
+      .get();
     for (const document of snapshot.docs) {
       const cleanup = cleanupRecord(documentId, document.data());
       if ((await canonicalVersion(documentId)) === cleanup.version) {
@@ -271,6 +275,8 @@ export function createAssetModelImagesService(
       ]);
       await document.ref.delete();
     }
+    const remaining = await cleanups.where('modeloId', '==', documentId).limit(1).get();
+    return remaining.empty;
   }
 
   async function claimRecoverableOperation(
@@ -642,7 +648,9 @@ export function createAssetModelImagesService(
       }
 
       try {
-        await processPendingCleanups(documentId);
+        if (!(await processPendingCleanups(documentId))) {
+          throw new Error('La limpieza anterior permanece pendiente.');
+        }
       } catch {
         throw new AdminAssetModelsError(
           'asset-model-image-reconciliation-required',
@@ -682,7 +690,9 @@ export function createAssetModelImagesService(
         }
       });
       try {
-        await processPendingCleanups(documentId);
+        if (!(await processPendingCleanups(documentId))) {
+          throw new Error('La limpieza anterior permanece pendiente.');
+        }
         if (!(await recoverAbandonedOperations(documentId))) {
           throw new Error('La reconciliación permanece pendiente.');
         }
@@ -758,12 +768,17 @@ export function createAssetModelImagesService(
     async cleanupDeleted(documentId) {
       try {
         const operationsComplete = await recoverAbandonedOperations(documentId);
-        await processPendingCleanups(documentId);
+        const cleanupsComplete = await processPendingCleanups(documentId);
         const [pendingOperations, pendingCleanups] = await Promise.all([
           operations.where('modeloId', '==', documentId).limit(1).get(),
           cleanups.where('modeloId', '==', documentId).limit(1).get(),
         ]);
-        if (!operationsComplete || !pendingOperations.empty || !pendingCleanups.empty) {
+        if (
+          !operationsComplete ||
+          !cleanupsComplete ||
+          !pendingOperations.empty ||
+          !pendingCleanups.empty
+        ) {
           throw new Error('La reconciliación permanece pendiente.');
         }
       } catch {

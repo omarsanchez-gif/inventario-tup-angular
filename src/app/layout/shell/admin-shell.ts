@@ -62,6 +62,7 @@ export class AdminShell implements OnDestroy {
     );
   });
   private readonly unregisterCapabilityListeners: (() => void)[] = [];
+  private readonly unregisterAdminAccessListener: () => void;
 
   private readonly handleViewportChange = (event: MediaQueryListEvent): void => {
     this.desktop.set(event.matches);
@@ -69,6 +70,13 @@ export class AdminShell implements OnDestroy {
   };
 
   constructor() {
+    this.unregisterAdminAccessListener = this.sessionScope.registerAdminAccessListener(
+      (allowed) => {
+        if (!allowed && this.router.url.startsWith('/usuarios')) {
+          void this.router.navigateByUrl('/dashboard', { replaceUrl: true });
+        }
+      },
+    );
     this.desktopMedia?.addEventListener('change', this.handleViewportChange);
     this.router.events
       .pipe(
@@ -92,6 +100,7 @@ export class AdminShell implements OnDestroy {
 
   ngOnDestroy(): void {
     this.desktopMedia?.removeEventListener('change', this.handleViewportChange);
+    this.unregisterAdminAccessListener();
     for (const unregister of this.unregisterCapabilityListeners) unregister();
   }
 

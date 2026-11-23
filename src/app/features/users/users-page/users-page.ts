@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  signal,
+} from '@angular/core';
 import {
   FormBuilder,
   type FormControl,
@@ -8,6 +15,7 @@ import {
 } from '@angular/forms';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { UserRole } from '../../../shared/models/authorized-user';
 import type { SystemUser } from '../../../shared/models/system-user';
 import {
@@ -34,8 +42,9 @@ type PermissionFormControls = Record<PermissionModule, FormGroup<PermissionActio
   styleUrl: './users-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UsersPage {
+export class UsersPage implements OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly sessionScope = inject(SessionScope);
   protected readonly auth = inject(AuthFacade);
   protected readonly users = inject(UsersFacade);
   protected readonly formVisible = signal(false);
@@ -66,9 +75,19 @@ export class UsersPage {
       permissionModules.map((module) => [module, this.permissionControls()]),
     ) as PermissionFormControls,
   );
+  private readonly unregisterAdminAccessListener: () => void;
 
   constructor() {
+    this.unregisterAdminAccessListener = this.sessionScope.registerAdminAccessListener(
+      (allowed) => {
+        if (!allowed) this.closePrivateDialogs();
+      },
+    );
     void this.users.load();
+  }
+
+  ngOnDestroy(): void {
+    this.unregisterAdminAccessListener();
   }
 
   protected openNew(): void {
@@ -257,5 +276,13 @@ export class UsersPage {
         boolean
       >,
     );
+  }
+
+  private closePrivateDialogs(): void {
+    this.formVisible.set(false);
+    this.editingId.set(null);
+    this.pendingDeletion.set(null);
+    this.permissionsUser.set(null);
+    this.openPermissionModule.set(null);
   }
 }

@@ -285,4 +285,23 @@ describe('AdminShell', () => {
     }
     expect(logout).not.toHaveBeenCalled();
   });
+
+  it('LAY-033 leaves Usuarios on admin loss without closing the valid session or reviving the route', async () => {
+    createShell();
+    const router = TestBed.inject(Router);
+    const scope = TestBed.inject(SessionScope);
+    await router.navigateByUrl('/usuarios');
+
+    roleState.set('usuario');
+    scope.reconcileAdminAccess('admin', 'usuario');
+    await fixture.whenStable();
+    expect(router.url).toBe('/dashboard');
+    expect(logout).not.toHaveBeenCalled();
+
+    roleState.set('admin');
+    scope.reconcileAdminAccess('usuario', 'admin');
+    await fixture.whenStable();
+    expect(router.url).toBe('/dashboard');
+    expect(logout).not.toHaveBeenCalled();
+  });
 });

@@ -40,3 +40,4 @@
 - [x] Obtener validación expresa del responsable.
 - [x] Incorporar Campus al registro del shell y probar combinaciones de cero a cuatro submenús.
 - [x] Derivar submenús, resolución de ruta y listeners de revocación del registro tipado y probar dinámicamente cada módulo vigente.
+- [x] Abandonar `/usuarios` al perder `admin` sin cerrar la sesión ni rehabilitar la ruta al restaurar el rol.

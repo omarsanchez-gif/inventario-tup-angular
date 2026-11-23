@@ -123,6 +123,8 @@ Estado, identificadores, normalización, claves de unicidad, metadata de imagen 
 - La transacción de sustitución crea un trabajo de limpieza para la versión anterior; borrar esa versión no puede afectar las rutas de la nueva.
 - Eliminar imagen retira la referencia canónica y crea en la misma transacción un trabajo de limpieza; repetir la operación procesa cualquier trabajo pendiente aunque `imagen` ya sea `null`.
 - Eliminar un Modelo crea el trabajo antes de retirar documento y clave. Repetir la eliminación puede completar el trabajo aun cuando el Modelo ya no exista.
+- Cada invocación procesa como máximo 50 trabajos de limpieza del Modelo y comprueba después si existe otro. `setAssetModelImage`, `removeAssetModelImage` y la limpieza posterior a `deleteAssetModel` responden `asset-model-image-reconciliation-required` mientras quede al menos uno, incluso si la metadata canónica ya fue confirmada o retirada.
+- El límite por invocación no descarta trabajo ni altera la semántica: cada reintento continúa de forma idempotente, respeta generaciones y omite cualquier versión canónica vigente.
 - Los documentos históricos sin layout conservan lectura y limpieza desde las rutas originales; no existe migración silenciosa o masiva.
 
 ### Acceso temporal
@@ -239,6 +241,7 @@ Entrada: `documentId`.
 - Procesa operaciones recuperables antes y después de retirar la metadata.
 - Reporta `asset-model-image-reconciliation-required` cuando una carga conserva un arrendamiento vigente o no existe evidencia suficiente del fin de ambas escrituras; el diálogo permanece recuperable y un reintento posterior procesa la evidencia disponible. Sin acuse y con cero o una variante observable, la operación continúa pendiente.
 - Una operación sin acuse solo deja de bloquear cuando una ronda posterior observa previamente el acuse durable o ambas generaciones físicas, ejecuta los borrados protegidos y retira la evidencia técnica. Un acuse llegado durante el cierre exige otra ronda.
+- El resultado solo es exitoso si, después del lote acotado, no quedan trabajos de limpieza ni operaciones recuperables; un remanente conserva referencias técnicas y exige reintento.
 
 ### `getAssetModelImageAccess`
 

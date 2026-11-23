@@ -2,6 +2,7 @@ import { signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { AuthorizedUser } from '../../../shared/models/authorized-user';
 import {
   emptyPermissionMap,
@@ -118,6 +119,33 @@ describe('UsersPage dialogs', () => {
     actionButton('Editar a Usuario Prueba').click();
     fixture.detectChanges();
     expect(element.querySelector('.dialog__title')?.textContent).toContain('Editar usuario');
+  });
+
+  it('USR-042 closes every private dialog when administrative access is lost', () => {
+    const session = TestBed.inject(SessionScope);
+
+    actionButton('Editar a Usuario Prueba').click();
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeTruthy();
+    session.reconcileAdminAccess('admin', 'usuario');
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeNull();
+
+    session.reconcileAdminAccess('usuario', 'admin');
+    actionButton('Eliminar a Usuario Prueba').click();
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeTruthy();
+    session.reconcileAdminAccess('admin', 'usuario');
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeNull();
+
+    session.reconcileAdminAccess('usuario', 'admin');
+    actionButton('Asignar permisos a Usuario Prueba').click();
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeTruthy();
+    session.reconcileAdminAccess('admin', 'usuario');
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeNull();
   });
 
   it('requires the institutional dialog before deleting', async () => {
