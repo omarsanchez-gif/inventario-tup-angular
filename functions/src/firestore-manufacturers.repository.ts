@@ -15,6 +15,10 @@ import {
   type ManagedManufacturer,
   type ManufacturerDraft,
 } from './admin-manufacturers.js';
+import {
+  hasCanonicalPermission as canonicalPermissionGranted,
+  type PermissionAction,
+} from './catalog-permissions.js';
 
 function timestamp(value: unknown): string {
   if (!(value instanceof Timestamp)) {
@@ -87,12 +91,18 @@ export function createAdminManufacturersRepository(
   const users = firestore.collection('usuarios');
   const assetModels = firestore.collection('modelos_activos');
 
-  async function requireCanonicalAdmin(transaction: Transaction, uid: string): Promise<void> {
-    const snapshot = await transaction.get(users.where('uid', '==', uid).limit(2));
+  async function requireCanonicalPermission(
+    transaction: Transaction,
+    uid: string,
+    action: PermissionAction,
+  ): Promise<void> {
     if (
-      snapshot.size !== 1 ||
-      snapshot.docs[0]?.data()['activo'] !== true ||
-      snapshot.docs[0]?.data()['rol'] !== 'admin'
+      !(await canonicalPermissionGranted(
+        transaction,
+        users.where('uid', '==', uid).limit(2),
+        'fabricantes',
+        action,
+      ))
     ) {
       throw new AdminManufacturersError(
         'permission-denied',
@@ -103,12 +113,12 @@ export function createAdminManufacturersRepository(
   }
 
   return {
-    async findCanonicalAdmin(uid) {
-      const snapshot = await users.where('uid', '==', uid).limit(2).get();
-      return (
-        snapshot.size === 1 &&
-        snapshot.docs[0]?.data()['activo'] === true &&
-        snapshot.docs[0]?.data()['rol'] === 'admin'
+    async hasCanonicalPermission(uid, action) {
+      return canonicalPermissionGranted(
+        null,
+        users.where('uid', '==', uid).limit(2),
+        'fabricantes',
+        action,
       );
     },
     async list(limit) {
@@ -119,7 +129,7 @@ export function createAdminManufacturersRepository(
       const manufacturerReference = manufacturers.doc();
       const indexReference = names.doc(nameKey(input.nombreNormalizado));
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'crear');
         const [manufacturerSnapshot, indexSnapshot] = await Promise.all([
           transaction.get(manufacturers.limit(MAX_SUPPORTED_MANUFACTURERS + 1)),
           transaction.get(indexReference),
@@ -155,7 +165,7 @@ export function createAdminManufacturersRepository(
     },
     async update(requesterUid, input) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'editar');
         const manufacturerReference = manufacturers.doc(input.documentId);
         const manufacturerSnapshot = await transaction.get(manufacturerReference);
         if (!manufacturerSnapshot.exists) {
@@ -199,7 +209,7 @@ export function createAdminManufacturersRepository(
     },
     async setStatus(requesterUid, documentId, activo) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'cambiarEstado');
         const reference = manufacturers.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists) {
@@ -220,7 +230,7 @@ export function createAdminManufacturersRepository(
     },
     async delete(requesterUid, documentId) {
       await firestore.runTransaction(async (transaction) => {
-        await requireCanonicalAdmin(transaction, requesterUid);
+        await requireCanonicalPermission(transaction, requesterUid, 'eliminar');
         const reference = manufacturers.doc(documentId);
         const snapshot = await transaction.get(reference);
         if (!snapshot.exists) {

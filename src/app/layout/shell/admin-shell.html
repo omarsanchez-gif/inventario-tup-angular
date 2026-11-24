@@ -41,6 +41,8 @@
           <app-icon name="users" />
           <span>Usuarios</span>
         </a>
+      }
+      @if (settingsVisible()) {
         <div class="navigation-group">
           <button
             class="navigation__link navigation__group-toggle"
@@ -60,33 +62,19 @@
           </button>
           @if (settingsExpanded()) {
             <div class="navigation__subnav" id="settings-navigation">
-              <a
-                class="navigation__sublink"
-                routerLink="/configuraciones/categorias"
-                routerLinkActive="navigation__sublink--active"
-                ariaCurrentWhenActive="page"
-                (click)="closeNavigationOnMobile()"
-              >
-                Categorías
-              </a>
-              <a
-                class="navigation__sublink"
-                routerLink="/configuraciones/fabricantes"
-                routerLinkActive="navigation__sublink--active"
-                ariaCurrentWhenActive="page"
-                (click)="closeNavigationOnMobile()"
-              >
-                Fabricantes
-              </a>
-              <a
-                class="navigation__sublink"
-                routerLink="/configuraciones/modelos-activos"
-                routerLinkActive="navigation__sublink--active"
-                ariaCurrentWhenActive="page"
-                (click)="closeNavigationOnMobile()"
-              >
-                Modelos de activos
-              </a>
+              @for (module of settingsModules; track module.id) {
+                @if (auth.can(module.id, 'ver')) {
+                  <a
+                    class="navigation__sublink"
+                    [routerLink]="module.route"
+                    routerLinkActive="navigation__sublink--active"
+                    ariaCurrentWhenActive="page"
+                    (click)="closeNavigationOnMobile()"
+                  >
+                    {{ module.label }}
+                  </a>
+                }
+              }
             </div>
           }
         </div>

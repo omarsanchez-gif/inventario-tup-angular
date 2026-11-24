@@ -2,11 +2,32 @@
 
 El 7 de noviembre de 2026 aprobaron 27 pruebas Angular, 28 pruebas unitarias de Functions y 9 pruebas integrales con Auth, Firestore, Functions y Storage Emulator. También aprobaron lint, guardia visual, formato, compilación de Functions y build de staging; `npm audit --omit=dev --audit-level=high` no reportó vulnerabilidades altas o críticas y conservó cuatro moderadas transitivas ya documentadas en ADR-002.
 
-La automatización cubre autorización, sanitización, límites de payload, transformación real a WebP, unicidad transaccional, conservación de catálogos inactivos vigentes, bloqueo de Categoría/Fabricante en uso, reglas cerradas, modales, columnas, acciones, búsqueda, paginación, descarte de miniaturas fuera de página y renovación de URLs vencidas. La prueba remota autenticada de sustitución, eliminación y expiración de imagen, así como la aceptación visual móvil, permanecen pendientes.
+La automatización cubre autorización, sanitización, límites de payload, transformación real a WebP, unicidad transaccional, conservación de catálogos inactivos vigentes, bloqueo de Categoría/Fabricante en uso, reglas cerradas, modales, columnas, acciones, búsqueda, paginación, descarte de miniaturas fuera de página y renovación de URLs vencidas. La prueba remota autenticada de carga, sustitución, retirada, eliminación y expiración de imagen quedó aceptada el 13 de noviembre de 2026; la revisión visual móvil integral permanece pendiente.
 
 La verificación remota posterior al despliegue confirmó las nueve callables `ACTIVE` en Node.js 22, `us-central1`, con `maxInstances: 20`; las nueve rechazaron solicitudes anónimas con HTTP 401. Firestore rechazó lectura anónima de `modelos_activos` y Storage rechazó lectura anónima de `modelos-activos/**`, ambas con HTTP 403. `/configuraciones/modelos-activos` y sus bundles `main-ALBLFGKY.js`, `styles-CISTRGAV.css` y `chunk-CA-BBvnz.js` respondieron HTTP 200. No se crearon documentos ni objetos de negocio.
 
-La primera comprobación autenticada de un Modelo con imagen expuso `SigningError` en `getAssetModelImageAccess` y la interfaz mostró el placeholder seguro. Tras conceder a la cuenta runtime el vínculo propio mínimo para `iam.serviceAccounts.signBlob` y actualizar únicamente esa callable, una recarga autenticada confirmó que la alerta desapareció y la miniatura del Modelo `MSI` cargó. MOD-029 queda aceptada para emisión y consumo real de la variante `thumbnail`; las variantes restantes y su expiración conservan cobertura automatizada y aceptación manual pendiente.
+La primera comprobación autenticada de un Modelo con imagen expuso `SigningError` en `getAssetModelImageAccess` y la interfaz mostró el placeholder seguro. Tras conceder a la cuenta runtime el vínculo propio mínimo para `iam.serviceAccounts.signBlob` y actualizar únicamente esa callable, una recarga autenticada confirmó que la alerta desapareció y la miniatura del Modelo `MSI` cargó. MOD-029 quedó aceptada inicialmente para emisión y consumo real de `thumbnail`; la expiración y renovación se aceptaron manualmente el 13 de noviembre de 2026.
+
+El primer intento del 12 de noviembre de 2026 preparó la Categoría `QA Imagen cierre 121126`, el Fabricante `QA Fabricante imágenes 121126` y dos PNG sintéticos menores de 2 MiB, pero Brave impidió adjuntar el archivo desde la extensión. Ese intento aislado se conserva como `no ejecutado por impedimento de carga` y no se presenta como evidencia positiva; la ejecución manual posterior sí completó el ciclo.
+
+## Evidencia local de escrituras tardías — 10 de noviembre de 2026
+
+- El SHA `58a0ab3f4e7452d349cf5bf93632258f0068aeac` aprobó la secuencia retener escrituras → vencer lease → recuperar sin objetos → materializar ambas variantes → recuperar de nuevo. La primera recuperación dejó `estado: cancelada` y `cargaFinalizada: false`; después el escritor registró `cargaFinalizada: true`, el reintento eliminó ambos objetos y la operación desapareció.
+- Retirar antes del vencimiento respondió `asset-model-image-reconciliation-required`, mantuvo la operación y solo confirmó éxito después del reintento. Las pruebas existentes de versión canónica, concurrencia, fallos parciales, eliminación de Modelo y Storage Emulator real permanecieron verdes dentro de 27 pruebas integrales.
+- En staging se actualizaron exclusivamente `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel`. Cloud Functions API confirmó estado `ACTIVE`, revisiones `00003` y HTTP 401 anónimo para las tres; no se ejecutó una mutación autenticada ni se crearon datos para esta verificación.
+
+## Evidencia local de cierre concurrente — 10 de noviembre de 2026
+
+- Sobre `ef8ae667cb3d30104edc1cc4ebd4fc2f8d5ddd04`, MOD-052 pausó la transacción final después de borrar, permitió que el escritor registrara acuse y generaciones y comprobó que esa ronda respondió reconciliación sin retirar la evidencia. La ronda posterior eliminó los dos objetos y la operación.
+- MOD-053 completó ambos uploads, falló antes de `recordUploadCompletion` y durante `markCanceled`, venció el lease y recuperó por las dos generaciones físicas. Después permitió guardar y retirar una imagen nueva sin bloqueo heredado.
+- En staging, las tres Functions afectadas quedaron `ACTIVE` en revisiones `00004` y rechazaron solicitudes anónimas. Se publicó además el Ruleset de Firestore `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting sirve `main-525UVZWO.js` y `styles-CISTRGAV.css`. No se ejecutó una mutación autenticada para esta verificación.
+
+## Evidencia local del protocolo versionado — 9 de noviembre de 2026
+
+- Las 42 pruebas unitarias de Functions cubrieron JPEG, PNG, WebP, AVIF real y MIME incongruente; las 17 pruebas integrales comprobaron sustituciones concurrentes, eliminación frente a sustitución, compensación parcial y limpieza reintentable incluso después de eliminar el Modelo.
+- Las 38 pruebas Angular comprobaron que una escritura confirmada conserva su `documentId`, que el reintento no vuelve a crear y que respuestas tardías no contaminan otro diálogo.
+- Los cuatro recorridos Playwright comprobaron recuperación tras fallo parcial, mensajes dentro del diálogo, teclado, foco y uso a 320 px sin desbordamiento global.
+- Lint, guardia visual, formato, compilación de Functions, build de staging, trazabilidad de 175 criterios y auditoría con umbral alto aprobaron. La auditoría conserva únicamente las cuatro moderadas aceptadas en ADR-002.
 
 ## Backend, referencias y seguridad
 
@@ -39,7 +60,7 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 - MOD-024: archivo mayor a 2 MiB, base64 inválido, MIME incongruente, GIF, SVG o contenido malformado se rechaza sin alterar la imagen vigente.
 - MOD-025: procesamiento rechaza más de 40 megapíxeles o más de 10,000 px por dimensión, aplica orientación, elimina metadata, conserva proporción y respeta 1,600 px y 256 px sin ampliar imágenes pequeñas.
 - MOD-026: alta de imagen actualiza metadata únicamente después de confirmar ambos objetos y nunca persiste binario o URL.
-- MOD-027: reemplazar sobrescribe rutas deterministas, cambia versión y no acumula objetos versionados.
+- MOD-027: reemplazar publica rutas inmutables por versión, cambia la metadata canónica y agenda la limpieza segura de versiones anteriores sin borrar una versión concurrente.
 - MOD-028: eliminar imagen es idempotente y reporta reconciliación si no puede confirmar limpieza.
 - MOD-029: acceso temporal requiere administrador canónico, firma solo variantes solicitadas y vence en máximo cinco minutos.
 - MOD-030: listado de 500 Modelos no genera URLs; la interfaz solicita miniaturas solo para las diez filas visibles y descarta accesos vencidos.
@@ -51,3 +72,50 @@ La primera comprobación autenticada de un Modelo con imagen expuso `SigningErro
 - MOD-033: selectores no contienen botones de alta anidada; un catálogo inactivo vigente se distingue y solo puede conservarse.
 - MOD-034: búsqueda automática ocupa todo el ancho, incluye los cinco campos textuales, reinicia página y pagina diez registros.
 - MOD-035: tabla, miniatura/placeholder, badges, iconos, estados, previsualización, mensajes de carga parcial y diálogos funcionan por teclado y desde 320 px.
+- MOD-036: dos sustituciones concurrentes dejan original, miniatura y metadata en una sola versión confirmada. <!-- trace:required -->
+- MOD-037: eliminar mientras otra solicitud sustituye la imagen no borra la versión nueva. <!-- trace:required -->
+- MOD-038: una limpieza fallida permanece pendiente y un reintento la completa aunque `imagen` ya sea `null`. <!-- trace:required -->
+- MOD-039: fallar una de las dos escrituras compensa la otra y no confirma metadata parcial. <!-- trace:required -->
+- MOD-040: la limpieza asociada a un Modelo eliminado puede reanudarse sin restaurar el documento. <!-- trace:required -->
+- MOD-041: una creación confirmada seguida de fallo de lectura o imagen conserva `documentId`, reintenta como edición y no llama de nuevo a `create`. <!-- trace:required -->
+- MOD-042: respuestas tardías del Modelo anterior no alteran el diálogo actual; cerrar el diálogo o destruir la página invalida sus solicitudes. <!-- trace:required -->
+- MOD-043: la renovación de miniaturas aplica espera creciente, máximo tres reintentos y cancelación por sesión, denegación o destrucción. <!-- trace:required -->
+- MOD-044: JPEG, PNG, WebP y AVIF válidos producen ambas variantes WebP; MIME incongruente y formatos no autorizados se rechazan. <!-- trace:required -->
+- MOD-045: `save()` y las mutaciones propagan la generación hasta la recarga; cerrar sesión o cambiar de usuario antes de resolver el listado no restaura datos ni publica éxito. <!-- trace:required -->
+- MOD-046: un error terminal de miniatura prevalece sobre errores transitorios concurrentes, cancela solicitudes y temporizadores y no se reactiva por una expiración vencida. <!-- trace:required -->
+- MOD-047: retirar una imagen con fallo físico, eliminar después el Modelo y reintentar procesa el trabajo conocido aunque la metadata ya sea nula, sin tocar versiones ajenas. <!-- trace:required -->
+- MOD-048: toda carga registra una operación antes de Storage; fallos de confirmación y compensación dejan una vía recuperable que converge sin limpiar una carga activa ni una versión canónica. <!-- trace:required -->
+- MOD-049: una integración con Admin SDK, Firestore Emulator y Storage Emulator atraviesa el bucket real para carga, sustitución, metadata, generaciones, retirada y ausencia final de objetos o trabajos. <!-- trace:required -->
+- MOD-050: retener ambas escrituras, vencer el arrendamiento, recuperar sin objetos, liberar las escrituras y recuperar de nuevo conserva la operación hasta `cargaFinalizada` y termina sin objetos huérfanos ni afectar la versión canónica. <!-- trace:required -->
+- MOD-051: retirar antes de vencer una carga recuperable responde reconciliación pendiente, conserva la carga activa y solo confirma limpieza después del reintento que elimina objetos y operación. <!-- trace:required -->
+- MOD-052: si el escritor registra `cargaFinalizada: true` después de los borrados y antes de la transacción final, esa ronda conserva operación y generaciones, responde reconciliación y una ronda posterior elimina ambos objetos antes de cerrar. <!-- trace:required -->
+- MOD-053: si ambos uploads terminan pero Firestore falla antes del acuse y durante la compensación, el reintento vencido descubre ambas generaciones, limpia la versión y deja utilizables una carga y retirada posteriores. <!-- trace:required -->
+
+## Criterios del incremento de permisos
+
+- MOD-054: `admin` conserva acceso total; `usuario` con `modelosActivos.ver` lista, navega y obtiene miniaturas, mientras otro `usuario` y anónimo son rechazados.
+- MOD-055: Crear, Editar, Cambiar estado y Eliminar exigen exactamente su acción canónica además de Ver; revocar una acción invalida su resultado pendiente y cierra solo la operación dependiente. <!-- trace:required -->
+- MOD-056: carga, sustitución y retirada de imagen requieren Editar; acceso temporal a original o miniatura requiere Ver y Storage directo permanece cerrado.
+- MOD-057: `getAssetModelCatalogs` entrega referencias sanitizadas a quien puede Ver Modelos sin conceder rutas o callables administrativas de Categorías o Fabricantes.
+- MOD-058: la interfaz muestra solo acciones permitidas, pero toda invocación directa sin capacidad es rechazada sin alterar metadata, objetos, operaciones o trabajos de limpieza.
+- MOD-059: un usuario con `modelosActivos.ver+crear`, sin Editar, crea los datos del Modelo sin ver controles de imagen y sin invocar carga, sustitución o retirada. <!-- trace:required -->
+- MOD-060: si Editar se revoca después de confirmar la creación y antes de procesar la imagen, se conserva el Modelo, no se inicia la operación de imagen y la interfaz informa el estado confirmado sin presentarlo como cancelación. <!-- trace:required -->
+- MOD-061: revocar una acción distinta de la mutación activa no apaga su indicador; una finalización anterior tampoco altera una operación posterior. <!-- trace:required -->
+- MOD-062: una creación con imagen invalidada por revocación no cambia campos, errores, cierre o indicador de un diálogo nuevo, aunque su promesa se resuelva después. <!-- trace:required -->
+- MOD-063: más de 50 sustituciones con borrado físico fallido acumulan trabajos reintentables; al recuperar Storage, la primera invocación procesa solo su lote y responde reconciliación mientras quede trabajo, conserva la versión canónica y los reintentos terminan sin objetos, operaciones ni limpiezas pendientes. <!-- trace:required -->
+
+## Evidencia de limpieza por lotes — 23 de noviembre de 2026
+
+- MOD-063 aprobó sobre `161aabd271e2d6d79935b85470572a230097ae8b` dentro de 45 pruebas con Emulator Suite. Cincuenta y una sustituciones con borrado fallido conservaron sus trabajos; al recuperar Storage, la primera llamada retiró un solo lote, devolvió reconciliación y preservó ambos objetos canónicos. El reintento terminó con metadata nula y cero objetos, operaciones o limpiezas.
+
+## Evidencia de revocación e imagen — 11 de noviembre de 2026
+
+- MOD-055, MOD-059 y MOD-060 aprobaron sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: cada operación valida su acción exacta, `ver+crear` no expone imágenes y una revocación posterior a la escritura conserva el Modelo confirmado sin iniciar la carga.
+
+## Aceptación funcional autenticada — 12 y 13 de noviembre de 2026
+
+- `QA-MODELO-IMG-20261112-1620` confirmó carga de una imagen roja, sustitución por una azul, retirada y eliminación del Modelo descartable.
+- `QA-EXP-20261113-A` mostró una miniatura roja cuya primera URL firmada vencía en `2026-11-13T16:41:56Z`. Sin recarga manual, después del vencimiento la aplicación obtuvo una URL nueva válida hasta `2026-11-13T16:46:51Z` y la miniatura permaneció visible.
+- El responsable eliminó `QA-EXP-20261113-A`; la comprobación posterior confirmó su ausencia. La Categoría `QA Imagen cierre 121126` y el Fabricante `QA Fabricante imágenes 121126` permanecieron intactos.
+- Esta ejecución acepta el ciclo funcional real de imágenes en escritorio y la renovación prevista por MOD-029/MOD-043. No sustituye la revisión visual móvil integral ni se interpreta como una nueva prueba automatizada.
+- La cuenta `PROFESOR`, con Modelos `Ver + Crear` y sin Editar, pudo crear datos sin ver controles de imagen ni acciones no concedidas. La revocación posterior de `Ver` y de Editar confirmó redirección/cierre selectivo sin cerrar la sesión; al finalizar quedó `Sin permisos`.

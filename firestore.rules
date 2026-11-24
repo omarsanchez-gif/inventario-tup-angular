@@ -30,6 +30,30 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    match /modelos_activos_limpiezas/{cleanupId} {
+      allow read, write: if false;
+    }
+
+    match /modelos_activos_operaciones_imagen/{operationId} {
+      allow read, write: if false;
+    }
+
+    match /campus/{campusId} {
+      allow read, write: if false;
+    }
+
+    match /campus_claves/{keyId} {
+      allow read, write: if false;
+    }
+
+    match /areas/{areaId} {
+      allow read, write: if false;
+    }
+
+    match /areas_claves/{keyId} {
+      allow read, write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

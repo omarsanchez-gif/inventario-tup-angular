@@ -1,4 +1,9 @@
 import type { FunctionsErrorCode } from 'firebase-functions/https';
+import {
+  fullPermissionMap,
+  sanitizePermissionMap,
+  type PermissionMap,
+} from './catalog-permissions.js';
 
 export type UserRole = 'admin' | 'usuario';
 
@@ -15,6 +20,7 @@ export interface AuthorizedUserRecord {
   readonly correo: string;
   readonly rol: unknown;
   readonly activo: boolean;
+  readonly permisos: PermissionMap;
 }
 
 export interface CanonicalUserRecord extends AuthorizedUserRecord {
@@ -28,6 +34,7 @@ export interface AuthorizationRepository {
   recordSuccessfulAccess(
     record: AuthorizedUserRecord,
     authenticatedUid: string,
+    authenticatedEmail: string,
   ): Promise<CanonicalUserRecord>;
 }
 
@@ -129,7 +136,11 @@ export async function bootstrapAuthorization(
       throw new AuthorizationError('uid-conflict', 'permission-denied', 'El UID no coincide.');
     }
 
-    const canonical = await dependencies.repository.recordSuccessfulAccess(record, identity.uid);
+    const canonical = await dependencies.repository.recordSuccessfulAccess(
+      record,
+      identity.uid,
+      email,
+    );
     const currentClaims = await dependencies.claims.getClaims(identity.uid);
     const claimsUpdated =
       currentClaims['authorized'] !== true || currentClaims['role'] !== canonical.rol;
@@ -146,6 +157,8 @@ export async function bootstrapAuthorization(
       rol: canonical.rol,
       activo: true as const,
       claimsUpdated,
+      permisos:
+        canonical.rol === 'admin' ? fullPermissionMap() : sanitizePermissionMap(canonical.permisos),
     };
   } catch (error) {
     if (error instanceof AuthorizationError) {

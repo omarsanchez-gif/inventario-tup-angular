@@ -34,4 +34,34 @@
 - [x] Desplegar por separado Rules, Functions, Storage Rules y Hosting a `inventario-stg`.
 - [x] Verificar evidencia remota sin crear datos reales ni tocar producción.
 - [x] Corregir el `SigningError` de la primera prueba autenticada con un vínculo IAM propio y verificar la miniatura del Modelo de prueba existente.
-- [ ] Completar aceptación funcional y visual autenticada en escritorio y móvil.
+- [x] Completar aceptación funcional autenticada en escritorio de carga, sustitución, retirada, expiración, renovación y eliminación de imagen.
+- [ ] Completar la revisión visual autenticada integral del módulo en móvil.
+- [x] Sustituir rutas compartidas por versiones inmutables y generaciones de Storage.
+- [x] Persistir y reintentar limpiezas incompletas para imagen y eliminación de Modelo.
+- [x] Corregir detección AVIF de Sharp (`heif` con compresión `av1`).
+- [x] Conservar el ID después de una escritura confirmada y recuperar imagen/listado sin duplicar.
+- [x] Invalidar respuestas fuera de orden y limitar reintentos de miniaturas.
+- [x] Presentar errores de operaciones del formulario dentro del diálogo.
+- [x] Comprobar el arranque y los cuatro recorridos Playwright desde un clon limpio del SHA de implementación.
+- [x] Publicar por separado Rules, ocho Functions afectadas y Hosting del endurecimiento únicamente en staging.
+- [x] Propagar la generación de sesión hasta recargas, mensajes y la fase posterior de imagen.
+- [x] Detener de forma terminal la renovación de miniaturas ante denegación, pérdida de sesión o destrucción.
+- [x] Procesar limpiezas y operaciones pendientes aun cuando el Modelo o su metadata vigente ya no existan.
+- [x] Persistir una operación arrendada antes del primer objeto y reconciliar cargas canceladas o vencidas.
+- [x] Probar el adaptador real con Firestore Emulator y Storage Emulator, además de `FakeBucket`.
+- [x] Conservar un tombstone recuperable cuando Storage materializa escrituras después de vencer el arrendamiento.
+- [x] Impedir que `removeAssetModelImage` declare éxito mientras existan operaciones activas o pendientes.
+- [x] Cerrar cada recuperación únicamente con evidencia observada antes de sus borrados y conservar generaciones concurrentes.
+- [x] Recuperar un escritor ausente mediante ambas generaciones autoritativas sin fabricar el acuse ni usar TTL.
+- [x] Publicar y verificar este incremento de endurecimiento únicamente en staging.
+
+## Incremento autorizado: permisos granulares
+
+- [x] Especificar el mapeo de las nueve callables a Ver/Crear/Editar/Cambiar estado/Eliminar.
+- [x] Definir que Editar gobierna carga, sustitución y retirada de imagen y Ver gobierna acceso temporal.
+- [x] Sustituir la restricción exclusiva de `admin` por la capacidad canónica, conservando acceso total administrativo.
+- [x] Adaptar guard, submenú, acciones e imagen visible sin confiar en frontend como autoridad.
+- [x] Probar cada concesión y denegación con rol `usuario`, Storage privado y regresión completa del protocolo de imagen.
+- [x] Separar Crear de Editar para que un alta sin Editar no exponga ni inicie operaciones de imagen.
+- [x] Invalidar respuestas, URLs y temporizadores del módulo ante revocación y revalidar negativas de imagen de forma deduplicada.
+- [x] Limitar cada ronda de limpiezas y rechazar éxito mientras exista otro lote pendiente, cubriendo más de 50 trabajos con Firestore Emulator.

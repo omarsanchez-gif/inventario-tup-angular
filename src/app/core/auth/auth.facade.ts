@@ -9,19 +9,37 @@ import type {
 } from '../../shared/models/authorized-user';
 import { mapAuthError } from './auth-error.mapper';
 import { AUTH_GATEWAY, AUTHORIZATION_GATEWAY } from './gateways';
+import { SessionScope } from './session-scope';
+import { isPermissionDenied } from './permission-denied';
+import {
+  hasPermission,
+  type PermissionAction,
+  type PermissionModule,
+} from '../../shared/models/catalog-permissions';
+
+class StaleSessionError extends Error {}
 
 @Injectable({ providedIn: 'root' })
 export class AuthFacade {
   private readonly authGateway = inject(AUTH_GATEWAY);
   private readonly authorizationGateway = inject(AUTHORIZATION_GATEWAY);
   private readonly router = inject(Router);
+  private readonly sessionScope = inject(SessionScope);
   private readonly userState = signal<AuthorizedUser | null>(null);
   private readonly loadingState = signal(true);
   private readonly initializedState = signal(false);
   private readonly errorState = signal<string | null>(null);
   private initializationPromise: Promise<void> | null = null;
   private authorizationPromise: Promise<BootstrapAuthorizationResult> | null = null;
+  private denialAuthorizationPromise: Promise<boolean> | null = null;
+  private denialRevision = 0;
+  private denialCoveredRevision = 0;
+  private denialCycle = 0;
   private authorizationUid: string | null = null;
+  private sessionUid: string | null = null;
+  private authorizationGeneration = 0;
+  private authorizationAttempt = 0;
+  private firebaseUser: User | null = null;
 
   readonly user = this.userState.asReadonly();
   readonly loading = this.loadingState.asReadonly();
@@ -29,6 +47,52 @@ export class AuthFacade {
   readonly error = this.errorState.asReadonly();
   readonly authorized = computed(() => this.userState() !== null);
   readonly role = computed<UserRole | null>(() => this.userState()?.rol ?? null);
+
+  can(module: PermissionModule, action: PermissionAction): boolean {
+    const user = this.userState();
+    return hasPermission(user?.rol ?? null, user?.permisos, module, action);
+  }
+
+  async revalidatePermissionDenial(error: unknown): Promise<boolean> {
+    if (!isPermissionDenied(error)) return false;
+    this.denialRevision += 1;
+    if (this.denialAuthorizationPromise) return this.denialAuthorizationPromise;
+    const cycle = this.denialCycle;
+    const operation = Promise.resolve().then(() => this.runDenialRevalidation(cycle));
+    this.denialAuthorizationPromise = operation;
+    const cleanup = (): void => {
+      if (this.denialAuthorizationPromise === operation) this.denialAuthorizationPromise = null;
+    };
+    void operation.then(cleanup, cleanup);
+    return operation;
+  }
+
+  async refreshAuthorization(forceNewRound = false): Promise<boolean> {
+    await this.initialize();
+    const user = this.firebaseUser;
+    if (!user) return false;
+    const generation = this.authorizationGeneration;
+    let attempt = this.authorizationAttempt;
+    try {
+      const operation = this.authorize(user, generation, forceNewRound);
+      attempt = this.authorizationAttempt;
+      await operation;
+      this.requireCurrentAuthorization(user.uid, generation, attempt);
+      return true;
+    } catch (error) {
+      if (
+        error instanceof StaleSessionError ||
+        !this.isCurrentAuthorization(user.uid, generation, attempt)
+      ) {
+        return false;
+      }
+      this.invalidateSession(null, true);
+      this.errorState.set(mapAuthError(error));
+      await this.safeSignOut();
+      await this.navigateToLogin();
+      return false;
+    }
+  }
 
   initialize(): Promise<void> {
     if (this.initializationPromise) return this.initializationPromise;
@@ -45,8 +109,9 @@ export class AuthFacade {
       this.authGateway.observeSession(
         (user) => void this.handleSession(user).finally(finish),
         (error) => {
-          this.clearState();
+          this.invalidateSession(null, true);
           this.errorState.set(mapAuthError(error));
+          void this.navigateToLogin();
           finish();
         },
       );
@@ -56,76 +121,197 @@ export class AuthFacade {
 
   async login(): Promise<void> {
     await this.initialize();
+    let operationUid = this.sessionUid;
+    let operationGeneration = this.authorizationGeneration;
+    let operationAttempt: number | null = null;
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
       const user = await this.authGateway.signInWithGoogle();
-      await this.authorize(user);
+      this.firebaseUser = user;
+      operationUid = user.uid;
+      operationGeneration = this.activateSession(user.uid);
+      const authorization = this.authorize(user, operationGeneration);
+      operationAttempt = this.authorizationAttempt;
+      await authorization;
+      this.requireCurrentAuthorization(user.uid, operationGeneration, operationAttempt);
       await this.router.navigateByUrl('/dashboard', { replaceUrl: true });
     } catch (error) {
-      this.clearState();
+      if (
+        error instanceof StaleSessionError ||
+        !this.isCurrentSession(operationUid, operationGeneration) ||
+        (operationAttempt !== null &&
+          !this.isCurrentAuthorization(operationUid, operationGeneration, operationAttempt))
+      ) {
+        return;
+      }
+      this.invalidateSession(null, true);
       this.errorState.set(mapAuthError(error));
       await this.safeSignOut();
-    } finally {
       this.loadingState.set(false);
+    } finally {
+      if (
+        this.isCurrentSession(operationUid, operationGeneration) &&
+        (operationAttempt === null ||
+          this.isCurrentAuthorization(operationUid, operationGeneration, operationAttempt))
+      )
+        this.loadingState.set(false);
     }
   }
 
   async logout(): Promise<void> {
     this.loadingState.set(true);
-    this.clearState();
+    this.invalidateSession(null, true);
     try {
       await this.authGateway.signOut();
     } finally {
       this.loadingState.set(false);
-      await this.router.navigateByUrl('/login', { replaceUrl: true });
+      await this.navigateToLogin();
     }
   }
 
   private async handleSession(user: User | null): Promise<void> {
     if (!user) {
-      this.clearState();
+      this.firebaseUser = null;
+      const hadSession = this.sessionUid !== null;
+      this.invalidateSession(null);
+      if (hadSession || this.initializedState()) await this.navigateToLogin();
       return;
     }
+    this.firebaseUser = user;
+    const generation = this.activateSession(user.uid);
+    let attempt = this.authorizationAttempt;
     this.loadingState.set(true);
     try {
-      await this.authorize(user);
+      const operation = this.authorize(user, generation);
+      attempt = this.authorizationAttempt;
+      await operation;
     } catch (error) {
-      this.clearState();
+      if (error instanceof StaleSessionError || !this.isCurrentSession(user.uid, generation))
+        return;
+      this.invalidateSession(null, true);
       this.errorState.set(mapAuthError(error));
       await this.safeSignOut();
-    } finally {
       this.loadingState.set(false);
+      await this.navigateToLogin();
+    } finally {
+      if (this.isCurrentAuthorization(user.uid, generation, attempt)) this.loadingState.set(false);
     }
   }
 
-  private authorize(user: User): Promise<BootstrapAuthorizationResult> {
-    if (this.authorizationPromise && this.authorizationUid === user.uid) {
+  private authorize(
+    user: User,
+    generation: number,
+    forceNewRound = false,
+  ): Promise<BootstrapAuthorizationResult> {
+    if (
+      !forceNewRound &&
+      this.authorizationPromise &&
+      this.authorizationUid === user.uid &&
+      this.authorizationGeneration === generation
+    ) {
       return this.authorizationPromise;
     }
     this.authorizationUid = user.uid;
-    this.authorizationPromise = this.performAuthorization(user).finally(() => {
+    const attempt = ++this.authorizationAttempt;
+    const operation = this.performAuthorization(user, generation, attempt).catch((error) => {
+      this.requireCurrentAuthorization(user.uid, generation, attempt);
+      throw error;
+    });
+    this.authorizationPromise = operation;
+    const cleanup = (): void => {
+      if (this.authorizationPromise !== operation) return;
       this.authorizationPromise = null;
       this.authorizationUid = null;
-    });
-    return this.authorizationPromise;
+    };
+    void operation.then(cleanup, cleanup);
+    return operation;
   }
 
-  private async performAuthorization(user: User): Promise<BootstrapAuthorizationResult> {
+  private async performAuthorization(
+    user: User,
+    generation: number,
+    attempt: number,
+  ): Promise<BootstrapAuthorizationResult> {
     const profile = await this.authorizationGateway.bootstrap();
+    this.requireCurrentAuthorization(user.uid, generation, attempt);
     const token = await this.authGateway.refreshClaims(user);
+    this.requireCurrentAuthorization(user.uid, generation, attempt);
     if (token.claims['authorized'] !== true || token.claims['role'] !== profile.rol) {
       throw { details: { functionalCode: 'service-unavailable' } };
     }
+    const previous = this.userState();
+    this.sessionScope.reconcileAdminAccess(previous?.rol ?? null, profile.rol);
     this.userState.set(profile);
+    this.sessionScope.reconcileCapabilities(
+      previous?.rol ?? null,
+      previous?.permisos,
+      profile.rol,
+      profile.permisos,
+    );
     this.errorState.set(null);
     return profile;
   }
 
+  private activateSession(uid: string): number {
+    if (this.sessionUid !== uid) {
+      this.sessionUid = uid;
+      this.authorizationGeneration += 1;
+      this.sessionScope.invalidate();
+      this.clearState();
+    }
+    return this.authorizationGeneration;
+  }
+
+  private invalidateSession(uid: null, force = false): void {
+    this.firebaseUser = null;
+    if (force || this.sessionUid !== uid) {
+      this.sessionUid = uid;
+      this.authorizationGeneration += 1;
+      this.sessionScope.invalidate();
+    }
+    this.clearState();
+  }
+
+  private requireCurrentSession(uid: string, generation: number): void {
+    if (!this.isCurrentSession(uid, generation)) {
+      throw new StaleSessionError('La respuesta pertenece a una sesión anterior.');
+    }
+  }
+
+  private isCurrentSession(uid: string | null, generation: number): boolean {
+    return this.sessionUid === uid && this.authorizationGeneration === generation;
+  }
+
   private clearState(): void {
+    const previous = this.userState();
+    this.sessionScope.reconcileAdminAccess(previous?.rol ?? null, null);
     this.userState.set(null);
     this.authorizationPromise = null;
     this.authorizationUid = null;
+    this.denialAuthorizationPromise = null;
+    this.denialRevision = 0;
+    this.denialCoveredRevision = 0;
+    this.denialCycle += 1;
+  }
+
+  private requireCurrentAuthorization(uid: string, generation: number, attempt: number): void {
+    if (!this.isCurrentAuthorization(uid, generation, attempt)) {
+      throw new StaleSessionError('La respuesta pertenece a una autorización anterior.');
+    }
+  }
+
+  private isCurrentAuthorization(uid: string | null, generation: number, attempt: number): boolean {
+    return this.isCurrentSession(uid, generation) && this.authorizationAttempt === attempt;
+  }
+
+  private async runDenialRevalidation(cycle: number): Promise<boolean> {
+    while (cycle === this.denialCycle && this.denialCoveredRevision < this.denialRevision) {
+      const coveredRevision = this.denialRevision;
+      if (!(await this.refreshAuthorization(true)) || cycle !== this.denialCycle) return false;
+      this.denialCoveredRevision = coveredRevision;
+    }
+    return cycle === this.denialCycle;
   }
 
   private async safeSignOut(): Promise<void> {
@@ -133,6 +319,12 @@ export class AuthFacade {
       await this.authGateway.signOut();
     } catch {
       // El error funcional original tiene prioridad.
+    }
+  }
+
+  private async navigateToLogin(): Promise<void> {
+    if (this.router.url !== '/login') {
+      await this.router.navigateByUrl('/login', { replaceUrl: true });
     }
   }
 }

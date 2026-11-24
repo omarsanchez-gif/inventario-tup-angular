@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { adminGuard } from './core/guards/admin.guard';
 import { authorizedGuard } from './core/guards/authorized.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { capabilityGuard } from './core/guards/capability.guard';
 
 export const routes: Routes = [
   {
@@ -35,7 +36,7 @@ export const routes: Routes = [
       },
       {
         path: 'configuraciones/categorias',
-        canActivate: [adminGuard],
+        canActivate: [capabilityGuard('categorias')],
         loadComponent: () =>
           import('./features/categories/categories-page/categories-page').then(
             (component) => component.CategoriesPage,
@@ -44,7 +45,7 @@ export const routes: Routes = [
       },
       {
         path: 'configuraciones/fabricantes',
-        canActivate: [adminGuard],
+        canActivate: [capabilityGuard('fabricantes')],
         loadComponent: () =>
           import('./features/manufacturers/manufacturers-page/manufacturers-page').then(
             (component) => component.ManufacturersPage,
@@ -53,12 +54,28 @@ export const routes: Routes = [
       },
       {
         path: 'configuraciones/modelos-activos',
-        canActivate: [adminGuard],
+        canActivate: [capabilityGuard('modelosActivos')],
         loadComponent: () =>
           import('./features/asset-models/asset-models-page/asset-models-page').then(
             (component) => component.AssetModelsPage,
           ),
         title: 'Modelos de activos | Sistema de Inventario TUP',
+      },
+      {
+        path: 'configuraciones/campus',
+        canActivate: [capabilityGuard('campus')],
+        loadComponent: () =>
+          import('./features/campuses/campuses-page/campuses-page').then(
+            (component) => component.CampusesPage,
+          ),
+        title: 'Campus | Sistema de Inventario TUP',
+      },
+      {
+        path: 'configuraciones/areas',
+        canActivate: [capabilityGuard('areas')],
+        loadComponent: () =>
+          import('./features/areas/areas-page/areas-page').then((component) => component.AreasPage),
+        title: 'Áreas | Sistema de Inventario TUP',
       },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],

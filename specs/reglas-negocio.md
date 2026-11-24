@@ -8,12 +8,49 @@
 - RN-AUT-004: Si el registro autorizado conserva `uid: null`, el primer acceso válido asocia el UID.
 - RN-AUT-005: El último acceso se registra con hora del servidor.
 - RN-AUT-006: No existe registro público ni autenticación por contraseña.
+- RN-AUT-007: La asociación inicial de UID revalida dentro de la transacción que el correo canónico siga coincidiendo con el correo autenticado y verificado.
+- RN-AUT-008: Cada cambio o pérdida de identidad invalida autorizaciones y lecturas pendientes; ningún resultado de una generación anterior puede restaurar perfil o datos privados.
+- RN-AUT-009: El éxito, error y finalización de toda autorización o renovación de claims se aplican únicamente si conservan el UID, la generación de sesión y el intento de autorización que inició la operación; una ronda sustituida nunca cierra, limpia, redirige ni apaga el estado de una ronda posterior.
 
 ## Roles iniciales
 
 - RN-ROL-001: Los roles del primer incremento son `admin` y `usuario`.
 - RN-ROL-002: Solo `admin` administra usuarios.
-- RN-ROL-003: Los permisos futuros de inventario requieren especificación propia; el rol no los implica todavía.
+- RN-ROL-003: `admin` implica acceso total a los catálogos administrativos vigentes; `usuario` no implica acceso a ningún catálogo y depende de permisos explícitos.
+
+## Permisos granulares de catálogos — incremento autorizado
+
+RN-PER-001–026 y las ampliaciones granulares de Layout, Categorías, Fabricantes, Modelos, Campus y Áreas describen el incremento autorizado e implementado conforme a ADR-007. Su despliegue se limita a staging.
+
+- RN-PER-001: `usuarios` es la fuente canónica de permisos; Custom Claims conserva solo autorización y rol.
+- RN-PER-002: En este incremento solo son autorizables `categorias`, `fabricantes`, `modelosActivos`, `campus` y `areas`.
+- RN-PER-003: Cada módulo admite `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; cualquier acción distinta de `ver` exige también `ver`.
+- RN-PER-004: La ausencia del mapa, módulo o acción equivale a denegación para `usuario`; no existen concesiones implícitas por puesto, correo o coordinación.
+- RN-PER-005: Crear un usuario no asigna permisos. La asignación se realiza después mediante una acción independiente.
+- RN-PER-006: Solo un `admin` activo puede reemplazar el mapa completo de otro registro con rol `usuario`; el objetivo no administra sus propios privilegios.
+- RN-PER-007: Cambiar el rol limpia el mapa granular para impedir que permisos dormidos reaparezcan al degradar acceso.
+- RN-PER-008: Un usuario inactivo no tiene permisos efectivos, aunque su configuración se conserve para una posible reactivación.
+- RN-PER-009: Cada callable revalida el permiso canónico de su acción. Menú, botones y guards solo son defensas de presentación.
+- RN-PER-010: Una reducción entra en vigor inmediatamente en backend; una respuesta de autorización anterior nunca restaura permisos en una sesión nueva.
+- RN-PER-011: Los permisos de los cinco módulos vigentes son funcionales y globales; Áreas no representa alcance territorial y no anticipa Coordinaciones o alcance sobre Activos.
+- RN-PER-012: `ver` Modelos permite obtener sus referencias sanitizadas y acceso temporal a sus imágenes, sin conceder acceso administrativo a Categorías o Fabricantes.
+
+### Ampliación autorizada para Campus
+
+- RN-PER-013: Campus es el cuarto módulo autorizable del mapa canónico.
+- RN-PER-014: `campus` admite `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; cada callable exige exactamente su acción y toda acción distinta de `ver` requiere también `ver`.
+- RN-PER-015: Para `usuario`, la ausencia de `permisos.campus` o `permisos.areas` equivale a denegación del módulo ausente. `admin` conserva acceso total por rol sin migrar documentos anteriores.
+- RN-PER-016: La callable de asignación exige el mapa completo de cinco módulos. Un cliente anterior que omita Áreas se rechaza de forma explícita y recuperable sin modificar permisos almacenados.
+- RN-PER-026: Todo módulo funcional nuevo se incorpora al registro tipado, Usuarios → Asignar permisos, backend canónico, guard, navegación, interfaz, revocación, pruebas y trazabilidad durante su implementación; de lo contrario no está terminado. Etiqueta, ruta y controles del frontend, así como listeners de revocación, se derivan de ese registro y no de enumeraciones manuales paralelas.
+- RN-PER-017: Los permisos de Campus administrarán el catálogo institucional completo; no representan alcance sobre Activos, Áreas, Coordinaciones o sedes asignadas al usuario.
+- RN-PER-018: Una reducción del mismo UID invalida por módulo y acción las operaciones pendientes; no invalida la sesión completa ni limpia estados de módulos no afectados.
+- RN-PER-019: Retirar `ver` descarta estado privado, URLs y temporizadores del módulo, cierra sus diálogos y abandona su ruta. Retirar otra acción conserva el listado y cierra únicamente la operación dependiente con un anuncio accesible.
+- RN-PER-020: Un `permission-denied` de listado, mutación, catálogo o imagen provoca revalidación deduplicada de autorización y nunca un bucle de reintentos automáticos.
+- RN-PER-021: Un Modelo creado con `ver+crear` no expone ni ejecuta operaciones de imagen; cargar, sustituir o retirar imagen exige `editar` vigente antes y después de cada espera relevante.
+- RN-PER-022: Una escritura ya confirmada no se presenta como cancelada por una revocación posterior. La interfaz descarta resultados obsoletos y reconcilia el estado mediante una lectura autorizada posterior.
+- RN-PER-023: Cada `permission-denied` queda cubierto por una lectura canónica iniciada después de recibirlo. Los rechazos acumulados antes de iniciar una ronda la comparten; si llega otro mientras esa ronda espera perfil o claims, se agenda una ronda posterior que puede cubrir todos los pendientes, sin reintentar la mutación original ni crear un ciclo ilimitado.
+- RN-PER-024: El indicador de guardado pertenece a una operación y acción concretas. Revocar otra acción no lo apaga; una finalización anterior no altera una operación posterior.
+- RN-PER-025: Cada apertura de diálogo posee una identidad invalidada al cerrar, destruir o perder la capacidad necesaria. Ninguna espera anterior modifica campos, errores, cierre o indicador de un diálogo posterior.
 
 ## Usuarios
 
@@ -27,6 +64,8 @@
 - RN-USR-008: El módulo admite un máximo inicial de 500 usuarios y no devuelve resultados parciales.
 - RN-USR-009: Ningún cliente lee `usuarios` directamente; incluso el listado administrativo se obtiene mediante una callable con revalidación canónica.
 - RN-USR-010: Al reducir acceso, actualizar claims y revocar refresh tokens son intentos independientes; el fallo de uno no omite el otro y la operación informa reconciliación requerida.
+- RN-USR-011: El listado administrativo entrega el mapa granular sanitizado para administrar y resumir permisos sin exponer campos técnicos.
+- RN-USR-012: El acceso a Usuarios posee una generación administrativa independiente de la identidad. Perder `admin` limpia listado, filtros, mensajes y operaciones privadas; restaurarlo al mismo UID no rehabilita lecturas, mutaciones ni diálogos de la etapa anterior.
 
 ## Dashboard inicial
 
@@ -40,17 +79,19 @@
 - RN-LAY-002: En escritorio el menú lateral se muestra inicialmente y el botón de menú lo oculta o muestra por completo, sin conservar una barra residual.
 - RN-LAY-003: En móvil el menú inicia cerrado, se presenta como drawer superpuesto y puede cerrarse con el botón, el fondo, Escape o la selección de una ruta.
 - RN-LAY-004: Tipografía, tamaños, colores, espaciado, radios, sombras, iconografía y estados interactivos proceden de tokens o primitivas globales.
-- RN-LAY-005: La navegación conserva las restricciones por rol; estandarizar su presentación no amplía autorizaciones.
+- RN-LAY-005: La navegación conserva las restricciones por rol y permiso; estandarizar su presentación no amplía autorizaciones.
 - RN-LAY-006: Altas, ediciones y confirmaciones de eliminación se presentan mediante el diálogo compartido; no se usan formularios administrativos inline ni confirmaciones nativas del navegador.
-- RN-LAY-007: `Configuraciones` es un grupo desplegable exclusivo de `admin`, no una ruta ni una pantalla independiente.
+- RN-LAY-007: `Configuraciones` es un grupo desplegable, no una ruta ni una pantalla independiente; aparece para `admin` o cuando un `usuario` posee `ver` en al menos un submódulo autorizado.
 - RN-LAY-008: Solo los módulos administrativos implementados y autorizados aparecen como opciones secundarias de `Configuraciones`.
 - RN-LAY-009: Las opciones secundarias usan texto y estado activo; el icono distintivo se reserva para el grupo principal.
 - RN-LAY-010: Si una ruta secundaria está activa, `Configuraciones` expresa su estado activo y se abre al navegar a ella; el usuario puede contraerlo manualmente sin perder el indicador del padre.
 - RN-LAY-011: En móvil, seleccionar una opción secundaria navega y cierra completamente el drawer.
+- RN-LAY-012: El error de una eliminación iniciada en un diálogo se anuncia dentro de ese diálogo, que permanece abierto y recuperable sin duplicar el mensaje en el fondo.
+- RN-LAY-013: Si una sesión válida pierde `admin` mientras `/usuarios` está activa, abandona esa ruta hacia Dashboard, conserva la sesión y sus capacidades granulares restantes y no vuelve automáticamente al restaurar el rol.
 
 ## Categorías
 
-- RN-CAT-001: Solo un `admin` autorizado puede listar y administrar categorías.
+- RN-CAT-001: Un `admin` o un `usuario` con la acción canónica correspondiente puede operar Categorías; cada callable exige su permiso específico.
 - RN-CAT-002: Los únicos campos capturados son `nombre` y `notas`; no existen tipo, acuerdo de uso, imagen ni opciones de notificación en este módulo.
 - RN-CAT-003: El nombre es obligatorio, tiene máximo 120 caracteres y es único después de normalizar mayúsculas, diacríticos y espacios.
 - RN-CAT-004: Las notas son opcionales, se recortan y admiten máximo 1,000 caracteres.
@@ -65,7 +106,7 @@
 
 ## Fabricantes
 
-- RN-FAB-001: Solo un `admin` autorizado puede listar y administrar fabricantes.
+- RN-FAB-001: Un `admin` o un `usuario` con la acción canónica correspondiente puede operar Fabricantes; cada callable exige su permiso específico.
 - RN-FAB-002: Los únicos campos capturados son `nombre` y `notas`; no se almacenan URL, URL de soporte, búsqueda de garantía, teléfono, correo de soporte ni imagen.
 - RN-FAB-003: El nombre es obligatorio, tiene máximo 120 caracteres y es único después de normalizar mayúsculas, diacríticos y espacios.
 - RN-FAB-004: Las notas son opcionales, se recortan y admiten máximo 1,000 caracteres.
@@ -80,7 +121,7 @@
 
 ## Modelos de activos
 
-- RN-MOD-001: Solo un `admin` autorizado puede listar y administrar Modelos de activos.
+- RN-MOD-001: Un `admin` o un `usuario` con la acción canónica correspondiente puede operar Modelos de activos; cada callable exige su permiso específico.
 - RN-MOD-002: Los únicos campos capturados son `nombre`, `categoriaId`, `fabricanteId`, `modeloNo`, `notas` e imagen opcional.
 - RN-MOD-003: El nombre es obligatorio, se normaliza y admite máximo 120 caracteres.
 - RN-MOD-004: Categoría y Fabricante son obligatorios y se guardan mediante identificadores estables; sus nombres no se duplican como fuente canónica.
@@ -100,11 +141,28 @@
 - RN-MOD-018: El listado admite un máximo inicial de 500 Modelos, se ordena por nombre normalizado y nunca devuelve resultados parciales.
 - RN-MOD-019: Identificadores, claves de unicidad, normalización, metadatos de imagen y fechas son administrados por backend.
 - RN-MOD-020: Categorías y Fabricantes se administran en sus módulos propios; el modal de Modelo no contiene altas rápidas ni formularios anidados.
+- RN-MOD-021: Cada imagen confirmada usa una versión inmutable; original y miniatura pertenecen a esa misma versión y una limpieza anterior nunca puede borrar objetos de una versión posterior.
+- RN-MOD-022: Toda limpieza incompleta conserva un trabajo técnico reintentable e idempotente hasta confirmar ambos objetos; eliminar la metadata o el Modelo no equivale a completar la limpieza.
+- RN-MOD-023: Mutaciones y recargas de Modelos conservan la generación de sesión original en todas sus fases; ninguna respuesta tardía actualiza listados, mensajes o inicia una operación de imagen.
+- RN-MOD-024: Un error terminal de acceso a miniaturas detiene la ronda completa y sus temporizadores; solo los errores transitorios admiten hasta tres reintentos con espera creciente.
+- RN-MOD-025: Eliminar un Modelo procesa su imagen vigente, sus limpiezas anteriores y sus cargas recuperables; mientras exista trabajo técnico no confirmado responde reconciliación pendiente.
+- RN-MOD-026: Antes del primer objeto de una carga se persiste una operación con versión, rutas y arrendamiento. Solo una operación vigente puede confirmar metadata; una operación cancelada o vencida es recuperable y nunca puede borrar ni publicar una versión canónica posterior.
+- RN-MOD-027: El vencimiento de un arrendamiento no prueba que Storage dejó de escribir. La operación conserva `cargaFinalizada: false` hasta que el escritor observa el resultado de ambas variantes; la recuperación puede retirar objetos visibles, pero no elimina esa evidencia hasta que la carga finaliza o la versión consta como canónica.
+- RN-MOD-028: Retirar una imagen solo responde éxito cuando no quedan cargas activas, vencidas o canceladas pendientes; si una operación aún no puede reconciliarse responde `asset-model-image-reconciliation-required` y permite reintento.
+- RN-MOD-029: Una ronda de recuperación solo puede retirar la operación si antes de inspeccionar y borrar Storage ya observó `cargaFinalizada: true` o descubrió las generaciones de ambas variantes. Un acuse que aparece después de los borrados no valida esa ronda.
+- RN-MOD-030: Cuando el escritor terminó sin persistir su acuse, la existencia simultánea de ambas generaciones en las rutas inmutables constituye evidencia autoritativa de finalización física para esa versión; la recuperación las borra con precondición y libera la operación sin inventar `cargaFinalizada`.
+- RN-MOD-031: Cada flujo autorizado procesa como máximo un lote acotado de limpiezas y solo comunica éxito si una comprobación posterior confirma que no quedan trabajos del Modelo; un remanente responde reconciliación requerida y conserva la versión canónica y las referencias reintentables.
+
+## Calidad y entorno local
+
+- RN-DEV-001: Los datos sintéticos de Emulator Suite respetan los mismos documentos, normalización y reservas de unicidad que las callables, y su preparación es idempotente y exclusiva de `demo-inventario-tup`.
+- RN-DEV-002: Los criterios marcados como trazabilidad obligatoria en las specs deben tener una entrada estructurada válida; la evidencia de ejecución aprobada se registra separada de la mera presencia de un identificador en una prueba.
+- RN-DEV-003: Repetir la preparación sintética después de una edición canónica conserva el nombre vigente y su única reserva; no recrea el nombre inicial, no borra reservas ajenas y deja el nombre liberado disponible.
 
 ## Campus
 
 - RN-CAM-001: Campus es la raíz física para futuras Áreas, coberturas de Coordinaciones, asignaciones de Usuarios y Activos.
-- RN-CAM-002: Solo un `admin` autorizado puede listar y administrar Campus.
+- RN-CAM-002: Un `admin` activo conserva acceso total y un `usuario` activo solo puede operar Campus mediante la acción canónica explícita correspondiente.
 - RN-CAM-003: Los únicos campos capturados son `codigo`, `nombre` y `notas`; no se asignan Áreas ni Coordinaciones desde este formulario.
 - RN-CAM-004: El código es obligatorio, admite máximo 20 caracteres, se normaliza a mayúsculas sin diacríticos y es único.
 - RN-CAM-005: El nombre es obligatorio, admite máximo 120 caracteres y es único después de normalizar mayúsculas, diacríticos y espacios.
@@ -118,3 +176,30 @@
 - RN-CAM-013: `cantidadAreas` y `cantidadActivos` son contadores derivados, no editables, que permanecen en cero hasta implementar sus fuentes canónicas.
 - RN-CAM-014: FCS y TUP son datos administrativos esperados y no constantes codificadas ni documentos creados automáticamente durante despliegue.
 - RN-CAM-015: Una Coordinación futura podrá cubrir varios Campus sin duplicarse; la relación se definirá fuera del documento de Campus.
+
+### Autorización funcional
+
+- RN-CAM-016: Cada callable de Campus revalida el permiso exacto contra `usuarios`; el menú, guard y botones no son autoridad.
+
+## Áreas
+
+- RN-ARE-001: Cada Área pertenece exactamente a un Campus mediante `campusId`; `admin` conserva acceso ordinario total y `usuario` requiere la capacidad canónica explícita de Áreas.
+- RN-ARE-002: Los únicos campos capturados son Campus, nombre y notas; identidad, normalización, estado, reservas, contadores y fechas son de backend.
+- RN-ARE-003: El nombre es único por Campus después de normalizar Unicode, diacríticos, mayúsculas y espacios; puede repetirse en Campus distintos.
+- RN-ARE-004: Un alta exige Campus activo; una edición histórica puede conservar su Campus inactivo, pero una transferencia solo admite destino activo.
+- RN-ARE-005: Crear, eliminar y transferir mantienen `cantidadAreas` en la misma transacción; estado y renombre no modifican el contador.
+- RN-ARE-006: `cantidadAreas` incluye Áreas activas e inactivas y excluye eliminadas; nunca reemplaza la consulta canónica de referencias.
+- RN-ARE-007: Un Área solo se transfiere o elimina sin referencias; una referencia o error de comprobación bloquea de forma segura y permite desactivar.
+- RN-ARE-008: `deleteCampus` consulta `areas` y rechaza cualquier Área activa o inactiva, aunque el contador difiera.
+- RN-ARE-009: El listado completo admite hasta 500 Áreas y falla sin respuesta parcial al exceder el límite.
+- RN-ARE-010: La reconciliación es administrativa, idempotente, calculada en backend y transaccional; el cliente no envía cantidades.
+- RN-ARE-011: Firestore permanece cerrado a clientes y toda operación usa callables que revalidan rol, claim y perfil canónico.
+- RN-ARE-012: Áreas forma parte del mapa granular con `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; reconciliación permanece exclusiva de admin y el permiso no representa alcance territorial.
+- RN-ARE-013: Listados, catálogos y aperturas de Áreas usan generaciones independientes; solo la solicitud más reciente de la capacidad vigente puede escribir estado o mensajes. Alta y edición capturan además la generación de su acción antes de esperar Campus y la revalidan después. `loading` pertenece exclusivamente al listado vigente; una mutación que lo sustituye termina ese indicador y usa `saving` durante su recarga interna.
+- RN-ARE-014: Perder `areas.ver` invalida permanentemente toda operación anterior aunque el mismo UID recupere después el permiso; perder una acción mutante invalida únicamente operaciones iniciadas con esa acción.
+- RN-ARE-019: `getAreaCatalogs` requiere `areas.ver`, entrega solo identificador, código, nombre y estado aplicables de Campus y no exige `campus.ver`.
+- RN-ARE-020: `createArea`, `updateArea`, `setAreaStatus` y `deleteArea` revalidan respectivamente `crear`, `editar`, `cambiarEstado` y `eliminar` dentro de su transacción; el mapa canónico garantiza además `ver`.
+- RN-ARE-015: La reconciliación puede reparar un `cantidadAreas` derivado ausente, nulo, negativo o no entero cuando las relaciones canónicas son consistentes; informa el estado previo como inválido sin inventar un cero.
+- RN-ARE-016: El nombre de Área debe contener contenido visible efectivo y producir una identidad normalizada no vacía; espacios, controles, formatos invisibles, selectores de variación o marcas aisladas se rechazan antes de crear Área, reserva o modificar contadores.
+- RN-ARE-017: El inspector de referencias solo permite transferir o eliminar cuando responde explícitamente `false`; `true`, excepción o resultado indeterminado bloquean de forma segura.
+- RN-ARE-018: Los recorridos sintéticos generan identidad propia y limpian solo los documentos que poseen; una falla previa no puede colisionar con la siguiente ejecución ni autoriza un borrado global.

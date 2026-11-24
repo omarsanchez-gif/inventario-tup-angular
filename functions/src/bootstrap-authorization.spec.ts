@@ -5,6 +5,7 @@ import {
   bootstrapAuthorization,
   type AuthorizationDependencies,
 } from './bootstrap-authorization.js';
+import { emptyPermissionMap, fullPermissionMap } from './catalog-permissions.js';
 
 function dependencies(): AuthorizationDependencies {
   return {
@@ -18,6 +19,7 @@ function dependencies(): AuthorizationDependencies {
           correo: 'admin@tecplayacar.edu.mx',
           rol: 'admin',
           activo: true,
+          permisos: emptyPermissionMap(),
         },
       ]),
       recordSuccessfulAccess: vi.fn().mockResolvedValue({
@@ -27,6 +29,7 @@ function dependencies(): AuthorizationDependencies {
         correo: 'admin@tecplayacar.edu.mx',
         rol: 'admin',
         activo: true,
+        permisos: emptyPermissionMap(),
       }),
     },
     claims: {
@@ -40,17 +43,24 @@ function dependencies(): AuthorizationDependencies {
 
 describe('bootstrapAuthorization', () => {
   it('authorizes an active institutional profile and synchronizes claims', async () => {
+    const deps = dependencies();
     const result = await bootstrapAuthorization(
       {
         uid: 'uid-admin',
         email: 'Admin@tecplayacar.edu.mx',
         emailVerified: true,
       },
-      dependencies(),
+      deps,
     );
 
     expect(result.rol).toBe('admin');
     expect(result.claimsUpdated).toBe(true);
+    expect(result.permisos).toEqual(fullPermissionMap());
+    expect(deps.repository.recordSuccessfulAccess).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'admin' }),
+      'uid-admin',
+      'admin@tecplayacar.edu.mx',
+    );
   });
 
   it('rejects an external domain', async () => {

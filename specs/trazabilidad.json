@@ -1,0 +1,1582 @@
+{
+  "version": 2,
+  "baseReviewSha": "aa556567aecc1e5b0fb60c4c91a2156d9143fa3c",
+  "implementationSha": "161aabd271e2d6d79935b85470572a230097ae8b",
+  "requiredMarker": "<!-- trace:required -->",
+  "delivery": {
+    "localValidation": "complete",
+    "branchPublication": "complete",
+    "stagingDeployment": "not-requested-for-current-increment",
+    "continuousIntegration": "not-triggered-without-pull-request",
+    "manualAcceptance": "complete-area-granular-grant-revoke-and-restoration"
+  },
+  "matrixScopes": [
+    { "prefix": "AUT", "label": "Autenticación" },
+    { "prefix": "USR", "label": "Usuarios" },
+    { "prefix": "LAY", "label": "Layout privado" },
+    { "prefix": "CAT", "label": "Categorías" },
+    { "prefix": "FAB", "label": "Fabricantes" },
+    { "prefix": "CAM", "label": "Campus" },
+    { "prefix": "ARE", "label": "Áreas" },
+    { "prefix": "MOD", "label": "Modelos de activos" },
+    { "prefix": "DEV", "label": "Calidad local" }
+  ],
+  "executionEvidence": [
+    {
+      "id": "angular-1706695",
+      "sha": "1706695cc3d2a302ac490c3b917417bf4d6dacd2",
+      "status": "passed",
+      "command": "npm test",
+      "result": "14 archivos y 55 pruebas aprobadas",
+      "criteria": [
+        "AUT-011",
+        "AUT-013",
+        "AUT-014",
+        "USR-018",
+        "LAY-021",
+        "MOD-042",
+        "MOD-043",
+        "MOD-045",
+        "MOD-046"
+      ]
+    },
+    {
+      "id": "functions-1706695",
+      "sha": "1706695cc3d2a302ac490c3b917417bf4d6dacd2",
+      "status": "passed",
+      "command": "npm run test:functions",
+      "result": "8 archivos y 42 pruebas unitarias aprobadas; 25 pruebas de emulador omitidas por diseño",
+      "criteria": ["AUT-010", "MOD-044"]
+    },
+    {
+      "id": "emulators-1706695",
+      "sha": "1706695cc3d2a302ac490c3b917417bf4d6dacd2",
+      "status": "passed",
+      "command": "npm run test:emulators",
+      "result": "8 archivos y 25 pruebas con Auth, Firestore, Functions y Storage Emulator aprobadas",
+      "criteria": [
+        "MOD-036",
+        "MOD-037",
+        "MOD-038",
+        "MOD-039",
+        "MOD-040",
+        "MOD-047",
+        "MOD-048",
+        "MOD-049",
+        "DEV-001"
+      ]
+    },
+    {
+      "id": "browser-1706695",
+      "sha": "1706695cc3d2a302ac490c3b917417bf4d6dacd2",
+      "status": "passed",
+      "command": "npm run test:e2e",
+      "result": "4 recorridos Chromium aprobados",
+      "criteria": ["AUT-012", "USR-019", "LAY-020", "MOD-041"]
+    },
+    {
+      "id": "traceability-1706695",
+      "sha": "1706695cc3d2a302ac490c3b917417bf4d6dacd2",
+      "status": "passed",
+      "command": "npm run traceability:check",
+      "result": "184 inventariados, 25 obligatorios, 25 trazados; 7 casos negativos aprobados",
+      "criteria": ["DEV-002"]
+    },
+    {
+      "id": "quality-gates-1706695",
+      "sha": "1706695cc3d2a302ac490c3b917417bf4d6dacd2",
+      "status": "passed",
+      "command": "npm run format:check; npm run lint; npm run functions:build; npm run build:staging; git diff --check",
+      "result": "Formato, lint, guardia visual, ambos builds y diff aprobados; bundle main-525UVZWO.js",
+      "criteria": []
+    },
+    {
+      "id": "runtime-audit-1706695",
+      "sha": "1706695cc3d2a302ac490c3b917417bf4d6dacd2",
+      "status": "passed",
+      "command": "npm audit --omit=dev --audit-level=high",
+      "result": "0 altas o críticas; 4 moderadas transitivas de google-gax",
+      "criteria": []
+    },
+    {
+      "id": "emulators-58a0ab3",
+      "sha": "58a0ab3f4e7452d349cf5bf93632258f0068aeac",
+      "status": "passed",
+      "command": "npm run test:emulators",
+      "result": "8 archivos y 27 pruebas con Auth, Firestore, Functions y Storage Emulator aprobadas; incluye escritura tardía, retirada pendiente, seed tras renombrado e integración real con Storage",
+      "criteria": ["MOD-050", "MOD-051", "DEV-003"]
+    },
+    {
+      "id": "full-regression-58a0ab3",
+      "sha": "58a0ab3f4e7452d349cf5bf93632258f0068aeac",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "55 Angular, 42 Functions, 27 Emulator Suite, 4 Chromium y 7 pruebas de trazabilidad aprobadas; lint, guardia visual, formato, builds, auditoría high y diff aprobaron",
+      "criteria": []
+    },
+    {
+      "id": "emulators-ef8ae66",
+      "sha": "ef8ae667cb3d30104edc1cc4ebd4fc2f8d5ddd04",
+      "status": "passed",
+      "command": "npm run test:emulators",
+      "result": "8 archivos y 29 pruebas aprobadas; incluye cierre concurrente, escritor sin acuse, MOD-050 serial, seed e integración real con Storage Emulator",
+      "criteria": ["MOD-052", "MOD-053"]
+    },
+    {
+      "id": "full-regression-ef8ae66",
+      "sha": "ef8ae667cb3d30104edc1cc4ebd4fc2f8d5ddd04",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "55 Angular, 42 Functions, 29 Emulator Suite, 4 Chromium y 7 pruebas de trazabilidad aprobadas; lint, guardia visual, formato, builds, auditoría high y diff aprobaron",
+      "criteria": []
+    },
+    {
+      "id": "full-regression-f3a4ca2",
+      "sha": "f3a4ca208d550cb3ba4569e28efe0258f177b832",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "63 Angular, 47 Functions, 30 Emulator Suite, 5 Chromium y 7 pruebas de trazabilidad aprobadas; lint, guardia visual, formato, builds, auditoría high y diff aprobaron",
+      "criteria": [
+        "AUT-015",
+        "AUT-016",
+        "USR-020",
+        "USR-021",
+        "USR-022",
+        "USR-023",
+        "USR-024",
+        "USR-025",
+        "USR-026",
+        "USR-027",
+        "USR-028",
+        "USR-029",
+        "USR-030",
+        "LAY-022",
+        "LAY-023",
+        "LAY-024",
+        "LAY-025",
+        "CAT-025",
+        "CAT-026",
+        "CAT-027"
+      ]
+    },
+    {
+      "id": "angular-routes-d1d5b7b",
+      "sha": "d1d5b7bec7fe827bd79654ab0f25f93175c915ea",
+      "status": "passed",
+      "command": "npm test; npm run lint; npm run format:check; npm run traceability:check; npm run build:staging; git diff --check",
+      "result": "16 archivos y 67 pruebas Angular aprobadas; mapeo real de cuatro rutas, lint, guardia visual, formato, trazabilidad, build de staging y diff aprobados",
+      "criteria": ["LAY-024"]
+    },
+    {
+      "id": "campus-permissions-2883ff5",
+      "sha": "2883ff57150bad1ef4fd3867a0d4ccd3190b9724",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check; Firebase staging verification",
+      "result": "71 Angular, 47 Functions, 31 Emulator Suite, 5 Chromium y 7 pruebas de trazabilidad aprobadas; lint, guardia visual, formato, builds, auditoría high y diff aprobaron; 12 Functions ACTIVE, Hosting HTTP 200 con main-AQFFZNH7.js y rechazos anónimos HTTP 401",
+      "criteria": [
+        "AUT-017",
+        "USR-031",
+        "USR-032",
+        "USR-033",
+        "USR-034",
+        "LAY-026",
+        "LAY-027",
+        "CAM-032",
+        "CAM-033",
+        "CAM-034",
+        "CAM-035",
+        "CAM-036",
+        "CAM-037",
+        "CAM-038"
+      ]
+    },
+    {
+      "id": "permissions-accordion-77d8490",
+      "sha": "77d84903f9ca5ad528014cd11518f74a8f1e29d2",
+      "status": "passed",
+      "command": "npm test; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run build:staging; git diff --check; Firebase Hosting staging verification",
+      "result": "La suite aprobó, pero solo comprobaba atributos y no la visibilidad calculada; una regla local mantuvo todos los paneles visibles, por lo que esta ejecución no acredita USR-035",
+      "criteria": []
+    },
+    {
+      "id": "permissions-accordion-fix-f6a91de",
+      "sha": "f6a91de5deea6d8c16c8075150112078e8909a59",
+      "status": "passed",
+      "command": "npm test; npm run test:e2e; npm run lint; npm run format:check; npm run build:staging; git diff --check; Firebase Hosting staging verification",
+      "result": "73 pruebas Angular y 5 recorridos Chromium aprobados; las regresiones comprueban presencia y ausencia real de paneles; lint, guardia visual, formato, build y diff aprobaron; Hosting HTTP 200 con main-2AWLN5BY.js y styles-6O34NL67.css",
+      "criteria": []
+    },
+    {
+      "id": "permissions-accordion-motion-6f11278",
+      "sha": "6f112780370f9f890efc773e21288efc4f4f9497",
+      "status": "passed",
+      "command": "npm test; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run build:staging; git diff --check; Firebase Hosting staging verification",
+      "result": "73 pruebas Angular y 5 recorridos Chromium aprobados; el navegador verificó expansión exclusiva, panel contraído invisible, aria-hidden e inert; trazabilidad, lint, guardia visual, formato, build y diff aprobaron; Hosting HTTP 200 con main-JZFE42HR.js y styles-K7H52MHM.css",
+      "criteria": ["USR-035"]
+    },
+    {
+      "id": "permissions-revocation-4013c35",
+      "sha": "4013c35ae9e8d6eb95bbcefe9321706a876ce5af",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check; Firebase Hosting staging verification",
+      "result": "86 pruebas Angular, 47 unitarias de Functions, 31 con Emulator Suite, 7 recorridos Chromium y 7 controles de trazabilidad aprobados; lint, guardia visual, formato, builds, auditoría sin altas o críticas y diff aprobaron; Hosting HTTP 200 con main-BEAIWWJ4.js y styles-K7H52MHM.css",
+      "criteria": [
+        "AUT-018",
+        "AUT-019",
+        "LAY-028",
+        "CAT-026",
+        "FAB-022",
+        "CAM-038",
+        "MOD-055",
+        "MOD-059",
+        "MOD-060"
+      ]
+    },
+    {
+      "id": "areas-306826f",
+      "sha": "306826f1b0c9b27429a8109c81748f1d17c267b9",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "91 pruebas Angular, 51 unitarias de Functions, 37 con Emulator Suite, 8 recorridos Chromium y 7 controles negativos de trazabilidad aprobados; lint, guardia visual, formato, builds y diff aprobaron; auditoría de ejecución sin vulnerabilidades altas o críticas y con cuatro moderadas transitivas.",
+      "criteria": [
+        "ARE-001",
+        "ARE-002",
+        "ARE-005",
+        "ARE-008",
+        "ARE-016",
+        "ARE-019",
+        "ARE-022",
+        "ARE-023",
+        "ARE-025",
+        "ARE-030",
+        "ARE-034",
+        "ARE-035"
+      ]
+    },
+    {
+      "id": "areas-staging-bc54b96",
+      "sha": "bc54b9699435a9be2e200ed98db177f3d9329d40",
+      "status": "passed",
+      "command": "firebase deploy --only firestore:rules --project staging; firebase deploy --only functions:listAreas,functions:getAreaCatalogs,functions:createArea,functions:updateArea,functions:setAreaStatus,functions:deleteArea,functions:reconcileAreaCounts,functions:deleteCampus --project staging; firebase deploy --only hosting --project staging; functions:list; anonymous HTTP and Firestore REST checks",
+      "result": "Rules publicadas; siete Functions de Áreas creadas y deleteCampus actualizado en Node 22; siete rechazos anónimos 401; areas y areas_claves 403; Hosting 200 con main-2WSN4PTD.js y styles-K7H52MHM.css; producción y datos intactos.",
+      "criteria": ["ARE-032"]
+    },
+    {
+      "id": "areas-filter-7d7854e",
+      "sha": "7d7854e89c9fab4ee29ca2451fffb66a7c878798",
+      "status": "passed",
+      "command": "npm test; npm run lint; npm run build:staging; git diff --check; firebase deploy --only hosting --project staging; Hosting HTTP verification",
+      "result": "91 pruebas Angular, lint, guardia visual, build y diff aprobados; el filtro incluye Campus históricos presentes en Áreas y Hosting 200 sirve main-2LPPUI52.js con styles-K7H52MHM.css.",
+      "criteria": []
+    },
+    {
+      "id": "closure-hardening-5df7763",
+      "sha": "5df7763ca23d862c7b4629f1088299b077d63b8d",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "104 pruebas Angular, 52 unitarias de Functions, 40 con Emulator Suite, 8 recorridos Chromium y 7 controles negativos de trazabilidad aprobados; lint, guardia visual, formato, builds y diff aprobaron; auditoría sin altas o críticas y con cuatro moderadas transitivas aceptadas.",
+      "criteria": [
+        "AUT-020",
+        "CAT-028",
+        "FAB-024",
+        "CAM-039",
+        "MOD-061",
+        "MOD-062",
+        "ARE-036",
+        "ARE-037",
+        "ARE-038",
+        "ARE-039",
+        "ARE-040",
+        "ARE-041",
+        "ARE-042",
+        "ARE-043"
+      ]
+    },
+    {
+      "id": "closure-staging-5df7763",
+      "sha": "5df7763ca23d862c7b4629f1088299b077d63b8d",
+      "status": "passed",
+      "command": "firebase deploy --only functions:createArea --project staging; firebase deploy --only functions:updateArea --project staging; firebase deploy --only functions:deleteArea --project staging; firebase deploy --only functions:reconcileAreaCounts --project staging; firebase deploy --only hosting --project staging; functions:list; anonymous HTTP checks",
+      "result": "Cuatro Functions v2 Node 22 actualizadas por separado; las cuatro rechazaron anónimo con HTTP 401; Hosting HTTP 200 sirve main-5BT6D7I5.js y styles-K7H52MHM.css; Rules, datos, secretos, IAM y producción intactos.",
+      "criteria": []
+    },
+    {
+      "id": "areas-auth-corrections-88ea3af",
+      "sha": "88ea3afaa568bcc46a4aed45951e50049c2703fe",
+      "status": "passed",
+      "command": "npm test; npm run test:functions; npm run test:emulators; npm run test:e2e; npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "112 pruebas Angular, 52 unitarias de Functions, 42 con Emulator Suite, 8 recorridos Chromium y 7 controles negativos de trazabilidad aprobados; lint, guardia visual, formato, builds y diff aprobaron; auditoría sin altas o críticas y con cuatro moderadas transitivas aceptadas; bundle main-HZGOJ7WY.js.",
+      "criteria": [
+        "AUT-014",
+        "AUT-019",
+        "AUT-020",
+        "ARE-022",
+        "ARE-023",
+        "ARE-035",
+        "ARE-036",
+        "ARE-040",
+        "ARE-042"
+      ]
+    },
+    {
+      "id": "areas-auth-staging-88ea3af",
+      "sha": "88ea3afaa568bcc46a4aed45951e50049c2703fe",
+      "status": "passed",
+      "command": "firebase deploy --only functions:createArea --project staging; firebase deploy --only functions:updateArea --project staging; firebase deploy --only hosting --project staging; firebase functions:list --project staging; anonymous HTTP and Hosting checks",
+      "result": "createArea y updateArea v2 Node 22 actualizadas por separado y con rechazo anónimo HTTP 401; Hosting HTTP 200 sirve main-HZGOJ7WY.js y styles-K7H52MHM.css; Rules, demás Functions, índices, datos, secretos, IAM y producción intactos.",
+      "criteria": []
+    },
+    {
+      "id": "layout-mobile-5e645de",
+      "sha": "5e645debf1df4239c6c5f73fc56ca9263ac65ae4",
+      "status": "passed",
+      "command": "npm run test:e2e; npm run lint; npm run format; npm run format:check; npm run build:staging; npm run traceability:check; git diff --check",
+      "result": "8 recorridos Chromium aprobaron, incluido LAY-020 reforzado contra documentElement.clientWidth; lint, guardia visual, formato, build de staging, trazabilidad y diff aprobaron. La aceptación autenticada posterior confirmó ausencia de desplazamiento global en 320 px y escritorio.",
+      "criteria": ["LAY-020"]
+    },
+    {
+      "id": "layout-staging-5e645de",
+      "sha": "5e645debf1df4239c6c5f73fc56ca9263ac65ae4",
+      "status": "passed",
+      "command": "firebase deploy --only hosting --project staging; authenticated desktop and 320 px verification",
+      "result": "Hosting publicó 15 archivos únicamente en inventario-stg; la aplicación conservó main-HZGOJ7WY.js, actualizó styles-TYZCJRJC.css y la sesión administrativa observó scrollWidth igual a clientWidth en 320 px y escritorio.",
+      "criteria": []
+    },
+    {
+      "id": "manual-staging-acceptance-20261113",
+      "sha": "5e645debf1df4239c6c5f73fc56ca9263ac65ae4",
+      "status": "passed",
+      "command": "authenticated manual staging acceptance on inventario-stg",
+      "result": "ARE-033 completó eliminación acotada; el ciclo real de imagen confirmó carga, sustitución, retirada, renovación tras expiración y eliminación; la cuenta PROFESOR confirmó concesión y revocación selectiva y terminó sin permisos.",
+      "criteria": ["ARE-033"]
+    },
+    {
+      "id": "areas-permissions-angular-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "npm test",
+      "result": "22 archivos y 123 pruebas Angular aprobadas; incluye quinto módulo, guard, shell, acciones y revocación selectiva de Áreas.",
+      "criteria": [
+        "USR-036",
+        "USR-039",
+        "AUT-022",
+        "AUT-023",
+        "LAY-029",
+        "LAY-030",
+        "LAY-031",
+        "ARE-044",
+        "ARE-046",
+        "ARE-049",
+        "ARE-050",
+        "ARE-051",
+        "ARE-052"
+      ]
+    },
+    {
+      "id": "areas-permissions-functions-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "npm run test:functions",
+      "result": "10 archivos y 53 pruebas unitarias de Functions aprobadas; 43 escenarios de emulador omitidos aquí por diseño y ejecutados por separado.",
+      "criteria": [
+        "USR-037",
+        "USR-038",
+        "AUT-021",
+        "ARE-045",
+        "ARE-047",
+        "ARE-053",
+        "ARE-054",
+        "ARE-055",
+        "ARE-056"
+      ]
+    },
+    {
+      "id": "areas-permissions-emulators-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "npm run test:emulators",
+      "result": "9 archivos y 43 pruebas con Auth, Firestore, Functions y Storage Emulator aprobadas; incluye autorización callable, catálogo mínimo y revalidación transaccional de Áreas.",
+      "criteria": ["ARE-048", "ARE-057"]
+    },
+    {
+      "id": "areas-permissions-browser-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "npm run test:e2e",
+      "result": "8 recorridos Chromium aprobados; el acordeón accesible mostró y conservó el mapa completo de cinco módulos en escritorio y 320 px.",
+      "criteria": []
+    },
+    {
+      "id": "areas-permissions-quality-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "Contrato de permisos y trazabilidad aprobaron; lint, guardia visual, formato, ambos builds, auditoría sin altas/críticas y diff aprobaron. Bundle main-BXI7LJCY.js.",
+      "criteria": ["ARE-058"]
+    },
+    {
+      "id": "areas-permissions-staging-36b5a59",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "firebase deploy --only functions:<11 compatibles> --project staging; firebase deploy --only hosting --project staging; functions:list; anonymous HTTP and Hosting checks",
+      "result": "Once Functions de Autenticación, Usuarios y Áreas quedaron ACTIVE en Node.js 22 con hash común 6508c9d6fb576d85b8dceb857d79381897465d64; Hosting HTTP 200 publicó main-BXI7LJCY.js y styles-TYZCJRJC.css; cuatro callables representativas rechazaron acceso anónimo con HTTP 401.",
+      "criteria": []
+    },
+    {
+      "id": "areas-permissions-manual-20261120",
+      "sha": "36b5a593d1eab0c90dc478f986d9a318501c0a07",
+      "status": "passed",
+      "command": "authenticated manual staging acceptance on inventario-stg",
+      "result": "El responsable confirmó con PROFESOR la asignación efectiva de Ver, Editar y Crear en Áreas, la creación permitida y la pérdida de acceso al retirar permisos; la configuración quedó restaurada.",
+      "criteria": []
+    },
+    {
+      "id": "phase-close-angular-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "npm test",
+      "result": "22 archivos y 124 pruebas Angular aprobadas; incluye aperturas ligadas a capacidad y cobertura dinámica del registro en Usuarios y Layout.",
+      "criteria": ["USR-040", "LAY-032", "ARE-059"]
+    },
+    {
+      "id": "phase-close-functions-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "npm run test:functions",
+      "result": "10 archivos y 53 pruebas unitarias de Functions aprobadas; 44 escenarios de emulador omitidos aquí por diseño y ejecutados por separado.",
+      "criteria": ["ARE-001"]
+    },
+    {
+      "id": "phase-close-emulators-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "npm run test:emulators",
+      "result": "9 archivos y 44 pruebas con Auth, Firestore, Functions y Storage Emulator aprobadas; ARE-048 retuvo cada mutación con barrera determinista tras autorización preliminar real y comprobó el orden inverso.",
+      "criteria": ["ARE-048"]
+    },
+    {
+      "id": "phase-close-browser-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "npm run test:e2e",
+      "result": "8 recorridos Chromium aprobados con identidad y datos sintéticos.",
+      "criteria": []
+    },
+    {
+      "id": "phase-close-quality-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "npm run traceability:check; npm run lint; npm run format:check; npm run functions:build; npm run build:staging; npm audit --omit=dev --audit-level=high; git diff --check",
+      "result": "314 criterios inventariados y 128 obligatorios trazados; 8 pruebas de trazabilidad/contrato, lint, guardia visual, formato, ambos builds, auditoría sin altas/críticas y diff aprobaron. Bundle main-YXTMA5SG.js.",
+      "criteria": []
+    },
+    {
+      "id": "phase-close-staging-7e1e277",
+      "sha": "7e1e277adc039cadd5f87d2ffab8f1e33701e0fc",
+      "status": "passed",
+      "command": "firebase deploy --only hosting --project staging; HTTP verification",
+      "result": "Hosting publicó 15 archivos únicamente en inventario-stg; índice, main-YXTMA5SG.js y styles-TYZCJRJC.css respondieron HTTP 200. Functions, Rules, datos y producción permanecieron intactos.",
+      "criteria": []
+    },
+    {
+      "id": "admin-scope-angular-161aabd",
+      "sha": "161aabd271e2d6d79935b85470572a230097ae8b",
+      "status": "passed",
+      "command": "npm test",
+      "result": "22 archivos y 128 pruebas Angular aprobadas; Usuarios limpió datos y diálogos, aisló respuestas entre generaciones admin y el shell abandonó /usuarios sin logout.",
+      "criteria": ["USR-041", "USR-042", "LAY-033"]
+    },
+    {
+      "id": "image-cleanup-emulator-161aabd",
+      "sha": "161aabd271e2d6d79935b85470572a230097ae8b",
+      "status": "passed",
+      "command": "npm run test:emulators",
+      "result": "9 archivos y 45 pruebas con Auth, Firestore, Functions y Storage Emulator aprobadas; 51 limpiezas demostraron reconciliación tras el primer lote y convergencia sin dañar la versión canónica.",
+      "criteria": ["MOD-063"]
+    }
+  ],
+  "entries": [
+    {
+      "requirement": "RN-AUT-007",
+      "criterion": "AUT-010",
+      "verification": "automated",
+      "tests": ["functions/src/firestore-repositories.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "functions-1706695"
+    },
+    {
+      "requirement": "RN-AUT-008",
+      "criterion": "AUT-011",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "angular-1706695"
+    },
+    {
+      "requirement": "RN-AUT-008",
+      "criterion": "AUT-012",
+      "verification": "browser",
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "browser-1706695"
+    },
+    {
+      "requirement": "RN-AUT-008",
+      "criterion": "AUT-013",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "angular-1706695"
+    },
+    {
+      "requirement": "RN-AUT-009",
+      "criterion": "AUT-014",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-auth-corrections-88ea3af"
+    },
+    {
+      "requirement": "RN-USR-009",
+      "criterion": "USR-018",
+      "verification": "automated",
+      "tests": ["src/app/features/users/state/users.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "angular-1706695"
+    },
+    {
+      "requirement": "RN-LAY-006",
+      "criterion": "USR-019",
+      "verification": "browser",
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "browser-1706695"
+    },
+    {
+      "requirement": "RN-LAY-003",
+      "criterion": "LAY-020",
+      "verification": "browser",
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "layout-mobile-5e645de"
+    },
+    {
+      "requirement": "RN-LAY-012",
+      "criterion": "LAY-021",
+      "verification": "automated",
+      "tests": [
+        "src/app/features/users/users-page/users-page.spec.ts",
+        "src/app/features/categories/categories-page/categories-page.spec.ts",
+        "src/app/features/manufacturers/manufacturers-page/manufacturers-page.spec.ts",
+        "src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts",
+        "src/app/features/campuses/campuses-page/campuses-page.spec.ts"
+      ],
+      "state": "verified-local",
+      "evidenceId": "angular-1706695"
+    },
+    {
+      "requirement": "RN-MOD-021",
+      "criterion": "MOD-036",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-1706695"
+    },
+    {
+      "requirement": "RN-MOD-021",
+      "criterion": "MOD-037",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-1706695"
+    },
+    {
+      "requirement": "RN-MOD-022",
+      "criterion": "MOD-038",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-1706695"
+    },
+    {
+      "requirement": "RN-MOD-022",
+      "criterion": "MOD-039",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-1706695"
+    },
+    {
+      "requirement": "RN-MOD-022",
+      "criterion": "MOD-040",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-1706695"
+    },
+    {
+      "requirement": "RN-MOD-002",
+      "criterion": "MOD-041",
+      "verification": "browser",
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "browser-1706695"
+    },
+    {
+      "requirement": "RN-MOD-015",
+      "criterion": "MOD-042",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "angular-1706695"
+    },
+    {
+      "requirement": "RN-MOD-015",
+      "criterion": "MOD-043",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "angular-1706695"
+    },
+    {
+      "requirement": "RN-MOD-014",
+      "criterion": "MOD-044",
+      "verification": "automated",
+      "tests": ["functions/src/asset-model-images.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "functions-1706695"
+    },
+    {
+      "requirement": "RN-MOD-023",
+      "criterion": "MOD-045",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/state/asset-models.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "angular-1706695"
+    },
+    {
+      "requirement": "RN-MOD-024",
+      "criterion": "MOD-046",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "angular-1706695"
+    },
+    {
+      "requirement": "RN-MOD-025",
+      "criterion": "MOD-047",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-1706695"
+    },
+    {
+      "requirement": "RN-MOD-026",
+      "criterion": "MOD-048",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-1706695"
+    },
+    {
+      "requirement": "RN-MOD-026",
+      "criterion": "MOD-049",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-storage-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-1706695"
+    },
+    {
+      "requirement": "RN-MOD-027",
+      "criterion": "MOD-050",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-58a0ab3"
+    },
+    {
+      "requirement": "RN-MOD-028",
+      "criterion": "MOD-051",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-58a0ab3"
+    },
+    {
+      "requirement": "RN-MOD-029",
+      "criterion": "MOD-052",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-ef8ae66"
+    },
+    {
+      "requirement": "RN-MOD-030",
+      "criterion": "MOD-053",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-ef8ae66"
+    },
+    {
+      "requirement": "RN-DEV-001",
+      "criterion": "DEV-001",
+      "verification": "emulator",
+      "tests": ["functions/src/seed-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-1706695"
+    },
+    {
+      "requirement": "RN-DEV-002",
+      "criterion": "DEV-002",
+      "verification": "automated",
+      "tests": ["scripts/check-traceability.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "traceability-1706695"
+    },
+    {
+      "requirement": "RN-DEV-003",
+      "criterion": "DEV-003",
+      "verification": "emulator",
+      "tests": ["functions/src/seed-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "emulators-58a0ab3"
+    },
+    {
+      "requirement": "RN-PER-001",
+      "criterion": "AUT-015",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-010",
+      "criterion": "AUT-016",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-005",
+      "criterion": "USR-020",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-004",
+      "criterion": "USR-021",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-006",
+      "criterion": "USR-022",
+      "verification": "browser",
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-003",
+      "criterion": "USR-023",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-007",
+      "criterion": "USR-024",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-008",
+      "criterion": "USR-025",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-001",
+      "criterion": "USR-026",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-USR-011",
+      "criterion": "USR-027",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-005",
+      "criterion": "USR-028",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-005",
+      "criterion": "USR-029",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-006",
+      "criterion": "USR-030",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-LAY-005",
+      "criterion": "LAY-022",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-LAY-005",
+      "criterion": "LAY-023",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-009",
+      "criterion": "LAY-024",
+      "verification": "automated",
+      "tests": ["src/app/core/guards/capability.guard.spec.ts", "src/app/app.routes.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "angular-routes-d1d5b7b"
+    },
+    {
+      "requirement": "RN-PER-010",
+      "criterion": "LAY-025",
+      "verification": "automated",
+      "tests": ["src/app/core/guards/capability.guard.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-009",
+      "criterion": "CAT-025",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-018",
+      "criterion": "CAT-026",
+      "verification": "automated",
+      "tests": [
+        "src/app/features/categories/state/categories.facade.spec.ts",
+        "src/app/features/categories/categories-page/categories-page.spec.ts"
+      ],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-018",
+      "criterion": "FAB-022",
+      "verification": "browser",
+      "tests": [
+        "src/app/features/manufacturers/state/manufacturers.facade.spec.ts",
+        "src/app/features/manufacturers/manufacturers-page/manufacturers-page.spec.ts",
+        "e2e/inventory.spec.ts"
+      ],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-009",
+      "criterion": "CAT-027",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "full-regression-f3a4ca2"
+    },
+    {
+      "requirement": "RN-PER-015",
+      "criterion": "AUT-017",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-015",
+      "criterion": "USR-031",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-013",
+      "criterion": "USR-032",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-016",
+      "criterion": "USR-033",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-016",
+      "criterion": "USR-034",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-LAY-004",
+      "criterion": "USR-035",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-accordion-motion-6f11278"
+    },
+    {
+      "requirement": "RN-LAY-007",
+      "criterion": "LAY-026",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-009",
+      "criterion": "LAY-027",
+      "verification": "automated",
+      "tests": ["src/app/app.routes.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-CAM-002",
+      "criterion": "CAM-032",
+      "verification": "emulator",
+      "tests": ["functions/src/users-emulator.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-014",
+      "criterion": "CAM-033",
+      "verification": "emulator",
+      "tests": ["functions/src/campuses-firestore.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-009",
+      "criterion": "CAM-034",
+      "verification": "automated",
+      "tests": ["src/app/features/campuses/campuses-page/campuses-page.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-015",
+      "criterion": "CAM-035",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-013",
+      "criterion": "CAM-036",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-016",
+      "criterion": "CAM-037",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "campus-permissions-2883ff5"
+    },
+    {
+      "requirement": "RN-PER-010",
+      "criterion": "CAM-038",
+      "verification": "browser",
+      "tests": [
+        "src/app/features/campuses/state/campuses.facade.spec.ts",
+        "src/app/features/campuses/campuses-page/campuses-page.spec.ts",
+        "e2e/inventory.spec.ts"
+      ],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-018",
+      "criterion": "AUT-018",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/session-scope.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-020",
+      "criterion": "AUT-019",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "areas-auth-corrections-88ea3af"
+    },
+    {
+      "requirement": "RN-PER-019",
+      "criterion": "LAY-028",
+      "verification": "browser",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts", "e2e/inventory.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-018",
+      "criterion": "MOD-055",
+      "verification": "automated",
+      "tests": [
+        "src/app/features/asset-models/state/asset-models.facade.spec.ts",
+        "functions/src/admin-asset-models.spec.ts"
+      ],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-021",
+      "criterion": "MOD-059",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-PER-022",
+      "criterion": "MOD-060",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "deployed-staging",
+      "evidenceId": "permissions-revocation-4013c35"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "ARE-001",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "phase-close-functions-7e1e277"
+    },
+    {
+      "requirement": "RN-ARE-011",
+      "criterion": "ARE-002",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
+    },
+    {
+      "requirement": "RN-ARE-005",
+      "criterion": "ARE-005",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
+    },
+    {
+      "requirement": "RN-ARE-003",
+      "criterion": "ARE-008",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
+    },
+    {
+      "requirement": "RN-ARE-005",
+      "criterion": "ARE-016",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
+    },
+    {
+      "requirement": "RN-ARE-007",
+      "criterion": "ARE-019",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
+    },
+    {
+      "requirement": "RN-ARE-008",
+      "criterion": "ARE-022",
+      "verification": "emulator",
+      "tests": [
+        "functions/src/areas-firestore.spec.ts",
+        "functions/src/campuses-firestore.spec.ts"
+      ],
+      "state": "verified-local",
+      "evidenceId": "areas-auth-corrections-88ea3af"
+    },
+    {
+      "requirement": "RN-ARE-005",
+      "criterion": "ARE-023",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-auth-corrections-88ea3af"
+    },
+    {
+      "requirement": "RN-ARE-010",
+      "criterion": "ARE-025",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "ARE-030",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
+    },
+    {
+      "requirement": "RN-ARE-011",
+      "criterion": "ARE-032",
+      "verification": "manual",
+      "tests": [],
+      "state": "accepted-manual",
+      "evidenceId": "areas-staging-bc54b96"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "ARE-033",
+      "verification": "manual",
+      "tests": [],
+      "state": "accepted-manual",
+      "evidenceId": "manual-staging-acceptance-20261113"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "ARE-034",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-306826f"
+    },
+    {
+      "requirement": "RN-ARE-005",
+      "criterion": "ARE-035",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-auth-corrections-88ea3af"
+    },
+    {
+      "requirement": "RN-PER-023",
+      "criterion": "AUT-020",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/auth.facade.spec.ts", "src/app/core/auth/session-scope.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-auth-corrections-88ea3af"
+    },
+    {
+      "requirement": "RN-PER-024",
+      "criterion": "CAT-028",
+      "verification": "automated",
+      "tests": ["src/app/features/categories/state/categories.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-PER-024",
+      "criterion": "FAB-024",
+      "verification": "automated",
+      "tests": ["src/app/features/manufacturers/state/manufacturers.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-PER-024",
+      "criterion": "CAM-039",
+      "verification": "automated",
+      "tests": ["src/app/features/campuses/state/campuses.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-PER-024",
+      "criterion": "MOD-061",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/state/asset-models.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-PER-025",
+      "criterion": "MOD-062",
+      "verification": "automated",
+      "tests": ["src/app/features/asset-models/asset-models-page/asset-models-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-ARE-013",
+      "criterion": "ARE-036",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-auth-corrections-88ea3af"
+    },
+    {
+      "requirement": "RN-ARE-013",
+      "criterion": "ARE-037",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "ARE-038",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-ARE-015",
+      "criterion": "ARE-039",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-ARE-016",
+      "criterion": "ARE-040",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-auth-corrections-88ea3af"
+    },
+    {
+      "requirement": "RN-ARE-017",
+      "criterion": "ARE-041",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-ARE-015",
+      "criterion": "ARE-042",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-auth-corrections-88ea3af"
+    },
+    {
+      "requirement": "RN-ARE-018",
+      "criterion": "ARE-043",
+      "verification": "browser",
+      "tests": ["e2e/inventory.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "closure-hardening-5df7763"
+    },
+    {
+      "requirement": "RN-PER-026",
+      "criterion": "USR-036",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-007",
+      "criterion": "USR-037",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-016",
+      "criterion": "USR-038",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
+    },
+    {
+      "requirement": "RN-USR-011",
+      "criterion": "USR-039",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-015",
+      "criterion": "AUT-021",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "AUT-022",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/session-scope.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-010",
+      "criterion": "AUT-023",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/session-scope.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-LAY-007",
+      "criterion": "LAY-029",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "LAY-030",
+      "verification": "automated",
+      "tests": ["src/app/core/guards/capability.guard.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "LAY-031",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-026",
+      "criterion": "ARE-044",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-001",
+      "criterion": "ARE-045",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-019",
+      "criterion": "ARE-046",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/areas-page/areas-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-020",
+      "criterion": "ARE-047",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-020",
+      "criterion": "ARE-048",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "phase-close-emulators-7e1e277"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "ARE-049",
+      "verification": "automated",
+      "tests": [
+        "src/app/features/areas/areas-page/areas-page.spec.ts",
+        "src/app/features/areas/state/areas.facade.spec.ts"
+      ],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "ARE-050",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-014",
+      "criterion": "ARE-051",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/state/areas.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-010",
+      "criterion": "ARE-052",
+      "verification": "automated",
+      "tests": ["src/app/core/auth/session-scope.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-angular-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-015",
+      "criterion": "ARE-053",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-016",
+      "criterion": "ARE-054",
+      "verification": "automated",
+      "tests": ["functions/src/catalog-permissions.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-019",
+      "criterion": "ARE-055",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-012",
+      "criterion": "ARE-056",
+      "verification": "automated",
+      "tests": ["functions/src/admin-areas.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-functions-36b5a59"
+    },
+    {
+      "requirement": "RN-ARE-005",
+      "criterion": "ARE-057",
+      "verification": "emulator",
+      "tests": ["functions/src/areas-firestore.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-emulators-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-026",
+      "criterion": "ARE-058",
+      "verification": "automated",
+      "tests": ["scripts/check-permission-contract.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "areas-permissions-quality-36b5a59"
+    },
+    {
+      "requirement": "RN-PER-026",
+      "criterion": "USR-040",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "phase-close-angular-7e1e277"
+    },
+    {
+      "requirement": "RN-PER-026",
+      "criterion": "LAY-032",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "phase-close-angular-7e1e277"
+    },
+    {
+      "requirement": "RN-PER-025",
+      "criterion": "ARE-059",
+      "verification": "automated",
+      "tests": ["src/app/features/areas/areas-page/areas-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "phase-close-angular-7e1e277"
+    },
+    {
+      "requirement": "RN-USR-012",
+      "criterion": "USR-041",
+      "verification": "automated",
+      "tests": ["src/app/features/users/state/users.facade.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "admin-scope-angular-161aabd"
+    },
+    {
+      "requirement": "RN-USR-012",
+      "criterion": "USR-042",
+      "verification": "automated",
+      "tests": ["src/app/features/users/users-page/users-page.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "admin-scope-angular-161aabd"
+    },
+    {
+      "requirement": "RN-LAY-013",
+      "criterion": "LAY-033",
+      "verification": "automated",
+      "tests": ["src/app/layout/shell/admin-shell.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "admin-scope-angular-161aabd"
+    },
+    {
+      "requirement": "RN-MOD-031",
+      "criterion": "MOD-063",
+      "verification": "emulator",
+      "tests": ["functions/src/asset-model-images-emulator.spec.ts"],
+      "state": "verified-local",
+      "evidenceId": "image-cleanup-emulator-161aabd"
+    }
+  ]
+}

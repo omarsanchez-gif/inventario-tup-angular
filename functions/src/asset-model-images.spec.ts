@@ -13,7 +13,7 @@ const admin = { uid: 'uid-admin', authorized: true, role: 'admin' } as const;
 function dependencies(): AssetModelImageDependencies {
   return {
     repository: {
-      findCanonicalAdmin: vi.fn().mockResolvedValue(true),
+      hasCanonicalPermission: vi.fn().mockResolvedValue(true),
       list: vi.fn(),
       listCatalogs: vi.fn(),
       create: vi.fn(),
@@ -31,6 +31,26 @@ function dependencies(): AssetModelImageDependencies {
 }
 
 describe('asset model images', () => {
+  it('MOD-056 requires edit permission before uploading an image', async () => {
+    const deps = dependencies();
+    deps.repository.hasCanonicalPermission = vi.fn().mockResolvedValue(false);
+
+    await expect(
+      setAssetModelImage(
+        { uid: 'user', authorized: true, role: 'usuario' },
+        {
+          documentId: 'model-1',
+          fileName: 'image.png',
+          contentType: 'image/png',
+          base64: Buffer.from('png').toString('base64'),
+        },
+        deps,
+      ),
+    ).rejects.toMatchObject({ functionalCode: 'permission-denied' });
+    expect(deps.repository.hasCanonicalPermission).toHaveBeenCalledWith('user', 'editar');
+    expect(deps.images.set).not.toHaveBeenCalled();
+  });
+
   it('accepts only the declared content types and two MiB payload', async () => {
     const deps = dependencies();
     await expect(
@@ -79,6 +99,48 @@ describe('asset model images', () => {
     expect(thumbnail).toMatchObject({ format: 'webp', width: 256, height: 128 });
     await expect(
       processAssetModelImage({ fileName: 'fake.jpg', contentType: 'image/jpeg', bytes: source }),
+    ).rejects.toMatchObject({ functionalCode: 'asset-model-image-invalid' });
+  });
+
+  it('MOD-023 MOD-044 processes JPEG, PNG, WebP and AVIF using decoded metadata', async () => {
+    const source = sharp({
+      create: { width: 32, height: 24, channels: 3, background: '#123456' },
+    });
+    const fixtures = await Promise.all([
+      source
+        .clone()
+        .jpeg()
+        .toBuffer()
+        .then((bytes) => ({ bytes, contentType: 'image/jpeg' })),
+      source
+        .clone()
+        .png()
+        .toBuffer()
+        .then((bytes) => ({ bytes, contentType: 'image/png' })),
+      source
+        .clone()
+        .webp()
+        .toBuffer()
+        .then((bytes) => ({ bytes, contentType: 'image/webp' })),
+      source
+        .clone()
+        .avif()
+        .toBuffer()
+        .then((bytes) => ({ bytes, contentType: 'image/avif' })),
+    ]);
+
+    for (const fixture of fixtures) {
+      const result = await processAssetModelImage({ fileName: 'fixture', ...fixture });
+      await expect(sharp(result.original).metadata()).resolves.toMatchObject({ format: 'webp' });
+      await expect(sharp(result.thumbnail).metadata()).resolves.toMatchObject({ format: 'webp' });
+    }
+
+    await expect(
+      processAssetModelImage({
+        fileName: 'mismatch.avif',
+        contentType: 'image/avif',
+        bytes: fixtures[1]!.bytes,
+      }),
     ).rejects.toMatchObject({ functionalCode: 'asset-model-image-invalid' });
   });
 

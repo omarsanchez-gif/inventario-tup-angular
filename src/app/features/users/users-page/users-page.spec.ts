@@ -2,7 +2,15 @@ import { signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { AuthorizedUser } from '../../../shared/models/authorized-user';
+import {
+  emptyPermissionMap,
+  fullPermissionMap,
+  permissionActionDefinitions,
+  permissionModuleDefinitions,
+  permissionModules,
+} from '../../../shared/models/catalog-permissions';
 import type { SystemUser } from '../../../shared/models/system-user';
 import { UsersFacade } from '../state/users.facade';
 import { UsersPage } from './users-page';
@@ -14,6 +22,7 @@ describe('UsersPage dialogs', () => {
     correo: 'admin@tecplayacar.edu.mx',
     rol: 'admin',
     activo: true,
+    permisos: fullPermissionMap(),
   };
   const managedUser: SystemUser = {
     documentId: 'user-1',
@@ -24,6 +33,7 @@ describe('UsersPage dialogs', () => {
     activo: true,
     fechaCreacion: '2026-11-06T12:00:00.000Z',
     ultimoAcceso: null,
+    permisos: emptyPermissionMap(),
   };
   let fixture: ComponentFixture<UsersPage>;
   let element: HTMLElement;
@@ -33,6 +43,7 @@ describe('UsersPage dialogs', () => {
     update: ReturnType<typeof vi.fn>;
     setStatus: ReturnType<typeof vi.fn>;
     delete: ReturnType<typeof vi.fn>;
+    setPermissions: ReturnType<typeof vi.fn>;
     clearMessages: ReturnType<typeof vi.fn>;
     query: WritableSignal<string>;
     loading: WritableSignal<boolean>;
@@ -56,6 +67,7 @@ describe('UsersPage dialogs', () => {
       update: vi.fn().mockResolvedValue(true),
       setStatus: vi.fn().mockResolvedValue(true),
       delete: vi.fn().mockResolvedValue(true),
+      setPermissions: vi.fn().mockResolvedValue(true),
       clearMessages: vi.fn(),
       query: signal(''),
       loading: signal(false),
@@ -109,6 +121,33 @@ describe('UsersPage dialogs', () => {
     expect(element.querySelector('.dialog__title')?.textContent).toContain('Editar usuario');
   });
 
+  it('USR-042 closes every private dialog when administrative access is lost', () => {
+    const session = TestBed.inject(SessionScope);
+
+    actionButton('Editar a Usuario Prueba').click();
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeTruthy();
+    session.reconcileAdminAccess('admin', 'usuario');
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeNull();
+
+    session.reconcileAdminAccess('usuario', 'admin');
+    actionButton('Eliminar a Usuario Prueba').click();
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeTruthy();
+    session.reconcileAdminAccess('admin', 'usuario');
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeNull();
+
+    session.reconcileAdminAccess('usuario', 'admin');
+    actionButton('Asignar permisos a Usuario Prueba').click();
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeTruthy();
+    session.reconcileAdminAccess('admin', 'usuario');
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeNull();
+  });
+
   it('requires the institutional dialog before deleting', async () => {
     actionButton('Eliminar a Usuario Prueba').click();
     fixture.detectChanges();
@@ -128,23 +167,190 @@ describe('UsersPage dialogs', () => {
     expect(element.querySelector('dialog')).toBeFalsy();
   });
 
-  it('renders record actions as accessible icon-only buttons', () => {
+  it('LAY-021 keeps an administrative deletion error inside the open dialog', async () => {
+    users.delete.mockImplementationOnce(async () => {
+      users.error.set('La cuenta administradora no puede eliminarse.');
+      return false;
+    });
+    actionButton('Eliminar a Usuario Prueba').click();
+    fixture.detectChanges();
+    button('Eliminar usuario').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dialog = element.querySelector<HTMLDialogElement>('dialog[open]')!;
+    expect(dialog.querySelector('[role="alert"]')?.textContent).toContain(
+      'La cuenta administradora no puede eliminarse.',
+    );
+    expect(element.querySelector('main > [role="alert"]')).toBeNull();
+    button('Cancelar').click();
+    fixture.detectChanges();
+    expect(users.clearMessages).toHaveBeenCalled();
+    expect(element.querySelector('dialog[open]')).toBeNull();
+  });
+
+  it('USR-027 renders permission summary and accessible icon-only actions', () => {
     const actions = [...element.querySelectorAll<HTMLButtonElement>('.record-actions button')];
 
-    expect(actions).toHaveLength(3);
-    expect(actions.map((action) => action.textContent?.trim())).toEqual(['', '', '']);
+    expect(actions).toHaveLength(4);
+    expect(actions.map((action) => action.textContent?.trim())).toEqual(['', '', '', '']);
     expect(actions.map((action) => action.getAttribute('aria-label'))).toEqual([
+      'Asignar permisos a Usuario Prueba',
       'Editar a Usuario Prueba',
       'Desactivar a Usuario Prueba',
       'Eliminar a Usuario Prueba',
     ]);
     expect(actions.map((action) => action.getAttribute('title'))).toEqual([
+      'Asignar permisos a Usuario Prueba',
       'Editar a Usuario Prueba',
       'Desactivar a Usuario Prueba',
       'Eliminar a Usuario Prueba',
     ]);
     expect(actions.map((action) => action.querySelector('svg')?.getAttribute('data-icon'))).toEqual(
-      ['edit', 'deactivate', 'delete'],
+      ['permissions', 'edit', 'deactivate', 'delete'],
+    );
+  });
+
+  it('USR-022 USR-028 USR-032 USR-036 USR-039 USR-040 ARE-044 CAM-036 renders every registered module once with every permission control', async () => {
+    actionButton('Asignar permisos a Usuario Prueba').click();
+    fixture.detectChanges();
+    expect(element.querySelector('.dialog__title')?.textContent).toContain(
+      'Asignar permisos a Usuario Prueba',
+    );
+    const moduleTriggers = element.querySelectorAll<HTMLButtonElement>(
+      '[aria-controls$="-permissions-panel"]',
+    );
+    expect(moduleTriggers).toHaveLength(permissionModuleDefinitions.length);
+    for (const module of permissionModuleDefinitions) {
+      const triggers = element.querySelectorAll<HTMLButtonElement>(
+        `[aria-controls="${module.id}-permissions-panel"]`,
+      );
+      expect(triggers).toHaveLength(1);
+      expect(triggers[0]?.textContent).toContain(module.label);
+      expect(element.querySelectorAll(`#${module.id}-permissions-panel`)).toHaveLength(1);
+      for (const action of permissionActionDefinitions) {
+        expect(element.querySelectorAll(`#${module.id}-${action.id}`)).toHaveLength(1);
+      }
+    }
+
+    const edit = element.querySelector<HTMLInputElement>('#categorias-editar')!;
+    edit.click();
+    fixture.detectChanges();
+    expect(element.querySelector<HTMLInputElement>('#categorias-ver')?.checked).toBe(true);
+
+    element.querySelector<HTMLButtonElement>('[aria-controls="areas-permissions-panel"]')!.click();
+    fixture.detectChanges();
+    element.querySelector<HTMLInputElement>('#areas-eliminar')!.click();
+    fixture.detectChanges();
+    expect(element.querySelector<HTMLInputElement>('#areas-ver')?.checked).toBe(true);
+
+    button('Guardar permisos').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(users.setPermissions).toHaveBeenCalledWith(
+      managedUser,
+      expect.objectContaining({
+        categorias: ['ver', 'editar'],
+        campus: [],
+        areas: ['ver', 'eliminar'],
+      }),
+    );
+    expect(Object.keys(users.setPermissions.mock.calls[0]?.[1] ?? {}).sort()).toEqual(
+      [...permissionModules].sort(),
+    );
+    expect(element.querySelector('dialog[open]')).toBeNull();
+  });
+
+  it('USR-029 cancels permission assignment without persisting changes', () => {
+    actionButton('Asignar permisos a Usuario Prueba').click();
+    fixture.detectChanges();
+    button('Cancelar').click();
+    fixture.detectChanges();
+
+    expect(users.setPermissions).not.toHaveBeenCalled();
+    expect(element.querySelector('dialog[open]')).toBeNull();
+  });
+
+  it('USR-035 keeps one accessible permission panel open and preserves its selections', async () => {
+    actionButton('Asignar permisos a Usuario Prueba').click();
+    await fixture.whenStable();
+
+    const categoriesTrigger = element.querySelector<HTMLButtonElement>(
+      '[aria-controls="categorias-permissions-panel"]',
+    )!;
+    const manufacturersTrigger = element.querySelector<HTMLButtonElement>(
+      '[aria-controls="fabricantes-permissions-panel"]',
+    )!;
+    expect(categoriesTrigger.tagName).toBe('BUTTON');
+    expect(categoriesTrigger.getAttribute('aria-expanded')).toBe('true');
+    expect(manufacturersTrigger.getAttribute('aria-expanded')).toBe('false');
+    const categoriesPanel = element.querySelector<HTMLElement>('#categorias-permissions-panel')!;
+    const manufacturersPanel = element.querySelector<HTMLElement>(
+      '#fabricantes-permissions-panel',
+    )!;
+    expect(categoriesPanel.classList).toContain('disclosure__panel-motion--expanded');
+    expect(categoriesPanel.hasAttribute('aria-hidden')).toBe(false);
+    expect(categoriesPanel.hasAttribute('inert')).toBe(false);
+    expect(manufacturersPanel.classList).not.toContain('disclosure__panel-motion--expanded');
+    expect(manufacturersPanel.getAttribute('aria-hidden')).toBe('true');
+    expect(manufacturersPanel.hasAttribute('inert')).toBe(true);
+
+    manufacturersTrigger.click();
+    await fixture.whenStable();
+    expect(categoriesTrigger.getAttribute('aria-expanded')).toBe('false');
+    expect(manufacturersTrigger.getAttribute('aria-expanded')).toBe('true');
+    expect(categoriesPanel.classList).not.toContain('disclosure__panel-motion--expanded');
+    expect(categoriesPanel.getAttribute('aria-hidden')).toBe('true');
+    expect(categoriesPanel.hasAttribute('inert')).toBe(true);
+    expect(manufacturersPanel.classList).toContain('disclosure__panel-motion--expanded');
+    expect(manufacturersPanel.hasAttribute('aria-hidden')).toBe(false);
+    expect(manufacturersPanel.hasAttribute('inert')).toBe(false);
+
+    element.querySelector<HTMLInputElement>('#fabricantes-editar')!.click();
+    await fixture.whenStable();
+    expect(manufacturersTrigger.querySelector('.disclosure__summary')?.textContent?.trim()).toBe(
+      '2 permisos',
+    );
+
+    categoriesTrigger.click();
+    await fixture.whenStable();
+    manufacturersTrigger.click();
+    await fixture.whenStable();
+    expect(element.querySelector<HTMLInputElement>('#fabricantes-ver')?.checked).toBe(true);
+    expect(element.querySelector<HTMLInputElement>('#fabricantes-editar')?.checked).toBe(true);
+  });
+
+  it('USR-035 initially opens the first module that already has permissions', async () => {
+    const permittedUser: SystemUser = {
+      ...managedUser,
+      permisos: {
+        ...emptyPermissionMap(),
+        modelosActivos: ['ver'],
+      },
+    };
+    users.filteredUsers.set([permittedUser]);
+    await fixture.whenStable();
+
+    actionButton('Asignar permisos a Usuario Prueba').click();
+    await fixture.whenStable();
+
+    expect(
+      element
+        .querySelector('[aria-controls="modelosActivos-permissions-panel"]')
+        ?.getAttribute('aria-expanded'),
+    ).toBe('true');
+    expect(
+      element
+        .querySelector('[aria-controls="categorias-permissions-panel"]')
+        ?.getAttribute('aria-expanded'),
+    ).toBe('false');
+  });
+
+  it('USR-039 summarizes every granted registered module', async () => {
+    users.filteredUsers.set([{ ...managedUser, permisos: fullPermissionMap() }]);
+    await fixture.whenStable();
+    expect(element.querySelector('tbody tr td:nth-child(6)')?.textContent?.trim()).toBe(
+      `${permissionModuleDefinitions.length} módulos`,
     );
   });
 
