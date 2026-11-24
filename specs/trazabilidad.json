@@ -6,8 +6,8 @@
   "delivery": {
     "localValidation": "complete",
     "branchPublication": "complete",
-    "stagingDeployment": "not-requested-for-current-increment",
-    "continuousIntegration": "not-triggered-without-pull-request",
+    "stagingDeployment": "complete-three-image-functions-and-hosting-on-main-33ddd6d",
+    "continuousIntegration": "validate-passed-main-33ddd6d-run-45418542861",
     "manualAcceptance": "complete-area-granular-grant-revoke-and-restoration"
   },
   "matrixScopes": [
@@ -493,6 +493,14 @@
       "command": "npm run test:emulators",
       "result": "9 archivos y 45 pruebas con Auth, Firestore, Functions y Storage Emulator aprobadas; 51 limpiezas demostraron reconciliación tras el primer lote y convergencia sin dañar la versión canónica.",
       "criteria": ["MOD-063"]
+    },
+    {
+      "id": "image-cleanup-staging-33ddd6d",
+      "sha": "33ddd6d86058108401fd1b99f3f8e0ebbdcb70a6",
+      "status": "passed",
+      "command": "firebase deploy --only functions:setAssetModelImage,functions:removeAssetModelImage,functions:deleteAssetModel --project staging; firebase deploy --only hosting --project staging; remote technical verification",
+      "result": "Tres Functions ACTIVE en nodejs22/us-central1 y HTTP 401 anónimo; Hosting HTTP 200 con main-HXAPQR7E.js y styles-TYZCJRJC.css idénticos al build local. Sin aceptación autenticada nueva.",
+      "criteria": []
     }
   ],
   "entries": [

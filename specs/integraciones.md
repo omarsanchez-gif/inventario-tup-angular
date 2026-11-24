@@ -69,6 +69,8 @@
 
 ## Modelos de activos
 
+- El 24 de noviembre de 2026 se desplegó el SHA de `main` `33ddd6d86058108401fd1b99f3f8e0ebbdcb70a6`, después de confirmar `Validación continua / validate` en `success` y ejecutar con Node.js `22.23.5` y npm `11.13.0` los builds de Functions y staging. Se actualizaron exclusivamente `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel`; quedaron `ACTIVE`, `nodejs22`, `us-central1`, en las revisiones `setassetmodelimage-00006-wil`, `removeassetmodelimage-00006-fab` y `deleteassetmodel-00006-gom`. Las tres rechazaron solicitudes anónimas con HTTP 401.
+- Después de confirmar esas tres actualizaciones se desplegó únicamente Hosting. La raíz respondió HTTP 200 y sirvió `main-HXAPQR7E.js` y `styles-TYZCJRJC.css`; los tamaños y SHA-256 remotos coincidieron con el build local (`b6ac592821a5cdbaee4b7958886bc05906398c0a6d824b617af2ff277b5c45e2` y `0bf59d7608bd09c5be0e998dfb44a88b39b549e08226f14058f1bf17b0a44782`). Esta evidencia es verificación técnica de despliegue, no aceptación funcional autenticada. No se modificaron datos, Rules, Storage Rules, índices, secretos, IAM ni producción.
 - El bucket predeterminado `inventario-stg.firebasestorage.app` se inicializó el 7 de noviembre de 2026 como bucket regional en `US-CENTRAL1`, clase Standard y reglas de producción cerradas; no se cargaron objetos.
 - Las cargas nuevas usan exclusivamente ese bucket de staging y rutas inmutables `modelos-activos/{modeloId}/versiones/{version}/original.webp` y `thumbnail.webp`; las rutas históricas sin versión solo se leen o limpian de forma compatible.
 - Storage Rules permanecerá en denegación total; el binario viajará por callable y Admin SDK realizará las operaciones.

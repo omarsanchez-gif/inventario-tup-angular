@@ -2,8 +2,9 @@
 
 ## Corte documental
 
-- Fecha del corte: 23 de noviembre de 2026.
-- Rama inspeccionada: `codex/modulo-areas`.
+- Fecha del corte: 24 de noviembre de 2026.
+- Rama inspeccionada: `main`.
+- SHA de `main` validado por CI y desplegado en staging: `33ddd6d86058108401fd1b99f3f8e0ebbdcb70a6`.
 - SHA de endurecimiento de Usuarios e imágenes validado localmente: `161aabd271e2d6d79935b85470572a230097ae8b`.
 - SHA del cierre de fase validado, publicado y desplegado en Hosting: `7e1e277adc039cadd5f87d2ffab8f1e33701e0fc`.
 - SHA funcional de permisos de Áreas validado y desplegado: `36b5a593d1eab0c90dc478f986d9a318501c0a07`; evidencia documental publicada inicialmente en `32edfbef1a88c17ce6610c9ed81dda12e60c1bd4`.
@@ -60,17 +61,17 @@ La descripción normativa está en [reglas de negocio](reglas-negocio.md), [mode
 
 ## Evidencia y estados de entrega
 
-| Etapa                     | Estado al corte                                 | Evidencia o límite                                                                                                                                                                                                                                     |
-| ------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Especificado y aprobado   | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                                                                                                                                                                |
-| Implementado              | Sí para el alcance vigente                      | Endurecimiento en `161aabd`; garantías y evidencia histórica conservadas                                                                                                                                                                               |
-| Validado localmente       | Sí, sobre `161aabd`                             | 128 Angular, 53 Functions, 45 Emulator Suite, 8 Chromium y 8 de trazabilidad/contrato; controles de calidad aprobados                                                                                                                                  |
-| Publicado en rama         | Sí                                              | `codex/modulo-areas` contiene implementación, evidencia, despliegue y aceptación sin force push                                                                                                                                                        |
-| Integrado en `desarrollo` | No                                              | `desarrollo` permanece en `179e798`; la rama de trabajo continúa por delante                                                                                                                                                                           |
-| Verificado por CI         | No para este incremento                         | Cero PR y runs; crear el borrador devolvió `422 must be a collaborator`, `gh` no tiene sesión y la protección clásica exige autenticación (401). La lista pública de rulesets está vacía, por lo que no se pudo confirmar si `validate` es obligatorio |
-| Desplegado en staging     | No para este incremento                         | El usuario excluyó despliegues; staging conserva el corte anterior y no se modificaron Functions, Hosting, Rules, índices, datos, secretos, IAM ni producción                                                                                          |
-| Aceptado con sesión real  | Sí para el incremento de Áreas                  | `PROFESOR` confirmó Ver, Editar, Crear y la pérdida de acceso al retirar permisos; configuración restaurada                                                                                                                                            |
-| Producción                | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                                                                                                                                                           |
+| Etapa                    | Estado al corte                                 | Evidencia o límite                                                                                                      |
+| ------------------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Especificado y aprobado  | Sí para los módulos de la tabla, incluido Áreas | Specs y tareas vigentes                                                                                                 |
+| Implementado             | Sí para el alcance vigente                      | Endurecimiento en `161aabd`; garantías y evidencia histórica conservadas                                                |
+| Validado localmente      | Sí, sobre `161aabd`                             | 128 Angular, 53 Functions, 45 Emulator Suite, 8 Chromium y 8 de trazabilidad/contrato; controles de calidad aprobados   |
+| Publicado en rama        | Sí                                              | `main` contiene el merge validado `33ddd6d86058108401fd1b99f3f8e0ebbdcb70a6`                                            |
+| Integrado en `main`      | Sí                                              | Pull request 4 incorporó `desarrollo`; el SHA resultante es el mismo que aprobó CI y se desplegó                        |
+| Verificado por CI        | Sí, para el SHA desplegado                      | `Validación continua / validate` aprobó `33ddd6d86058108401fd1b99f3f8e0ebbdcb70a6` en la ejecución `45418542861`        |
+| Desplegado en staging    | Sí, alcance acotado                             | Tres Functions de imagen y Hosting; no se modificaron Rules, Storage Rules, índices, datos, secretos, IAM ni producción |
+| Aceptado con sesión real | Sí para el incremento de Áreas                  | `PROFESOR` confirmó Ver, Editar, Crear y la pérdida de acceso al retirar permisos; configuración restaurada             |
+| Producción               | No configurada ni autorizada                    | Ningún despliegue productivo                                                                                            |
 
 La evidencia histórica de `ef8ae66` permanece vigente para recuperación de imágenes. El incremento de Campus tiene evidencia propia en `2883ff5` y no traslada aceptación manual.
 
@@ -85,10 +86,10 @@ El 10 de noviembre de 2026 se especificó un incremento que permite asignar desp
 ## Staging vigente
 
 - Proyecto exclusivo: `inventario-stg`; alias obligatorio `staging`.
-- Hosting responde HTTP 200 y sirve `main-YXTMA5SG.js` y `styles-TYZCJRJC.css`.
+- Hosting responde HTTP 200 y sirve `main-HXAPQR7E.js` y `styles-TYZCJRJC.css`; ambos archivos remotos coinciden por tamaño y SHA-256 con el build de staging.
 - Las once callables compatibles de Autenticación, Usuarios y Áreas conservan Node.js 22, `us-central1`, estado `ACTIVE` y hash común `6508c9d6fb576d85b8dceb857d79381897465d64`.
 - Firestore Rules niega acceso directo a las colecciones administrativas y Storage Rules conserva denegación total.
-- El último incremento de recuperación desplegó `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` en revisión `00004`, el ruleset `8559cc9e-51fc-4bef-b6c2-49c02033abcf` y Hosting.
+- El 24 de noviembre `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` quedaron `ACTIVE`, `nodejs22`, `us-central1`, en revisiones `00006-wil`, `00006-fab` y `00006-gom`; las tres respondieron HTTP 401 sin sesión.
 - Storage Rules, índices, secretos, datos y producción no se modificaron en ese cierre.
 - La comprobación anónima posterior devolvió HTTP 401 en `bootstrapAuthorization`, `listAreas`, `createArea` y `setAuthorizedUserPermissions`. No se desplegaron Rules, Storage Rules, índices, datos, secretos, IAM ni producción.
 - El cierre `7e1e277` publicó 15 archivos únicamente mediante `--only hosting --project staging`; índice, bundle principal y estilos respondieron HTTP 200. No se redesplegaron Functions porque su código de producción no cambió.

@@ -25,6 +25,12 @@
 - MOD-063 conserva el lote máximo de 50 limpiezas, comprueba remanentes y exige reintento hasta cerrar objetos y registros técnicos sin afectar la versión canónica.
 - Los cuatro criterios quedaron verificados localmente sobre `161aabd271e2d6d79935b85470572a230097ae8b`: 128 pruebas Angular y 45 escenarios con Emulator Suite. La ejecución completa adicional aprobó 53 unitarias de Functions, 8 recorridos Chromium, trazabilidad, lint, guardia visual, formato, ambos builds, auditoría sin altas/críticas y `git diff --check`.
 
+## Publicación técnica de `main` — 24 de noviembre de 2026
+
+- `main` remoto `33ddd6d86058108401fd1b99f3f8e0ebbdcb70a6` aprobó `Validación continua / validate` antes de la publicación.
+- Se desplegaron únicamente las tres Functions de imagen afectadas y, después de confirmarlas, Hosting de `inventario-stg`. Las tres quedaron `ACTIVE` en Node.js 22 y rechazaron anónimo con 401; Hosting sirvió los dos bundles compilados con hashes idénticos al build local.
+- La comprobación fue técnica. No se reutiliza como aceptación funcional autenticada ni modifica la evidencia manual histórica.
+
 ## Incremento de permisos de Áreas — 20 de noviembre de 2026
 
 - La decisión histórica “Áreas solo admin” queda sustituida para sus seis operaciones ordinarias; reconciliación permanece exclusiva de admin.

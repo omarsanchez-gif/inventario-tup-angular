@@ -108,6 +108,12 @@ El primer intento del 12 de noviembre de 2026 preparó la Categoría `QA Imagen 
 
 - MOD-063 aprobó sobre `161aabd271e2d6d79935b85470572a230097ae8b` dentro de 45 pruebas con Emulator Suite. Cincuenta y una sustituciones con borrado fallido conservaron sus trabajos; al recuperar Storage, la primera llamada retiró un solo lote, devolvió reconciliación y preservó ambos objetos canónicos. El reintento terminó con metadata nula y cero objetos, operaciones o limpiezas.
 
+## Evidencia técnica de despliegue — 24 de noviembre de 2026
+
+- El merge de `main` `33ddd6d86058108401fd1b99f3f8e0ebbdcb70a6` tuvo `Validación continua / validate` aprobada. Los builds con Node.js 22.23.5 y npm 11.13.0 aprobaron antes de desplegar.
+- Solo `setAssetModelImage`, `removeAssetModelImage` y `deleteAssetModel` se actualizaron en `inventario-stg`; quedaron `ACTIVE`, `nodejs22`, `us-central1`, en revisiones `00006-wil`, `00006-fab` y `00006-gom`, respectivamente, y respondieron HTTP 401 sin sesión.
+- Hosting se publicó después y respondió HTTP 200 con `main-HXAPQR7E.js` y `styles-TYZCJRJC.css`; ambos archivos remotos coincidieron byte por byte y por SHA-256 con el build validado. No se ejecutó un ciclo autenticado de carga, sustitución, retirada o eliminación en esta publicación, por lo que no constituye una nueva aceptación funcional.
+
 ## Evidencia de revocación e imagen — 11 de noviembre de 2026
 
 - MOD-055, MOD-059 y MOD-060 aprobaron sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: cada operación valida su acción exacta, `ver+crear` no expone imágenes y una revocación posterior a la escritura conserva el Modelo confirmado sin iniciar la carga.
