@@ -22,6 +22,7 @@ import {
   type CanonicalUserRecord,
   type UserRole,
 } from './bootstrap-authorization.js';
+import { emptyPermissionMap, sanitizePermissionMap } from './catalog-permissions.js';
 
 function role(value: unknown): UserRole {
   if (value !== 'admin' && value !== 'usuario') {
@@ -44,6 +45,7 @@ function toManagedUser(id: string, data: DocumentData): ManagedUser {
     activo: data['activo'] === true,
     fechaCreacion: iso(data['fechaCreacion']),
     ultimoAcceso: iso(data['ultimoAcceso']),
+    permisos: sanitizePermissionMap(data['permisos']),
   };
 }
 
@@ -55,6 +57,7 @@ function toAuthorizationRecord(id: string, data: DocumentData): AuthorizedUserRe
     correo: typeof data['correo'] === 'string' ? data['correo'].trim().toLowerCase() : '',
     rol: data['rol'],
     activo: data['activo'] === true,
+    permisos: sanitizePermissionMap(data['permisos']),
   };
 }
 
@@ -65,7 +68,7 @@ export function createAuthorizationRepository(firestore: Firestore): Authorizati
       const snapshot = await collection.where('correo', '==', email).limit(2).get();
       return snapshot.docs.map((document) => toAuthorizationRecord(document.id, document.data()));
     },
-    async recordSuccessfulAccess(record, authenticatedUid) {
+    async recordSuccessfulAccess(record, authenticatedUid, authenticatedEmail) {
       const reference = collection.doc(record.id);
       return firestore.runTransaction(async (transaction): Promise<CanonicalUserRecord> => {
         const snapshot = await transaction.get(reference);
@@ -77,6 +80,13 @@ export function createAuthorizationRepository(firestore: Firestore): Authorizati
           );
         }
         const current = toAuthorizationRecord(snapshot.id, snapshot.data() ?? {});
+        if (current.correo !== authenticatedEmail) {
+          throw new AuthorizationError(
+            'user-not-authorized',
+            'permission-denied',
+            'La identidad autorizada cambió durante el acceso.',
+          );
+        }
         if (!current.activo) {
           throw new AuthorizationError('user-inactive', 'permission-denied', 'Usuario inactivo.');
         }
@@ -207,6 +217,7 @@ export function createAdminUsersRepository(firestore: Firestore): AdminUsersRepo
           activo: input.activo,
           fechaCreacion: FieldValue.serverTimestamp(),
           ultimoAcceso: null,
+          permisos: emptyPermissionMap(),
         });
       });
       return newReference.id;
@@ -236,8 +247,15 @@ export function createAdminUsersRepository(firestore: Firestore): AdminUsersRepo
           nombre: input.nombre,
           correo: input.correo,
           rol: input.rol,
+          ...(previous.rol === input.rol ? {} : { permisos: emptyPermissionMap() }),
         });
-        return { ...previous, nombre: input.nombre, correo: input.correo, rol: input.rol };
+        return {
+          ...previous,
+          nombre: input.nombre,
+          correo: input.correo,
+          rol: input.rol,
+          permisos: previous.rol === input.rol ? previous.permisos : emptyPermissionMap(),
+        };
       });
     },
     async setStatus(requesterUid, documentId, activo) {
@@ -296,6 +314,27 @@ export function createAdminUsersRepository(firestore: Firestore): AdminUsersRepo
           );
         }
         context.transaction.delete(reference(context, documentId));
+      });
+    },
+    async setPermissions(requesterUid, documentId, permissions) {
+      return transact(requesterUid, (context) => {
+        const previous = target(context.users, documentId);
+        if (previous.uid === requesterUid) {
+          throw new AdminUsersError(
+            'user-permissions-self-forbidden',
+            'failed-precondition',
+            'No puede administrar sus propios permisos.',
+          );
+        }
+        if (previous.rol !== 'usuario') {
+          throw new AdminUsersError(
+            'user-permissions-role-managed',
+            'failed-precondition',
+            'El rol administra el acceso de este usuario.',
+          );
+        }
+        context.transaction.update(reference(context, documentId), { permisos: permissions });
+        return { ...previous, permisos: permissions };
       });
     },
   };

@@ -1,6 +1,7 @@
 import type { FunctionsErrorCode } from 'firebase-functions/https';
 
 import type { AdminIdentity } from './admin-users.js';
+import type { PermissionAction } from './catalog-permissions.js';
 
 export const MAX_SUPPORTED_CAMPUSES = 100;
 
@@ -31,7 +32,7 @@ export interface CampusUpdate extends CampusDraft {
 }
 
 export interface AdminCampusesRepository {
-  findCanonicalAdmin(uid: string): Promise<boolean>;
+  hasCanonicalPermission(uid: string, action: PermissionAction): Promise<boolean>;
   list(limit: number): Promise<readonly ManagedCampus[]>;
   create(requesterUid: string, input: CampusDraft): Promise<string>;
   update(requesterUid: string, input: CampusUpdate): Promise<void>;
@@ -53,17 +54,18 @@ export class AdminCampusesError extends Error {
   }
 }
 
-async function requireAdmin(
+async function requirePermission(
   identity: AdminIdentity | null,
   dependencies: AdminCampusesDependencies,
+  action: PermissionAction,
 ): Promise<AdminIdentity> {
   if (!identity) {
     throw new AdminCampusesError('unauthenticated', 'unauthenticated', 'Se requiere una sesión.');
   }
-  if (!identity.authorized || identity.role !== 'admin') {
+  if (!identity.authorized) {
     throw new AdminCampusesError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
-  if (!(await dependencies.repository.findCanonicalAdmin(identity.uid))) {
+  if (!(await dependencies.repository.hasCanonicalPermission(identity.uid, action))) {
     throw new AdminCampusesError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
   return identity;
@@ -196,7 +198,7 @@ export async function listCampuses(
   identity: AdminIdentity | null,
   dependencies: AdminCampusesDependencies,
 ) {
-  await requireAdmin(identity, dependencies);
+  await requirePermission(identity, dependencies, 'ver');
   const campuses = await dependencies.repository.list(MAX_SUPPORTED_CAMPUSES + 1);
   if (campuses.length > MAX_SUPPORTED_CAMPUSES) {
     throw new AdminCampusesError(
@@ -230,7 +232,7 @@ export async function createCampus(
   data: unknown,
   dependencies: AdminCampusesDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'crear');
   const request = requestObject(data);
   allowedFields(request, ['codigo', 'nombre', 'notas']);
   const documentId = await dependencies.repository.create(requester.uid, draft(request));
@@ -242,7 +244,7 @@ export async function updateCampus(
   data: unknown,
   dependencies: AdminCampusesDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'editar');
   const request = requestObject(data);
   allowedFields(request, ['documentId', 'codigo', 'nombre', 'notas']);
   const documentId = campusDocumentId(request);
@@ -255,7 +257,7 @@ export async function setCampusStatus(
   data: unknown,
   dependencies: AdminCampusesDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'cambiarEstado');
   const request = requestObject(data);
   allowedFields(request, ['documentId', 'activo']);
   const documentId = campusDocumentId(request);
@@ -272,7 +274,7 @@ export async function deleteCampus(
   data: unknown,
   dependencies: AdminCampusesDependencies,
 ) {
-  const requester = await requireAdmin(identity, dependencies);
+  const requester = await requirePermission(identity, dependencies, 'eliminar');
   const request = requestObject(data);
   allowedFields(request, ['documentId']);
   const documentId = campusDocumentId(request);

@@ -1,5 +1,9 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
+import { SessionScope, type CapabilityContext } from '../../../core/auth/session-scope';
+import { AuthFacade } from '../../../core/auth/auth.facade';
+import { isPermissionDenied } from '../../../core/auth/permission-denied';
+import type { PermissionAction } from '../../../shared/models/catalog-permissions';
 import type { InventoryCategory } from '../../../shared/models/inventory-category';
 import {
   CATEGORIES_GATEWAY,
@@ -45,12 +49,16 @@ function searchable(value: string): string {
 @Injectable({ providedIn: 'root' })
 export class CategoriesFacade {
   private readonly gateway = inject(CATEGORIES_GATEWAY);
+  private readonly sessionScope = inject(SessionScope);
+  private readonly auth = inject(AuthFacade);
   private readonly categoriesState = signal<readonly InventoryCategory[]>([]);
   private readonly queryState = signal('');
   private readonly loadingState = signal(false);
   private readonly savingState = signal(false);
   private readonly errorState = signal<string | null>(null);
   private readonly successState = signal<string | null>(null);
+  private operationGeneration = 0;
+  private activeAction: PermissionAction | null = null;
 
   readonly categories = this.categoriesState.asReadonly();
   readonly query = this.queryState.asReadonly();
@@ -67,32 +75,60 @@ export class CategoriesFacade {
       : this.categoriesState();
   });
 
+  constructor() {
+    this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+    this.sessionScope.registerCapabilityListener('categorias', (change) => {
+      if (change.action === 'ver' && !change.allowed) this.resetPrivateState();
+      else if (!change.allowed && this.activeAction === change.action) {
+        this.operationGeneration += 1;
+        this.activeAction = null;
+        this.savingState.set(false);
+        this.clearMessages();
+      }
+    });
+  }
+
   setQuery(query: string): void {
     this.queryState.set(query);
   }
 
   async load(): Promise<void> {
+    const context = this.sessionScope.captureCapability('categorias', 'ver');
+    if (!this.auth.can('categorias', 'ver')) return;
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
-      this.categoriesState.set((await this.gateway.list()).items);
+      const result = await this.gateway.list();
+      if (this.isCurrent(context)) this.categoriesState.set(result.items);
     } catch (error) {
-      this.errorState.set(categoryErrorMessage(error));
+      await this.revalidateDenial(error);
+      if (this.isCurrent(context)) {
+        this.errorState.set(categoryErrorMessage(error));
+      }
     } finally {
-      this.loadingState.set(false);
+      if (this.isCurrent(context)) this.loadingState.set(false);
     }
   }
 
   async create(input: CategoryDraft): Promise<boolean> {
-    return this.mutate(() => this.gateway.create(input), 'Categoría creada correctamente.');
+    return this.mutate(
+      'crear',
+      () => this.gateway.create(input),
+      'Categoría creada correctamente.',
+    );
   }
 
   async update(input: CategoryUpdate): Promise<boolean> {
-    return this.mutate(() => this.gateway.update(input), 'Categoría actualizada correctamente.');
+    return this.mutate(
+      'editar',
+      () => this.gateway.update(input),
+      'Categoría actualizada correctamente.',
+    );
   }
 
   async setStatus(category: InventoryCategory): Promise<boolean> {
     return this.mutate(
+      'cambiarEstado',
       () => this.gateway.setStatus(category.documentId, !category.activo),
       category.activo ? 'Categoría desactivada.' : 'Categoría activada.',
     );
@@ -100,6 +136,7 @@ export class CategoriesFacade {
 
   async delete(category: InventoryCategory): Promise<boolean> {
     return this.mutate(
+      'eliminar',
       () => this.gateway.delete(category.documentId),
       'Categoría eliminada correctamente.',
     );
@@ -110,19 +147,60 @@ export class CategoriesFacade {
     this.successState.set(null);
   }
 
-  private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
+  private async mutate(
+    action: 'crear' | 'editar' | 'cambiarEstado' | 'eliminar',
+    operation: () => Promise<void>,
+    successMessage: string,
+  ): Promise<boolean> {
+    const context = this.sessionScope.captureCapability('categorias', action);
+    if (!this.auth.can('categorias', action)) return false;
+    const operationId = ++this.operationGeneration;
+    this.activeAction = action;
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
-      await this.load();
+      if (!this.isOperationCurrent(context, operationId)) return false;
+      const result = await this.gateway.list();
+      if (!this.isOperationCurrent(context, operationId)) return false;
+      this.categoriesState.set(result.items);
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      this.errorState.set(categoryErrorMessage(error));
+      await this.revalidateDenial(error);
+      if (this.isOperationCurrent(context, operationId)) {
+        this.errorState.set(categoryErrorMessage(error));
+      }
       return false;
     } finally {
-      this.savingState.set(false);
+      if (this.isOperationCurrent(context, operationId)) {
+        this.savingState.set(false);
+        this.activeAction = null;
+      }
     }
+  }
+
+  private isCurrent(context: CapabilityContext): boolean {
+    return (
+      this.sessionScope.isCapabilityCurrent(context) && this.auth.can('categorias', context.action)
+    );
+  }
+
+  private isOperationCurrent(context: CapabilityContext, operation: number): boolean {
+    return this.operationGeneration === operation && this.isCurrent(context);
+  }
+
+  private async revalidateDenial(error: unknown): Promise<void> {
+    if (isPermissionDenied(error)) await this.auth.revalidatePermissionDenial(error);
+  }
+
+  private resetPrivateState(): void {
+    this.operationGeneration += 1;
+    this.activeAction = null;
+    this.categoriesState.set([]);
+    this.queryState.set('');
+    this.loadingState.set(false);
+    this.savingState.set(false);
+    this.clearMessages();
   }
 }

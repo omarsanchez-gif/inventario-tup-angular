@@ -28,6 +28,13 @@ Estos escenarios definen la aceptación del módulo aprobado.
 - FAB-019: tabla, badges, acciones iconográficas, estados de carga/error/vacío y diálogos funcionan por teclado y desde 320 px.
 - FAB-020: la confirmación de eliminación identifica al fabricante, explica la restricción por Modelos y mantiene el registro cuando backend responde `manufacturer-in-use`.
 
+## Criterios del incremento de permisos
+
+- FAB-021: `admin` conserva acceso total; `usuario` con `fabricantes.ver` lista y navega, mientras otro `usuario` y anónimo son rechazados.
+- FAB-022: crear, editar, cambiar estado y eliminar exigen exactamente su acción canónica además de Ver; revocar una acción invalida su respuesta pendiente y cierra su diálogo sin vaciar el listado ni afectar otro módulo. <!-- trace:required -->
+- FAB-023: la interfaz muestra solo acciones permitidas, pero una invocación directa sin capacidad también es rechazada por backend sin modificar fabricante o reserva.
+- FAB-024: revocar una acción distinta de la mutación activa no apaga su indicador; un cierre anterior tampoco altera una operación posterior. <!-- trace:required -->
+
 ## Evidencia local — 7 de noviembre de 2026
 
 - 9 suites y 22 pruebas Angular aprobaron, incluida la presentación con los únicos campos Nombre y Notas, modales, acciones iconográficas, búsqueda, paginación y navegación.
@@ -43,3 +50,7 @@ Estos escenarios definen la aceptación del módulo aprobado.
 - Hosting respondió HTTP 200 en raíz, ruta SPA y bundle; sirve `main-TOQX2LZJ.js`, conserva CSP, usa `no-store` para rutas y caché inmutable para assets con hash.
 - No se desplegaron índices, datos, secretos, migración ni producción.
 - La aceptación funcional y visual autenticada en escritorio y móvil permanece pendiente.
+
+## Evidencia de revocación en sesión — 11 de noviembre de 2026
+
+- FAB-022 aprobó en facade, página y Chromium sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: retirar una acción cierra solo el diálogo dependiente, conserva el listado y permite continuar en el módulo.

@@ -21,3 +21,23 @@
 - [x] Permitir contraer `Configuraciones` con una ruta secundaria activa.
 - [x] Extender los enlaces secundarios a todo el ancho disponible conservando su sangría interna.
 - [x] Igualar la tipografía del botón `Configuraciones` con los enlaces principales del sidebar.
+- [x] Incorporar recorridos Playwright de teclado, foco, navegación móvil y viewport de 320 px con Emulator Suite.
+- [x] Evitar el ancho mínimo global que provoca desplazamiento horizontal en navegadores con barra vertical y reforzar LAY-020 contra el ancho útil real.
+- [x] Mantener los rechazos de eliminación dentro de los cinco diálogos administrativos, sin alerta duplicada en el fondo.
+
+## Incremento implementado: permisos granulares
+
+- [x] Especificar visibilidad del grupo y enlaces por capacidad Ver.
+- [x] Incorporar el estado de permisos efectivos al shell sin mutación externa.
+- [x] Sustituir guards administrativos de los tres catálogos por guards de capacidad con revalidación canónica.
+- [x] Mantener Usuarios y Campus exclusivos de `admin` en el primer incremento.
+- [x] Probar combinaciones de uno, dos, tres y ningún submenú en escritorio y desde 320 px.
+
+## Ampliación autorizada: Campus
+
+- [x] Especificar visibilidad y guard de Campus mediante `campus.ver`.
+- [x] Conservar Usuarios exclusivo de `admin` y Campus independiente del alcance territorial.
+- [x] Obtener validación expresa del responsable.
+- [x] Incorporar Campus al registro del shell y probar combinaciones de cero a cuatro submenús.
+- [x] Derivar submenús, resolución de ruta y listeners de revocación del registro tipado y probar dinámicamente cada módulo vigente.
+- [x] Abandonar `/usuarios` al perder `admin` sin cerrar la sesión ni rehabilitar la ruta al restaurar el rol.

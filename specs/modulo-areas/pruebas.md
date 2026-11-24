@@ -1,0 +1,92 @@
+# Pruebas: Áreas
+
+> Criterios aprobados — 12 de noviembre de 2026
+
+Los criterios siguientes son obligatorios. Su presencia en una prueba no acredita ejecución; el manifiesto registra estructura y la matriz vincula el SHA realmente validado.
+
+## Autorización y seguridad
+
+- ARE-001: `admin` activo conserva acceso ordinario total; un `usuario` activo puede listar o administrar únicamente con `areas.ver` y la acción explícita correspondiente; perfil inactivo, capacidad ausente y solicitud anónima son rechazados. <!-- trace:required -->
+- ARE-002: toda lectura o escritura directa a `areas` y `areas_claves` es rechazada. <!-- trace:required -->
+- ARE-003: cada callable revalida Authentication, autorización base y perfil canónico activo; las operaciones ordinarias exigen la capacidad exacta y `reconcileAreaCounts` continúa exigiendo administrador canónico.
+- ARE-004: errores y registros no exponen tokens, stack traces, reservas, hashes ni credenciales.
+
+## Validación, identidad y Campus
+
+- ARE-005: alta válida con Campus activo crea Área activa, reserva e incremento de `cantidadAreas` en una transacción. <!-- trace:required -->
+- ARE-006: nombre vacío o mayor al límite y notas mayores al límite se rechazan sin escrituras parciales.
+- ARE-007: Campus ausente, inexistente o inactivo se rechaza en alta sin crear reserva ni alterar contador.
+- ARE-008: nombres equivalentes dentro del mismo Campus producen `area-name-exists`, incluso ante altas concurrentes. <!-- trace:required -->
+- ARE-009: el mismo nombre normalizado puede existir en Campus distintos sin compartir reserva. Depende de D-ARE-001.
+- ARE-010: renombrar conserva `areaId`, fecha de creación, Campus y contador y sustituye únicamente la reserva.
+- ARE-011: una edición inválida conserva Área, reserva y contador anteriores.
+- ARE-012: el catálogo del formulario expone solo identificador, código y nombre de Campus aplicables y permite conservar el Campus histórico inactivo.
+- ARE-013: el listado ordenado no expone normalización, reservas ni documentos administrativos completos y falla sin resultado parcial al superar el límite aprobado.
+
+## Estado, transferencia y referencias
+
+- ARE-014: activar o desactivar solo cambia estado y fecha; repetir el estado vigente es idempotente y no altera `cantidadAreas`.
+- ARE-015: un Área inactiva permanece visible administrativamente y no puede usarse en nuevas relaciones cuando exista un consumidor aprobado.
+- ARE-016: transferir un Área libre cambia Campus y reserva y ajusta ambos contadores en una sola transacción. <!-- trace:required -->
+- ARE-017: una transferencia hacia Campus inexistente o inactivo conserva completamente el estado anterior.
+- ARE-018: una referencia dependiente bloquea o coordina la transferencia conforme a la decisión aprobada, sin dejar relaciones cruzadas. Depende de D-ARE-002.
+- ARE-019: eliminar un Área libre elimina documento y reserva y decrementa exactamente una vez `cantidadAreas`. <!-- trace:required -->
+- ARE-020: un Área referenciada responde `area-in-use`, permanece disponible para desactivación y no altera reservas ni contador. Depende de D-ARE-003.
+- ARE-021: un error al comprobar referencias responde reconciliación y falla de forma segura sin eliminar.
+- ARE-022: `deleteCampus` rechaza un Campus con cualquier Área activa o inactiva aunque `cantidadAreas` sea cero; conserva Campus, Área y reservas y un error de consulta nunca permite borrarlo. <!-- trace:required -->
+
+## Contadores y concurrencia
+
+- ARE-023: altas, eliminaciones y transferencias concurrentes coordinadas para solaparse conservan Áreas, Campus, propietarios de reservas y `cantidadAreas` sin incrementos perdidos, dobles decrementos, valores negativos ni cambios a registros ajenos. <!-- trace:required -->
+- ARE-024: renombrar, activar o desactivar no cambia el contador; reintentar una mutación idempotente no lo duplica.
+- ARE-025: la reconciliación reconstruye `cantidadAreas` desde Áreas existentes, reporta diferencias y no acepta un valor calculado por el cliente. <!-- trace:required -->
+
+## Interfaz, sesión y accesibilidad
+
+- ARE-026: `Áreas` aparece dentro de `Configuraciones` con `areas.ver`; la ruta usa el guard de capacidad y reconciliación conserva su control administrativo independiente.
+- ARE-027: alta y edición usan `AppDialog` con únicamente Campus, Nombre y Notas; no contienen alta rápida ni permisos, Coordinaciones, Usuarios o Activos.
+- ARE-028: búsqueda automática, filtro de Campus y paginación reinician correctamente la página y la tabla muestra Nombre, Campus, Notas, Estado y acciones iconográficas.
+- ARE-029: un error de eliminación o transferencia permanece dentro de `dialog[open]` con `role="alert"`, mantiene foco y controles de recuperación y no se duplica en el fondo.
+- ARE-030: cerrar sesión o cambiar de usuario durante listado, catálogos o mutación descarta respuestas tardías, vacía estado privado y no publica éxito. <!-- trace:required -->
+- ARE-031: navegación, tabla, formularios, tooltips, foco, Escape, retorno de foco y anuncios funcionan por teclado y desde 320 px sin pérdida de acciones.
+
+## Staging
+
+- ARE-032: la validación técnica y el despliegue autorizado se vinculan al SHA exacto; Rules niega acceso directo, Functions rechaza anónimo y Hosting sirve la ruta sin modificar producción ni crear datos. <!-- trace:required -->
+- ARE-033: una sesión administrativa real acepta alta, edición, estado, transferencia aprobada, eliminación y causas de rechazo; esta aceptación se registra separada de HTTP 200, Function `ACTIVE` y pruebas locales. <!-- trace:required -->
+- ARE-034: si el mismo UID pierde el rol administrativo durante una espera, la respuesta se descarta, se cierran diálogos, se limpia el estado y la ruta vuelve a Dashboard. <!-- trace:required -->
+- ARE-035: si el alta queda confirmada pero falla la recarga, la página cierra el diálogo, conserva el identificador y permite actualizar el listado sin repetir la creación; `loading` y `saving` terminan. <!-- trace:required -->
+- ARE-036: dos listados fuera de orden conservan exclusivamente la respuesta de la solicitud más reciente; una mutación que sustituye un listado pendiente asume su estado terminal y una finalización antigua no apaga una carga nueva. <!-- trace:required -->
+- ARE-037: el catálogo inicial tardío no reemplaza el catálogo posterior de una edición que conserva un Campus histórico inactivo. <!-- trace:required -->
+- ARE-038: perder y recuperar rol `admin` con el mismo UID no revive operaciones anteriores ni restaura estado, mensajes o diálogos. <!-- trace:required -->
+- ARE-039: reconciliar repara contadores negativos, nulos o ausentes con diagnóstico explícito, conserva relaciones canónicas e idempotencia. <!-- trace:required -->
+- ARE-040: nombres compuestos solo por espacios, U+200B, U+FE0F, formatos, controles o marcas que dejan identidad normalizada vacía se rechazan sin Área, reserva o cambio de contador; Unicode visible legítimo permanece permitido. <!-- trace:required -->
+- ARE-041: el inspector de referencias permite únicamente un `false` explícito; `true`, excepción o resultado indeterminado bloquean eliminación y transferencia sin cambios parciales. <!-- trace:required -->
+- ARE-042: reconciliación iniciada mientras una transferencia o eliminación está dentro de su transacción converge al contador, pertenencia y reservas exactos; la prueba coordina el solapamiento sin depender solo de `Promise.all` o pausas arbitrarias. <!-- trace:required -->
+- ARE-043: el recorrido E2E usa identidad sintética única y limpieza limitada a sus propios registros, de modo que una ejecución fallida no colisiona ni provoca borrados globales. <!-- trace:required -->
+
+## Aceptación manual de ARE-033 — 12 y 13 de noviembre de 2026
+
+- La sesión `Omar Sánchez / Administrador` aprobó alta, edición, transferencia entre los dos Campus sintéticos, desactivación, reactivación, rechazo de duplicado y rechazo de nombre obligatorio.
+- La eliminación se completó únicamente sobre `QA-DEL-20261112-1620`; la comprobación posterior confirmó que ya no aparecía en el listado.
+- `QAARE33A-121126`, `QAARE33B-121126`, `Área ARE-033 editada 20261112` y `Área temporal eliminación ARE-033 20261112-1525` permanecieron activos e intactos.
+- Esta evidencia manual acepta ARE-033 sobre la versión de staging derivada de `5e645debf1df4239c6c5f73fc56ca9263ac65ae4`; no se infiere de las pruebas locales, HTTP 200 o Functions `ACTIVE`.
+
+## Criterios del incremento de permisos granulares
+
+- ARE-044: Áreas aparece como quinto módulo en Asignar permisos con `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`; guardar conserva los otros cuatro módulos. <!-- trace:required -->
+- ARE-045: un usuario sin `areas` no ve enlace, no entra por URL y recibe denegación en las seis callables ordinarias. <!-- trace:required -->
+- ARE-046: un usuario con solo `areas.ver` lista Áreas y obtiene el catálogo mínimo de Campus sin `campus.ver`, pero no dispone de mutaciones. <!-- trace:required -->
+- ARE-047: crear, editar/transferir, cambiar estado y eliminar exigen `ver` más su acción exacta. <!-- trace:required -->
+- ARE-048: crear, editar/transferir, cambiar estado y eliminar se retienen mediante una barrera después de una autorización preliminar real; si se revoca la acción conservando `ver` antes de la transacción, la operación se rechaza sin cambiar Área, reserva, contadores ni fechas. Una escritura ya confirmada conserva sus efectos y la revocación posterior bloquea las siguientes. <!-- trace:required -->
+- ARE-049: retirar `areas.ver` invalida pendientes, limpia datos, cierra diálogos, oculta el enlace y redirige a Dashboard sin cerrar sesión. <!-- trace:required -->
+- ARE-050: retirar `areas.editar` cierra el diálogo de edición e invalida solo esa operación; conserva listado, ruta y otras acciones vigentes. <!-- trace:required -->
+- ARE-051: revocar y volver a conceder una capacidad de Áreas no rehabilita respuestas de la concesión anterior. <!-- trace:required -->
+- ARE-052: revocar Áreas no limpia estado ni operaciones de otro módulo y conserva la sesión. <!-- trace:required -->
+- ARE-053: un perfil histórico sin `permisos.areas` se normaliza como `areas: []` sin error ni migración. <!-- trace:required -->
+- ARE-054: un payload antiguo de cuatro módulos se rechaza con mensaje de actualización y conserva íntegro el mapa de cinco módulos. <!-- trace:required -->
+- ARE-055: `getAreaCatalogs` entrega únicamente la proyección necesaria de Campus a quien tenga `areas.ver`, sin conceder administración de Campus. <!-- trace:required -->
+- ARE-056: `reconcileAreaCounts` continúa denegado a `usuario` aunque tenga las cinco acciones ordinarias de Áreas. <!-- trace:required -->
+- ARE-057: la incorporación granular conserva unicidad, reservas, contadores, Campus histórico, inspector fail-safe y protección de `deleteCampus`. <!-- trace:required -->
+- ARE-058: los registros tipados de módulos y acciones de Angular y Functions coinciden mediante una prueba de contrato. <!-- trace:required -->
+- ARE-059: una apertura pendiente de alta o edición queda vinculada a la generación de su capacidad; revocar y restituir la acción no revive esa apertura, una apertura nueva sí funciona y una respuesta anterior no modifica un diálogo posterior. <!-- trace:required -->

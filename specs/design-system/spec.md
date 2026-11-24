@@ -71,7 +71,7 @@
 
 ### Grupo Configuraciones
 
-- `Configuraciones` es un botón desplegable de primer nivel con icono `settings`, visible exclusivamente a `admin`; no navega a una pantalla propia.
+- `Configuraciones` es un botón desplegable de primer nivel con icono `settings`; no navega a una pantalla propia. `admin` ve todas las opciones vigentes y `usuario` solo los submódulos donde posee `ver`.
 - Como elemento de primer nivel, usa exactamente la misma familia, tamaño y peso tipográfico que Dashboard y Usuarios.
 - El botón declara `aria-expanded` y `aria-controls`, admite teclado y conserva un objetivo mínimo de `44 × 44 px`.
 - Las opciones secundarias se presentan con texto, sangría y estado activo, sin exigir un icono individual.
@@ -81,6 +81,26 @@
 - Los enlaces secundarios ocupan todo el ancho disponible; la jerarquía visual se expresa mediante sangría interna sin reducir el fondo, foco ni área interactiva.
 - En móvil, activar una opción secundaria cierra el drawer; expandir o contraer el grupo no cierra el drawer.
 - `Usuarios` permanece como opción principal independiente.
+
+## Matriz de permisos de Usuario
+
+- La asignación se abre desde una acción iconográfica de la tabla y usa `AppDialog`; no se agrega al formulario de alta o identidad.
+- El icono de permisos se incorpora al registro `AppIcon` antes de implementar la acción y conserva nombre accesible y tooltip `Asignar permisos a <nombre>`.
+- La lista de módulos usa la primitiva global `disclosure-list`: cada encabezado es un botón de ancho completo con nombre, resumen textual, indicador compartido y atributos `aria-expanded`/`aria-controls`; solo un panel permanece expandido.
+- Cada panel conserva un `fieldset` con `legend` accesible y controles nativos etiquetados para Ver, Crear, Editar, Cambiar estado y Eliminar.
+- Al abrir se expande el primer módulo con permisos o, si no existe, el primero disponible. Cambiar de panel no reinicia controles ni persiste por sí mismo.
+- La dependencia de Ver se comunica por estado y texto; no se representa solo con color ni se dejan combinaciones inválidas.
+- En escritorio pueden alinearse acciones por columnas. Desde 320 px cada módulo se apila sin desplazamiento horizontal obligatorio y conserva objetivos de 44 × 44 px.
+- `Acceso total por rol`, `Sin permisos` y la cantidad de módulos se expresan como texto, no solo como badge de color.
+- Error y guardado permanecen dentro del diálogo; el foco retorna al botón de permisos que lo abrió.
+
+### Primitiva `disclosure-list`
+
+- `disclosure-list`, `disclosure`, `disclosure__trigger`, `disclosure__summary`, `disclosure__icon` y `disclosure__panel` se definen globalmente para listas compactas expandibles dentro de superficies administrativas.
+- El disparador conserva un objetivo mínimo de 44 px, foco visible, estado hover y una indicación textual independiente del giro del icono.
+- El panel usa el borde, radio, superficie, tipografía y espaciado globales; el SCSS encapsulado solo organiza el contenido particular del panel.
+- El panel entra y sale con una transición global de altura y opacidad de aproximadamente 180 ms. Los paneles contraídos permanecen a altura cero, `aria-hidden` e inertes para conservar el estado del formulario sin exponer controles.
+- La animación del panel y del indicador respeta `prefers-reduced-motion`, se reduce al mínimo y nunca es necesaria para comprender el estado.
 
 ## Diálogos y formularios administrativos
 
@@ -110,6 +130,8 @@
 - Permite retirar la selección antes de guardar y revoca el object URL local al reemplazar, cerrar o destruir el componente.
 - Una imagen vigente muestra miniatura, estado y acciones textuales `Reemplazar imagen` y `Eliminar imagen` dentro del diálogo.
 - Carga, procesamiento, error parcial y reintento se anuncian con regiones de estado accesibles; no se simula un porcentaje que la callable no pueda medir.
+- Los errores originados por una operación iniciada en el diálogo se presentan dentro de su superficie mediante `role="alert"`; un error parcial aclara que el Modelo ya existe y conserva el formulario sobre el mismo identificador.
+- Toda confirmación de eliminación conserva el diálogo abierto ante error y anuncia la causa dentro de `dialog[open]` mediante `role="alert"`; el fondo no duplica ese mensaje.
 - La tabla usa una miniatura con dimensiones reservadas y texto alternativo contextual; ante ausencia o error muestra un placeholder que no depende solo del color.
 - El campo se implementa por composición de primitivas globales; su SCSS encapsulado controla únicamente previsualización y distribución responsive.
 
@@ -120,5 +142,7 @@ El layout, los tokens ampliados, `AppIcon`, `AppDialog`, la guardia visual, el e
 Modelos de activos reutiliza las mismas primitivas y fue publicado en Hosting de staging el 7 de noviembre de 2026. La regresión actual aprobó 10 suites con 27 pruebas Angular y la guardia visual; Hosting sirve `main-ALBLFGKY.js`, `styles-CISTRGAV.css` y el módulo diferido `chunk-CA-BBvnz.js`. La aceptación visual autenticada en escritorio y móvil permanece pendiente.
 
 Campus reutiliza encabezado, tabla, búsqueda, `AppPagination`, `AppDialog`, badges e icon-buttons sin introducir variantes visuales. Fue publicado únicamente en Hosting de staging el 9 de noviembre de 2026; la regresión aprobó 11 suites con 30 pruebas Angular y la guardia visual. La sesión administrativa confirmó navegación, estado vacío y formulario modal en escritorio; la revisión visual móvil permanece pendiente.
+
+La matriz de permisos usa `disclosure-list` desde el 11 de noviembre de 2026. La revisión autenticada reveló que el primer despliegue mantenía visibles los paneles cerrados por una colisión de estilos; `f6a91de5deea6d8c16c8075150112078e8909a59` corrigió la visibilidad y añadió comprobaciones reales. El refinamiento `6f112780370f9f890efc773e21288efc4f4f9497` conservó esa protección y agregó la transición global de altura y opacidad con paneles contraídos `aria-hidden` e inertes. Aprobaron 73 pruebas Angular y 5 recorridos Chromium y se publicó únicamente Hosting de staging. La ruta `/usuarios` y los bundles `main-JZFE42HR.js` y `styles-K7H52MHM.css` respondieron HTTP 200; la confirmación visual autenticada de la animación permanece pendiente.
 
 Botones, campos, alertas, badges y tarjetas se definen globalmente en `src/styles.scss`; los estilos encapsulados controlan composición.

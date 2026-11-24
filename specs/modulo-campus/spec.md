@@ -2,11 +2,11 @@
 
 ## Estado
 
-Especificación aprobada y autorizada por el responsable el 9 de noviembre de 2026 para implementación, pruebas y despliegue exclusivo a `inventario-stg`. No autoriza crear datos de negocio, migrar Snipe-IT ni modificar producción.
+El módulo base fue aprobado, implementado y desplegado exclusivamente a `inventario-stg`. La ampliación para permitir acceso granular a `usuario` fue autorizada expresamente el 11 de noviembre de 2026; autoriza código, pruebas y despliegue exclusivo a staging. No autoriza crear datos de negocio, migrar Snipe-IT ni modificar producción.
 
 ## Objetivo
 
-Permitir que un `admin` gestione los campus institucionales que servirán como raíz física para las futuras Áreas, coberturas de Coordinaciones, asignaciones de Usuarios y Activos, sin introducir todavía esas entidades dependientes.
+Permitir administrar los campus institucionales que sirven como raíz física para Áreas y, en incrementos futuros, coberturas de Coordinaciones, asignaciones de Usuarios y Activos.
 
 ## Modelo organizacional
 
@@ -19,13 +19,13 @@ Permitir que un `admin` gestione los campus institucionales que servirán como r
 
 ## Alcance
 
-- Ruta privada `/configuraciones/campus`, visible únicamente a `admin` después de implementar y autorizar el módulo.
+- Ruta privada implementada `/configuraciones/campus`, visible para `admin` o para un `usuario` activo con `campus.ver`.
 - Listado administrativo completo, ordenado por nombre y limitado inicialmente a 100 registros.
 - Búsqueda automática local por código, nombre o notas.
 - Alta, edición, activación, desactivación y eliminación condicionada.
 - Reserva transaccional de código y nombre normalizados.
 - Estados de carga, vacío, error y éxito.
-- Presentación de cantidades derivadas de Áreas y Activos; ambas permanecerán en cero hasta que existan fuentes canónicas aprobadas.
+- Presentación de `cantidadAreas`, mantenida y reconciliada por el módulo Áreas; `cantidadActivos` permanece en cero hasta su fuente canónica.
 
 ## Campos capturados
 
@@ -93,12 +93,21 @@ Ambos valores son read models. Las entidades futuras serán la fuente canónica 
 
 ## Autorización
 
-- Solo `admin` autenticado, autorizado y activo puede acceder a la ruta o invocar sus callables.
-- `usuario`, perfiles inactivos y solicitudes anónimas no pueden listar ni mutar Campus.
+- En la versión vigente `admin` conserva acceso total y `usuario` autenticado, autorizado y activo requiere la capacidad exacta de Campus.
+- Un `usuario` sin la acción canónica exacta, perfiles inactivos y solicitudes anónimas no pueden listar ni mutar Campus.
 - Angular no accederá directamente a `campus` ni a `campus_claves`.
 - Cada callable verificará Authentication, claim administrativo y el documento canónico `usuarios`.
 - El guard y la visibilidad del menú serán defensas de presentación, no autorización efectiva.
-- Esta spec no modifica los permisos de inventario de `usuario`; la reestructuración de accesos se realizará después de definir Áreas y coberturas de Coordinaciones.
+- Esta spec no define alcance sobre inventario; la reestructuración de accesos a Activos se realizará después de definir Áreas y coberturas de Coordinaciones.
+
+- Campus es el cuarto módulo del mapa canónico con `ver`, `crear`, `editar`, `cambiarEstado` y `eliminar`.
+- `campus.ver` habilita ruta, submenú y `listCampuses`.
+- `campus.crear`, `campus.editar`, `campus.cambiarEstado` y `campus.eliminar` protegen respectivamente `createCampus`, `updateCampus`, `setCampusStatus` y `deleteCampus` y exigen también `ver`.
+- Cada callable revalidará el permiso exacto dentro de su operación; poseer otra acción no elevará acceso.
+- Un documento anterior sin `permisos.campus` equivaldrá a lista vacía para `usuario`. `admin` conservará acceso total por rol.
+- Los permisos serán globales para administrar el catálogo. No indican qué Campus, Áreas, Coordinaciones o Activos puede consultar operativamente el usuario.
+- Reducir el permiso se aplicará inmediatamente en backend; menú, botones y guard se actualizarán al revalidar la sesión, pero no serán autoridad.
+- La revocación en sesión, el descarte selectivo de respuestas tardías y la navegación segura siguen `../patrones/permisos-modulares.md`.
 
 ## Contratos callable
 
@@ -125,6 +134,7 @@ items[]
 - Si existen más de 100 documentos, responde `campus-capacity-exceeded` y no devuelve resultados parciales.
 - No expone campos normalizados, hashes ni documentos del índice técnico.
 - Expone las cantidades como enteros no negativos y no acepta modificarlas en payloads administrativos.
+- Después de aprobar la ampliación exigirá `campus.ver` o rol `admin`.
 
 ### `createCampus`
 
@@ -133,6 +143,7 @@ Entrada: `codigo`, `nombre`, `notas`.
 - Normaliza y valida los campos.
 - Reserva código y nombre y crea el Campus activo con contadores en cero dentro de una transacción.
 - Responde `campus-code-exists` o `campus-name-exists` si alguna reserva ya pertenece a otro Campus.
+- Después de aprobar la ampliación exigirá `campus.crear` junto con `campus.ver`, o rol `admin`.
 
 ### `updateCampus`
 
@@ -141,6 +152,7 @@ Entrada: `documentId`, `codigo`, `nombre`, `notas`.
 - No permite modificar estado, cantidades, identificador ni fechas administradas.
 - Sustituye en la misma transacción las reservas de código o nombre que cambien.
 - Conserva `campusId`, `fechaCreacion` y cantidades vigentes.
+- Después de aprobar la ampliación exigirá `campus.editar` junto con `campus.ver`, o rol `admin`.
 
 ### `setCampusStatus`
 
@@ -149,6 +161,7 @@ Entrada: `documentId`, `activo`.
 - Cambia únicamente estado y fecha de actualización.
 - No elimina referencias ni documentos.
 - Repetir el estado vigente es idempotente.
+- Después de aprobar la ampliación exigirá `campus.cambiarEstado` junto con `campus.ver`, o rol `admin`.
 
 ### `deleteCampus`
 
@@ -157,6 +170,7 @@ Entrada: `documentId`.
 - Verifica de forma fail-safe todas las referencias aprobadas antes de eliminar.
 - Mientras no existan consumidores implementados, valida la entidad y sus dos reservas técnicas.
 - Elimina Campus y reservas de código y nombre en una transacción.
+- Después de aprobar la ampliación exigirá `campus.eliminar` junto con `campus.ver`, o rol `admin`; las restricciones por referencias permanecen inalteradas.
 
 ## Códigos funcionales
 
@@ -179,10 +193,10 @@ La interfaz traducirá estos códigos a mensajes institucionales y no expondrá 
 
 ### Navegación
 
-- `Configuraciones` permanece como grupo desplegable exclusivo de `admin`.
-- `Campus` será una opción secundaria de texto y navegará a `/configuraciones/campus` únicamente después de implementar, validar y autorizar el módulo.
+- `Configuraciones` permanece completo para `admin`; para `usuario` solo contiene módulos con `ver` explícito.
+- `Campus` es visible para `admin` y para `usuario` únicamente con `campus.ver`; navega a `/configuraciones/campus`.
 - No tendrá icono individual porque las opciones secundarias usan el icono compartido del grupo.
-- Áreas y Coordinaciones no aparecerán hasta contar con specs e implementación propias.
+- Áreas aparece como módulo administrativo propio; Coordinaciones permanece fuera hasta contar con specs e implementación.
 
 ### Página
 
@@ -207,7 +221,7 @@ La interfaz traducirá estos códigos a mensajes institucionales y no expondrá 
 ## Fuera de alcance
 
 - Áreas, edificios, ubicaciones, Coordinaciones y su cobertura por Campus.
-- Reestructuración de Usuarios, asignaciones, permisos de inventario y acceso por ámbito.
+- Asignaciones de Campus a Usuarios, permisos de inventario y acceso por ámbito.
 - Activos, movimientos, transferencias, responsables y responsivas.
 - Direcciones, mapas, fotografías, geolocalización y jerarquías físicas.
 - Importación, sincronización o almacenamiento visible de identificadores de Snipe-IT.
@@ -220,8 +234,9 @@ La interfaz traducirá estos códigos a mensajes institucionales y no expondrá 
 2. Código, Nombre y Notas son los únicos campos capturados.
 3. Código y Nombre son únicos y editables sin cambiar el identificador estable.
 4. El formulario no asigna Áreas ni Coordinaciones.
-5. Las cantidades de Áreas y Activos son read models no editables que permanecen en cero hasta contar con fuentes aprobadas.
+5. Las cantidades son read models no editables; Áreas mantiene `cantidadAreas` y Activos mantendrá su contador cuando se apruebe.
 6. FCS y TUP son registros administrativos, no constantes ni datos creados por el despliegue.
+7. La ampliación autorizada concede permisos funcionales sobre el catálogo Campus y no define alcance territorial sobre inventario.
 
 ## Estado de publicación
 

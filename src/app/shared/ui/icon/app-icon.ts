@@ -10,6 +10,7 @@ export type AppIconName =
   | 'logout'
   | 'menu'
   | 'next'
+  | 'permissions'
   | 'previous'
   | 'settings'
   | 'users';

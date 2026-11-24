@@ -1,5 +1,9 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
+import { AuthFacade } from '../../../core/auth/auth.facade';
+import { isPermissionDenied } from '../../../core/auth/permission-denied';
+import type { PermissionAction } from '../../../shared/models/catalog-permissions';
+import { SessionScope, type CapabilityContext } from '../../../core/auth/session-scope';
 import type { InventoryCampus } from '../../../shared/models/inventory-campus';
 import { CAMPUSES_GATEWAY, type CampusDraft, type CampusUpdate } from '../data/campuses.gateway';
 
@@ -49,12 +53,16 @@ function searchable(value: string): string {
 @Injectable({ providedIn: 'root' })
 export class CampusesFacade {
   private readonly gateway = inject(CAMPUSES_GATEWAY);
+  private readonly sessionScope = inject(SessionScope);
+  private readonly auth = inject(AuthFacade);
   private readonly campusesState = signal<readonly InventoryCampus[]>([]);
   private readonly queryState = signal('');
   private readonly loadingState = signal(false);
   private readonly savingState = signal(false);
   private readonly errorState = signal<string | null>(null);
   private readonly successState = signal<string | null>(null);
+  private operationGeneration = 0;
+  private activeAction: PermissionAction | null = null;
 
   readonly campuses = this.campusesState.asReadonly();
   readonly query = this.queryState.asReadonly();
@@ -71,32 +79,56 @@ export class CampusesFacade {
       : this.campusesState();
   });
 
+  constructor() {
+    this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+    this.sessionScope.registerCapabilityListener('campus', (change) => {
+      if (change.action === 'ver' && !change.allowed) this.resetPrivateState();
+      else if (!change.allowed && this.activeAction === change.action) {
+        this.operationGeneration += 1;
+        this.activeAction = null;
+        this.savingState.set(false);
+        this.clearMessages();
+      }
+    });
+  }
+
   setQuery(query: string): void {
     this.queryState.set(query);
   }
 
   async load(): Promise<void> {
+    const context = this.sessionScope.captureCapability('campus', 'ver');
+    if (!this.auth.can('campus', 'ver')) return;
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
-      this.campusesState.set((await this.gateway.list()).items);
+      const result = await this.gateway.list();
+      if (this.isCurrent(context)) this.campusesState.set(result.items);
     } catch (error) {
-      this.errorState.set(campusErrorMessage(error));
+      await this.revalidateDenial(error);
+      if (this.isCurrent(context)) {
+        this.errorState.set(campusErrorMessage(error));
+      }
     } finally {
-      this.loadingState.set(false);
+      if (this.isCurrent(context)) this.loadingState.set(false);
     }
   }
 
   async create(input: CampusDraft): Promise<boolean> {
-    return this.mutate(() => this.gateway.create(input), 'Campus creado correctamente.');
+    return this.mutate('crear', () => this.gateway.create(input), 'Campus creado correctamente.');
   }
 
   async update(input: CampusUpdate): Promise<boolean> {
-    return this.mutate(() => this.gateway.update(input), 'Campus actualizado correctamente.');
+    return this.mutate(
+      'editar',
+      () => this.gateway.update(input),
+      'Campus actualizado correctamente.',
+    );
   }
 
   async setStatus(campus: InventoryCampus): Promise<boolean> {
     return this.mutate(
+      'cambiarEstado',
       () => this.gateway.setStatus(campus.documentId, !campus.activo),
       campus.activo ? 'Campus desactivado.' : 'Campus activado.',
     );
@@ -104,6 +136,7 @@ export class CampusesFacade {
 
   async delete(campus: InventoryCampus): Promise<boolean> {
     return this.mutate(
+      'eliminar',
       () => this.gateway.delete(campus.documentId),
       'Campus eliminado correctamente.',
     );
@@ -114,19 +147,60 @@ export class CampusesFacade {
     this.successState.set(null);
   }
 
-  private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
+  private async mutate(
+    action: 'crear' | 'editar' | 'cambiarEstado' | 'eliminar',
+    operation: () => Promise<void>,
+    successMessage: string,
+  ): Promise<boolean> {
+    const context = this.sessionScope.captureCapability('campus', action);
+    if (!this.auth.can('campus', action)) return false;
+    const operationId = ++this.operationGeneration;
+    this.activeAction = action;
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
-      await this.load();
+      if (!this.isOperationCurrent(context, operationId)) return false;
+      const result = await this.gateway.list();
+      if (!this.isOperationCurrent(context, operationId)) return false;
+      this.campusesState.set(result.items);
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      this.errorState.set(campusErrorMessage(error));
+      await this.revalidateDenial(error);
+      if (this.isOperationCurrent(context, operationId)) {
+        this.errorState.set(campusErrorMessage(error));
+      }
       return false;
     } finally {
-      this.savingState.set(false);
+      if (this.isOperationCurrent(context, operationId)) {
+        this.savingState.set(false);
+        this.activeAction = null;
+      }
     }
+  }
+
+  private isCurrent(context: CapabilityContext): boolean {
+    return (
+      this.sessionScope.isCapabilityCurrent(context) && this.auth.can('campus', context.action)
+    );
+  }
+
+  private isOperationCurrent(context: CapabilityContext, operation: number): boolean {
+    return this.operationGeneration === operation && this.isCurrent(context);
+  }
+
+  private async revalidateDenial(error: unknown): Promise<void> {
+    if (isPermissionDenied(error)) await this.auth.revalidatePermissionDenial(error);
+  }
+
+  private resetPrivateState(): void {
+    this.operationGeneration += 1;
+    this.activeAction = null;
+    this.campusesState.set([]);
+    this.queryState.set('');
+    this.loadingState.set(false);
+    this.savingState.set(false);
+    this.clearMessages();
   }
 }

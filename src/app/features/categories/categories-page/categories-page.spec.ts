@@ -4,6 +4,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import type { InventoryCategory } from '../../../shared/models/inventory-category';
 import { CategoriesFacade } from '../state/categories.facade';
 import { CategoriesPage } from './categories-page';
+import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope } from '../../../core/auth/session-scope';
+import { emptyPermissionMap } from '../../../shared/models/catalog-permissions';
 
 describe('CategoriesPage', () => {
   const category: InventoryCategory = {
@@ -17,6 +20,7 @@ describe('CategoriesPage', () => {
   };
   let fixture: ComponentFixture<CategoriesPage>;
   let element: HTMLElement;
+  let authCan: ReturnType<typeof vi.fn>;
   let categories: {
     load: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
@@ -55,10 +59,14 @@ describe('CategoriesPage', () => {
       success: signal(null),
       filteredCategories: signal([category]),
     };
+    authCan = vi.fn().mockReturnValue(true);
 
     await TestBed.configureTestingModule({
       imports: [CategoriesPage],
-      providers: [{ provide: CategoriesFacade, useValue: categories }],
+      providers: [
+        { provide: CategoriesFacade, useValue: categories },
+        { provide: AuthFacade, useValue: { can: authCan } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CategoriesPage);
@@ -119,6 +127,22 @@ describe('CategoriesPage', () => {
     expect(categories.delete).toHaveBeenCalledWith(category);
   });
 
+  it('LAY-021 shows a reference error inside the category deletion dialog', async () => {
+    categories.delete.mockImplementationOnce(async () => {
+      categories.error.set('La Categoría está referenciada por un Modelo.');
+      return false;
+    });
+    action('Eliminar Laptops').click();
+    fixture.detectChanges();
+    textButton('Eliminar categoría').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dialog = element.querySelector<HTMLDialogElement>('dialog[open]')!;
+    expect(dialog.querySelector('[role="alert"]')?.textContent).toContain('está referenciada');
+    expect(element.querySelector('main > [role="alert"]')).toBeNull();
+  });
+
   it('filters automatically and paginates ten categories', () => {
     categories.filteredCategories.set(
       Array.from({ length: 12 }, (_, index) => ({
@@ -143,5 +167,21 @@ describe('CategoriesPage', () => {
     expect(
       element.querySelector<HTMLButtonElement>('[aria-label="Página anterior"]')!.disabled,
     ).toBe(true);
+  });
+
+  it('CAT-026 closes an edit dialog and announces an exact action revocation', () => {
+    action('Editar Laptops').click();
+    fixture.detectChanges();
+    expect(element.querySelector('dialog[open]')).toBeTruthy();
+    authCan.mockImplementation((_module: string, actionName: string) => actionName !== 'editar');
+    const previous = { ...emptyPermissionMap(), categorias: ['ver', 'editar'] as const };
+    const next = { ...emptyPermissionMap(), categorias: ['ver'] as const };
+
+    TestBed.inject(SessionScope).reconcileCapabilities('usuario', previous, 'usuario', next);
+    fixture.detectChanges();
+
+    expect(element.querySelector('dialog[open]')).toBeNull();
+    expect(element.querySelector('[role="status"]')?.textContent).toContain('permisos');
+    expect(element.querySelector('tbody tr')).toBeTruthy();
   });
 });

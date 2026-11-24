@@ -33,7 +33,7 @@ function manufacturer(
 function dependencies(items: readonly ManagedManufacturer[] = []): AdminManufacturersDependencies {
   return {
     repository: {
-      findCanonicalAdmin: vi.fn().mockResolvedValue(true),
+      hasCanonicalPermission: vi.fn().mockResolvedValue(true),
       list: vi.fn().mockResolvedValue(items),
       create: vi.fn().mockResolvedValue('new-manufacturer'),
       update: vi.fn().mockResolvedValue(undefined),
@@ -44,16 +44,22 @@ function dependencies(items: readonly ManagedManufacturer[] = []): AdminManufact
 }
 
 describe('admin manufacturers', () => {
-  it('rejects requests without an authenticated canonical admin', async () => {
+  it('FAB-021 requires the canonical permission and allows an authorized user', async () => {
     await expect(listManufacturers(null, dependencies())).rejects.toMatchObject({
       functionalCode: 'unauthenticated',
     });
 
     const deps = dependencies();
-    deps.repository.findCanonicalAdmin = vi.fn().mockResolvedValue(false);
+    deps.repository.hasCanonicalPermission = vi.fn().mockResolvedValue(false);
     await expect(listManufacturers(admin, deps)).rejects.toMatchObject({
       functionalCode: 'permission-denied',
     });
+
+    const allowed = dependencies();
+    await expect(
+      listManufacturers({ uid: 'user', authorized: true, role: 'usuario' }, allowed),
+    ).resolves.toMatchObject({ total: 0 });
+    expect(allowed.repository.hasCanonicalPermission).toHaveBeenCalledWith('user', 'ver');
   });
 
   it('normalizes manufacturer names consistently', () => {
@@ -116,7 +122,7 @@ describe('admin manufacturers', () => {
     });
   });
 
-  it('forwards only the allowed update, status and deletion fields', async () => {
+  it('FAB-022 forwards only the allowed update, status and deletion fields', async () => {
     const deps = dependencies();
     await updateManufacturer(
       admin,

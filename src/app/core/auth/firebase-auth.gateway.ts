@@ -3,6 +3,7 @@ import {
   getIdTokenResult,
   GoogleAuthProvider,
   onAuthStateChanged,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
   type IdTokenResult,
@@ -11,6 +12,7 @@ import {
 } from 'firebase/auth';
 
 import { FIREBASE_AUTH } from '../firebase/firebase.tokens';
+import { environment } from '../../../environments/environment';
 import type { AuthGateway } from './gateways';
 
 @Injectable()
@@ -23,6 +25,15 @@ export class FirebaseAuthGateway implements AuthGateway {
   }
 
   async signInWithGoogle(): Promise<User> {
+    if (environment.useEmulators) {
+      return (
+        await signInWithEmailAndPassword(
+          this.auth,
+          'admin.e2e@tecplayacar.edu.mx',
+          'local-emulator-only',
+        )
+      ).user;
+    }
     return (await signInWithPopup(this.auth, this.provider)).user;
   }
 

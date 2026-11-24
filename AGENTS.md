@@ -46,6 +46,14 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - Interfaz WCAG 2.2 AA y responsive desde 320 px.
 - Ante contradicción o ambigüedad funcional, detener la implementación y actualizar specs.
 
+## Skill Angular oficial
+
+- Para tareas Angular sobre componentes, templates, estado reactivo, formularios, inyección de dependencias, navegación, accesibilidad, estilos o pruebas, consultar `.agents/skills/angular-developer/SKILL.md` y únicamente las referencias pertinentes a la tarea.
+- Las especificaciones aprobadas determinan alcance, reglas, contratos y aceptación; la skill aporta orientación técnica y no autoriza módulos, cambios funcionales, arquitectura, dependencias o herramientas nuevas. Ante contradicción, explicar el efecto y conservar los contratos aprobados hasta contar con una decisión que los modifique.
+- Conservar Angular standalone y TypeScript estricto, `Page → Facade → Gateway`, la estrategia vigente de Signals y formularios, las primitivas compartidas incluido `AppDialog`, WCAG 2.2 AA desde 320 px, el descarte de respuestas tardías de sesiones anteriores y la autorización canónica mediante backend y callables.
+- Signal Forms, SSR, Angular Aria, MCP, migraciones y demás recomendaciones opcionales requieren un incremento especificado y aprobado; su presencia en la skill no implica adopción automática.
+- Para cambios de código, ejecutar las validaciones proporcionales del repositorio. Instalar o actualizar esta skill no es un servicio Firebase desplegable.
+
 ## Alcance autorizado inicial
 
 - Base Angular standalone estricta.
@@ -63,16 +71,24 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - La primera lectura autenticada de una miniatura reveló falta de permiso de firma. Con autorización expresa se concedió `roles/iam.serviceAccountTokenCreator` únicamente a la cuenta runtime de staging sobre sí misma y se actualizó solo `getAssetModelImageAccess`; la miniatura cargó en sesión administrativa, Storage siguió cerrado y producción no fue modificada.
 - `modulo-campus`: aprobado el 9 de noviembre de 2026 como raíz física para Áreas, coberturas de Coordinaciones, asignaciones y Activos; implementación, pruebas y despliegue exclusivo a staging están autorizados conforme a sus specs. No incluye crear FCS, TUP ni otros datos.
 - Campus fue desplegado únicamente a `inventario-stg` el 9 de noviembre de 2026: Firestore Rules, cinco Functions y Hosting. Las Functions están `ACTIVE`, la ruta administrativa fue verificada vacía y no se crearon datos de negocio; producción permaneció intacta.
+- `modulo-areas`: autorizado el 12 de noviembre de 2026 como catálogo físico dependiente de Campus, limitado a Campus, Nombre y Notas, integridad transaccional, reconciliación manual y despliegue exclusivo a staging. La decisión inicial de administración ordinaria exclusiva de `admin` fue sustituida el 20 de noviembre de 2026 por capacidades granulares; `reconcileAreaCounts` permanece exclusivo de `admin` canónico.
+- Áreas fue desplegado únicamente a `inventario-stg` el 12 de noviembre de 2026: Firestore Rules, siete Functions nuevas, `deleteCampus` y Hosting. Las ocho Functions afectadas están en Node 22, las siete callables de Áreas rechazan anónimo con `401`, Rules niega ambas colecciones con `403` y Hosting final sirve `main-2LPPUI52.js`; no se crearon datos y producción permaneció intacta.
+- El cierre de endurecimiento `5df7763ca23d862c7b4629f1088299b077d63b8d` validó generaciones administrativas, respuestas fuera de orden, revalidación posterior a negativas, guardado por operación, aislamiento de diálogos, contadores inválidos, nombres invisibles e inspector indeterminado. Se actualizaron por separado únicamente `createArea`, `updateArea`, `deleteArea`, `reconcileAreaCounts` y Hosting en staging; las cuatro callables rechazaron anónimo con `401` y Hosting sirve `main-5BT6D7I5.js`. Rules, datos, secretos, IAM y producción permanecieron intactos; ARE-033 continúa pendiente de aceptación autenticada real.
+- La corrección `88ea3afaa568bcc46a4aed45951e50049c2703fe` cerró errores de autorizaciones sustituidas, frescura ante negativas posteriores, `loading` huérfano de Áreas, identidades normalizadas vacías, carreras transaccionales y recuperación posterior al alta. Aprobó 112 Angular, 52 Functions, 42 Emulator Suite y 8 Chromium. Se desplegaron únicamente `createArea`, `updateArea` y Hosting en staging; ambas callables rechazaron anónimo con `401` y Hosting sirve `main-HZGOJ7WY.js`. Rules, demás servicios, datos, secretos, IAM y producción permanecieron intactos; ARE-033 continúa pendiente.
+- La corrección responsive `5e645debf1df4239c6c5f73fc56ca9263ac65ae4` retiró el ancho mínimo global que excedía los 305 px útiles cuando el viewport de 320 px mostraba barra vertical y reforzó LAY-020 contra `documentElement.clientWidth`. Ocho recorridos Chromium y los controles proporcionales aprobaron; se desplegó únicamente Hosting a staging y la repetición autenticada aprobó escritorio y 320 px con `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css`. Functions, Rules, Storage, datos, secretos, IAM y producción permanecieron intactos.
 - Endurecimiento transversal previo a Fabricantes, autorizado el 7 de noviembre de 2026: cierre de lectura directa de Usuarios, revocación defensiva, encabezados y caché de Hosting, CI y reconciliación documental conforme a ADR-004.
+- Permisos granulares para Categorías, Fabricantes, Modelos de activos, Campus y Áreas: asignación posterior desde Usuarios, denegación por defecto para `usuario`, autorización canónica en backend y filtrado defensivo de navegación y acciones conforme a ADR-007 y `specs/patrones/permisos-modulares.md`. No incluye Coordinaciones ni alcance territorial de Activos.
 
 ## Fuera de alcance actual
 
-- Áreas, Coordinaciones y reestructuración de accesos de Usuarios.
+- Coordinaciones y alcance territorial de Usuarios.
 - Activos, personas, ubicaciones y responsivas.
 - Migración o sincronización de Snipe-IT.
 - Métricas funcionales del Dashboard.
 - Creación o despliegue de proyectos Firebase de producción.
 - Datos reales.
+
+El corte vigente y la separación entre implementación, validación, integración, staging y aceptación se resumen en `specs/estado-actual.md`; la secuencia futura no autorizada está en `specs/plan-siguientes-modulos.md`.
 
 ## Definición de terminado
 
@@ -81,3 +97,4 @@ Desarrollo por especificaciones. Todo código debe ser trazable a `specs/`.
 - No introduce datos simulados como información real.
 - No expone secretos ni identificadores productivos.
 - Documentación y trazabilidad están actualizadas.
+- Todo módulo funcional nuevo incorpora durante su implementación su identificador tipado en frontend y backend, acciones realmente soportadas, sección en Usuarios → Asignar permisos, persistencia, validación canónica, guard, navegación, interfaz condicionada, revocación en sesión, denegación por defecto, prueba de contrato y trazabilidad. Un módulo que omita cualquiera de estos elementos no está terminado.

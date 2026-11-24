@@ -14,3 +14,64 @@
 - [x] Cerrar toda lectura directa de `usuarios` y consumir exclusivamente las callables administrativas.
 - [x] Hacer independiente el intento de revocación ante fallos de sincronización de claims.
 - [ ] Validación visual y funcional con cuentas sintéticas.
+
+## Incremento autorizado: permisos granulares
+
+- [x] Separar permisos funcionales del futuro alcance por Campus, Coordinación y Área.
+- [x] Definir módulos, acciones, denegación por defecto y acceso total de `admin`.
+- [x] Definir el mapa canónico, compatibilidad con documentos anteriores y limpieza al cambiar rol.
+- [x] Definir la asignación posterior desde una acción independiente de la tabla.
+- [x] Definir `setAuthorizedUserPermissions` y la ampliación de `bootstrapAuthorization`.
+- [x] Registrar la decisión en ADR-007 y specs transversales.
+- [x] Obtener validación final del responsable y autorización separada para implementar.
+- [x] Implementar repositorio, caso de uso y callable de reemplazo completo.
+- [x] Adaptar contratos de Usuario y Autenticación sin incluir permisos en claims.
+- [x] Implementar acción, resumen y diálogo accesible en Usuarios.
+- [x] Incorporar guards de capacidad y actualización segura de la sesión.
+- [x] Adaptar las callables de Categorías, Fabricantes y Modelos por acción.
+- [x] Agregar pruebas unitarias, Emulator Suite, Angular y Playwright.
+- [x] Validar formato, lint, guardia visual, builds, trazabilidad y auditoría.
+- [x] Desplegar exclusivamente los servicios afectados a staging después de validar y recibir autorización de implementación.
+- [ ] Ejecutar aceptación autenticada sin usar datos reales ni producción.
+
+## Ampliación autorizada: permisos de Campus
+
+- [x] Separar permiso funcional de Campus del futuro alcance por Campus, Coordinación y Área.
+- [x] Definir compatibilidad por denegación para documentos sin `permisos.campus`.
+- [x] Definir reemplazo completo de cuatro módulos y rechazo atómico de clientes anteriores.
+- [x] Definir el cuarto bloque del diálogo y el resumen de hasta cuatro módulos.
+- [x] Obtener validación expresa del responsable sobre esta ampliación.
+- [x] Incorporar Campus al contrato canónico, al diálogo y a las regresiones.
+- [x] Implementar contratos, backend, interfaz y regresiones después de la aprobación.
+- [x] Desplegar Functions antes de Hosting y verificar que una pestaña anterior falle sin sobrescribir permisos.
+
+## Refinamiento visual: acordeón de permisos
+
+- [x] Definir un acordeón de apertura individual sin modificar el contrato canónico de permisos.
+- [x] Documentar resumen textual, estado inicial, teclado, accesibilidad y conservación de selecciones.
+- [x] Implementar la primitiva visual compartida y aplicarla al diálogo de Usuarios.
+- [x] Agregar regresión de expansión única, resumen dinámico y conservación de valores.
+- [x] Suavizar apertura y cierre mediante altura/opacidad, respetando `prefers-reduced-motion`, `aria-hidden` e `inert`.
+- [x] Validar y publicar únicamente Hosting en staging.
+
+## Endurecimiento de revocación modular
+
+- [x] Documentar el patrón común de revisiones por módulo y acción.
+- [x] Mantener separado el alcance funcional del futuro alcance territorial.
+- [x] Reforzar USR-034 con rechazo atómico real del payload anterior y conservación del mapa de cuatro módulos.
+
+## Ampliación autorizada: permisos de Áreas
+
+- [x] Añadir Áreas como quinto bloque del acordeón y del resumen modular.
+- [x] Persistir el mapa completo de cinco módulos conservando permisos ajenos a Áreas.
+- [x] Normalizar documentos anteriores sin `areas` y rechazar con mensaje recuperable una pestaña antigua de cuatro módulos.
+- [x] Actualizar altas, cambios de rol, listado y bootstrap al mapa de cinco módulos.
+- [x] Validar y desplegar primero Functions compatibles y después Hosting en staging.
+- [x] Completar aceptación autenticada de la concesión y reducción de Áreas con la cuenta `PROFESOR`.
+- [x] Derivar secciones, etiquetas, controles y mapa del formulario desde el registro tipado y cubrir cada módulo registrado sin otra enumeración de prueba.
+
+## Endurecimiento del contexto administrativo
+
+- [x] Vincular listado y mutaciones de Usuarios a la generación de acceso `admin`, además de la sesión.
+- [x] Limpiar estado y cerrar diálogos al reducir el rol sin cerrar la sesión válida.
+- [x] Impedir que `admin → usuario → admin` rehabilite respuestas de la primera etapa administrativa.

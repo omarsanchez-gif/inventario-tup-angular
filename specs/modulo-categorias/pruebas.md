@@ -30,15 +30,26 @@
 - CAT-023: las futuras operaciones de crear, eliminar, restaurar o transferir Activos ajustan los contadores afectados sin producir negativos; la prueba integral queda bloqueada hasta especificar e implementar Activos.
 - CAT-024: antes de desplegar Modelos, una referencia en `modelos_activos` produce `category-in-use`; un error de consulta falla de forma segura sin eliminar categoría ni reserva.
 
+## Criterios del incremento de permisos
+
+- CAT-025: `admin` conserva acceso total; `usuario` con `categorias.ver` lista y navega, mientras otro `usuario` y anónimo son rechazados. <!-- trace:required -->
+- CAT-026: crear, editar, cambiar estado y eliminar exigen exactamente su acción canónica además de Ver; revocar una acción invalida su respuesta pendiente y cierra su diálogo sin vaciar el listado ni afectar otro módulo. <!-- trace:required -->
+- CAT-027: la interfaz muestra solo acciones permitidas, pero una invocación directa sin capacidad también es rechazada por backend sin modificar categoría o reserva. <!-- trace:required -->
+- CAT-028: revocar una acción distinta de la mutación activa no apaga su indicador; un cierre anterior tampoco altera una operación posterior. <!-- trace:required -->
+
 ## Evidencia local — 7 de noviembre de 2026
 
 - 8 suites y 18 pruebas Angular aprobaron, incluidas presentación, modales, acciones, cantidad, búsqueda, paginación y navegación de Configuraciones.
 - 3 archivos y 11 pruebas unitarias de Functions aprobaron; 7 corresponden a la lógica administrativa de Categorías.
 - Firestore Emulator aprobó 2 pruebas de integración: transacciones, unicidad concurrente, renombrado, estado, eliminación condicionada y denegación de acceso directo.
 - Compilación de Functions, lint Angular/Functions, guardia visual, formato y build de staging aprobaron.
-- CAT-023 permanece parcialmente diferida: el valor inicial y la protección están cubiertos, pero el ajuste por operaciones reales requiere los futuros módulos de Modelos y Activos.
+- CAT-023 permanece parcialmente diferida: el valor inicial y la protección están cubiertos; Modelos ya existe, pero el ajuste por operaciones reales requiere el futuro módulo de Activos, que será la fuente canónica.
 - CAT-024 quedó aprobada con Firestore Emulator el 7 de noviembre de 2026: una referencia de Modelo impide eliminar la Categoría y la transacción conserva categoría y reserva.
 - Firestore Rules, las cinco callables y Hosting se desplegaron por separado únicamente a `inventario-stg`.
 - Las cinco callables están `ACTIVE` en `us-central1`, usan Node.js 22 y rechazaron solicitudes anónimas con HTTP 401.
 - Firestore remoto rechazó con HTTP 403 la lectura anónima directa de `categorias` y Hosting respondió HTTP 200 con `main-XXPSXP7R.js` y `styles-CISTRGAV.css`.
 - La aceptación funcional y visual autenticada en escritorio y móvil permanece pendiente.
+
+## Evidencia de revocación en sesión — 11 de noviembre de 2026
+
+- CAT-026 aprobó en facade y página sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: una edición pendiente se descarta y su diálogo se cierra sin vaciar el listado ni invalidar otro módulo.

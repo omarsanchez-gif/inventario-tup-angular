@@ -19,6 +19,21 @@
 - LAY-017: en móvil, expandir el grupo conserva el drawer y seleccionar `Categorías` navega y lo cierra.
 - LAY-018: con Categorías activa, el usuario puede contraer y volver a expandir `Configuraciones`; el padre conserva su estado activo y el submenú usa todo el ancho disponible.
 - LAY-019: Dashboard, Usuarios y Configuraciones exponen el mismo tamaño y peso tipográfico como opciones principales.
+- LAY-020: Chromium comprueba Escape, retorno de foco, navegación móvil, formulario a 320 px y ausencia de desbordamiento global contra `documentElement.clientWidth`, incluida una barra vertical que reduzca el ancho útil; las tablas pueden desplazarse únicamente dentro de su contenedor. <!-- trace:required -->
+- LAY-021: los rechazos de eliminación de Usuarios, Categorías, Fabricantes, Modelos y Campus permanecen dentro del `dialog[open]` con `role="alert"`, sin duplicado de fondo y con cierre o reintento accesibles. <!-- trace:required -->
+
+## Criterios del incremento de permisos
+
+- LAY-022: `admin` ve todos los submenús vigentes; `usuario` ve Configuraciones solo con al menos un permiso Ver y exclusivamente los enlaces concedidos. <!-- trace:required -->
+- LAY-023: un `usuario` con uno, dos o tres módulos conserva alternancia, ruta activa, cierre móvil, teclado y ancho completo de submenús; sin módulos no se renderiza el grupo. <!-- trace:required -->
+- LAY-024: `/usuarios` conserva `adminGuard`; las rutas de Categorías, Fabricantes y Modelos se asocian exactamente con la capacidad `ver` de su propio módulo y revalidan el perfil canónico; una URL directa no confía en la visibilidad del sidebar. <!-- trace:required -->
+- LAY-025: revocar permisos y revalidar sesión retira enlaces y acciones sin aceptar respuestas de otra generación; backend deniega de inmediato aun si la vista estaba obsoleta. <!-- trace:required -->
+
+## Criterios obligatorios para Campus
+
+- LAY-026: `usuario` ve Campus en Configuraciones únicamente con `campus.ver`; el resto de enlaces conserva su filtrado independiente y un grupo sin módulos no se renderiza. <!-- trace:required -->
+- LAY-027: `/configuraciones/campus` usa exactamente el guard de `campus.ver`; una URL directa sin esa capacidad redirige al Dashboard y `admin` conserva acceso total. <!-- trace:required -->
+- LAY-028: retirar `ver` durante una sesión elimina el enlace y abandona la ruta activa hacia Dashboard sin cerrar la sesión ni alterar módulos no afectados. <!-- trace:required -->
 
 ## Evidencia del incremento
 
@@ -36,3 +51,25 @@
 - LAY-018 aprobó en la regresión de 8 suites y 18 pruebas Angular; Hosting se actualizó de forma aislada y sirve `main-3IK73UUE.js` y `styles-CISTRGAV.css` con HTTP 200.
 - LAY-019 aprobó en la regresión de 8 suites y 19 pruebas Angular; Hosting sirve `main-IQTLWJGB.js` y `styles-CISTRGAV.css` con HTTP 200.
 - La aceptación visual autenticada permanece pendiente.
+
+## Evidencia de navegación granular de Campus — 11 de noviembre de 2026
+
+- LAY-026 y LAY-027 aprobaron sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`: el shell muestra Campus de forma independiente y la ruta usa exactamente `campus.ver`.
+- Hosting se desplegó después de las Functions del contrato y `/configuraciones/campus` respondió HTTP 200 con `main-AQFFZNH7.js`.
+- La aceptación visual autenticada con permisos parciales en escritorio y móvil permanece pendiente.
+
+## Evidencia de revocación en sesión — 11 de noviembre de 2026
+
+- LAY-028 aprobó en pruebas de shell y en Chromium sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: retirar `campus.ver` elimina su enlace y navega a Dashboard, mientras Categorías y la sesión permanecen vigentes.
+
+## Criterios de Áreas en navegación
+
+- LAY-029: un usuario con solo `areas.ver` ve Configuraciones y únicamente el enlace Áreas; sin esa capacidad no lo ve. <!-- trace:required -->
+- LAY-030: el guard de `/configuraciones/areas` acepta admin o `areas.ver` canónico y redirige cualquier otra sesión autorizada a Dashboard. <!-- trace:required -->
+- LAY-031: retirar `areas.ver` con la ruta abierta elimina el enlace y redirige a Dashboard sin logout ni cambios en otros submenús. <!-- trace:required -->
+- LAY-032: cada módulo del registro tipado produce exactamente un submenú con su etiqueta y ruta, registra revocación de `ver` y abandona únicamente su ruta activa; la prueba recorre el registro sin mantener otra lista de módulos. <!-- trace:required -->
+- LAY-033: perder `admin` con `/usuarios` abierta redirige a Dashboard sin logout; restaurar el rol conserva Dashboard y exige una navegación administrativa nueva. <!-- trace:required -->
+
+## Evidencia de ruta administrativa — 23 de noviembre de 2026
+
+- LAY-033 aprobó sobre `161aabd271e2d6d79935b85470572a230097ae8b`: `/usuarios` volvió a Dashboard al reducir el rol, no invocó logout y no reapareció al restaurar `admin`.

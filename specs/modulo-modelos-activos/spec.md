@@ -2,15 +2,15 @@
 
 ## Estado
 
-Especificación aprobada, implementada y desplegada únicamente a `inventario-stg` el 7 de noviembre de 2026. El responsable confirmó las decisiones técnicas; producción, migración y datos reales permanecen fuera de alcance. La validación local y la verificación técnica remota están aprobadas; la aceptación funcional autenticada del ciclo completo de imagen continúa pendiente.
+Especificación base y autorización granular aprobadas, implementadas y desplegadas únicamente a `inventario-stg`. Producción, migración y datos reales permanecen fuera de alcance. La validación local, la verificación técnica remota y la aceptación funcional autenticada del ciclo completo de imagen están aprobadas; la revisión visual móvil integral permanece separada.
 
 ## Objetivo
 
-Permitir que un `admin` gestione el catálogo de Modelos que clasifica a los Activos futuros, relacionando cada Modelo con una Categoría y un Fabricante y centralizando su imagen para que los Activos la hereden sin duplicar archivos.
+Permitir que un `admin` o un `usuario` expresamente autorizado gestione el catálogo de Modelos que clasifica a los Activos futuros, relacionando cada Modelo con una Categoría y un Fabricante y centralizando su imagen para que los Activos la hereden sin duplicar archivos.
 
 ## Alcance
 
-- Ruta privada `/configuraciones/modelos-activos`, visible únicamente a `admin` después de implementar y autorizar el módulo.
+- Ruta privada `/configuraciones/modelos-activos`, visible a `admin` o a `usuario` con `modelosActivos.ver` cuando el incremento granular sea implementado.
 - Listado administrativo completo, ordenado por nombre y limitado inicialmente a 500 registros.
 - Búsqueda automática local por nombre, categoría, fabricante, Modelo No. o notas.
 - Alta, edición, activación, desactivación y eliminación condicionada.
@@ -115,13 +115,17 @@ Estado, identificadores, normalización, claves de unicidad, metadata de imagen 
 
 ### Persistencia
 
-- Los objetos usan rutas deterministas `modelos-activos/{modeloId}/original.webp` y `modelos-activos/{modeloId}/thumbnail.webp`.
+- Cada carga nueva usa rutas inmutables `modelos-activos/{modeloId}/versiones/{version}/original.webp` y `thumbnail.webp`.
 - Firestore guarda únicamente metadata; nunca base64, URL pública ni URL firmada.
 - Storage Rules permanece en denegación total para clientes; la callable usa Admin SDK.
 - La carga ocurre después de guardar los datos del Modelo. Si falla, el Modelo permanece válido sin cambiar su imagen y la interfaz permite reintentar.
-- Reemplazar sobrescribe las dos rutas deterministas y actualiza metadata únicamente después de validar ambos objetos.
-- Eliminar imagen limpia primero la referencia canónica y después ambos objetos; si la limpieza no puede confirmarse, informa `asset-model-image-reconciliation-required`.
-- Eliminar un Modelo intenta limpiar sus objetos después de confirmar la eliminación transaccional del documento y su clave. Un fallo de limpieza no restaura un documento eliminado y queda señalado para reconciliación operativa.
+- Reemplazar escribe ambas variantes en una versión nueva, confirma sus generaciones y actualiza metadata únicamente después de validar ambos objetos.
+- La transacción de sustitución crea un trabajo de limpieza para la versión anterior; borrar esa versión no puede afectar las rutas de la nueva.
+- Eliminar imagen retira la referencia canónica y crea en la misma transacción un trabajo de limpieza; repetir la operación procesa cualquier trabajo pendiente aunque `imagen` ya sea `null`.
+- Eliminar un Modelo crea el trabajo antes de retirar documento y clave. Repetir la eliminación puede completar el trabajo aun cuando el Modelo ya no exista.
+- Cada invocación procesa como máximo 50 trabajos de limpieza del Modelo y comprueba después si existe otro. `setAssetModelImage`, `removeAssetModelImage` y la limpieza posterior a `deleteAssetModel` responden `asset-model-image-reconciliation-required` mientras quede al menos uno, incluso si la metadata canónica ya fue confirmada o retirada.
+- El límite por invocación no descarta trabajo ni altera la semántica: cada reintento continúa de forma idempotente, respeta generaciones y omite cualquier versión canónica vigente.
+- Los documentos históricos sin layout conservan lectura y limpieza desde las rutas originales; no existe migración silenciosa o masiva.
 
 ### Acceso temporal
 
@@ -132,11 +136,14 @@ Estado, identificadores, normalización, claves de unicidad, metadata de imagen 
 
 ## Autorización
 
-- Solo `admin` autenticado, autorizado y activo puede acceder a la ruta o invocar sus callables.
-- `usuario`, perfiles inactivos y anónimos no pueden listar, mutar ni obtener imágenes.
+- `admin` autenticado, autorizado y activo conserva acceso total.
+- `usuario` requiere `modelosActivos.ver` para ruta, listado, catálogos sanitizados y acceso temporal a imagen; `crear` para alta; `editar` para datos, carga, sustitución o retirada de imagen; `cambiarEstado` para activar o desactivar; y `eliminar` para eliminar.
+- Toda acción exige además `modelosActivos.ver`; sin la capacidad requerida, para perfil inactivo y para anónimo, backend rechaza la solicitud.
+- Obtener Categorías y Fabricantes sanitizados como apoyo de Modelos no concede acceso a sus pantallas administrativas.
 - Angular no accede directamente a `modelos_activos`, `modelos_activos_claves` ni Storage.
-- Cada callable verifica Authentication, claims y el documento canónico `usuarios`.
+- Cada callable verifica Authentication, claim base, documento canónico `usuarios` y la capacidad de su acción.
 - El guard y la visibilidad del menú son defensa de presentación, no autorización efectiva.
+- El permiso es global para el catálogo; no contiene Campus, Coordinación o Área.
 
 ## Contratos callable
 
@@ -212,7 +219,8 @@ Entrada: `documentId`.
 
 - Verifica referencias de consumidores aprobados.
 - Elimina Modelo y reserva de identidad en una transacción.
-- Después limpia las rutas deterministas de imagen si existen.
+- Antes de eliminar persiste transaccionalmente un trabajo de limpieza para la versión canónica de imagen, si existe.
+- Después intenta limpiar únicamente los objetos versionados y generaciones registradas; un reintento puede completar el trabajo aunque el Modelo ya no exista.
 - Responde el estado de limpieza sin exponer rutas internas.
 
 ### `setAssetModelImage`
@@ -229,8 +237,11 @@ Entrada: `documentId`, `fileName`, `contentType`, `base64`.
 Entrada: `documentId`.
 
 - Es idempotente cuando el Modelo no tiene imagen.
-- Limpia metadata y objetos deterministas.
-- Reporta reconciliación cuando no puede confirmar la limpieza.
+- Retira la metadata canónica y programa la limpieza de los objetos versionados con precondición de generación.
+- Procesa operaciones recuperables antes y después de retirar la metadata.
+- Reporta `asset-model-image-reconciliation-required` cuando una carga conserva un arrendamiento vigente o no existe evidencia suficiente del fin de ambas escrituras; el diálogo permanece recuperable y un reintento posterior procesa la evidencia disponible. Sin acuse y con cero o una variante observable, la operación continúa pendiente.
+- Una operación sin acuse solo deja de bloquear cuando una ronda posterior observa previamente el acuse durable o ambas generaciones físicas, ejecuta los borrados protegidos y retira la evidencia técnica. Un acuse llegado durante el cierre exige otra ronda.
+- El resultado solo es exitoso si, después del lote acotado, no quedan trabajos de limpieza ni operaciones recuperables; un remanente conserva referencias técnicas y exige reintento.
 
 ### `getAssetModelImageAccess`
 
@@ -245,7 +256,7 @@ expiresAt: string ISO-8601
 version: string
 ```
 
-- Solo firma rutas deterministas cuando la metadata canónica indica imagen vigente.
+- Solo firma las rutas versionadas de la metadata canónica vigente; conserva lectura compatible de metadata histórica mientras se retira naturalmente.
 - La vigencia máxima es de cinco minutos.
 - Una variante no solicitada se devuelve como `null`.
 
@@ -268,6 +279,7 @@ version: string
 - `asset-model-image-too-large`
 - `asset-model-image-type-not-allowed`
 - `asset-model-image-invalid`
+- `asset-model-image-upload-failed`
 - `asset-model-image-reconciliation-required`
 
 La interfaz traduce estos códigos a mensajes institucionales y no expone stack traces, rutas, hashes, contenido base64, URLs vencidas ni datos técnicos.
@@ -276,10 +288,10 @@ La interfaz traduce estos códigos a mensajes institucionales y no expone stack 
 
 ### Navegación
 
-- `Configuraciones` permanece como grupo desplegable de primer nivel solo para `admin`.
-- `Modelos de activos` será una opción secundaria de texto y navegará a `/configuraciones/modelos-activos`.
-- La opción solo se incorpora cuando el módulo esté implementado y autorizado.
-- El orden será `Categorías`, `Fabricantes`, `Modelos de activos`.
+- `Configuraciones` permanece como grupo desplegable de primer nivel; `admin` ve todos los enlaces y `usuario` solo Modelos de activos cuando posee `modelosActivos.ver`.
+- `Modelos de activos` es una opción secundaria de texto y navega a `/configuraciones/modelos-activos`.
+- La opción está publicada porque el módulo fue implementado y autorizado.
+- El orden vigente es `Categorías`, `Fabricantes`, `Modelos de activos`, `Campus`.
 - Activos no aparece hasta contar con especificación e implementación propias.
 
 ### Página
@@ -297,6 +309,9 @@ La interfaz traduce estos códigos a mensajes institucionales y no expone stack 
 - Eliminar Modelo usa diálogo de confirmación e informa que no procede si existen Activos vinculados.
 - Guardado, procesamiento de imagen y acciones concurrentes permanecen deshabilitados mientras exista una operación incompatible.
 - Si los datos se guardan pero la imagen falla, el diálogo informa que el Modelo quedó guardado y permite reintentar la imagen sin duplicar el Modelo.
+- El identificador confirmado se conserva aunque falle la recarga del listado; el formulario pasa a edición y distingue datos guardados, listado pendiente e imagen pendiente.
+- Las respuestas de imagen se asocian a la generación del diálogo y no pueden actualizar otro Modelo abierto posteriormente.
+- La renovación de miniaturas usa esperas de 1, 2 y 4 segundos, se limita a tres reintentos y se cancela al destruir la página o perder autorización.
 - El diseño funciona desde 320 px; el formulario usa una columna en móvil y la tabla permite desplazamiento horizontal sin recortar acciones.
 
 ## Migración

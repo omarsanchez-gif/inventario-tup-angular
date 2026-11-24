@@ -8,7 +8,7 @@
     <button class="button button--primary" type="button" (click)="openNew()">Nuevo usuario</button>
   </header>
 
-  @if (users.error(); as error) {
+  @if (!formVisible() && !pendingDeletion() && !permissionsUser() && users.error(); as error) {
     <div class="alert alert--error" role="alert">{{ error }}</div>
   }
   @if (users.success(); as success) {
@@ -22,6 +22,9 @@
       (dismissed)="closeForm()"
     >
       <form class="dialog-form" [formGroup]="form" (ngSubmit)="submit()">
+        @if (users.error(); as error) {
+          <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
         <div class="form-grid">
           <div class="field">
             <label for="user-name">Nombre</label>
@@ -78,6 +81,9 @@
       <p class="dialog__help">
         Esta acción revoca su acceso al sistema, pero no elimina su cuenta institucional de Google.
       </p>
+      @if (users.error(); as error) {
+        <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+      }
       <div class="dialog__actions">
         <button
           class="button button--secondary"
@@ -96,6 +102,84 @@
           {{ users.saving() ? 'Eliminando…' : 'Eliminar usuario' }}
         </button>
       </div>
+    </app-dialog>
+  }
+
+  @if (permissionsUser(); as user) {
+    <app-dialog
+      [title]="'Asignar permisos a ' + user.nombre"
+      [dismissible]="!users.saving()"
+      (dismissed)="closePermissions()"
+    >
+      <form class="dialog-form" [formGroup]="permissionsForm" (ngSubmit)="savePermissions()">
+        <p class="dialog__help">
+          El acceso se aplica a los módulos funcionales implementados. El alcance territorial de
+          activos se configurará en un incremento posterior.
+        </p>
+        @if (users.error(); as error) {
+          <div class="alert alert--error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
+        <div class="disclosure-list">
+          @for (module of permissionModules; track module.id) {
+            <section class="disclosure">
+              <h3 class="disclosure__heading">
+                <button
+                  class="disclosure__trigger"
+                  type="button"
+                  [attr.aria-expanded]="openPermissionModule() === module.id"
+                  [attr.aria-controls]="permissionPanelId(module.id)"
+                  (click)="togglePermissionModule(module.id)"
+                >
+                  <span class="disclosure__label">{{ module.label }}</span>
+                  <span class="disclosure__summary">
+                    {{ permissionSelectionSummary(module.id) }}
+                  </span>
+                  <app-icon class="disclosure__icon" name="next" />
+                </button>
+              </h3>
+              <div
+                class="disclosure__panel-motion"
+                [class.disclosure__panel-motion--expanded]="openPermissionModule() === module.id"
+                [id]="permissionPanelId(module.id)"
+                [attr.aria-hidden]="openPermissionModule() === module.id ? null : 'true'"
+                [attr.inert]="openPermissionModule() === module.id ? null : ''"
+              >
+                <div class="disclosure__panel-clip">
+                  <fieldset class="disclosure__panel permissions-group" [formGroupName]="module.id">
+                    <legend class="sr-only">Permisos de {{ module.label }}</legend>
+                    <div class="permissions-group__actions">
+                      @for (action of permissionOptions; track action.id) {
+                        <label class="checkbox-field" [for]="module.id + '-' + action.id">
+                          <input
+                            [id]="module.id + '-' + action.id"
+                            type="checkbox"
+                            [formControlName]="action.id"
+                            (change)="permissionChanged(module.id, action.id)"
+                          />
+                          {{ action.label }}
+                        </label>
+                      }
+                    </div>
+                  </fieldset>
+                </div>
+              </div>
+            </section>
+          }
+        </div>
+        <div class="dialog__actions">
+          <button
+            class="button button--secondary"
+            type="button"
+            [disabled]="users.saving()"
+            (click)="closePermissions()"
+          >
+            Cancelar
+          </button>
+          <button class="button button--primary" type="submit" [disabled]="users.saving()">
+            {{ users.saving() ? 'Guardando…' : 'Guardar permisos' }}
+          </button>
+        </div>
+      </form>
     </app-dialog>
   }
 
@@ -132,6 +216,7 @@
             <th scope="col">Rol</th>
             <th scope="col">Estado</th>
             <th scope="col">Último acceso</th>
+            <th scope="col">Permisos</th>
             <th scope="col">Acciones</th>
           </tr>
         </thead>
@@ -151,8 +236,21 @@
                 </span>
               </td>
               <td>{{ formatAccess(user.ultimoAcceso) }}</td>
+              <td>{{ permissionSummary(user) }}</td>
               <td>
                 <div class="record-actions">
+                  @if (user.rol === 'usuario') {
+                    <button
+                      class="icon-button icon-button--secondary"
+                      type="button"
+                      [disabled]="isSelf(user) || users.saving()"
+                      [attr.aria-label]="'Asignar permisos a ' + user.nombre"
+                      [attr.title]="'Asignar permisos a ' + user.nombre"
+                      (click)="openPermissions(user)"
+                    >
+                      <app-icon name="permissions" />
+                    </button>
+                  }
                   <button
                     class="icon-button icon-button--secondary"
                     type="button"

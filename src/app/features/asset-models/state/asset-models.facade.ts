@@ -1,10 +1,15 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
+import { SessionScope, type CapabilityContext } from '../../../core/auth/session-scope';
+import { AuthFacade } from '../../../core/auth/auth.facade';
+import { isPermissionDenied } from '../../../core/auth/permission-denied';
 import type { InventoryAssetModel } from '../../../shared/models/inventory-asset-model';
+import type { PermissionAction } from '../../../shared/models/catalog-permissions';
 import {
   ASSET_MODELS_GATEWAY,
   type AssetModelCatalogs,
   type AssetModelDraft,
+  type AssetModelImageAccess,
   type AssetModelUpdate,
 } from '../data/asset-models.gateway';
 
@@ -40,9 +45,17 @@ function searchable(value: string): string {
     .toLocaleLowerCase('es-MX');
 }
 
+export interface AssetModelSaveResult {
+  readonly documentId: string;
+  readonly dataSaved: true;
+  readonly listRefreshed: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AssetModelsFacade {
   private readonly gateway = inject(ASSET_MODELS_GATEWAY);
+  private readonly sessionScope = inject(SessionScope);
+  private readonly auth = inject(AuthFacade);
   private readonly modelsState = signal<readonly InventoryAssetModel[]>([]);
   private readonly catalogsState = signal<AssetModelCatalogs>({ categorias: [], fabricantes: [] });
   private readonly queryState = signal('');
@@ -50,6 +63,8 @@ export class AssetModelsFacade {
   private readonly savingState = signal(false);
   private readonly errorState = signal<string | null>(null);
   private readonly successState = signal<string | null>(null);
+  private operationGeneration = 0;
+  private activeAction: PermissionAction | null = null;
 
   readonly models = this.modelsState.asReadonly();
   readonly catalogs = this.catalogsState.asReadonly();
@@ -69,44 +84,87 @@ export class AssetModelsFacade {
       : this.modelsState();
   });
 
+  constructor() {
+    this.sessionScope.registerInvalidationListener(() => this.resetPrivateState());
+    this.sessionScope.registerCapabilityListener('modelosActivos', (change) => {
+      if (change.action === 'ver' && !change.allowed) this.resetPrivateState();
+      else if (!change.allowed && this.activeAction === change.action) {
+        this.operationGeneration += 1;
+        this.activeAction = null;
+        this.savingState.set(false);
+        this.clearMessages();
+      }
+    });
+  }
+
   setQuery(query: string): void {
     this.queryState.set(query);
   }
 
   async load(): Promise<void> {
+    const context = this.sessionScope.captureCapability('modelosActivos', 'ver');
+    if (!this.auth.can('modelosActivos', 'ver')) return;
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
       const [list, catalogs] = await Promise.all([this.gateway.list(), this.gateway.catalogs()]);
-      this.modelsState.set(list.items);
-      this.catalogsState.set(catalogs);
+      if (this.isCurrent(context)) {
+        this.modelsState.set(list.items);
+        this.catalogsState.set(catalogs);
+      }
     } catch (error) {
-      this.errorState.set(errorMessage(error));
+      await this.revalidateDenial(error);
+      if (this.isCurrent(context)) this.errorState.set(errorMessage(error));
     } finally {
-      this.loadingState.set(false);
+      if (this.isCurrent(context)) this.loadingState.set(false);
     }
   }
 
-  async save(input: AssetModelDraft | AssetModelUpdate): Promise<string | null> {
+  async save(input: AssetModelDraft | AssetModelUpdate): Promise<AssetModelSaveResult | null> {
+    const action = 'documentId' in input ? 'editar' : 'crear';
+    const context = this.sessionScope.captureCapability('modelosActivos', action);
+    if (!this.auth.can('modelosActivos', action)) return null;
+    const operation = ++this.operationGeneration;
+    this.activeAction = action;
     this.savingState.set(true);
     this.clearMessages();
+    let documentId: string;
     try {
-      const documentId =
-        'documentId' in input ? input.documentId : await this.gateway.create(input);
+      documentId = 'documentId' in input ? input.documentId : await this.gateway.create(input);
       if ('documentId' in input) await this.gateway.update(input);
-      await this.reloadModels();
-      this.successState.set('Modelo guardado correctamente.');
-      return documentId;
     } catch (error) {
-      this.errorState.set(errorMessage(error));
+      await this.revalidateDenial(error);
+      if (this.isOperationCurrent(context, operation)) this.errorState.set(errorMessage(error));
+      if (this.isOperationCurrent(context, operation)) {
+        this.savingState.set(false);
+        this.activeAction = null;
+      }
       return null;
+    }
+    if (!this.isOperationCurrent(context, operation)) return null;
+    try {
+      if (!(await this.reloadModels(context, operation))) return null;
+      if (!this.isOperationCurrent(context, operation)) return null;
+      this.successState.set('Modelo guardado correctamente.');
+      return { documentId, dataSaved: true, listRefreshed: true };
+    } catch (error) {
+      await this.revalidateDenial(error);
+      if (!this.isOperationCurrent(context, operation)) return null;
+      this.errorState.set(
+        'El Modelo quedó guardado, pero el listado no pudo actualizarse. Puede continuar con la imagen.',
+      );
+      return { documentId, dataSaved: true, listRefreshed: false };
     } finally {
-      this.savingState.set(false);
+      if (this.isOperationCurrent(context, operation)) {
+        this.savingState.set(false);
+        this.activeAction = null;
+      }
     }
   }
 
   async setImage(documentId: string, file: File, base64: string): Promise<boolean> {
     return this.mutate(
+      'editar',
       () => this.gateway.setImage(documentId, file, base64),
       'Imagen guardada correctamente.',
     );
@@ -114,6 +172,7 @@ export class AssetModelsFacade {
 
   async removeImage(documentId: string): Promise<boolean> {
     return this.mutate(
+      'editar',
       () => this.gateway.removeImage(documentId),
       'Imagen eliminada correctamente.',
     );
@@ -121,6 +180,7 @@ export class AssetModelsFacade {
 
   async setStatus(model: InventoryAssetModel): Promise<boolean> {
     return this.mutate(
+      'cambiarEstado',
       () => this.gateway.setStatus(model.documentId, !model.activo),
       model.activo ? 'Modelo desactivado.' : 'Modelo activado.',
     );
@@ -128,13 +188,28 @@ export class AssetModelsFacade {
 
   async delete(model: InventoryAssetModel): Promise<boolean> {
     return this.mutate(
+      'eliminar',
       () => this.gateway.delete(model.documentId),
       'Modelo eliminado correctamente.',
     );
   }
 
-  imageAccess(documentId: string, variant: 'thumbnail' | 'original' | 'both') {
-    return this.gateway.imageAccess(documentId, variant);
+  async imageAccess(
+    documentId: string,
+    variant: 'thumbnail' | 'original' | 'both',
+  ): Promise<AssetModelImageAccess> {
+    const context = this.sessionScope.captureCapability('modelosActivos', 'ver');
+    if (!this.auth.can('modelosActivos', 'ver')) {
+      throw { details: { functionalCode: 'permission-denied' } };
+    }
+    try {
+      const result = await this.gateway.imageAccess(documentId, variant);
+      if (!this.isCurrent(context)) throw { details: { functionalCode: 'permission-denied' } };
+      return result;
+    } catch (error) {
+      if (this.sessionScope.isCapabilityCurrent(context)) await this.revalidateDenial(error);
+      throw error;
+    }
   }
 
   clearMessages(): void {
@@ -146,23 +221,66 @@ export class AssetModelsFacade {
     this.errorState.set('No fue posible cargar una imagen temporal.');
   }
 
-  private async reloadModels(): Promise<void> {
-    this.modelsState.set((await this.gateway.list()).items);
+  private async reloadModels(context: CapabilityContext, operation: number): Promise<boolean> {
+    const result = await this.gateway.list();
+    if (!this.isOperationCurrent(context, operation)) return false;
+    this.modelsState.set(result.items);
+    return true;
   }
 
-  private async mutate(operation: () => Promise<void>, successMessage: string): Promise<boolean> {
+  private async mutate(
+    action: 'editar' | 'cambiarEstado' | 'eliminar',
+    operation: () => Promise<void>,
+    successMessage: string,
+  ): Promise<boolean> {
+    const context = this.sessionScope.captureCapability('modelosActivos', action);
+    if (!this.auth.can('modelosActivos', action)) return false;
+    const operationGeneration = ++this.operationGeneration;
+    this.activeAction = action;
     this.savingState.set(true);
     this.clearMessages();
     try {
       await operation();
-      await this.reloadModels();
+      if (!this.isOperationCurrent(context, operationGeneration)) return false;
+      if (!(await this.reloadModels(context, operationGeneration))) return false;
       this.successState.set(successMessage);
       return true;
     } catch (error) {
-      this.errorState.set(errorMessage(error));
+      await this.revalidateDenial(error);
+      if (this.isOperationCurrent(context, operationGeneration))
+        this.errorState.set(errorMessage(error));
       return false;
     } finally {
-      this.savingState.set(false);
+      if (this.isOperationCurrent(context, operationGeneration)) {
+        this.savingState.set(false);
+        this.activeAction = null;
+      }
     }
+  }
+
+  private resetPrivateState(): void {
+    this.operationGeneration += 1;
+    this.activeAction = null;
+    this.modelsState.set([]);
+    this.catalogsState.set({ categorias: [], fabricantes: [] });
+    this.queryState.set('');
+    this.loadingState.set(false);
+    this.savingState.set(false);
+    this.clearMessages();
+  }
+
+  private isCurrent(context: CapabilityContext): boolean {
+    return (
+      this.sessionScope.isCapabilityCurrent(context) &&
+      this.auth.can('modelosActivos', context.action)
+    );
+  }
+
+  private isOperationCurrent(context: CapabilityContext, operation: number): boolean {
+    return this.operationGeneration === operation && this.isCurrent(context);
+  }
+
+  private async revalidateDenial(error: unknown): Promise<void> {
+    if (isPermissionDenied(error)) await this.auth.revalidatePermissionDenial(error);
   }
 }

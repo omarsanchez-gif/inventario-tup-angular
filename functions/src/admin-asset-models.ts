@@ -1,6 +1,8 @@
 import type { FunctionsErrorCode } from 'firebase-functions/https';
 
 import type { AdminIdentity } from './admin-users.js';
+import type { AssetModelImageStorageLayout } from './asset-model-image-storage.js';
+import type { PermissionAction } from './catalog-permissions.js';
 
 export const MAX_SUPPORTED_ASSET_MODELS = 500;
 
@@ -10,6 +12,9 @@ export interface AssetModelImageMetadata {
   readonly thumbnailSize: number;
   readonly sha256: string;
   readonly version: string;
+  readonly storageLayout: AssetModelImageStorageLayout;
+  readonly originalGeneration: string | null;
+  readonly thumbnailGeneration: string | null;
   readonly fechaActualizacion: string;
 }
 
@@ -56,13 +61,13 @@ export interface AssetModelCatalogs {
 }
 
 export interface AdminAssetModelsRepository {
-  findCanonicalAdmin(uid: string): Promise<boolean>;
+  hasCanonicalPermission(uid: string, action: PermissionAction): Promise<boolean>;
   list(limit: number): Promise<readonly ManagedAssetModel[]>;
   listCatalogs(): Promise<AssetModelCatalogs>;
   create(requesterUid: string, input: AssetModelDraft): Promise<string>;
   update(requesterUid: string, input: AssetModelUpdate): Promise<void>;
   setStatus(requesterUid: string, documentId: string, activo: boolean): Promise<void>;
-  delete(requesterUid: string, documentId: string): Promise<{ readonly hadImage: boolean }>;
+  delete(requesterUid: string, documentId: string): Promise<{ readonly cleanupRequired: true }>;
 }
 
 export interface AdminAssetModelsDependencies {
@@ -82,6 +87,7 @@ export class AdminAssetModelsError extends Error {
 export async function requireAssetModelAdmin(
   identity: AdminIdentity | null,
   dependencies: AdminAssetModelsDependencies,
+  action: PermissionAction,
 ): Promise<AdminIdentity> {
   if (!identity) {
     throw new AdminAssetModelsError(
@@ -90,10 +96,10 @@ export async function requireAssetModelAdmin(
       'Se requiere una sesión.',
     );
   }
-  if (!identity.authorized || identity.role !== 'admin') {
+  if (!identity.authorized) {
     throw new AdminAssetModelsError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
-  if (!(await dependencies.repository.findCanonicalAdmin(identity.uid))) {
+  if (!(await dependencies.repository.hasCanonicalPermission(identity.uid, action))) {
     throw new AdminAssetModelsError('permission-denied', 'permission-denied', 'Acceso denegado.');
   }
   return identity;
@@ -210,7 +216,7 @@ export async function listAssetModels(
   identity: AdminIdentity | null,
   dependencies: AdminAssetModelsDependencies,
 ) {
-  await requireAssetModelAdmin(identity, dependencies);
+  await requireAssetModelAdmin(identity, dependencies, 'ver');
   const models = await dependencies.repository.list(MAX_SUPPORTED_ASSET_MODELS + 1);
   if (models.length > MAX_SUPPORTED_ASSET_MODELS) {
     throw new AdminAssetModelsError(
@@ -245,7 +251,7 @@ export async function getAssetModelCatalogs(
   identity: AdminIdentity | null,
   dependencies: AdminAssetModelsDependencies,
 ) {
-  await requireAssetModelAdmin(identity, dependencies);
+  await requireAssetModelAdmin(identity, dependencies, 'ver');
   return dependencies.repository.listCatalogs();
 }
 
@@ -254,7 +260,7 @@ export async function createAssetModel(
   data: unknown,
   dependencies: AdminAssetModelsDependencies,
 ) {
-  const requester = await requireAssetModelAdmin(identity, dependencies);
+  const requester = await requireAssetModelAdmin(identity, dependencies, 'crear');
   const request = assetModelRequestObject(data);
   allowAssetModelFields(request, ['nombre', 'categoriaId', 'fabricanteId', 'modeloNo', 'notas']);
   const documentId = await dependencies.repository.create(requester.uid, draft(request));
@@ -266,7 +272,7 @@ export async function updateAssetModel(
   data: unknown,
   dependencies: AdminAssetModelsDependencies,
 ) {
-  const requester = await requireAssetModelAdmin(identity, dependencies);
+  const requester = await requireAssetModelAdmin(identity, dependencies, 'editar');
   const request = assetModelRequestObject(data);
   allowAssetModelFields(request, [
     'documentId',
@@ -286,7 +292,7 @@ export async function setAssetModelStatus(
   data: unknown,
   dependencies: AdminAssetModelsDependencies,
 ) {
-  const requester = await requireAssetModelAdmin(identity, dependencies);
+  const requester = await requireAssetModelAdmin(identity, dependencies, 'cambiarEstado');
   const request = assetModelRequestObject(data);
   allowAssetModelFields(request, ['documentId', 'activo']);
   const documentId = assetModelDocumentId(request['documentId']);
@@ -302,10 +308,10 @@ export async function deleteAssetModel(
   data: unknown,
   dependencies: AdminAssetModelsDependencies,
 ) {
-  const requester = await requireAssetModelAdmin(identity, dependencies);
+  const requester = await requireAssetModelAdmin(identity, dependencies, 'eliminar');
   const request = assetModelRequestObject(data);
   allowAssetModelFields(request, ['documentId']);
   const documentId = assetModelDocumentId(request['documentId']);
-  const result = await dependencies.repository.delete(requester.uid, documentId);
-  return { documentId, hadImage: result.hadImage, status: 'completed' as const };
+  await dependencies.repository.delete(requester.uid, documentId);
+  return { documentId, cleanupRequired: true as const };
 }

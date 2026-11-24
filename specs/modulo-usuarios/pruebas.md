@@ -17,6 +17,30 @@
 - USR-015: el listado presenta 10 registros por página y el paginador informa intervalo, total y página actual con controles accesibles.
 - USR-016: si falla `setClaims` durante una reducción de acceso, aun se intenta revocar refresh tokens y se responde `reconciliation-required`.
 - USR-017: Auth, Functions y Firestore Emulator validan admin canónico, rechazo de `usuario` y anónimo, Rules cerradas, desactivación, claims, autoprotección y unicidad concurrente.
+- USR-018: una lectura iniciada por una sesión anterior no repuebla el listado después de invalidar y limpiar su generación. <!-- trace:required -->
+- USR-019: un error de duplicado iniciado en el formulario se anuncia dentro del diálogo en navegador real. <!-- trace:required -->
+
+## Criterios del incremento de permisos
+
+- USR-020: crear un `usuario` persiste el mapa vacío y no muestra controles de permisos dentro del alta. <!-- trace:required -->
+- USR-021: un documento anterior sin `permisos` se interpreta sin acceso granular cuando su rol es `usuario`; un `admin` conserva acceso total por rol. <!-- trace:required -->
+- USR-022: solo un `admin` canónico puede reemplazar mediante `setAuthorizedUserPermissions` el mapa completo de otro registro con rol `usuario`. <!-- trace:required -->
+- USR-023: módulo, acción, duplicado, campo o combinación desconocidos se rechazan sin escritura parcial; toda acción distinta de `ver` exige `ver`. <!-- trace:required -->
+- USR-024: cambiar entre `admin` y `usuario` limpia permisos almacenados y nunca reactiva una configuración antigua al degradar el rol. <!-- trace:required -->
+- USR-025: desactivar vuelve inefectivos los permisos sin perder su configuración; reactivar recupera solo el mapa canónico vigente. <!-- trace:required -->
+- USR-026: `bootstrapAuthorization` entrega permisos sanitizados sin agregarlos a Custom Claims y una respuesta tardía no reemplaza la sesión actual. <!-- trace:required -->
+- USR-027: la tabla resume Acceso total, Sin permisos o cantidad de módulos y muestra la acción iconográfica solo para filas `usuario`. <!-- trace:required -->
+- USR-028: el diálogo separado usa fieldsets etiquetados, resuelve la dependencia de Ver, reemplaza el mapa una sola vez y conserva error, foco y reintento desde 320 px. <!-- trace:required -->
+- USR-029: cancelar, Escape, backdrop o cierre visible no ejecutan la callable ni alteran el mapa. <!-- trace:required -->
+- USR-030: un solicitante no puede asignarse permisos a sí mismo, modificar un `admin` mediante la matriz ni conceder acciones por payload desconocido. <!-- trace:required -->
+
+## Criterios obligatorios para Campus
+
+- USR-031: un documento anterior sin `permisos.campus` se sanitiza con Campus vacío para `usuario` y acceso total para `admin`, sin reescribir Firestore. <!-- trace:required -->
+- USR-032: el diálogo presenta Campus como cuarto módulo, mantiene la dependencia de Ver y resume correctamente entre cero y cuatro módulos autorizados. <!-- trace:required -->
+- USR-033: `setAuthorizedUserPermissions` acepta el mapa completo de cuatro módulos y rechaza sin escritura parcial un mapa anterior de tres módulos, campos adicionales o acciones desconocidas. <!-- trace:required -->
+- USR-034: una pestaña anterior que envía el mapa de tres módulos recibe `user-permissions-invalid`; la prueba integral comprueba que el mapa canónico de cuatro módulos permanece íntegro y que un bootstrap posterior lo devuelve sin pérdida. <!-- trace:required -->
+- USR-035: el diálogo presenta los módulos en un acordeón accesible de apertura individual, abre el primer módulo con permisos o el primero disponible, anima altura y opacidad sin exponer el panel contraído, actualiza el resumen textual y conserva selecciones al cambiar de panel desde escritorio y 320 px. <!-- trace:required -->
 
 ## Evidencia de endurecimiento local — 7 de noviembre de 2026
 
@@ -30,7 +54,7 @@
 
 - Firestore Rules se desplegaron sin advertencias y el acceso anónimo directo a `usuarios` respondió HTTP 403.
 - Las cinco callables de Usuarios y `bootstrapAuthorization` quedaron `ACTIVE`, Node.js 22, `us-central1`, `maxInstances: 20`, y respondieron HTTP 401 sin sesión.
-- La aceptación autenticada real del listado y de las mutaciones administrativas permanece pendiente para no alterar datos durante la verificación técnica.
+- En ese corte la aceptación autenticada real del listado y de las mutaciones administrativas permanecía pendiente para no alterar datos durante la verificación técnica; la aceptación acotada de permisos se completó el 13 de noviembre de 2026.
 
 ## Evidencia de staging — 6 de noviembre de 2026
 
@@ -46,6 +70,53 @@
 - Las 6 suites y 11 pruebas Angular aprobaron, junto con lint, guardia visual, formato y build de staging.
 - El incremento fue desplegado únicamente en Hosting de `inventario-stg`; la comprobación remota confirmó HTTP 200 y los bundles esperados.
 - Queda pendiente su aceptación visual autenticada en escritorio y móvil.
+
+## Criterios de ampliación a Áreas
+
+- USR-036: el acordeón presenta Áreas como quinto módulo y persiste sus acciones sin alterar Categorías, Fabricantes, Modelos o Campus. <!-- trace:required -->
+- USR-037: alta y cambio de rol producen el mapa vacío completo de cinco módulos; listado y bootstrap entregan `areas` sanitizado. <!-- trace:required -->
+- USR-038: un payload anterior de cuatro módulos responde `user-permissions-contract-outdated`, no escribe parcialmente y permite reintentar después de actualizar la pestaña. <!-- trace:required -->
+- USR-039: el resumen de la tabla cuenta hasta cinco módulos con `ver` y no concede Áreas a usuarios existentes. <!-- trace:required -->
+- USR-040: cada módulo del registro tipado aparece exactamente una vez en Asignar permisos, contiene todos los controles de acción registrados y el mapa enviado conserva exactamente las claves canónicas; la prueba deriva sus expectativas del registro y detecta omisiones sin copiar otra lista manual. <!-- trace:required -->
+- USR-041: perder `admin` limpia datos visibles e invalida listado y mutación pendientes; restaurar `admin` al mismo UID no acepta sus respuestas, mientras una operación nueva sí puede publicar listado y mensaje sin ser alterada por la anterior. <!-- trace:required -->
+- USR-042: perder `admin` cierra formularios de alta/edición, confirmación de eliminación y asignación de permisos; una respuesta anterior no cierra ni modifica un diálogo de la nueva etapa administrativa. <!-- trace:required -->
+
+## Evidencia del mapa de cuatro módulos — 11 de noviembre de 2026
+
+- USR-031–034 aprobaron sobre `2883ff57150bad1ef4fd3867a0d4ccd3190b9724`: Campus aparece como cuarto bloque, el resumen admite hasta cuatro módulos y el contrato anterior se rechaza sin perder el permiso almacenado.
+- Las seis Functions administrativas de Usuarios y `bootstrapAuthorization` se actualizaron antes de Hosting únicamente en staging; quedaron `ACTIVE` y `setAuthorizedUserPermissions` rechazó una solicitud anónima con HTTP 401.
+- En ese corte la aceptación autenticada del diálogo con una cuenta institucional parcial permanecía separada; se completó el 13 de noviembre de 2026 con la cuenta `PROFESOR`.
+
+## Evidencia del acordeón de permisos — 11 de noviembre de 2026
+
+- La primera implementación `77d84903f9ca5ad528014cd11518f74a8f1e29d2` no acreditó USR-035: aunque cambiaba `aria-expanded` y el atributo `hidden`, el `display: grid` encapsulado mantuvo visibles todos los paneles. La captura autenticada detectó la insuficiencia de las pruebas anteriores.
+- La corrección `f6a91de5deea6d8c16c8075150112078e8909a59` renderiza estructuralmente solo el panel activo mediante `@if`; contraer un módulo lo retira del DOM sin perder los valores del `FormGroup`.
+- La regresión nueva verifica presencia y ausencia reales de cada panel, expansión exclusiva y conservación de selecciones. Aprobaron 17 archivos y 73 pruebas Angular, 5 recorridos Chromium, lint, guardia visual, formato, build de staging y `git diff --check`.
+- Se desplegó únicamente Hosting con `--only hosting --project staging`; `/usuarios`, `main-2AWLN5BY.js` y `styles-6O34NL67.css` respondieron HTTP 200. Functions, Rules, Storage, índices, datos, secretos, IAM y producción permanecieron intactos.
+- Queda pendiente confirmar visualmente la corrección con la sesión institucional; la evidencia automatizada sí comprueba ahora el estado visible real en Chromium.
+- El refinamiento `6f112780370f9f890efc773e21288efc4f4f9497` agregó una transición de altura y opacidad de 180 ms. Los paneles contraídos conservan el formulario, pero quedan a altura cero, `aria-hidden` e inertes. La regresión volvió a aprobar 73 pruebas Angular y 5 recorridos Chromium.
+- Se redesplegó únicamente Hosting; `/usuarios`, `main-JZFE42HR.js` y `styles-K7H52MHM.css` respondieron HTTP 200. La preferencia global de movimiento reducido acorta la transición al mínimo.
+
+## Aceptación visual de cierre — 12 de noviembre de 2026
+
+- Una sesión real `Omar Sánchez / Administrador` abrió el diálogo de `Eventos` en escritorio y 320 px sobre `main-HZGOJ7WY.js` y `styles-TYZCJRJC.css`.
+- El acordeón presentó una sola sección expandida, permitió contraer Categorías y abrir Fabricantes, conservó los resúmenes y cerró con Escape devolviendo el foco a `Asignar permisos a Eventos`.
+- La matriz se inspeccionó sin modificarla: Categorías y Fabricantes conservan `Ver`, Modelos no tiene acceso y Campus conserva `Ver`.
+- La presentación visual de USR-035 queda aceptada.
+
+## Aceptación funcional de permisos — 13 de noviembre de 2026
+
+- La cuenta real `PROFESOR` (`tup-d3001@tecplayacar.edu.mx`), con rol `usuario`, inició sin permisos y mostró únicamente Dashboard.
+- Con Modelos `Ver + Crear` pudo acceder al listado y abrir `Nuevo modelo`; el formulario no mostró imagen y la tabla no mostró Editar, Cambiar estado ni Eliminar.
+- Al retirar Modelos `Ver` con la ruta abierta, la pestaña volvió a Dashboard, desapareció el submenú, la sesión permaneció activa y la URL directa `/configuraciones/modelos-activos` también regresó a Dashboard.
+- Con Modelos `Ver + Editar` y Campus `Ver`, retirar únicamente Editar cerró el diálogo de edición, retiró esa acción y conservó el listado de Modelos, Campus y la sesión.
+- Al terminar se restauró el mapa vacío: la cuenta volvió a ver solo Dashboard y la tabla administrativa mostró `Sin permisos`. La autorización de `Eventos` no fue modificada.
+- La aceptación funcional confirma concesión, dependencia de Ver, revocación inmediata y selectividad por módulo/acción sobre la versión de staging derivada de `5e645debf1df4239c6c5f73fc56ca9263ac65ae4`; no sustituye las pruebas automatizadas ni una revisión visual móvil integral de cada catálogo.
+
+## Evidencia de aislamiento administrativo — 23 de noviembre de 2026
+
+- USR-041 y USR-042 aprobaron sobre `161aabd271e2d6d79935b85470572a230097ae8b` dentro de 128 pruebas Angular: perder `admin` limpió listado, búsqueda, mensajes e indicadores, cerró los tres tipos de diálogo y descartó listados y mutaciones pendientes aun después de restituir el rol al mismo UID.
+- Una operación administrativa nueva después de la restitución publicó su propio listado y mensaje; resolver después la mutación anterior no los alteró.
 
 ## Evidencia local — búsqueda y paginación
 

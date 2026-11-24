@@ -1,13 +1,39 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  signal,
+} from '@angular/core';
+import {
+  FormBuilder,
+  type FormControl,
+  type FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 
 import { AuthFacade } from '../../../core/auth/auth.facade';
+import { SessionScope } from '../../../core/auth/session-scope';
 import type { UserRole } from '../../../shared/models/authorized-user';
 import type { SystemUser } from '../../../shared/models/system-user';
+import {
+  permissionActionDefinitions,
+  permissionActions,
+  permissionModuleDefinitions,
+  permissionModules,
+  type PermissionAction,
+  type PermissionMap,
+  type PermissionModule,
+} from '../../../shared/models/catalog-permissions';
 import { AppDialog } from '../../../shared/ui/dialog/app-dialog';
 import { AppIcon } from '../../../shared/ui/icon/app-icon';
 import { AppPagination } from '../../../shared/ui/pagination/app-pagination';
 import { UsersFacade } from '../state/users.facade';
+
+type PermissionActionControls = Record<PermissionAction, FormControl<boolean>>;
+type PermissionFormControls = Record<PermissionModule, FormGroup<PermissionActionControls>>;
 
 @Component({
   selector: 'app-users-page',
@@ -16,13 +42,18 @@ import { UsersFacade } from '../state/users.facade';
   styleUrl: './users-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UsersPage {
+export class UsersPage implements OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly sessionScope = inject(SessionScope);
   protected readonly auth = inject(AuthFacade);
   protected readonly users = inject(UsersFacade);
   protected readonly formVisible = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly pendingDeletion = signal<SystemUser | null>(null);
+  protected readonly permissionsUser = signal<SystemUser | null>(null);
+  protected readonly openPermissionModule = signal<PermissionModule | null>(null);
+  protected readonly permissionModules = permissionModuleDefinitions;
+  protected readonly permissionOptions = permissionActionDefinitions;
   protected readonly pageSize = 10;
   protected readonly currentPage = signal(1);
   protected readonly totalPages = computed(() =>
@@ -39,9 +70,24 @@ export class UsersPage {
     rol: ['usuario' as UserRole, Validators.required],
     activo: [true],
   });
+  protected readonly permissionsForm = this.formBuilder.nonNullable.group(
+    Object.fromEntries(
+      permissionModules.map((module) => [module, this.permissionControls()]),
+    ) as PermissionFormControls,
+  );
+  private readonly unregisterAdminAccessListener: () => void;
 
   constructor() {
+    this.unregisterAdminAccessListener = this.sessionScope.registerAdminAccessListener(
+      (allowed) => {
+        if (!allowed) this.closePrivateDialogs();
+      },
+    );
     void this.users.load();
+  }
+
+  ngOnDestroy(): void {
+    this.unregisterAdminAccessListener();
   }
 
   protected openNew(): void {
@@ -119,13 +165,96 @@ export class UsersPage {
   }
 
   protected cancelDeletion(): void {
-    if (!this.users.saving()) this.pendingDeletion.set(null);
+    if (!this.users.saving()) {
+      this.users.clearMessages();
+      this.pendingDeletion.set(null);
+    }
   }
 
   protected async confirmDeletion(): Promise<void> {
     const user = this.pendingDeletion();
     if (!user || this.users.saving()) return;
     if (await this.users.delete(user)) this.pendingDeletion.set(null);
+  }
+
+  protected openPermissions(user: SystemUser): void {
+    if (user.rol !== 'usuario' || this.isSelf(user)) return;
+    this.users.clearMessages();
+    for (const module of permissionModules) {
+      const actions = user.permisos[module];
+      this.permissionsForm.controls[module].setValue({
+        ver: actions.includes('ver'),
+        crear: actions.includes('crear'),
+        editar: actions.includes('editar'),
+        cambiarEstado: actions.includes('cambiarEstado'),
+        eliminar: actions.includes('eliminar'),
+      });
+    }
+    this.openPermissionModule.set(
+      this.permissionModules.find(({ id }) => user.permisos[id].length > 0)?.id ??
+        this.permissionModules[0].id,
+    );
+    this.permissionsUser.set(user);
+  }
+
+  protected closePermissions(): void {
+    if (this.users.saving()) return;
+    this.users.clearMessages();
+    this.permissionsUser.set(null);
+    this.openPermissionModule.set(null);
+  }
+
+  protected togglePermissionModule(module: PermissionModule): void {
+    this.openPermissionModule.update((current) => (current === module ? null : module));
+  }
+
+  protected permissionPanelId(module: PermissionModule): string {
+    return `${module}-permissions-panel`;
+  }
+
+  protected permissionSelectionSummary(module: PermissionModule): string {
+    const controls = this.permissionsForm.controls[module].controls;
+    const selected = permissionActions.filter((action) => controls[action].value);
+    if (selected.length === 0) return 'Sin acceso';
+    if (selected.length === permissionActions.length) return 'Acceso completo';
+    if (selected.length === 1 && selected[0] === 'ver') return 'Solo ver';
+    return `${selected.length} permisos`;
+  }
+
+  protected permissionChanged(module: PermissionModule, action: PermissionAction): void {
+    const controls = this.permissionsForm.controls[module].controls;
+    if (action === 'ver' && !controls.ver.value) {
+      controls.crear.setValue(false);
+      controls.editar.setValue(false);
+      controls.cambiarEstado.setValue(false);
+      controls.eliminar.setValue(false);
+    } else if (action !== 'ver' && controls[action].value) {
+      controls.ver.setValue(true);
+    }
+  }
+
+  protected async savePermissions(): Promise<void> {
+    const user = this.permissionsUser();
+    if (!user || this.users.saving()) return;
+    const raw = this.permissionsForm.getRawValue();
+    const permissions = Object.fromEntries(
+      permissionModules.map((module) => [
+        module,
+        permissionActions.filter((action) => raw[module][action]),
+      ]),
+    ) as unknown as PermissionMap;
+    if (await this.users.setPermissions(user, permissions)) {
+      this.permissionsUser.set(null);
+      this.openPermissionModule.set(null);
+    }
+  }
+
+  protected permissionSummary(user: SystemUser): string {
+    if (user.rol === 'admin') return 'Acceso total por rol';
+    const count = permissionModules.filter((module) =>
+      user.permisos[module].includes('ver'),
+    ).length;
+    return count === 0 ? 'Sin permisos' : count === 1 ? '1 módulo' : `${count} módulos`;
   }
 
   protected formatAccess(value: string | null): string {
@@ -138,5 +267,22 @@ export class UsersPage {
           timeStyle: 'short',
           timeZone: 'America/Cancun',
         }).format(date);
+  }
+
+  private permissionControls(): FormGroup<PermissionActionControls> {
+    return this.formBuilder.nonNullable.group(
+      Object.fromEntries(permissionActions.map((action) => [action, false])) as Record<
+        PermissionAction,
+        boolean
+      >,
+    );
+  }
+
+  private closePrivateDialogs(): void {
+    this.formVisible.set(false);
+    this.editingId.set(null);
+    this.pendingDeletion.set(null);
+    this.permissionsUser.set(null);
+    this.openPermissionModule.set(null);
   }
 }

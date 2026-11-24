@@ -15,3 +15,14 @@
   width: 1.2rem;
   height: 1.2rem;
 }
+
+.permissions-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.permissions-group__actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.5rem;
+}

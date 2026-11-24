@@ -44,6 +44,17 @@ Estos escenarios definen la aceptación del módulo aprobado.
 
 Los escenarios CAM-026 a CAM-030 se implementarán en los módulos consumidores correspondientes; se conservan aquí para definir el contrato que Campus deberá soportar.
 
+## Criterios obligatorios para permisos granulares
+
+- CAM-032: `admin` conserva acceso total; `usuario` con `campus.ver` lista y navega, mientras otro `usuario`, un perfil inactivo y anónimo son rechazados. <!-- trace:required -->
+- CAM-033: crear, editar, cambiar estado y eliminar exigen exactamente su acción canónica además de Ver; poseer otra acción no eleva acceso. <!-- trace:required -->
+- CAM-034: la interfaz muestra Nuevo, Editar, Activar/Desactivar y Eliminar únicamente cuando corresponde, pero una invocación directa sin capacidad también es rechazada sin modificar Campus o reservas. <!-- trace:required -->
+- CAM-035: un documento anterior sin `permisos.campus` se interpreta con acceso denegado para `usuario` y total para `admin`, sin migración ni escritura automática. <!-- trace:required -->
+- CAM-036: el diálogo de Usuarios incorpora Campus como cuarto módulo, conserva dependencia de Ver, cancelación sin persistencia, accesibilidad y resumen de cero a cuatro módulos. <!-- trace:required -->
+- CAM-037: después de habilitar el contrato de cuatro módulos, un payload anterior de tres módulos responde `user-permissions-invalid` y conserva íntegro el mapa previo. <!-- trace:required -->
+- CAM-038: retirar `campus.ver` entra en vigor inmediatamente en backend y, tras revalidar, invalida lecturas o mutaciones pendientes, limpia solo Campus, cierra sus diálogos, elimina ruta y submenú y navega a Dashboard sin cerrar la sesión ni afectar otros módulos. <!-- trace:required -->
+- CAM-039: revocar una acción distinta de la mutación activa no apaga su indicador; un cierre anterior tampoco altera una operación posterior. <!-- trace:required -->
+
 ## Evidencia local — 9 de noviembre de 2026
 
 - 11 suites y 30 pruebas Angular aprobaron, incluidas navegación, columnas, contadores, formulario limitado a Código, Nombre y Notas, diálogos, búsqueda y paginación.
@@ -62,3 +73,16 @@ Los escenarios CAM-026 a CAM-030 se implementarán en los módulos consumidores 
 - `/configuraciones/campus` respondió HTTP 200 y sirve `main-HWJHCEZJ.js`, `styles-CISTRGAV.css` y el módulo diferido `chunk-DMN2xbo-.js`.
 - Una sesión administrativa confirmó Campus como cuarta opción de `Configuraciones`, encabezado, búsqueda, estado vacío y modal con únicamente Código, Nombre y Notas; el diálogo se canceló sin crear datos.
 - No se desplegaron índices, Storage, secretos, migración ni producción. La aceptación visual móvil y el ciclo real de alta, edición, estado y eliminación permanecen pendientes.
+
+## Evidencia de permisos granulares — 11 de noviembre de 2026
+
+- El commit `2883ff57150bad1ef4fd3867a0d4ccd3190b9724` aprobó 71 pruebas Angular, 47 unitarias de Functions, 31 con Emulator Suite, 5 recorridos Chromium y 7 pruebas del verificador de trazabilidad.
+- CAM-032–038 comprobaron denegación histórica, acción exacta, controles parciales, cuarto bloque de Usuarios, rechazo atómico del payload anterior y limpieza de estado tras revocación.
+- Lint Angular/Functions, guardia visual, formato, builds de Functions y staging, `git diff --check` y auditoría de runtime con umbral high aprobaron; permanecen cuatro alertas moderadas transitivas ya aceptadas en ADR-002 y ninguna alta o crítica.
+- Se desplegaron primero `bootstrapAuthorization`, las seis Functions administrativas de Usuarios y las cinco de Campus; las doce quedaron `ACTIVE` en Node.js 22 y `us-central1`. Después se desplegó únicamente Hosting.
+- `/configuraciones/campus` respondió HTTP 200 y sirvió `main-AQFFZNH7.js`; `listCampuses` y `setAuthorizedUserPermissions` rechazaron solicitudes anónimas con HTTP 401.
+- No se desplegaron Rules, Storage Rules, índices, datos, secretos ni producción. La aceptación autenticada con un usuario parcial y otro sin Campus permanece pendiente.
+
+## Evidencia de revocación en sesión — 11 de noviembre de 2026
+
+- CAM-038 aprobó en facade, página y Chromium sobre `4013c35ae9e8d6eb95bbcefe9321706a876ce5af`: retirar Ver limpia únicamente Campus, cierra sus diálogos y abandona su ruta sin cerrar sesión ni vaciar Categorías.

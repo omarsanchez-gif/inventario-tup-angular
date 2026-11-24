@@ -1,0 +1,366 @@
+import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import type { IdTokenResult, User } from 'firebase/auth';
+
+import type { BootstrapAuthorizationResult } from '../../shared/models/authorized-user';
+import { fullPermissionMap } from '../../shared/models/catalog-permissions';
+import { emptyPermissionMap } from '../../shared/models/catalog-permissions';
+import { AuthFacade } from './auth.facade';
+import { AUTH_GATEWAY, AUTHORIZATION_GATEWAY, type AuthGateway } from './gateways';
+import { SessionScope } from './session-scope';
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+  return { promise, resolve, reject };
+}
+
+function profile(uid: string, nombre: string): BootstrapAuthorizationResult {
+  return {
+    uid,
+    nombre,
+    correo: `${uid}@tecplayacar.edu.mx`,
+    rol: 'admin',
+    activo: true,
+    claimsUpdated: false,
+    permisos: fullPermissionMap(),
+  };
+}
+
+describe('AuthFacade session lifecycle', () => {
+  let emitSession: (user: User | null) => void;
+  let authGateway: AuthGateway;
+  let bootstrap: ReturnType<typeof vi.fn>;
+  let router: { url: string; navigateByUrl: ReturnType<typeof vi.fn> };
+
+  beforeEach(() => {
+    authGateway = {
+      signInWithGoogle: vi.fn(),
+      observeSession: vi.fn((onSession) => {
+        emitSession = onSession;
+        return vi.fn();
+      }),
+      refreshClaims: vi.fn().mockResolvedValue({
+        claims: { authorized: true, role: 'admin' },
+      } as unknown as IdTokenResult),
+      signOut: vi.fn().mockResolvedValue(undefined),
+    };
+    bootstrap = vi.fn();
+    router = {
+      url: '/dashboard',
+      navigateByUrl: vi.fn(async (url: string) => {
+        router.url = url;
+        return true;
+      }),
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        AuthFacade,
+        { provide: AUTH_GATEWAY, useValue: authGateway },
+        { provide: AUTHORIZATION_GATEWAY, useValue: { bootstrap } },
+        { provide: Router, useValue: router },
+      ],
+    });
+  });
+
+  it('AUT-011 ignores an authorization response that finishes after the session disappears', async () => {
+    const pending = deferred<BootstrapAuthorizationResult>();
+    bootstrap.mockReturnValueOnce(pending.promise);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+
+    emitSession({ uid: 'previous' } as User);
+    emitSession(null);
+    pending.resolve(profile('previous', 'Usuario anterior'));
+    await initialization;
+    await Promise.resolve();
+
+    expect(facade.user()).toBeNull();
+    expect(facade.authorized()).toBe(false);
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
+  it('AUT-013 AUT-016 does not mix a late response from the previous user with the current session', async () => {
+    const first = deferred<BootstrapAuthorizationResult>();
+    const second = deferred<BootstrapAuthorizationResult>();
+    bootstrap.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+
+    emitSession({ uid: 'user-a' } as User);
+    emitSession({ uid: 'user-b' } as User);
+    second.resolve(profile('user-b', 'Usuario B'));
+    first.resolve(profile('user-a', 'Usuario A'));
+    await initialization;
+    await Promise.resolve();
+
+    expect(facade.user()).toMatchObject({ uid: 'user-b', nombre: 'Usuario B' });
+  });
+
+  it('AUT-014 ignores a rejected bootstrap from A after B becomes authorized', async () => {
+    const first = deferred<BootstrapAuthorizationResult>();
+    bootstrap
+      .mockReturnValueOnce(first.promise)
+      .mockResolvedValueOnce(profile('user-b', 'Usuario B'));
+    const facade = TestBed.inject(AuthFacade);
+    facade.initialize();
+
+    emitSession({ uid: 'user-a' } as User);
+    emitSession({ uid: 'user-b' } as User);
+    await vi.waitFor(() => expect(facade.user()?.uid).toBe('user-b'));
+    first.reject(new Error('late bootstrap failure'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(facade.user()).toMatchObject({ uid: 'user-b', nombre: 'Usuario B' });
+    expect(authGateway.signOut).not.toHaveBeenCalled();
+    expect(router.navigateByUrl).not.toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
+  it('AUT-014 ignores a rejected claims refresh from A after B becomes authorized', async () => {
+    const firstClaims = deferred<IdTokenResult>();
+    bootstrap
+      .mockResolvedValueOnce(profile('user-a', 'Usuario A'))
+      .mockResolvedValueOnce(profile('user-b', 'Usuario B'));
+    vi.mocked(authGateway.refreshClaims)
+      .mockReturnValueOnce(firstClaims.promise)
+      .mockResolvedValueOnce({
+        claims: { authorized: true, role: 'admin' },
+      } as unknown as IdTokenResult);
+    const facade = TestBed.inject(AuthFacade);
+    facade.initialize();
+
+    emitSession({ uid: 'user-a' } as User);
+    await Promise.resolve();
+    emitSession({ uid: 'user-b' } as User);
+    await vi.waitFor(() => expect(facade.user()?.uid).toBe('user-b'));
+    firstClaims.reject(new Error('late claims failure'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(facade.user()).toMatchObject({ uid: 'user-b', nombre: 'Usuario B' });
+    expect(authGateway.signOut).not.toHaveBeenCalled();
+    expect(router.navigateByUrl).not.toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
+  it('AUT-014 still rejects and signs out the session that owns the current error', async () => {
+    bootstrap.mockRejectedValueOnce(new Error('current bootstrap failure'));
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+
+    emitSession({ uid: 'current-user' } as User);
+    await initialization;
+
+    expect(facade.user()).toBeNull();
+    expect(authGateway.signOut).toHaveBeenCalledOnce();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
+  it('AUT-012 invalidates private state before waiting for Firebase sign-out', async () => {
+    bootstrap.mockResolvedValue(profile('admin', 'Administración'));
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+    emitSession({ uid: 'admin' } as User);
+    await initialization;
+    expect(facade.authorized()).toBe(true);
+
+    await facade.logout();
+
+    expect(facade.user()).toBeNull();
+    expect(authGateway.signOut).toHaveBeenCalledOnce();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
+  it('AUT-015 revalidates the canonical permission map without changing claims', async () => {
+    const initial: BootstrapAuthorizationResult = {
+      uid: 'catalog-user',
+      nombre: 'Capturista',
+      correo: 'catalog-user@tecplayacar.edu.mx',
+      rol: 'usuario',
+      activo: true,
+      claimsUpdated: false,
+      permisos: { ...emptyPermissionMap(), categorias: ['ver', 'editar'] },
+    };
+    const reduced = { ...initial, permisos: emptyPermissionMap() };
+    bootstrap.mockResolvedValueOnce(initial).mockResolvedValueOnce(reduced);
+    vi.mocked(authGateway.refreshClaims).mockResolvedValue({
+      claims: { authorized: true, role: 'usuario' },
+    } as unknown as IdTokenResult);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+    emitSession({ uid: 'catalog-user' } as User);
+    await initialization;
+    const sessionScope = TestBed.inject(SessionScope);
+    const editContext = sessionScope.captureCapability('categorias', 'editar');
+    const manufacturerContext = sessionScope.captureCapability('fabricantes', 'ver');
+
+    expect(facade.can('categorias', 'editar')).toBe(true);
+    await expect(facade.refreshAuthorization()).resolves.toBe(true);
+    expect(facade.can('categorias', 'ver')).toBe(false);
+    expect(facade.can('fabricantes', 'ver')).toBe(false);
+    expect(sessionScope.isCapabilityCurrent(editContext)).toBe(false);
+    expect(sessionScope.isCapabilityCurrent(manufacturerContext)).toBe(true);
+  });
+
+  it('AUT-019 deduplicates concurrent revalidation after permission-denied', async () => {
+    const current = profile('catalog-admin', 'Administración');
+    const pending = deferred<BootstrapAuthorizationResult>();
+    bootstrap.mockResolvedValueOnce(current).mockReturnValueOnce(pending.promise);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+    emitSession({ uid: current.uid } as User);
+    await initialization;
+
+    const first = facade.revalidatePermissionDenial({ code: 'functions/permission-denied' });
+    const second = facade.revalidatePermissionDenial({
+      details: { functionalCode: 'permission-denied' },
+    });
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledTimes(2));
+    expect(bootstrap).toHaveBeenCalledTimes(2);
+    pending.resolve(current);
+
+    await expect(Promise.all([first, second])).resolves.toEqual([true, true]);
+    expect(bootstrap).toHaveBeenCalledTimes(2);
+  });
+
+  it('AUT-020 starts one fresh rejection round and ignores the older pending refresh', async () => {
+    const current = profile('catalog-admin', 'Administración');
+    const stale = deferred<BootstrapAuthorizationResult>();
+    const fresh = deferred<BootstrapAuthorizationResult>();
+    bootstrap
+      .mockResolvedValueOnce(current)
+      .mockReturnValueOnce(stale.promise)
+      .mockReturnValueOnce(fresh.promise);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+    emitSession({ uid: current.uid } as User);
+    await initialization;
+
+    const oldRefresh = facade.refreshAuthorization();
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledTimes(2));
+    const firstDenial = facade.revalidatePermissionDenial({ code: 'functions/permission-denied' });
+    const secondDenial = facade.revalidatePermissionDenial({
+      details: { functionalCode: 'permission-denied' },
+    });
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledTimes(3));
+    fresh.resolve(profile(current.uid, 'Autorización vigente'));
+
+    await expect(Promise.all([firstDenial, secondDenial])).resolves.toEqual([true, true]);
+    stale.resolve(profile(current.uid, 'Perfil obsoleto'));
+    await expect(oldRefresh).resolves.toBe(false);
+
+    expect(facade.user()?.nombre).toBe('Autorización vigente');
+    expect(bootstrap).toHaveBeenCalledTimes(3);
+    expect(authGateway.signOut).not.toHaveBeenCalled();
+  });
+
+  it('AUT-014 ignores an older same-session failure after a replacement succeeds', async () => {
+    const current = profile('catalog-admin', 'Inicial');
+    const stale = deferred<BootstrapAuthorizationResult>();
+    const fresh = deferred<BootstrapAuthorizationResult>();
+    bootstrap
+      .mockResolvedValueOnce(current)
+      .mockReturnValueOnce(stale.promise)
+      .mockReturnValueOnce(fresh.promise);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+    emitSession({ uid: current.uid } as User);
+    await initialization;
+
+    const oldRefresh = facade.refreshAuthorization();
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledTimes(2));
+    const denial = facade.revalidatePermissionDenial({ code: 'functions/permission-denied' });
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledTimes(3));
+    fresh.resolve(profile(current.uid, 'Vigente'));
+    await expect(denial).resolves.toBe(true);
+    stale.reject(new Error('fallo obsoleto'));
+    await expect(oldRefresh).resolves.toBe(false);
+
+    expect(facade.user()).toMatchObject({ uid: current.uid, nombre: 'Vigente' });
+    expect(facade.authorized()).toBe(true);
+    expect(facade.error()).toBeNull();
+    expect(facade.loading()).toBe(false);
+    expect(authGateway.signOut).not.toHaveBeenCalled();
+    expect(router.navigateByUrl).not.toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
+  it('AUT-020 covers a denial received while the previous canonical read is pending', async () => {
+    const initial = {
+      ...profile('catalog-admin', 'Inicial'),
+      rol: 'usuario' as const,
+      permisos: { ...emptyPermissionMap(), categorias: ['ver', 'editar'] as const },
+    };
+    const intermediate = deferred<BootstrapAuthorizationResult>();
+    const reduced = deferred<BootstrapAuthorizationResult>();
+    bootstrap
+      .mockResolvedValueOnce(initial)
+      .mockReturnValueOnce(intermediate.promise)
+      .mockReturnValueOnce(reduced.promise);
+    vi.mocked(authGateway.refreshClaims).mockResolvedValue({
+      claims: { authorized: true, role: 'usuario' },
+    } as unknown as IdTokenResult);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+    emitSession({ uid: initial.uid } as User);
+    await initialization;
+
+    const first = facade.revalidatePermissionDenial({ code: 'functions/permission-denied' });
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledTimes(2));
+    const second = facade.revalidatePermissionDenial({ code: 'functions/permission-denied' });
+    intermediate.resolve(initial);
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledTimes(3));
+    reduced.resolve({ ...initial, nombre: 'Reducido', permisos: emptyPermissionMap() });
+
+    await expect(Promise.all([first, second])).resolves.toEqual([true, true]);
+    expect(facade.user()?.nombre).toBe('Reducido');
+    expect(facade.can('categorias', 'ver')).toBe(false);
+    expect(bootstrap).toHaveBeenCalledTimes(3);
+    expect(authGateway.signOut).not.toHaveBeenCalled();
+  });
+
+  it('AUT-020 covers a denial received while claims from the previous round are pending', async () => {
+    const initial = {
+      ...profile('catalog-admin', 'Inicial'),
+      rol: 'usuario' as const,
+      permisos: { ...emptyPermissionMap(), fabricantes: ['ver', 'editar'] as const },
+    };
+    const pendingClaims = deferred<IdTokenResult>();
+    bootstrap
+      .mockResolvedValueOnce(initial)
+      .mockResolvedValueOnce(initial)
+      .mockResolvedValueOnce({
+        ...initial,
+        nombre: 'Sin fabricante',
+        permisos: emptyPermissionMap(),
+      });
+    vi.mocked(authGateway.refreshClaims)
+      .mockResolvedValueOnce({
+        claims: { authorized: true, role: 'usuario' },
+      } as unknown as IdTokenResult)
+      .mockReturnValueOnce(pendingClaims.promise)
+      .mockResolvedValueOnce({
+        claims: { authorized: true, role: 'usuario' },
+      } as unknown as IdTokenResult);
+    const facade = TestBed.inject(AuthFacade);
+    const initialization = facade.initialize();
+    emitSession({ uid: initial.uid } as User);
+    await initialization;
+
+    const first = facade.revalidatePermissionDenial({ code: 'functions/permission-denied' });
+    await vi.waitFor(() => expect(authGateway.refreshClaims).toHaveBeenCalledTimes(2));
+    const second = facade.revalidatePermissionDenial({ code: 'functions/permission-denied' });
+    pendingClaims.resolve({
+      claims: { authorized: true, role: 'usuario' },
+    } as unknown as IdTokenResult);
+
+    await expect(Promise.all([first, second])).resolves.toEqual([true, true]);
+    expect(facade.user()?.nombre).toBe('Sin fabricante');
+    expect(facade.can('fabricantes', 'ver')).toBe(false);
+    expect(bootstrap).toHaveBeenCalledTimes(3);
+    expect(authGateway.signOut).not.toHaveBeenCalled();
+  });
+});
